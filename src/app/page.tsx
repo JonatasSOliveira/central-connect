@@ -1,5 +1,5 @@
 // import Link from 'next/link'
-import { Container } from '@/components/container'
+import { Container } from '@/components/molecules/container'
 import { SignInForm } from './form'
 
 const HomePage: React.FC = () => {
@@ -7,9 +7,6 @@ const HomePage: React.FC = () => {
     <Container>
       <h1>Central Connect</h1>
       <SignInForm />
-      {/* <Link href={pageDefinition.path}>
-        <span className="text-blue-500 underline">Novo? Cadastre-se</span>
-      </Link> */}
     </Container>
   )
 }

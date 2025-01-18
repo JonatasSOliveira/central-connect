@@ -5,11 +5,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
-import { pageDefinition } from './secure/dashboard/page-definition'
 import toast from 'react-hot-toast'
-import { Input } from '@/components/input'
-import { Form } from '@/components/form'
+import { Input } from '@/components/atoms/input'
+import { Form } from '@/components/molecules/form'
 import { AuthController } from '@/application/controllers/auth'
+import { churchPageDefinition } from './secure/church/page-definition'
 
 export const SignInForm = () => {
   const router = useRouter()
@@ -28,7 +28,7 @@ export const SignInForm = () => {
       try {
         await AuthController.signIn(data)
         toast.success('Usuário autenticado com sucesso')
-        router.push(pageDefinition.path)
+        router.push(churchPageDefinition.path)
       } catch (error) {
         if (error instanceof Error) {
           toast.error(error.message)

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { BaseModelSchema } from '@/domain/models/base'
 import { ServiceScheduleTemplateModelSchema } from '@/domain/models/service-schedule-template'
-import { timeSchema } from '@/domain/types/time'
+import { timeSchema } from '@/domain/types/zod/time'
 import { DayOfWeek } from '@/domain/enums/day-of-week'
 
 export const WorshipServiceTemplateModelSchema = BaseModelSchema.extend({

@@ -1,6 +1,6 @@
 import { signIn, signUp } from './actions'
 
 export class AuthController {
-  static signIn = signIn
-  static signUp = signUp
+  public static signIn = signIn
+  public static signUp = signUp
 }
