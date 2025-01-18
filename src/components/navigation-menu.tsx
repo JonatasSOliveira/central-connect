@@ -1,4 +1,4 @@
-import { Container } from './container'
+import { Container } from './molecules/container'
 
 interface NavigationMenuProps {
   children: React.ReactNode
@@ -13,7 +13,7 @@ const Header = () => (
 export const NavigationMenu: React.FC<NavigationMenuProps> = ({ children }) => (
   <div className="flex flex-1 flex-col">
     <Header />
-    <div className="flex-1 flex flex-col justify-center items-center">
+    <div className="flex-1 flex flex-col justify-center items-center py-8">
       <Container>{children}</Container>
     </div>
   </div>

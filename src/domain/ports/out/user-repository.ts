@@ -1,5 +1,4 @@
 import { UserModel } from '@/domain/models/user'
+import { BaseRepository } from './base-repository'
 
-export interface UserRepository {
-  create(user: Partial<UserModel>): Promise<string>
-}
+export type UserRepository = BaseRepository<UserModel>

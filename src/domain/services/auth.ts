@@ -7,6 +7,7 @@ import {
 import { AuthPortOut } from '@/domain/ports/out/auth'
 import { UserRepository } from '@/domain/ports/out/user-repository'
 import { AuthPortIn } from '@/domain//ports/in/auth'
+import { setSession } from '@/lib/auth'
 
 export class AuthService implements AuthPortIn {
   constructor(
@@ -21,7 +22,9 @@ export class AuthService implements AuthPortIn {
       throw new Error('Validation failed')
     }
 
-    return await this.authPortOut.signIn(result.data)
+    const authenticatedUser = await this.authPortOut.signIn(result.data)
+    await setSession(authenticatedUser)
+    return authenticatedUser
   }
 
   public async signUp(
@@ -34,8 +37,12 @@ export class AuthService implements AuthPortIn {
     }
 
     const resultData = result.data
-    const userId = await this.authPortOut.signUp(resultData)
-    await this.userRepository.create({ ...resultData, userId: userId.id })
-    return userId
+    const authenticatedUser = await this.authPortOut.signUp(resultData)
+    await this.userRepository.create({
+      ...resultData,
+      userId: authenticatedUser.id,
+    })
+    await setSession(authenticatedUser)
+    return authenticatedUser
   }
 }

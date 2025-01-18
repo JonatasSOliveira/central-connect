@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { BaseModelSchema } from '@/domain/models/base'
-import { timeSchema } from '@/domain/types/time'
+import { timeSchema } from '@/domain/types/zod/time'
 
 export const WorshipServiceModelSchema = BaseModelSchema.extend({
   name: z.string().min(1),
