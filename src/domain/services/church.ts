@@ -8,7 +8,6 @@ export class ChurchService implements ChurchPortIn {
   constructor(private readonly repository: ChurchRepository) {}
 
   public async create(data: ChurchCreateDTO): Promise<string> {
-    console.log(data)
     const result = ChurchCreateDTOSchema.safeParse(data)
     if (!result.success) {
       throw new Error('Validation failed')
@@ -22,7 +21,10 @@ export class ChurchService implements ChurchPortIn {
   }
 
   public async listAll(): Promise<ChurchListDto[]> {
-    const response = await this.repository.list()
-    return response
+    return await this.repository.list()
+  }
+
+  public async delete(id: string): Promise<void> {
+    await this.repository.delete(id)
   }
 }

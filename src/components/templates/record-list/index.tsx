@@ -1,3 +1,5 @@
+import { H1 } from '@/components/atoms/h1'
+import { RecordListItem } from '@/components/molecules/record-list-item'
 import { PageDefinition } from '@/types/page-definition'
 import Link from 'next/link'
 import { JSX } from 'react'
@@ -19,13 +21,15 @@ export const RecordListTemplate = async <RecordType extends { id: string }>({
 
   return (
     <>
-      <h1 className="text-2xl font-bold">{title}</h1>
+      <H1>{title}</H1>
       <hr className="border-t-gray-300 border-t-2 w-full" />
       <div className="flex-1">
         {records.map((record) => (
-          <div key={record.id}>
-            <p>{String(record[labelAttribute])}</p>
-          </div>
+          <RecordListItem<RecordType>
+            key={record.id}
+            record={record}
+            labelAttribute={labelAttribute}
+          />
         ))}
       </div>
       <div className="flex justify-center">
