@@ -6,10 +6,12 @@ import {
   addDoc,
   collection,
   CollectionReference,
+  doc,
   DocumentSnapshot,
   getDocs,
   query,
   Timestamp,
+  updateDoc,
   where,
   WithFieldValue,
 } from 'firebase/firestore'
@@ -65,5 +67,10 @@ export abstract class FirebaseBaseRepository<Model extends BaseModel>
     const q = query(this.col, ...conditions)
     const querySnapshot = await getDocs(q)
     return querySnapshot.docs.map((doc) => this.convertDocToData(doc))
+  }
+
+  public async delete(id: string): Promise<void> {
+    const docRef = doc(this.col, id)
+    await updateDoc(docRef, { deletedAt: Timestamp.now() })
   }
 }
