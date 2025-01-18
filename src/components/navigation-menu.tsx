@@ -6,7 +6,7 @@ interface NavigationMenuProps {
 
 const Header = () => (
   <div className=" bg-white py-2 px-4">
-    <h1>Central Connect</h1>
+    <span>Central Connect</span>
   </div>
 )
 
