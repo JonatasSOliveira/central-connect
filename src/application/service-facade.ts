@@ -16,7 +16,7 @@ export class ServiceFacade {
     new FirebaseChurchRepository(),
   )
 
-  public static getAuth: () => AuthPortIn = () => this.authService
+  public static getAuthService: () => AuthPortIn = () => this.authService
 
-  public static getChurch: () => ChurchPortIn = () => this.churchService
+  public static getChurchService: () => ChurchPortIn = () => this.churchService
 }

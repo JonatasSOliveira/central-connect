@@ -6,11 +6,11 @@ import { ServiceFacade } from '@/application/service-facade'
 import { SignUpRequestDTO } from '@/domain/dtos/auth/sign-up.request'
 
 export async function signIn(authData: AuthDTO): Promise<AuthenticatedUserDTO> {
-  return await ServiceFacade.getAuth().signIn(authData)
+  return await ServiceFacade.getAuthService().signIn(authData)
 }
 
 export async function signUp(
   signUpData: SignUpRequestDTO,
 ): Promise<AuthenticatedUserDTO> {
-  return await ServiceFacade.getAuth().signUp(signUpData)
+  return await ServiceFacade.getAuthService().signUp(signUpData)
 }
