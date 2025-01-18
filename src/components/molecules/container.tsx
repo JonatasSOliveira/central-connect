@@ -8,7 +8,12 @@ export const Container: React.FC<ContainerProps> = ({
   fullScreen = true,
 }) => {
   const InsiderContainer = () => (
-    <div className="flex flex-1 flex-col items-center gap-2 rounded bg-white p-8 shadow-md">
+    <div
+      className={
+        'flex flex-col items-center gap-2 rounded bg-white p-8 shadow-md' +
+        (fullScreen ? ' flex-1' : '')
+      }
+    >
       {children}
     </div>
   )
