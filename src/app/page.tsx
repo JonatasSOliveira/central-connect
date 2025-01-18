@@ -4,7 +4,7 @@ import { SignInForm } from './form'
 
 const HomePage: React.FC = () => {
   return (
-    <Container>
+    <Container fullScreen={false}>
       <h1>Central Connect</h1>
       <SignInForm />
     </Container>
