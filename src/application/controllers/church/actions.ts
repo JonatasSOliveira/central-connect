@@ -14,3 +14,7 @@ export async function listAll() {
 export async function deleteData(id: string) {
   return await ServiceFacade.getChurchService().delete(id)
 }
+
+export async function update(id: string, data: ChurchCreateDTO) {
+  return await ServiceFacade.getChurchService().update(id, data)
+}

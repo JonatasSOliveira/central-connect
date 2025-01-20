@@ -7,17 +7,23 @@ import { ChurchListDto } from '../dtos/church/list'
 export class ChurchService implements ChurchPortIn {
   constructor(private readonly repository: ChurchRepository) {}
 
+  private async getSessionUserId(): Promise<string> {
+    const session = await getSession()
+    return session.id
+  }
+
   public async create(data: ChurchCreateDTO): Promise<string> {
     const result = ChurchCreateDTOSchema.safeParse(data)
     if (!result.success) {
       throw new Error('Validation failed')
     }
 
-    const session = await getSession()
-    return this.repository.create({
-      ...result.data,
-      createdByUserId: session.id,
-    })
+    return this.repository.create(
+      {
+        ...result.data,
+      },
+      await this.getSessionUserId(),
+    )
   }
 
   public async listAll(): Promise<ChurchListDto[]> {
@@ -25,6 +31,10 @@ export class ChurchService implements ChurchPortIn {
   }
 
   public async delete(id: string): Promise<void> {
-    await this.repository.delete(id)
+    await this.repository.logicalDelete(id, await this.getSessionUserId())
+  }
+
+  public async update(id: string, data: ChurchCreateDTO): Promise<void> {
+    await this.repository.update(id, data, await this.getSessionUserId())
   }
 }
