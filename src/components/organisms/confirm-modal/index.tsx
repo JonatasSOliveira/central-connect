@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useTransition } from 'react'
-import { Modal, ModalHandlers } from '../modal'
+import { Modal, ModalHandlers } from '../../molecules/modal'
 import { Button, ButtonColors } from '@/components/atoms/button'
 import { H2 } from '@/components/atoms/h2'
 

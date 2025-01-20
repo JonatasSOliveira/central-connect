@@ -2,6 +2,7 @@ import { RecordListTemplate } from '@/components/templates/record-list'
 import { churchFormPageDefinition } from './form/page-definition'
 import { ChurchController } from '@/application/controllers/church'
 import { ChurchListDto } from '@/domain/dtos/church/list'
+import { churchPageDefinition } from './page-definition'
 
 const ChurchPage: React.FC = () => {
   const deleteRecordHandler = async (church: ChurchListDto) => {
@@ -11,7 +12,7 @@ const ChurchPage: React.FC = () => {
 
   return (
     <RecordListTemplate<ChurchListDto>
-      title={churchFormPageDefinition.title}
+      title={churchPageDefinition.title}
       newRecordPageDefinition={churchFormPageDefinition}
       getRecords={ChurchController.listAll}
       labelAttribute="name"

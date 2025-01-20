@@ -25,13 +25,14 @@ export const RecordListTemplate = async <RecordType extends { id: string }>({
     <>
       <H1>{title}</H1>
       <hr className="border-t-gray-300 border-t-2 w-full" />
-      <div className="flex-1">
+      <div className="flex-1 w-full">
         {records.map((record) => (
           <RecordListItem<RecordType>
             key={record.id}
             record={record}
             labelAttribute={labelAttribute}
             deleteRecord={deleteRecord}
+            updateFormPagePath={newRecordPageDefinition.path}
           />
         ))}
       </div>

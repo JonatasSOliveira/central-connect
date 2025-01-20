@@ -6,7 +6,7 @@ import { PageDefinition } from '@/types/page-definition'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { JSX, useTransition } from 'react'
-import { Path, useForm } from 'react-hook-form'
+import { DefaultValues, Path, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { ZodObject, ZodRawShape } from 'zod'
 
@@ -22,6 +22,7 @@ export interface FormProps<RecordType extends Record<string, unknown>> {
   sucessMessage?: string
   sucessPageDefinition: PageDefinition
   inputsDefinition?: InputDefinition<RecordType>[]
+  initialValue?: RecordType
 }
 
 export const RecordFormTemplateForm = <
@@ -32,6 +33,7 @@ export const RecordFormTemplateForm = <
   sucessMessage,
   sucessPageDefinition,
   inputsDefinition,
+  initialValue,
 }: FormProps<RecordType>): JSX.Element => {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -42,6 +44,7 @@ export const RecordFormTemplateForm = <
   } = useForm<RecordType>({
     mode: 'onSubmit',
     resolver: zodResolver(schema),
+    defaultValues: initialValue as DefaultValues<RecordType> | undefined,
   })
 
   const fields = Object.keys(schema.shape) as Path<RecordType>[]
