@@ -2,12 +2,13 @@ import { ChurchController } from '@/application/controllers/church'
 import { ChurchEditForm } from './form'
 
 interface ChurchEditFormPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 const ChurchEditFormPage: React.FC<ChurchEditFormPageProps> = async ({
-  params: { id },
+  params,
 }) => {
+  const { id } = await params
   const church = await ChurchController.listOneById(id)
 
   return <ChurchEditForm church={church} />
