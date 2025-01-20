@@ -6,4 +6,5 @@ export interface ChurchPortIn {
   listAll(): Promise<ChurchListDto[]>
   delete(id: string): Promise<void>
   update(id: string, data: ChurchCreateDTO): Promise<void>
+  listOneById(id: string): Promise<ChurchListDto>
 }

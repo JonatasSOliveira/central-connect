@@ -37,4 +37,9 @@ export class ChurchService implements ChurchPortIn {
   public async update(id: string, data: ChurchCreateDTO): Promise<void> {
     await this.repository.update(id, data, await this.getSessionUserId())
   }
+
+  public async listOneById(id: string): Promise<ChurchListDto> {
+    const dataList = await this.repository.list({ where: { id } })
+    return dataList[0]
+  }
 }

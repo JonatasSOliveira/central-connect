@@ -8,6 +8,7 @@ import {
   CollectionReference,
   doc,
   DocumentSnapshot,
+  getDoc,
   getDocs,
   query,
   Timestamp,
@@ -66,6 +67,15 @@ export abstract class FirebaseBaseRepository<Model extends BaseModel>
     const conditions = [where('deletedAt', '==', null)]
 
     if (options?.where) {
+      const id = options.where.id
+      if (id) {
+        const docRef = doc(this.col, id)
+        const docData = this.convertDocToData(
+          (await getDoc(docRef)) as DocumentSnapshot,
+        )
+        return [docData]
+      }
+
       for (const [key, value] of Object.entries(options.where)) {
         conditions.push(where(key, '==', value))
       }

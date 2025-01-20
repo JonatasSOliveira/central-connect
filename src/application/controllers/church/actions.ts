@@ -18,3 +18,7 @@ export async function deleteData(id: string) {
 export async function update(id: string, data: ChurchCreateDTO) {
   return await ServiceFacade.getChurchService().update(id, data)
 }
+
+export async function listOneById(id: string) {
+  return await ServiceFacade.getChurchService().listOneById(id)
+}
