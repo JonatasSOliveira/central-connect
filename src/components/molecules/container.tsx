@@ -11,7 +11,7 @@ export const Container: React.FC<ContainerProps> = ({
     <div
       className={
         'flex flex-col items-center gap-2 rounded bg-white p-8 shadow-md' +
-        (fullScreen ? ' flex-1' : '')
+        (fullScreen ? ' flex-1 w-[90%]' : '')
       }
     >
       {children}

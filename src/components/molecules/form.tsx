@@ -14,7 +14,7 @@ export const Form = forwardRef<HTMLFormElement, FormProps>(
       ref={ref}
       onSubmit={onSubmit}
       {...props}
-      className="flex flex-col gap-2"
+      className="flex flex-col gap-2 w-full"
     >
       <Toaster />
       {children}

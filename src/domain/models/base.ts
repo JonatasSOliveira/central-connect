@@ -7,6 +7,8 @@ export const BaseModelSchema = z.object({
   updatedAt: z.string(),
   deletedAt: z.string().optional(),
   createdByUserId: z.string().optional(),
+  updatedByUserId: z.string().optional(),
+  deletedByUserId: z.string().optional(),
 })
 
 export type BaseModel = z.infer<typeof BaseModelSchema>

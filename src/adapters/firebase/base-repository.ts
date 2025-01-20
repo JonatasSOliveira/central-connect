@@ -8,6 +8,7 @@ import {
   CollectionReference,
   doc,
   DocumentSnapshot,
+  getDoc,
   getDocs,
   query,
   Timestamp,
@@ -25,12 +26,19 @@ export abstract class FirebaseBaseRepository<Model extends BaseModel>
     this.col = collection(FirebaseProvider.getFirestore(), this.collectionName)
   }
 
-  public async create(data: Partial<Model>): Promise<string> {
+  public async create(
+    data: Partial<Model>,
+    createdByUserId?: string,
+  ): Promise<string> {
     const formatedData: WithFieldValue<Partial<Model>> = {
       ...data,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       deletedAt: null,
+    }
+
+    if (createdByUserId) {
+      formatedData.createdByUserId = createdByUserId
     }
 
     const docRef = await addDoc(this.col, formatedData)
@@ -59,6 +67,15 @@ export abstract class FirebaseBaseRepository<Model extends BaseModel>
     const conditions = [where('deletedAt', '==', null)]
 
     if (options?.where) {
+      const id = options.where.id
+      if (id) {
+        const docRef = doc(this.col, id)
+        const docData = this.convertDocToData(
+          (await getDoc(docRef)) as DocumentSnapshot,
+        )
+        return [docData]
+      }
+
       for (const [key, value] of Object.entries(options.where)) {
         conditions.push(where(key, '==', value))
       }
@@ -69,8 +86,27 @@ export abstract class FirebaseBaseRepository<Model extends BaseModel>
     return querySnapshot.docs.map((doc) => this.convertDocToData(doc))
   }
 
-  public async delete(id: string): Promise<void> {
+  public async logicalDelete(
+    id: string,
+    deletedByUserId?: string,
+  ): Promise<void> {
     const docRef = doc(this.col, id)
-    await updateDoc(docRef, { deletedAt: Timestamp.now() })
+    await updateDoc(docRef, {
+      deletedAt: Timestamp.now(),
+      deletedByUserId,
+    })
+  }
+
+  public async update(
+    id: string,
+    data: Partial<Model>,
+    updatedByUserId?: string,
+  ): Promise<void> {
+    const docRef = doc(this.col, id)
+    await updateDoc(docRef, {
+      ...data,
+      updatedAt: Timestamp.now(),
+      updatedByUserId,
+    })
   }
 }
