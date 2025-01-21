@@ -6,6 +6,7 @@ export enum ButtonColors {
   SECONDARY = 'secondary',
   DANGER = 'danger',
   DANGER_OUTLINE = 'danger_outline',
+  PRIMARY_OUTLINE = 'primary_outline',
 }
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,6 +20,8 @@ const colorClasses: Record<ButtonColors, string> = {
   [ButtonColors.DANGER]: 'text-white bg-red-500 hover:bg-red-700',
   [ButtonColors.DANGER_OUTLINE]:
     'text-red-500 bg-white border-solid border-red-500 border-2',
+  [ButtonColors.PRIMARY_OUTLINE]:
+    'text-blue-500 bg-white border-solid border-blue-500 border-2',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -27,10 +30,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <button
-        ref={ref}
-        className={'rounded px-2 py-1 font-bold ' + colorClass}
-        disabled={isPending || props.disabled}
         {...props}
+        ref={ref}
+        className={
+          'rounded px-2 py-1 font-bold ' +
+          colorClass +
+          ' ' +
+          (props.className || '')
+        }
+        disabled={isPending || props.disabled}
       >
         {!isPending ? (
           children
