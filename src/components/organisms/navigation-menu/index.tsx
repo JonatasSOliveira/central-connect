@@ -18,7 +18,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({
   return (
     <div className="flex flex-1 flex-col">
       <Header />
-      <div className="flex-1 flex flex-col justify-center items-center py-8">
+      <div className="flex-1 flex flex-col justify-center items-center py-4">
         <Container>{children}</Container>
       </div>
       <NavigationMenuFooter pages={pages} />
