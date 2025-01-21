@@ -1,48 +1,24 @@
 import { ChurchPortIn } from '@/domain/ports/in/church'
-import { ChurchCreateDTO, ChurchCreateDTOSchema } from '../dtos/church/create'
+import { ChurchCreateDTO } from '../dtos/church/create'
 import { ChurchRepository } from '../ports/out/church-repository'
 import { ChurchListDto } from '../dtos/church/list'
-import { SessionServicePortInbound } from '../ports/inbound/session'
+import { BaseCrudService } from './base-crud'
+import { ChurchModel, ChurchModelSchema } from '../models/church'
+import { SafeParseReturnType } from 'zod'
 
-export class ChurchService implements ChurchPortIn {
-  constructor(
-    private readonly repository: ChurchRepository,
-    private readonly sessionService: SessionServicePortInbound,
-  ) {}
-
-  private async getSessionUserId(): Promise<string> {
-    const session = await this.sessionService.get()
-    return session.id
-  }
-
-  public async create(data: ChurchCreateDTO): Promise<string> {
-    const result = ChurchCreateDTOSchema.safeParse(data)
-    if (!result.success) {
-      throw new Error('Validation failed')
-    }
-
-    return this.repository.create(
-      {
-        ...result.data,
-      },
-      await this.getSessionUserId(),
-    )
-  }
-
-  public async listAll(): Promise<ChurchListDto[]> {
-    return await this.repository.list()
-  }
-
-  public async delete(id: string): Promise<void> {
-    await this.repository.logicalDelete(id, await this.getSessionUserId())
-  }
-
-  public async update(id: string, data: ChurchCreateDTO): Promise<void> {
-    await this.repository.update(id, data, await this.getSessionUserId())
-  }
-
-  public async listOneById(id: string): Promise<ChurchListDto> {
-    const dataList = await this.repository.list({ where: { id } })
-    return dataList[0]
+export class ChurchService
+  extends BaseCrudService<
+    ChurchModel,
+    ChurchRepository,
+    ChurchCreateDTO,
+    ChurchCreateDTO,
+    ChurchListDto
+  >
+  implements ChurchPortIn
+{
+  protected override safeParse(
+    data: Partial<ChurchModel>,
+  ): SafeParseReturnType<ChurchCreateDTO, ChurchCreateDTO> {
+    return ChurchModelSchema.safeParse(data)
   }
 }
