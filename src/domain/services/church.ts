@@ -1,14 +1,17 @@
 import { ChurchPortIn } from '@/domain/ports/in/church'
 import { ChurchCreateDTO, ChurchCreateDTOSchema } from '../dtos/church/create'
 import { ChurchRepository } from '../ports/out/church-repository'
-import { getSession } from '@/lib/auth'
 import { ChurchListDto } from '../dtos/church/list'
+import { SessionServicePortInbound } from '../ports/inbound/session'
 
 export class ChurchService implements ChurchPortIn {
-  constructor(private readonly repository: ChurchRepository) {}
+  constructor(
+    private readonly repository: ChurchRepository,
+    private readonly sessionService: SessionServicePortInbound,
+  ) {}
 
   private async getSessionUserId(): Promise<string> {
-    const session = await getSession()
+    const session = await this.sessionService.get()
     return session.id
   }
 
