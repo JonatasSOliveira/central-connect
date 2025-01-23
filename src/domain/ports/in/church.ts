@@ -1,9 +1,10 @@
 import { ChurchCreateDTO } from '@/domain/dtos/church/create'
 import { ChurchListDto } from '@/domain/dtos/church/list'
 import { BaseCrudPortIn } from './base-crud'
+import { ChurchStorageDTO } from '@/domain/dtos/church/storage'
 
-export type ChurchPortIn = BaseCrudPortIn<
-  ChurchCreateDTO,
-  ChurchCreateDTO,
-  ChurchListDto
->
+export interface ChurchPortIn
+  extends BaseCrudPortIn<ChurchCreateDTO, ChurchCreateDTO, ChurchListDto> {
+  selectChurch(church: ChurchStorageDTO): Promise<void>
+  getSelectedChurch(): Promise<ChurchStorageDTO | null>
+}

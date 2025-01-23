@@ -1,14 +1,14 @@
 import { ChurchRolePortInt } from '@/domain/ports/in/church-role'
 import { BaseCrudService } from './base-crud'
-import {
-  ChurchRoleModel,
-  ChurchRoleModelSchema,
-} from '@/domain/models/church-role'
+import { ChurchRoleModel } from '@/domain/models/church-role'
 import { ChurchRoleRepository } from '@/domain/ports/out/church-role-repository'
-import { ChurchRoleCreateDTO } from '@/domain/dtos/church-role/create'
+import {
+  ChurchRoleCreateDTO,
+  ChurchRoleCreateDTOSchema,
+} from '@/domain/dtos/church-role/create'
 import { ChurchRoleListDto } from '@/domain/dtos/church-role/list'
 import { SafeParseReturnType } from 'zod'
-import { SelectChurchStoragePortInbound } from '../ports/inbound/select-church-storage'
+import { ChurchStoragePortInbound } from '../ports/inbound/church-storage'
 import { SessionServicePortInbound } from '../ports/inbound/session'
 
 export class ChurchRoleService
@@ -24,7 +24,7 @@ export class ChurchRoleService
   constructor(
     protected readonly repository: ChurchRoleRepository,
     protected readonly sessionService: SessionServicePortInbound,
-    private readonly selectChurchStorage: SelectChurchStoragePortInbound,
+    private readonly selectChurchStorage: ChurchStoragePortInbound,
   ) {
     super(repository, sessionService)
   }
@@ -32,7 +32,7 @@ export class ChurchRoleService
   protected override safeParse(
     data: Partial<ChurchRoleModel>,
   ): SafeParseReturnType<ChurchRoleCreateDTO, ChurchRoleCreateDTO> {
-    return ChurchRoleModelSchema.safeParse(data)
+    return ChurchRoleCreateDTOSchema.safeParse(data)
   }
 
   protected override async processData(

@@ -36,7 +36,7 @@ export const NavigationMenuFooter: React.FC<NavigationMenuFooterProps> = ({
           ))}
         </div>
       </Modal>
-      <div className="flex w-full justify-center bg-white py-2">
+      <div className="flex w-full justify-center bg-white py-2 gap-2">
         <Button
           type="button"
           onClick={openPagesModal}

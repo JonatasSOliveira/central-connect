@@ -6,13 +6,13 @@ import { FirebaseUserRepository } from '@/adapters/firebase/user-repository'
 import { AuthPortIn } from '@/domain/ports/in/auth'
 import { ChurchPortIn } from '@/domain/ports/in/church'
 import { ChurchRolePortInt } from '@/domain/ports/in/church-role'
-import { SelectChurchStoragePortInbound } from '@/domain/ports/inbound/select-church-storage'
+import { ChurchStoragePortInbound } from '@/domain/ports/inbound/church-storage'
 import { SessionServicePortInbound } from '@/domain/ports/inbound/session'
 import { ServerDataStoragePortOut } from '@/domain/ports/out/server-data-storage'
 import { AuthService } from '@/domain/services/auth'
 import { ChurchService } from '@/domain/services/church'
 import { ChurchRoleService } from '@/domain/services/church-role'
-import { SelectChurchStorageService } from '@/domain/services/select-church-storage'
+import { ChurchStorageService } from '@/domain/services/church-storage'
 import { SessionService } from '@/domain/services/session'
 
 export class ServiceFacade {
@@ -22,8 +22,8 @@ export class ServiceFacade {
   private static readonly sessionService: SessionServicePortInbound =
     new SessionService(ServiceFacade.dataStore)
 
-  private static readonly selectChurchStorage: SelectChurchStoragePortInbound =
-    new SelectChurchStorageService(ServiceFacade.dataStore)
+  private static readonly selectChurchStorage: ChurchStoragePortInbound =
+    new ChurchStorageService(ServiceFacade.dataStore)
 
   private static readonly authService: AuthPortIn = new AuthService(
     new FirebaseAuthAdapter(),
@@ -34,6 +34,7 @@ export class ServiceFacade {
   private static readonly churchService: ChurchPortIn = new ChurchService(
     new FirebaseChurchRepository(),
     ServiceFacade.sessionService,
+    ServiceFacade.selectChurchStorage,
   )
 
   private static readonly churchRoleService: ChurchRolePortInt =
