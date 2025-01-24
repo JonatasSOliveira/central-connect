@@ -16,7 +16,6 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         id={id}
         ref={ref}
         {...props}
-        type="text"
       />
       {error && <span className="text-sm text-red-500">{error}</span>}
     </div>
