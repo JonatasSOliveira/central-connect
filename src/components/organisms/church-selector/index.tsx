@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { Icon } from '@iconify/react'
 import { ChurchController } from '@/application/controllers/church'
 import { Button, ButtonColors } from '@/components/atoms/button'
