@@ -15,7 +15,10 @@ const ChurchEditFormPage: React.FC<ChurchEditFormPageProps> = async ({
   return (
     <ChurchFormComponent
       title={churchEditFormPageDefinition.title}
-      onSubmit={async (data) => await ChurchController.update(church.id, data)}
+      onSubmit={async (data) => {
+        'use server'
+        await ChurchController.update(church.id, data)
+      }}
       initialValue={church}
     />
   )
