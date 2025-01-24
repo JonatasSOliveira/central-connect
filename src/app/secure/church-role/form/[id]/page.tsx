@@ -1,17 +1,26 @@
-import { ChurchRoleEditForm } from './form'
+import { ChurchRoleFormComponent } from '../form-component'
 import { ChurchRoleController } from '@/application/controllers/church-role'
+import { churchRoleEditFormPageDefinition } from './page-definition'
 
-interface ChurchEditFormPageProps {
+interface ChurchRoleEditFormPageProps {
   params: Promise<{ id: string }>
 }
 
-const ChurchEditFormPage: React.FC<ChurchEditFormPageProps> = async ({
+const ChurchRoleEditFormPage: React.FC<ChurchRoleEditFormPageProps> = async ({
   params,
 }) => {
   const { id } = await params
   const churchRole = await ChurchRoleController.listOneById(id)
 
-  return <ChurchRoleEditForm churchRole={churchRole} />
+  return (
+    <ChurchRoleFormComponent
+      title={churchRoleEditFormPageDefinition.title}
+      onSubmit={async (data) =>
+        await ChurchRoleController.update(churchRole.id, data)
+      }
+      initialValue={churchRole}
+    />
+  )
 }
 
-export default ChurchEditFormPage
+export default ChurchRoleEditFormPage

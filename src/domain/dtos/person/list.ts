@@ -1,6 +1,8 @@
-import { ResourcePermissionModelSchema } from '@/domain/models/resource-permission'
+import { PersonModelSchema } from '@/domain/models/person'
 import { z } from 'zod'
 
-export const PersonListDtoSchema = ResourcePermissionModelSchema
+export const PersonListDTOSchema = PersonModelSchema.extend({
+  id: z.string(),
+})
 
-export type PersonListDto = z.infer<typeof PersonListDtoSchema>
+export type PersonListDTO = z.infer<typeof PersonListDTOSchema>

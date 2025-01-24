@@ -1,5 +1,3 @@
-'use client'
-
 import { churchPageDefinition } from '../page-definition'
 import { ChurchController } from '@/application/controllers/church'
 import { ChurchFormComponent } from './form-component'

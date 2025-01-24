@@ -4,7 +4,7 @@ import { churchRolePageDefinition } from './page-definition'
 import { ChurchRoleController } from '@/application/controllers/church-role'
 import { ChurchRoleListDto } from '@/domain/dtos/church-role/list'
 
-const ChurchPage: React.FC = () => {
+const ChurchRolePage: React.FC = () => {
   const deleteRecordHandler = async (churchRole: ChurchRoleListDto) => {
     'use server'
     await ChurchRoleController.delete(churchRole.id)
@@ -21,4 +21,4 @@ const ChurchPage: React.FC = () => {
   )
 }
 
-export default ChurchPage
+export default ChurchRolePage

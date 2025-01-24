@@ -4,6 +4,7 @@ import { z } from 'zod'
 export const AuthenticatedUserDTOSchema = UserModelSchema.pick({
   id: true,
 }).extend({
+  id: z.string(),
   email: z.string().email(),
 })
 

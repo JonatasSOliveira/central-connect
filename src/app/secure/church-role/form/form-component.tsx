@@ -1,3 +1,5 @@
+'use client'
+
 import { RecordFormTemplate } from '@/components/templates/record-form'
 
 import { churchRolePageDefinition } from '../page-definition'

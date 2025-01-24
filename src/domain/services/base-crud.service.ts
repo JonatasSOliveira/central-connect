@@ -27,6 +27,16 @@ export abstract class BaseCrudService<
     data: Partial<Model>,
   ): SafeParseReturnType<CreateDTO, CreateDTO>
 
+  protected async processData(
+    data: CreateDTO | UpdateDTO,
+  ): Promise<Partial<Model>> {
+    return data
+  }
+
+  protected async getDefaultWhere(): Promise<Where<Model> | undefined> {
+    return undefined
+  }
+
   public async create(data: CreateDTO): Promise<string> {
     const result = this.safeParse(await this.processData(data))
     if (!result.success) {
@@ -39,12 +49,6 @@ export abstract class BaseCrudService<
       },
       await this.getSessionUserId(),
     )
-  }
-
-  protected async processData(
-    data: CreateDTO | UpdateDTO,
-  ): Promise<Partial<Model>> {
-    return data
   }
 
   public async update(id: string, data: UpdateDTO): Promise<void> {
@@ -61,7 +65,9 @@ export abstract class BaseCrudService<
   }
 
   public async listAll(): Promise<ListDTO[]> {
-    return (await this.repository.list()) as ListDTO[]
+    return (await this.repository.list({
+      where: await this.getDefaultWhere(),
+    })) as ListDTO[]
   }
 
   public async delete(id: string): Promise<void> {

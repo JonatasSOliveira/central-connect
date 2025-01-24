@@ -9,11 +9,14 @@ import { ChurchRolePortInt } from '@/domain/ports/in/church-role'
 import { ChurchStoragePortInbound } from '@/domain/ports/inbound/church-storage'
 import { SessionServicePortInbound } from '@/domain/ports/inbound/session'
 import { ServerDataStoragePortOut } from '@/domain/ports/out/server-data-storage'
-import { AuthService } from '@/domain/services/auth'
-import { ChurchService } from '@/domain/services/church'
-import { ChurchRoleService } from '@/domain/services/church-role'
-import { ChurchStorageService } from '@/domain/services/church-storage'
-import { SessionService } from '@/domain/services/session'
+import { AuthService } from '@/domain/services/auth.service'
+import { ChurchService } from '@/domain/services/church.service'
+import { ChurchRoleService } from '@/domain/services/church-role.service'
+import { ChurchStorageService } from '@/domain/services/church-storage.service'
+import { SessionService } from '@/domain/services/session.service'
+import { PersonPortIn } from '@/domain/ports/in/person'
+import { PersonService } from '@/domain/services/person.service'
+import { FirebasePersonRepository } from '@/adapters/firebase/person-repository'
 
 export class ServiceFacade {
   private static readonly dataStore: ServerDataStoragePortOut =
@@ -44,10 +47,18 @@ export class ServiceFacade {
       ServiceFacade.selectChurchStorage,
     )
 
+  private static readonly personService: PersonPortIn = new PersonService(
+    new FirebasePersonRepository(),
+    ServiceFacade.sessionService,
+    ServiceFacade.selectChurchStorage,
+  )
+
   public static getAuthService: () => AuthPortIn = () => this.authService
 
   public static getChurchService: () => ChurchPortIn = () => this.churchService
 
   public static getChurchRoleService: () => ChurchRolePortInt = () =>
     this.churchRoleService
+
+  public static getPersonService: () => PersonPortIn = () => this.personService
 }

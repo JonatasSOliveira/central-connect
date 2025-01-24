@@ -6,7 +6,7 @@ import { useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { Input } from '@/components/atoms/input'
+import { TextInput } from '@/components/atoms/text-input'
 import { Form } from '@/components/molecules/form'
 import { AuthController } from '@/application/controllers/auth'
 import { churchPageDefinition } from './secure/church/page-definition'
@@ -46,7 +46,7 @@ export const SignInForm = () => {
       confirmButtonText="Entrar"
     >
       <div className="flex flex-col gap-2">
-        <Input
+        <TextInput
           id="email"
           label="E-mail"
           placeholder="email@domain.com"
@@ -54,7 +54,7 @@ export const SignInForm = () => {
           autoFocus
           {...register('email')}
         />
-        <Input
+        <TextInput
           id="password"
           label="Senha"
           placeholder="senha"
