@@ -1,4 +1,12 @@
-import { create, deleteData, listAll, listOneById, update } from './actions'
+import {
+  create,
+  deleteData,
+  getSelectedChurch,
+  listAll,
+  listOneById,
+  selectChurch,
+  update,
+} from './actions'
 
 export class ChurchController {
   public static create = create
@@ -6,4 +14,6 @@ export class ChurchController {
   public static delete = deleteData
   public static update = update
   public static listOneById = listOneById
+  public static selectChurch = selectChurch
+  public static getSelectedChurch = getSelectedChurch
 }

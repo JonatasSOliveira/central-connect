@@ -7,12 +7,13 @@ import {
 import { AuthPortOut } from '@/domain/ports/out/auth'
 import { UserRepository } from '@/domain/ports/out/user-repository'
 import { AuthPortIn } from '@/domain//ports/in/auth'
-import { setSession } from '@/lib/auth'
+import { SessionServicePortInbound } from '../ports/inbound/session'
 
 export class AuthService implements AuthPortIn {
   constructor(
     private readonly authPortOut: AuthPortOut,
     private readonly userRepository: UserRepository,
+    private readonly sessionService: SessionServicePortInbound,
   ) {}
 
   public async signIn(request: AuthDTO): Promise<AuthenticatedUserDTO> {
@@ -23,7 +24,7 @@ export class AuthService implements AuthPortIn {
     }
 
     const authenticatedUser = await this.authPortOut.signIn(result.data)
-    await setSession(authenticatedUser)
+    await this.sessionService.set(authenticatedUser)
     return authenticatedUser
   }
 
@@ -42,7 +43,7 @@ export class AuthService implements AuthPortIn {
       ...resultData,
       userId: authenticatedUser.id,
     })
-    await setSession(authenticatedUser)
+    await this.sessionService.set(authenticatedUser)
     return authenticatedUser
   }
 }

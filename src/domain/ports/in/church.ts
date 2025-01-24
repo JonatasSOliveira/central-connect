@@ -1,10 +1,10 @@
 import { ChurchCreateDTO } from '@/domain/dtos/church/create'
 import { ChurchListDto } from '@/domain/dtos/church/list'
+import { BaseCrudPortIn } from './base-crud'
+import { ChurchStorageDTO } from '@/domain/dtos/church/storage'
 
-export interface ChurchPortIn {
-  create(data: ChurchCreateDTO): Promise<string>
-  listAll(): Promise<ChurchListDto[]>
-  delete(id: string): Promise<void>
-  update(id: string, data: ChurchCreateDTO): Promise<void>
-  listOneById(id: string): Promise<ChurchListDto>
+export interface ChurchPortIn
+  extends BaseCrudPortIn<ChurchCreateDTO, ChurchCreateDTO, ChurchListDto> {
+  selectChurch(church: ChurchStorageDTO): Promise<void>
+  getSelectedChurch(): Promise<ChurchStorageDTO | null>
 }
