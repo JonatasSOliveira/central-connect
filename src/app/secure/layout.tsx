@@ -1,16 +1,22 @@
 import { NavigationMenu } from '@/components/organisms/navigation-menu'
 import { churchPageDefinition } from './church/page-definition'
 import { dashboardPageDefinition } from './dashboard/page-definition'
-import { PageDefinition } from '@/types/page-definition'
 import { ChurchProvider } from '@/context/ChurchContext'
 import { personsPageDefinition } from './person/page-definition'
 import { churchRolePageDefinition } from './church-role/page-definition'
+import { PageNavigationOption } from '@/components/organisms/navigation-menu/footer'
 
-const pages: PageDefinition[] = [
-  dashboardPageDefinition,
-  personsPageDefinition,
-  churchRolePageDefinition,
-  churchPageDefinition,
+const pages: PageNavigationOption[] = [
+  { definition: dashboardPageDefinition },
+  { definition: churchPageDefinition },
+  {
+    definition: churchRolePageDefinition,
+    onlyShowIfHaveChurch: true,
+  },
+  {
+    definition: personsPageDefinition,
+    onlyShowIfHaveChurch: true,
+  },
 ]
 
 export default function SecureLayout({
