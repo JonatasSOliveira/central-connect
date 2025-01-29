@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { Permission } from '@/domain/enums/permission'
-import { ResourceID } from '@/domain/enums/resource-id'
+import { Permission } from '@/domain/enums/permission.enum'
+import { ResourceID } from '@/domain/enums/resource-id.enum'
 import { BaseModelSchema } from '@/domain/models/base'
 
 export const ResourcePermissionModelSchema = BaseModelSchema.extend({

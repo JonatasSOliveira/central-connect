@@ -5,6 +5,7 @@ export const PersonCreateDTOSchema = PersonModelSchema.pick({
   name: true,
   phoneNumber: true,
   churchRoleId: true,
+  sex: true,
 })
 
 export type PersonCreateDTO = z.infer<typeof PersonCreateDTOSchema>

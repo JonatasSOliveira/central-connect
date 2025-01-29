@@ -6,8 +6,9 @@ import {
   PersonCreateDTO,
   PersonCreateDTOSchema,
 } from '@/domain/dtos/person/create'
-import { FormInputType } from '@/components/templates/record-form/form-input'
+import { FormInputType } from '@/components/molecules/form-input'
 import { ComboBoxOption } from '@/components/atoms/combo-box'
+import { PersonSex, PersonSexLabels } from '@/domain/enums/person-sex.enum'
 
 export interface PersonFormProps {
   title: string
@@ -36,6 +37,16 @@ export const PersonFormTemplateConfig: React.FC<PersonFormProps> = ({
         label: 'Cargo:',
         type: FormInputType.COMBO_BOX,
         options: churchRolesOptions,
+      },
+      {
+        field: 'sex',
+        label: 'Sexo:',
+        type: FormInputType.COMBO_BOX,
+        options: Object.values(PersonSex).map((sex) => ({
+          label: PersonSexLabels[sex],
+          value: sex,
+          id: sex,
+        })),
       },
     ]}
     initialValue={initialValue}

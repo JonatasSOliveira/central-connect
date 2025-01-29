@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { BaseModelSchema } from '@/domain/models/base'
 import { ServiceScheduleTemplateModelSchema } from '@/domain/models/service-schedule-template'
 import { timeSchema } from '@/domain/types/zod/time'
-import { DayOfWeek } from '@/domain/enums/day-of-week'
+import { DayOfWeek } from '@/domain/enums/day-of-week.enum'
 
 export const WorshipServiceTemplateModelSchema = BaseModelSchema.extend({
   name: z.string().min(1),
