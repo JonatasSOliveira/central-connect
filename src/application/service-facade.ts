@@ -17,6 +17,9 @@ import { SessionService } from '@/domain/services/session.service'
 import { PersonPortIn } from '@/domain/ports/in/person'
 import { PersonService } from '@/domain/services/person.service'
 import { FirebasePersonRepository } from '@/adapters/firebase/person-repository'
+import { WeeklyConfigPortIn } from '@/domain/ports/in/weekly-config'
+import { FirebaseWeeklyConfigRepository } from '@/adapters/firebase/weekly-config.repository'
+import { WeeklyConfigService } from '@/domain/services/weekly-config.service'
 
 export class ServiceFacade {
   private static readonly dataStore: ServerDataStoragePortOut =
@@ -53,6 +56,13 @@ export class ServiceFacade {
     ServiceFacade.selectChurchStorage,
   )
 
+  private static readonly weekConfigService: WeeklyConfigPortIn =
+    new WeeklyConfigService(
+      new FirebaseWeeklyConfigRepository(),
+      ServiceFacade.sessionService,
+      ServiceFacade.selectChurchStorage,
+    )
+
   public static getAuthService: () => AuthPortIn = () => this.authService
 
   public static getChurchService: () => ChurchPortIn = () => this.churchService
@@ -61,4 +71,7 @@ export class ServiceFacade {
     this.churchRoleService
 
   public static getPersonService: () => PersonPortIn = () => this.personService
+
+  public static getWeekConfigService: () => WeeklyConfigPortIn = () =>
+    this.weekConfigService
 }

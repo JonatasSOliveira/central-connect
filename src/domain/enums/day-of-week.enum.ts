@@ -1,9 +1,19 @@
 export enum DayOfWeek {
-  Sunday = 0,
-  Monday = 1,
-  Tuesday = 2,
-  Wednesday = 3,
-  Thursday = 4,
-  Friday = 5,
-  Saturday = 6,
+  Sunday = 'sunday',
+  Monday = 'monday',
+  Tuesday = 'tuesday',
+  Wednesday = 'wednesday',
+  Thursday = 'thursday ',
+  Friday = 'friday',
+  Saturday = 'saturday',
+}
+
+export const DayOfWeekLabels: Record<DayOfWeek, string> = {
+  [DayOfWeek.Sunday]: 'Domingo',
+  [DayOfWeek.Monday]: 'Segunda-feira',
+  [DayOfWeek.Tuesday]: 'Terça-feira',
+  [DayOfWeek.Wednesday]: 'Quarta-feira',
+  [DayOfWeek.Thursday]: 'Quinta-feira',
+  [DayOfWeek.Friday]: 'Sexta-feira',
+  [DayOfWeek.Saturday]: 'Sábado',
 }

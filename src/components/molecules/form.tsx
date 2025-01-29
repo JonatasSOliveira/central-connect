@@ -22,7 +22,7 @@ export const Form = forwardRef<HTMLFormElement, FormProps>(
       className="flex flex-col gap-2 w-full flex-1"
     >
       <Toaster />
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 flex flex-col gap-2">{children}</div>
       <div className="flex justify-center gap-2">
         {onCancel && (
           <Button type="button" color={ButtonColors.DANGER} onClick={onCancel}>

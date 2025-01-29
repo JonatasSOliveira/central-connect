@@ -6,7 +6,7 @@ interface H1Props extends React.HTMLAttributes<HTMLHeadingElement> {
 
 export const H1 = forwardRef<HTMLHeadingElement, H1Props>(
   ({ children, ...props }, ref) => (
-    <h1 className="text-2xl font-bold" ref={ref} {...props}>
+    <h1 className="text-2xl font-bold text-center" ref={ref} {...props}>
       {children}
     </h1>
   ),
