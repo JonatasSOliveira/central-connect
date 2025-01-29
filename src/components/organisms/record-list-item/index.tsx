@@ -1,6 +1,6 @@
 'use client'
 
-import { JSX, useRef } from 'react'
+import { JSX, useRef, useState } from 'react'
 import { ConfirmModal, ConfirmModalHandlers } from '../confirm-modal'
 import { Button, ButtonColors } from '@/components/atoms/button'
 import Link from 'next/link'
@@ -18,6 +18,7 @@ export const RecordListItem = <RecordType extends { id: string }>({
   deleteRecord,
   updateFormPagePath,
 }: RecordListItemProps<RecordType>): JSX.Element => {
+  const [changingScreen, setchangingScreen] = useState(false)
   const confirmModalRef = useRef<ConfirmModalHandlers>(null)
   const label = String(record[labelAttribute])
 
@@ -50,7 +51,13 @@ export const RecordListItem = <RecordType extends { id: string }>({
             Excluir
           </Button>
           <Link href={`${updateFormPagePath}/${record.id}`}>
-            <Button type="button">Editar</Button>
+            <Button
+              type="button"
+              isPending={changingScreen}
+              onClick={() => setchangingScreen(true)}
+            >
+              Editar
+            </Button>
           </Link>
         </div>
       </div>

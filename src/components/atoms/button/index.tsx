@@ -24,6 +24,14 @@ const colorClasses: Record<ButtonColors, string> = {
     'text-blue-500 bg-white border-solid border-blue-500 border-2',
 }
 
+const iconColorClasses: Record<ButtonColors, string> = {
+  [ButtonColors.PRIMARY]: 'text-white',
+  [ButtonColors.SECONDARY]: 'text-white',
+  [ButtonColors.DANGER]: 'text-white',
+  [ButtonColors.DANGER_OUTLINE]: 'text-red-500',
+  [ButtonColors.PRIMARY_OUTLINE]: 'text-blue-500',
+}
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, isPending, color = ButtonColors.PRIMARY, ...props }, ref) => {
     const colorClass = color ? colorClasses[color] : ''
@@ -33,7 +41,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
         ref={ref}
         className={
-          'rounded px-2 py-1 font-bold flex gap-2 ' +
+          'rounded px-4 py-2 font-bold flex gap-2 overflow-hidden text-ellipsis whitespace-nowrap ' +
           colorClass +
           ' ' +
           (props.className || '')
@@ -47,7 +55,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             icon="line-md:loading-loop"
             width="24"
             height="24"
-            className="text-white"
+            className={iconColorClasses[color]}
           />
         )}
       </button>

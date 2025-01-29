@@ -34,6 +34,7 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
           <select
             id={id}
             {...field}
+            className="border-2 border-solid rounded-md py-1 px-2"
             value={options.find((option) => option.id === field.value?.id)?.id} // Mapeia o value atual para o índice
             onChange={(e) => {
               const selectedId = e.target.value

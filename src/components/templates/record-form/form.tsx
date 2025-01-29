@@ -8,7 +8,7 @@ import { JSX, useTransition } from 'react'
 import { DefaultValues, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { ZodObject, ZodRawShape } from 'zod'
-import { FormInput, InputDefinition } from './form-input'
+import { FormInput, InputDefinition } from '../../molecules/form-input'
 
 export interface FormProps<RecordType extends Record<string, unknown>> {
   schema: ZodObject<ZodRawShape>
@@ -42,6 +42,8 @@ export const RecordFormTemplateForm = <
     defaultValues: initialValue as DefaultValues<RecordType> | undefined,
   })
 
+  const goBack = () => router.back()
+
   const formAction: () => void = handleSubmit(async (data) =>
     startTransition(async () => {
       try {
@@ -59,7 +61,7 @@ export const RecordFormTemplateForm = <
   )
 
   return (
-    <Form isPending={isPending} onSubmit={formAction}>
+    <Form isPending={isPending} onSubmit={formAction} onCancel={goBack}>
       {inputsDefinition.map((inputDefinition, index) => (
         <FormInput
           key={index}
