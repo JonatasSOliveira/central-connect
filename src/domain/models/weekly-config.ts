@@ -4,7 +4,7 @@ import { WorshipServiceTemplateModelSchema } from '@/domain/models/worship-servi
 
 export const WeeklyConfigModelSchema = BaseModelSchema.extend({
   name: z.string().min(1),
-  worshipServices: z.array(WorshipServiceTemplateModelSchema),
+  worshipServiceTemplates: z.array(WorshipServiceTemplateModelSchema).min(1),
   churchId: z.string(),
 })
 

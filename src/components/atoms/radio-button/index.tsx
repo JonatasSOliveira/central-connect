@@ -1,3 +1,4 @@
+import { ErrorSpan } from '../error-span'
 import { Label } from '../label'
 
 type RadioButtonProps = {
@@ -32,6 +33,6 @@ export const RadioButton: React.FC<RadioButtonProps> = ({
         {label}
       </Label>
     </div>
-    {error && <span className="text-sm text-red-500">{error}</span>}
+    <ErrorSpan error={error} />
   </>
 )

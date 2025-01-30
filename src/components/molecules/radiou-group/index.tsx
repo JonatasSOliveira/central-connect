@@ -11,7 +11,7 @@ type RadioGroupProps = {
   defaultValue?: string
 }
 
-const RadioGroup: React.FC<RadioGroupProps> = ({
+export const RadioGroup: React.FC<RadioGroupProps> = ({
   options,
   name,
   control,
@@ -44,5 +44,3 @@ const RadioGroup: React.FC<RadioGroupProps> = ({
     </div>
   )
 }
-
-export default RadioGroup

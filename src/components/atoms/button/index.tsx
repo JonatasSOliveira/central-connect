@@ -41,7 +41,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
         ref={ref}
         className={
-          'rounded px-4 py-2 font-bold flex gap-2 overflow-hidden text-ellipsis whitespace-nowrap ' +
+          'rounded px-4 py-2 font-bold flex gap-2 overflow-hidden text-ellipsis whitespace-nowrap justify-center ' +
           colorClass +
           ' ' +
           (props.className || '')

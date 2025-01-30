@@ -2,23 +2,25 @@
 
 import { JSX, useRef, useState } from 'react'
 import { ConfirmModal, ConfirmModalHandlers } from '../confirm-modal'
-import { Button, ButtonColors } from '@/components/atoms/button'
-import Link from 'next/link'
+import { ButtonColors } from '@/components/atoms/button'
+import { ListItem } from '@/components/molecules/list-item'
+import { useRouter } from 'next/navigation'
 
-interface RecordListItemProps<RecordType extends { id: string }> {
+interface RecordListItemProps<RecordType extends { id?: string }> {
   record: RecordType
   labelAttribute: keyof RecordType
   deleteRecord: (record: RecordType) => Promise<void>
   updateFormPagePath: string
 }
 
-export const RecordListItem = <RecordType extends { id: string }>({
+export const RecordListItem = <RecordType extends { id?: string }>({
   record,
   labelAttribute,
   deleteRecord,
   updateFormPagePath,
 }: RecordListItemProps<RecordType>): JSX.Element => {
-  const [changingScreen, setchangingScreen] = useState(false)
+  const router = useRouter()
+  const [changingScreen, setChangingScreen] = useState(false)
   const confirmModalRef = useRef<ConfirmModalHandlers>(null)
   const label = String(record[labelAttribute])
 
@@ -27,6 +29,11 @@ export const RecordListItem = <RecordType extends { id: string }>({
   const onConfirmDeleteHandler = async () => {
     await deleteRecord(record)
     window.location.reload()
+  }
+
+  const goToEditFormPage = () => {
+    setChangingScreen(true)
+    router.push(`${updateFormPagePath}/${record.id}`)
   }
 
   return (
@@ -38,29 +45,12 @@ export const RecordListItem = <RecordType extends { id: string }>({
         confirmButtonColor={ButtonColors.DANGER}
         onConfirm={onConfirmDeleteHandler}
       />
-      <div className="flex flex-col shadow-md p-4 rounded">
-        <div className="mb-2">
-          <p className="text-center font-bold">{label}</p>
-        </div>
-        <div className="flex justify-center gap-4">
-          <Button
-            type="button"
-            color={ButtonColors.DANGER}
-            onClick={openConfirmModal}
-          >
-            Excluir
-          </Button>
-          <Link href={`${updateFormPagePath}/${record.id}`}>
-            <Button
-              type="button"
-              isPending={changingScreen}
-              onClick={() => setchangingScreen(true)}
-            >
-              Editar
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <ListItem
+        title={label}
+        onDelete={openConfirmModal}
+        onEdit={goToEditFormPage}
+        editIsPending={changingScreen}
+      />
     </>
   )
 }
