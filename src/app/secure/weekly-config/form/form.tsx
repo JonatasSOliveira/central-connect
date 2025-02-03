@@ -10,7 +10,7 @@ import {
 } from '@/domain/dtos/weekly-config/form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useRef, useTransition } from 'react'
+import React, { useRef, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import {
@@ -24,7 +24,13 @@ import { DayOfWeekLabels } from '@/domain/enums/day-of-week.enum'
 import { ErrorSpan } from '@/components/atoms/error-span'
 import { weeklyConfigPageDefinition } from '../page-definition'
 
-export const WeeklyConfigForm = () => {
+interface WeeklyConfigFormProps {
+  weeklyConfig?: WeeklyConfigFormDTO
+}
+
+export const WeeklyConfigForm: React.FC<WeeklyConfigFormProps> = ({
+  weeklyConfig,
+}) => {
   const router = useRouter()
   const worhipTemplateFormModalRef =
     useRef<WorshipTemplateFormModalHandlers>(null)
@@ -38,6 +44,7 @@ export const WeeklyConfigForm = () => {
     getValues,
   } = useForm<WeeklyConfigFormDTO>({
     mode: 'onSubmit',
+    defaultValues: weeklyConfig,
     resolver: zodResolver(WeeklyConfigFormDTOSchema),
   })
 
@@ -50,8 +57,11 @@ export const WeeklyConfigForm = () => {
     async (data) =>
       startTransition(async () => {
         try {
-          console.log(data)
-          await WeeklyConfigController.create(data)
+          if (weeklyConfig?.id) {
+            await WeeklyConfigController.update(weeklyConfig.id, data)
+          } else {
+            await WeeklyConfigController.create(data)
+          }
           toast.success('Configuração salva com sucesso')
           router.push(weeklyConfigPageDefinition.path)
         } catch (error) {
@@ -64,7 +74,7 @@ export const WeeklyConfigForm = () => {
       }),
     (errors) => {
       console.log(errors)
-      toast.error('Existem erros no fo')
+      toast.error('Existem erros no Formulário')
     },
   )
 
