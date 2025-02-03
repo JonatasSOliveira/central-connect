@@ -1,4 +1,4 @@
-import { BaseModel } from '@/domain/models/base'
+import { BaseModel } from '@/domain/models/base.model'
 import { BaseRepository } from '@/domain/ports/out/base-repository'
 import { QueryOptions } from '@/domain/types/repositories/query-options'
 import { FirebaseProvider } from '@/infra/firebase/provider'

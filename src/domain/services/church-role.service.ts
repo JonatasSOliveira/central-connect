@@ -1,8 +1,8 @@
-import { ChurchRolePortInt } from '@/domain/ports/in/church-role'
+import { ChurchRolePortInt } from '@/domain/ports/in/church-role.port-in'
 import {
   ChurchRoleModel,
   ChurchRoleModelSchema,
-} from '@/domain/models/church-role'
+} from '@/domain/models/church-role.model'
 import { ChurchRoleRepository } from '@/domain/ports/out/church-role-repository'
 import { ChurchRoleCreateDTO } from '@/domain/dtos/church-role/create'
 import { ChurchRoleListDto } from '@/domain/dtos/church-role/list'

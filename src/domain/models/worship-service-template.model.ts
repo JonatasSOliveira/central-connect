@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ServiceScheduleTemplateModelSchema } from '@/domain/models/service-schedule-template'
+import { ServiceScheduleTemplateModelSchema } from '@/domain/models/service-schedule-template.model'
 import { timeSchema } from '@/domain/types/zod/time'
 import { DayOfWeek } from '../enums/day-of-week.enum'
 

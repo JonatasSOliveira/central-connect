@@ -1,4 +1,4 @@
-import { UserModelSchema } from '@/domain/models/user'
+import { UserModelSchema } from '@/domain/models/user.model'
 import { z } from 'zod'
 
 export const AuthenticatedUserDTOSchema = UserModelSchema.pick({

@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { BaseModelSchema } from '@/domain/models/base'
-import { ResourcePermissionModelSchema } from '@/domain/models/resource-permission'
+import { BaseModelSchema } from '@/domain/models/base.model'
+import { ResourcePermissionModelSchema } from '@/domain/models/resource-permission.model'
 
 export const UserRoleModelSchema = BaseModelSchema.extend({
   name: z.string(),

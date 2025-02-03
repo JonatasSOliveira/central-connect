@@ -1,6 +1,6 @@
 import { ChurchCreateDTO } from '@/domain/dtos/church/create'
 import { ChurchListDto } from '@/domain/dtos/church/list'
-import { BaseCrudPortIn } from './base-crud'
+import { BaseCrudPortIn } from './base-crud.port-in'
 import { ChurchStorageDTO } from '@/domain/dtos/church/storage'
 
 export interface ChurchPortIn

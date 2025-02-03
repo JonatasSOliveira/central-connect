@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { BaseModelSchema } from '@/domain/models/base'
-import { PersonModelSchema } from '@/domain/models/person'
-import { ScheduleOccupationModelSchema } from '@/domain/models/schedule-occupation'
+import { BaseModelSchema } from '@/domain/models/base.model'
+import { PersonModelSchema } from '@/domain/models/person.model'
+import { ScheduleOccupationModelSchema } from '@/domain/models/schedule-occupation.model'
 
 export const ServiceScheduleTemplateModelSchema = BaseModelSchema.extend({
   name: z.string().min(1),

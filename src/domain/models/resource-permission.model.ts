@@ -1,9 +1,8 @@
 import { z } from 'zod'
 import { Permission } from '@/domain/enums/permission.enum'
 import { ResourceID } from '@/domain/enums/resource-id.enum'
-import { BaseModelSchema } from '@/domain/models/base'
 
-export const ResourcePermissionModelSchema = BaseModelSchema.extend({
+export const ResourcePermissionModelSchema = z.object({
   resourceId: z.nativeEnum(ResourceID),
   permissions: z.array(z.nativeEnum(Permission)),
 })

@@ -1,4 +1,4 @@
-import { ChurchRoleModelSchema } from '@/domain/models/church-role'
+import { ChurchRoleModelSchema } from '@/domain/models/church-role.model'
 import { z } from 'zod'
 
 export const ChurchRoleCreateDTOSchema = ChurchRoleModelSchema.pick({

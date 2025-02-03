@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BaseModelSchema } from '@/domain/models/base'
+import { BaseModelSchema } from '@/domain/models/base.model'
 
 export const WorshipServiceReportModelSchema = BaseModelSchema.extend({
   note: z.string().min(3),

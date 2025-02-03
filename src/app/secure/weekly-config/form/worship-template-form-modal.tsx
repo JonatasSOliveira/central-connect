@@ -8,7 +8,7 @@ import { DayOfWeek, DayOfWeekLabels } from '@/domain/enums/day-of-week.enum'
 import {
   WorshipServiceTemplateModel,
   WorshipServiceTemplateModelSchema,
-} from '@/domain/models/worship-service-template'
+} from '@/domain/models/worship-service-template.model'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { Control, useForm } from 'react-hook-form'

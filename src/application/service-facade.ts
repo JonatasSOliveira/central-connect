@@ -3,9 +3,9 @@ import { FirebaseAuthAdapter } from '@/adapters/firebase/auth'
 import { FirebaseChurchRepository } from '@/adapters/firebase/church-repository'
 import { FirebaseChurchRoleRepository } from '@/adapters/firebase/church-role-repository'
 import { FirebaseUserRepository } from '@/adapters/firebase/user-repository'
-import { AuthPortIn } from '@/domain/ports/in/auth'
-import { ChurchPortIn } from '@/domain/ports/in/church'
-import { ChurchRolePortInt } from '@/domain/ports/in/church-role'
+import { AuthPortIn } from '@/domain/ports/in/auth.port-in'
+import { ChurchPortIn } from '@/domain/ports/in/church.port-in'
+import { ChurchRolePortInt } from '@/domain/ports/in/church-role.port-in'
 import { ChurchStoragePortInbound } from '@/domain/ports/inbound/church-storage'
 import { SessionServicePortInbound } from '@/domain/ports/inbound/session'
 import { ServerDataStoragePortOut } from '@/domain/ports/out/server-data-storage'
@@ -14,12 +14,15 @@ import { ChurchService } from '@/domain/services/church.service'
 import { ChurchRoleService } from '@/domain/services/church-role.service'
 import { ChurchStorageService } from '@/domain/services/church-storage.service'
 import { SessionService } from '@/domain/services/session.service'
-import { PersonPortIn } from '@/domain/ports/in/person'
+import { PersonPortIn } from '@/domain/ports/in/person.port-in'
 import { PersonService } from '@/domain/services/person.service'
 import { FirebasePersonRepository } from '@/adapters/firebase/person-repository'
-import { WeeklyConfigPortIn } from '@/domain/ports/in/weekly-config'
+import { WeeklyConfigPortIn } from '@/domain/ports/in/weekly-config.port-in'
 import { FirebaseWeeklyConfigRepository } from '@/adapters/firebase/weekly-config.repository'
 import { WeeklyConfigService } from '@/domain/services/weekly-config.service'
+import { UserRolePortIn } from '@/domain/ports/in/user-role.port-in'
+import { UserRoleService } from '@/domain/services/user-role.service'
+import { FirebaseUserRoleRepository } from '@/adapters/firebase/user-role-repository'
 
 export class ServiceFacade {
   private static readonly dataStore: ServerDataStoragePortOut =
@@ -63,6 +66,11 @@ export class ServiceFacade {
       ServiceFacade.selectChurchStorage,
     )
 
+  private static readonly userRoleService: UserRolePortIn = new UserRoleService(
+    new FirebaseUserRoleRepository(),
+    ServiceFacade.sessionService,
+  )
+
   public static getAuthService: () => AuthPortIn = () => this.authService
 
   public static getChurchService: () => ChurchPortIn = () => this.churchService
@@ -74,4 +82,7 @@ export class ServiceFacade {
 
   public static getWeekConfigService: () => WeeklyConfigPortIn = () =>
     this.weekConfigService
+
+  public static getUserRoleService: () => UserRolePortIn = () =>
+    this.userRoleService
 }

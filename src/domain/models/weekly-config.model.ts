@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { BaseModelSchema } from '@/domain/models/base'
-import { WorshipServiceTemplateModelSchema } from '@/domain/models/worship-service-template'
+import { BaseModelSchema } from '@/domain/models/base.model'
+import { WorshipServiceTemplateModelSchema } from '@/domain/models/worship-service-template.model'
 
 export const WeeklyConfigModelSchema = BaseModelSchema.extend({
   name: z.string().min(1),

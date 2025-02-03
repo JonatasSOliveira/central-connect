@@ -1,4 +1,4 @@
-import { WeeklyConfigModelSchema } from '@/domain/models/weekly-config'
+import { WeeklyConfigModelSchema } from '@/domain/models/weekly-config.model'
 import { z } from 'zod'
 
 export const WeeklyConfigFormDTOSchema = WeeklyConfigModelSchema.omit({

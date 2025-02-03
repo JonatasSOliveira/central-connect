@@ -18,7 +18,7 @@ import {
   WorshipTemplateFormModal,
   WorshipTemplateFormModalHandlers,
 } from './worship-template-form-modal'
-import { WorshipServiceTemplateModel } from '@/domain/models/worship-service-template'
+import { WorshipServiceTemplateModel } from '@/domain/models/worship-service-template.model'
 import { ListItem } from '@/components/molecules/list-item'
 import { DayOfWeekLabels } from '@/domain/enums/day-of-week.enum'
 import { ErrorSpan } from '@/components/atoms/error-span'

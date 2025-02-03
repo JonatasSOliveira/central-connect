@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BaseModelSchema } from '@/domain/models/base'
+import { BaseModelSchema } from '@/domain/models/base.model'
 
 export const ChurchRoleModelSchema = BaseModelSchema.extend({
   name: z.string().min(1),

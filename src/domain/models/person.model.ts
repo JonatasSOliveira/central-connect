@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BaseModelSchema } from '@/domain/models/base'
+import { BaseModelSchema } from '@/domain/models/base.model'
 import { PersonSex } from '../enums/person-sex.enum'
 
 export const PersonModelSchema = BaseModelSchema.extend({

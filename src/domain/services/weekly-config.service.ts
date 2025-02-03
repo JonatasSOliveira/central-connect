@@ -4,8 +4,8 @@ import { WeeklyConfigListDTO } from '../dtos/weekly-config/list'
 import {
   WeeklyConfigModel,
   WeeklyConfigModelSchema,
-} from '../models/weekly-config'
-import { WeeklyConfigPortIn } from '../ports/in/weekly-config'
+} from '../models/weekly-config.model'
+import { WeeklyConfigPortIn } from '../ports/in/weekly-config.port-in'
 import { WeeklyConfigRepository } from '../ports/out/weekly-config-repository'
 import { BaseCrudWithChurchService } from './base-crud-with-church.service'
 

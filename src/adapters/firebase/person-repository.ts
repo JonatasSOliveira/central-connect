@@ -1,5 +1,5 @@
 import { FirebaseBaseRepository } from '@/adapters/firebase/base-repository'
-import { PersonModel } from '@/domain/models/person'
+import { PersonModel } from '@/domain/models/person.model'
 import { PersonRepository } from '@/domain/ports/out/person.repository'
 
 export class FirebasePersonRepository
