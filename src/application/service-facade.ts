@@ -23,6 +23,8 @@ import { WeeklyConfigService } from '@/domain/services/weekly-config.service'
 import { UserRolePortIn } from '@/domain/ports/in/user-role.port-in'
 import { UserRoleService } from '@/domain/services/user-role.service'
 import { FirebaseUserRoleRepository } from '@/adapters/firebase/user-role-repository'
+import { UserPortIn } from '@/domain/ports/in/user.port-in'
+import { UserService } from '@/domain/services/user.service'
 
 export class ServiceFacade {
   private static readonly dataStore: ServerDataStoragePortOut =
@@ -71,6 +73,11 @@ export class ServiceFacade {
     ServiceFacade.sessionService,
   )
 
+  private static readonly userService: UserPortIn = new UserService(
+    new FirebaseUserRepository(),
+    ServiceFacade.sessionService,
+  )
+
   public static getAuthService: () => AuthPortIn = () => this.authService
 
   public static getChurchService: () => ChurchPortIn = () => this.churchService
@@ -85,4 +92,6 @@ export class ServiceFacade {
 
   public static getUserRoleService: () => UserRolePortIn = () =>
     this.userRoleService
+
+  public static getUserService: () => UserPortIn = () => this.userService
 }

@@ -4,6 +4,7 @@ import { UserRoleModelSchema } from '@/domain/models/user-role.model'
 import { BaseModelSchema } from '@/domain/models/base.model'
 
 export const UserModelSchema = BaseModelSchema.extend({
+  email: z.string().email(),
   person: PersonModelSchema,
   userRole: UserRoleModelSchema,
 })
