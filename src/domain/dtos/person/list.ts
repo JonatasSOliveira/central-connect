@@ -1,4 +1,4 @@
-import { PersonModelSchema } from '@/domain/models/person'
+import { PersonModelSchema } from '@/domain/models/person.model'
 import { z } from 'zod'
 
 export const PersonListDTOSchema = PersonModelSchema.extend({

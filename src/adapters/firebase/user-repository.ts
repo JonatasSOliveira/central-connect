@@ -1,4 +1,4 @@
-import { UserModel } from '@/domain/models/user'
+import { UserModel } from '@/domain/models/user.model'
 import { UserRepository } from '@/domain/ports/out/user-repository'
 import { FirebaseBaseRepository } from './base-repository'
 

@@ -1,5 +1,5 @@
-import { BaseModel } from '@/domain/models/base'
-import { BaseCrudPortIn } from '@/domain/ports/in/base-crud'
+import { BaseModel } from '@/domain/models/base.model'
+import { BaseCrudPortIn } from '@/domain/ports/in/base-crud.port-in'
 import { BaseRepository } from '@/domain/ports/out/base-repository'
 import { BaseCrudService } from './base-crud.service'
 import { SessionServicePortInbound } from '../ports/inbound/session'

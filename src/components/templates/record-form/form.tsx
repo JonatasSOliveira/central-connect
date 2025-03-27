@@ -8,7 +8,7 @@ import { JSX, useTransition } from 'react'
 import { DefaultValues, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { ZodObject, ZodRawShape } from 'zod'
-import { FormInput, InputDefinition } from './form-input'
+import { FormInput, InputDefinition } from '@/components/molecules/form-input'
 
 export interface FormProps<RecordType extends Record<string, unknown>> {
   schema: ZodObject<ZodRawShape>
@@ -16,7 +16,7 @@ export interface FormProps<RecordType extends Record<string, unknown>> {
   sucessMessage?: string
   sucessPageDefinition: PageDefinition
   inputsDefinition: InputDefinition<RecordType>[]
-  initialValue?: RecordType
+  initialValue?: Partial<RecordType>
 }
 
 export const RecordFormTemplateForm = <
@@ -42,24 +42,31 @@ export const RecordFormTemplateForm = <
     defaultValues: initialValue as DefaultValues<RecordType> | undefined,
   })
 
-  const formAction: () => void = handleSubmit(async (data) =>
-    startTransition(async () => {
-      try {
-        await onSubmit(data)
-        if (sucessMessage) toast.success(sucessMessage)
-        router.push(sucessPageDefinition.path)
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message)
-          return
+  const goBack = () => router.back()
+
+  const formAction: () => void = handleSubmit(
+    async (data) =>
+      startTransition(async () => {
+        try {
+          await onSubmit(data)
+          if (sucessMessage) toast.success(sucessMessage)
+          router.push(sucessPageDefinition.path)
+        } catch (error) {
+          if (error instanceof Error) {
+            toast.error(error.message)
+            return
+          }
+          toast.error('Houve um erro, por favor contate o suporte')
         }
-        toast.error('Houve um erro, por favor contate o suporte')
-      }
-    }),
+      }),
+    (errors) => {
+      console.log(errors)
+      toast.error('Existem erros no Formulário')
+    },
   )
 
   return (
-    <Form isPending={isPending} onSubmit={formAction}>
+    <Form isPending={isPending} onSubmit={formAction} onCancel={goBack}>
       {inputsDefinition.map((inputDefinition, index) => (
         <FormInput
           key={index}

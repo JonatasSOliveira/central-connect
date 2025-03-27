@@ -1,7 +1,7 @@
-import { BaseCrudPortIn } from '@/domain/ports/in/base-crud'
+import { BaseCrudPortIn } from '@/domain/ports/in/base-crud.port-in'
 import { SessionServicePortInbound } from '../ports/inbound/session'
 import { BaseRepository } from '../ports/out/base-repository'
-import { BaseModel } from '../models/base'
+import { BaseModel } from '../models/base.model'
 import { Where } from '../types/repositories/where'
 import { SafeParseReturnType } from 'zod'
 

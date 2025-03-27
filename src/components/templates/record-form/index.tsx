@@ -1,6 +1,7 @@
 import { JSX } from 'react'
 import { FormProps, RecordFormTemplateForm } from './form'
 import { H1 } from '@/components/atoms/h1'
+import { Separator } from '@/components/atoms/separator'
 
 interface RecordFormTemplateProps<T extends Record<string, unknown>>
   extends FormProps<T> {
@@ -13,7 +14,7 @@ export const RecordFormTemplate = <T extends Record<string, unknown>>({
 }: RecordFormTemplateProps<T>): JSX.Element => (
   <>
     <H1>{title}</H1>
-    <hr className="border-t-gray-300 border-t-2 w-full" />
+    <Separator />
     <RecordFormTemplateForm {...props} />
   </>
 )

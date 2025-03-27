@@ -1,4 +1,4 @@
-import { BaseModel } from '@/domain/models/base'
+import { BaseModel } from '@/domain/models/base.model'
 import { QueryOptions } from '@/domain/types/repositories/query-options'
 
 export interface BaseRepository<Model extends BaseModel> {

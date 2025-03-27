@@ -6,7 +6,7 @@ import {
 } from '@/domain/dtos/auth/sign-up.request'
 import { AuthPortOut } from '@/domain/ports/out/auth'
 import { UserRepository } from '@/domain/ports/out/user-repository'
-import { AuthPortIn } from '@/domain//ports/in/auth'
+import { AuthPortIn } from '@/domain/ports/in/auth.port-in'
 import { SessionServicePortInbound } from '../ports/inbound/session'
 
 export class AuthService implements AuthPortIn {

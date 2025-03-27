@@ -1,3 +1,4 @@
+import { Button } from '@/components/atoms/button'
 import { H1 } from '@/components/atoms/h1'
 import { RecordListItem } from '@/components/organisms/record-list-item'
 import { PageDefinition } from '@/types/page-definition'
@@ -37,11 +38,8 @@ export const RecordListTemplate = async <RecordType extends { id: string }>({
         ))}
       </div>
       <div className="flex justify-center">
-        <Link
-          className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-          href={newRecordPageDefinition.path}
-        >
-          {newRecordPageDefinition.title}
+        <Link href={newRecordPageDefinition.path}>
+          <Button type="button">{newRecordPageDefinition.title}</Button>
         </Link>
       </div>
     </>

@@ -1,5 +1,6 @@
 import { Controller, Control } from 'react-hook-form'
 import { Label } from '../label'
+import { ErrorSpan } from '../error-span'
 
 export interface ComboBoxOption {
   id: string
@@ -34,16 +35,19 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
           <select
             id={id}
             {...field}
-            value={options.find((option) => option.id === field.value?.id)?.id} // Mapeia o value atual para o índice
+            className="border-2 border-solid rounded-md py-1 px-2"
+            value={
+              options.find((option) => option.value === field.value)?.id || ''
+            }
             onChange={(e) => {
               const selectedId = e.target.value
               const selectedOption = options.find(
                 (option) => option.id === selectedId,
               )
-              field.onChange(selectedOption?.value) // Atualiza o value com o valor do objeto selecionado
+              field.onChange(selectedOption ? selectedOption.value : '')
             }}
           >
-            <option value="">Selecione uma opção</option>
+            <option value="">Selecione uma opção</option>
             {options.map((option, index) => (
               <option key={index} value={option.id}>
                 {option.label}
@@ -52,7 +56,7 @@ export const ComboBox: React.FC<ComboBoxProps> = ({
           </select>
         )}
       />
-      {error && <span className="text-sm text-red-500">{error}</span>}
+      <ErrorSpan error={error} />
     </div>
   )
 }

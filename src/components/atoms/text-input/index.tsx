@@ -1,5 +1,6 @@
 import { forwardRef } from 'react'
 import { Label } from '../label'
+import { ErrorSpan } from '../error-span'
 
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string
@@ -17,7 +18,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         ref={ref}
         {...props}
       />
-      {error && <span className="text-sm text-red-500">{error}</span>}
+      <ErrorSpan error={error} />
     </div>
   ),
 )
