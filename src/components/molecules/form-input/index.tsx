@@ -3,6 +3,11 @@ import { TextInput } from '@/components/atoms/text-input'
 import { JSX } from 'react'
 import { Control, FieldErrors, Path, UseFormRegister } from 'react-hook-form'
 
+interface InputProps<RecordType extends Record<string, unknown>> {
+  control: Control<RecordType>
+  errors: FieldErrors<RecordType>
+}
+
 export enum FormInputType {
   TEXT = 'text',
   COMBO_BOX = 'combo_box',
@@ -14,6 +19,7 @@ export type InputDefinition<RecordType extends Record<string, unknown>> = {
   placeholder?: string
   options?: ComboBoxOption[]
   type?: FormInputType
+  customComponent?: (props: InputProps<RecordType>) => JSX.Element
 }
 
 interface FormInputProps<RecordType extends Record<string, unknown>> {
@@ -25,12 +31,21 @@ interface FormInputProps<RecordType extends Record<string, unknown>> {
 }
 
 export const FormInput = <RecordType extends Record<string, unknown>>({
-  inputDefinition: { field, label, placeholder, type, options },
+  inputDefinition: {
+    field,
+    label,
+    placeholder,
+    type,
+    options,
+    customComponent,
+  },
   register,
   errors,
   autoFocus,
   control,
 }: FormInputProps<RecordType>): JSX.Element => {
+  if (customComponent) return customComponent({ control, errors })
+
   switch (type) {
     case FormInputType.COMBO_BOX:
       if (!options) throw new Error('options is required for combo_box type')

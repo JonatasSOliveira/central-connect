@@ -3,11 +3,16 @@ import { RadioButton } from '@/components/atoms/radio-button'
 import React from 'react'
 import { Control, Controller } from 'react-hook-form'
 
+export type RadioGroupOption = {
+  label: string
+  value: string
+}
+
 type RadioGroupProps = {
-  options: { label: string; value: string }[]
+  options: RadioGroupOption[]
   name: string
   control: Control
-  label: string
+  label?: string
   defaultValue?: string
 }
 
@@ -20,7 +25,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-2">
-      <Label>{label}</Label>
+      {label ? <Label>{label}</Label> : null}
       <Controller
         name={name}
         control={control}

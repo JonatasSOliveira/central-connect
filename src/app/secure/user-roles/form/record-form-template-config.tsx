@@ -9,6 +9,8 @@ import {
 import { userRolesPageDefinition } from '../page-definition'
 import { ResourceID } from '@/domain/enums/resource-id.enum'
 import { ResourcePermissionModel } from '@/domain/models/resource-permission.model'
+import { PermissionsConfigTable } from './permissions-config-table'
+import { Control } from 'react-hook-form'
 
 export interface UserRoleFormProps {
   title: string
@@ -37,6 +39,15 @@ export const UserRoleFormTemplateConfig: React.FC<UserRoleFormProps> = ({
       onSubmit={onSubmit}
       inputsDefinition={[
         { field: 'name', label: 'Nome:', placeholder: 'NOME' },
+        {
+          field: 'resourcePermissions',
+          customComponent: ({ control, errors }) => (
+            <PermissionsConfigTable
+              control={control as unknown as Control}
+              error={errors.resourcePermissions?.message}
+            />
+          ),
+        },
       ]}
       initialValue={initialValue ?? { resourcePermissions }}
     />
