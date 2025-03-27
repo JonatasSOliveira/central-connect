@@ -5,10 +5,11 @@ import { ConfirmModal, ConfirmModalHandlers } from '../confirm-modal'
 import { ButtonColors } from '@/components/atoms/button'
 import { ListItem } from '@/components/molecules/list-item'
 import { useRouter } from 'next/navigation'
+import { KeyOf } from '@/types/KeyOf'
 
-interface RecordListItemProps<RecordType extends { id?: string }> {
+export interface RecordListItemProps<RecordType extends { id?: string }> {
   record: RecordType
-  labelAttribute: keyof RecordType
+  labelAttribute: KeyOf<RecordType>
   deleteRecord: (record: RecordType) => Promise<void>
   updateFormPagePath: string
 }
@@ -19,16 +20,28 @@ export const RecordListItem = <RecordType extends { id?: string }>({
   deleteRecord,
   updateFormPagePath,
 }: RecordListItemProps<RecordType>): JSX.Element => {
+  if (!labelAttribute) {
+    throw new Error('labelAttribute is required')
+  }
+
   const router = useRouter()
   const [changingScreen, setChangingScreen] = useState(false)
   const confirmModalRef = useRef<ConfirmModalHandlers>(null)
-  const label = String(record[labelAttribute])
+
+  const labelKeys = labelAttribute.split('.')
+  let objectLabel: RecordType | unknown = record
+
+  for (const key of labelKeys) {
+    objectLabel = (objectLabel as Record<string, unknown>)[key]
+  }
+
+  const label = String(objectLabel)
 
   const openConfirmModal = () => confirmModalRef.current?.openModal()
 
   const onConfirmDeleteHandler = async () => {
     await deleteRecord(record)
-    window.location.reload()
+    router.refresh()
   }
 
   const goToEditFormPage = () => {
