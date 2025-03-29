@@ -1,7 +1,6 @@
 'use client'
 
 import { RecordFormTemplate } from '@/components/templates/record-form'
-
 import {
   UserRoleFormDTO,
   UserRoleFormDTOSchema,

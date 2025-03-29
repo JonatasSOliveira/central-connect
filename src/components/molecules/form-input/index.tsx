@@ -1,7 +1,8 @@
 import { ComboBox, ComboBoxOption } from '@/components/atoms/combo-box'
 import { TextInput } from '@/components/atoms/text-input'
 import { JSX } from 'react'
-import { Control, FieldErrors, Path, UseFormRegister } from 'react-hook-form'
+import { Control, FieldErrors, UseFormRegister } from 'react-hook-form'
+import { KeyOf } from '@/types/KeyOf'
 
 interface InputProps<RecordType extends Record<string, unknown>> {
   control: Control<RecordType>
@@ -11,10 +12,11 @@ interface InputProps<RecordType extends Record<string, unknown>> {
 export enum FormInputType {
   TEXT = 'text',
   COMBO_BOX = 'combo_box',
+  PASSWORD = 'password',
 }
 
 export type InputDefinition<RecordType extends Record<string, unknown>> = {
-  field: Path<RecordType>
+  field: KeyOf<RecordType>
   label?: string
   placeholder?: string
   options?: ComboBoxOption[]
@@ -62,12 +64,14 @@ export const FormInput = <RecordType extends Record<string, unknown>>({
       )
 
     case FormInputType.TEXT:
+    case FormInputType.PASSWORD:
     default:
       return (
         <TextInput
           id={field}
           label={label}
           placeholder={placeholder}
+          type={type}
           error={errors[field]?.message as string | undefined}
           autoFocus={autoFocus}
           {...register(field)}
