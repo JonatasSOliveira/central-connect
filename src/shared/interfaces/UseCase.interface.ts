@@ -1,5 +1,5 @@
 import { Result } from "@/shared/result/Result";
 
-export interface UseCase<Input, Output, Failure> {
-  execute(input: Input): Promise<Result<Output, Failure>>;
+export interface UseCase<Input, Output> {
+  execute(input: Input): Promise<Result<Output>>;
 }

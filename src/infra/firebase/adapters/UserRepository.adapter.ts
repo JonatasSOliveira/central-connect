@@ -1,14 +1,15 @@
 import { db } from "@/infra/firebase/admin"; // seu Firestore inicializado
-import { UserRepository } from "@/domain/ports/auth/UserRepository.port";
+import { IUserRepository } from "@/domain/ports/auth/IUserRepository.port";
 import { User } from "@/domain/entities/User/User";
 
-export class FirebaseUserRepositoryAdapter implements UserRepository {
+export class FirebaseUserRepositoryAdapter implements IUserRepository {
   private collection = db.collection("users");
 
   public async save(user: User): Promise<void> {
     await this.collection.doc(user.id).set({
       email: user.email,
       displayName: user.displayName,
+      provider: user.provider,
     });
   }
 
@@ -16,7 +17,12 @@ export class FirebaseUserRepositoryAdapter implements UserRepository {
     const doc = await this.collection.doc(id).get();
     if (!doc.exists) return null;
     const data = doc.data()!;
-    return new User({ id, email: data.email, displayName: data.displayName });
+    return new User({
+      id,
+      email: data.email,
+      displayName: data.displayName,
+      provider: data.provider,
+    });
   }
 
   public async findByEmail(email: string): Promise<User | null> {
@@ -31,6 +37,7 @@ export class FirebaseUserRepositoryAdapter implements UserRepository {
       id: doc.id,
       email: data.email,
       displayName: data.displayName,
+      provider: data.provider,
     });
   }
 }
