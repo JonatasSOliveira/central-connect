@@ -1,7 +1,6 @@
 import { SignInWithGoogleInputSchema } from "@/application/dtos/auth/SignInWithGoogle.input.dto";
 import { compositionRoot } from "@/compositionRoot";
 import { zodToApiError } from "@/infra/zod/mapper";
-import { ApiError } from "@/shared/errors/Api.error";
 import { Result } from "@/shared/result/Result";
 import { NextResponse } from "next/server";
 
@@ -16,8 +15,21 @@ export async function POST(req: Request) {
   }
 
   const result = await compositionRoot.signInWithGoogleUseCase.execute(
-    parsed.data,
+    parsed.data
   );
   const statusCode = result.isSuccess ? 200 : result.error.status_code;
-  return NextResponse.json(result, { status: statusCode });
+  const response = NextResponse.json(result, { status: statusCode });
+
+  if (result.isSuccess) {
+    response.cookies.set({
+      name: "access_token",
+      value: result.value.token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
+  }
+
+  return response;
 }
