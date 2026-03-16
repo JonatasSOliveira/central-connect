@@ -130,6 +130,34 @@ refactor: extract schedule validation to domain service
 test: add unit tests for CreateSchedule use case
 ```
 
+### Página de Componentes
+
+Sempre que um novo componente shadcn for adicionado ou atualizado, a página `/components` deve refletir essas mudanças.
+
+A página está em `src/app/components/page.tsx` e usa um array de configuração para renderizar os componentes automaticamente. Para adicionar um novo componente:
+
+1. Adicionar o componente via shadcn: `pnpm dlx shadcn@latest add <componente>`
+2. Atualizar o arquivo `src/app/components/page.tsx`:
+   - Importar o componente
+   - Adicionar uma nova entrada no array `components` com a função `render()` que exibe as variações
+
+Exemplo de nova entrada:
+
+```typescript
+{
+  name: "Input",
+  description: "Campo de entrada de texto",
+  render: () => (
+    <div className="space-y-2">
+      <Input placeholder="Default" />
+      <Input placeholder="Disabled" disabled />
+    </div>
+  ),
+},
+```
+
+Para verificar se está funcionando, execute `pnpm build` e acesso `http://localhost:3000/components`.
+
 ## 5. Como Adicionar uma Nova Feature
 
 ### Passo a Passo
