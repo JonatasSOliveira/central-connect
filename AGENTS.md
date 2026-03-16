@@ -20,6 +20,33 @@ O sistema é um Progressive Web App (PWA) instalado no celular dos usuários, co
 | Zod | 4.3.6 |
 | pnpm | 10.x |
 
+## 2.1 Design System
+
+### Princípios
+- **Mobile-first**: O projeto é desenvolvido para mobile primeiro, depois adaptado para desktop
+- **PWA**: Progressive Web App instalado no celular dos usuários
+
+### Fontes
+O projeto utiliza duas fontes do Google Fonts:
+
+| Fonte | Uso |
+|-------|-----|
+| **Inter** | Corpo do texto, labels, botões (padrão) |
+| **DM Sans** | Títulos e headings |
+
+**Aplicação no código:**
+- `font-sans` (Tailwind) → Inter (padrão)
+- `font-heading` → DM Sans para títulos
+
+**Exemplo de uso:**
+```tsx
+// Títulos com DM Sans
+<h1 className="font-heading text-3xl">Título</h1>
+
+// Corpo com Inter (padrão)
+<p className="text-sm">Corpo do texto</p>
+```
+
 ## 3. Arquitetura e Regras de Dependência
 
 ### Estrutura de Pastas
