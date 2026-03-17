@@ -147,6 +147,8 @@ export default function Button({ children, onClick }) {
 
 ### Git Commits
 
+**NUNCA fazer commits automaticamente**. Apenas fazer commit quando o usuário solicitar explicitamente.
+
 Usar Conventional Commits:
 
 ```
