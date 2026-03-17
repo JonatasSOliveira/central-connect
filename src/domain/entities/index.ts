@@ -3,6 +3,7 @@ export { AuditLog } from "./AuditLog";
 export { BaseEntity } from "./BaseEntity";
 export { Church } from "./Church";
 export type { DayOfWeek } from "./DayOfWeek";
+export { Invite } from "./Invite";
 export { Member } from "./Member";
 export { MemberAvailability } from "./MemberAvailability";
 export { MemberChurch } from "./MemberChurch";

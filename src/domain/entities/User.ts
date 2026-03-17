@@ -6,7 +6,7 @@ export class User extends AuditableEntity {
   protected readonly _email: string | null;
   protected readonly _googleAccessToken: string | null;
   protected readonly _googleRefreshToken: string | null;
-  protected readonly _userRoleId: string;
+  protected readonly _userRoleId: string | null;
   protected readonly _isActive: boolean;
   protected readonly _isSuperAdmin: boolean;
   protected readonly _lastLoginAt: Date | null;
@@ -18,8 +18,8 @@ export class User extends AuditableEntity {
     this._email = params.email ?? null;
     this._googleAccessToken = params.googleAccessToken ?? null;
     this._googleRefreshToken = params.googleRefreshToken ?? null;
-    this._userRoleId = params.userRoleId;
-    this._isActive = params.isActive;
+    this._userRoleId = params.userRoleId ?? null;
+    this._isActive = params.isActive ?? true;
     this._isSuperAdmin = params.isSuperAdmin ?? false;
     this._lastLoginAt = params.lastLoginAt ?? null;
   }
@@ -44,7 +44,7 @@ export class User extends AuditableEntity {
     return this._googleRefreshToken;
   }
 
-  get userRoleId(): string {
+  get userRoleId(): string | null {
     return this._userRoleId;
   }
 
@@ -67,8 +67,8 @@ export interface UserParams extends AuditableEntityParams {
   email?: string | null;
   googleAccessToken?: string | null;
   googleRefreshToken?: string | null;
-  userRoleId: string;
-  isActive: boolean;
+  userRoleId?: string | null;
+  isActive?: boolean;
   isSuperAdmin?: boolean;
   lastLoginAt?: Date | null;
 }

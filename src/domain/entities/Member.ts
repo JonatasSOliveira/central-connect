@@ -5,7 +5,6 @@ export type MemberStatus = "Active" | "Inactive" | "Paused";
 export class Member extends AuditableEntity {
   protected readonly _fullName: string;
   protected readonly _phone: string | null;
-  protected readonly _email: string | null;
   protected readonly _role: string | null;
   protected readonly _maxServicesPerMonth: number;
   protected readonly _status: MemberStatus;
@@ -17,7 +16,6 @@ export class Member extends AuditableEntity {
     super(params);
     this._fullName = params.fullName;
     this._phone = params.phone ?? null;
-    this._email = params.email ?? null;
     this._role = params.role ?? null;
     this._maxServicesPerMonth = params.maxServicesPerMonth ?? 4;
     this._status = params.status ?? "Active";
@@ -32,10 +30,6 @@ export class Member extends AuditableEntity {
 
   get phone(): string | null {
     return this._phone;
-  }
-
-  get email(): string | null {
-    return this._email;
   }
 
   get role(): string | null {
@@ -66,7 +60,6 @@ export class Member extends AuditableEntity {
 export interface MemberParams extends AuditableEntityParams {
   fullName: string;
   phone?: string | null;
-  email?: string | null;
   role?: string | null;
   maxServicesPerMonth?: number;
   status?: MemberStatus;

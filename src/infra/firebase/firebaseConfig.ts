@@ -16,14 +16,18 @@ function getCredentials() {
 let firebaseApp: App | null = null;
 let firestoreDb: Firestore | null = null;
 
+export function getFirebaseApp(): App {
+  if (!firebaseApp) {
+    firebaseApp = initializeApp({
+      credential: cert(getCredentials()),
+    });
+  }
+  return firebaseApp;
+}
+
 export function getFirestoreDb(): Firestore {
   if (!firestoreDb) {
-    if (!firebaseApp) {
-      firebaseApp = initializeApp({
-        credential: cert(getCredentials()),
-      });
-    }
-    firestoreDb = getFirestore(firebaseApp);
+    firestoreDb = getFirestore(getFirebaseApp());
   }
   return firestoreDb;
 }
