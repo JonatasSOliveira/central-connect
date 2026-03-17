@@ -149,14 +149,35 @@ export default function Button({ children, onClick }) {
 
 **NUNCA fazer commits automaticamente**. Apenas fazer commit quando o usuário solicitar explicitamente.
 
-Usar Conventional Commits:
+**Estrutura de branches:**
+- `master` - Branch principal, produção
+- `develop` - Branch para atividades em revisão
+- `<sufixo>/<id-atividade>-<descricao-curto>` - Branchs de atividades
+
+**Exemplos de branchs:**
+```
+feat/3-autenticacao-google
+fix/5-corrigir-login
+refactor/10-reestruturar-repositories
+```
+
+**Formato de commit:**
+Usar Conventional Commits com referência ao issue:
 
 ```
 feat: add user authentication with Google
+
+refs #3
+
+---
 fix: resolve schedule date timezone issue
+
+refs #5
+
+---
 docs: update API endpoints documentation
-refactor: extract schedule validation to domain service
-test: add unit tests for CreateSchedule use case
+
+refs #10
 ```
 
 ### Página de Componentes
