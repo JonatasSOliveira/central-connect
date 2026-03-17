@@ -1,7 +1,5 @@
+export type { GoogleUserPayload } from "@/application/dtos/auth/GoogleUserPayload";
+export type { TokenPayload } from "@/application/dtos/auth/TokenPayload";
 export type { BaseRepository } from "./BaseRepository";
-export type {
-  GoogleUserPayload,
-  IAuthService,
-  TokenPayload,
-} from "./IAuthService";
+export type { IAuthService } from "./IAuthService";
 export type { IUserRepository } from "./IUserRepository";
