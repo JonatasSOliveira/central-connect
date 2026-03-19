@@ -19,9 +19,9 @@ export class MemberFirebaseRepository
     const convertedData = convertTimestampsToDates(data);
     const params: MemberParams = {
       id,
+      email: convertedData.email ?? "",
       fullName: convertedData.fullName ?? "",
       phone: convertedData.phone ?? null,
-      role: convertedData.role ?? null,
       maxServicesPerMonth: convertedData.maxServicesPerMonth ?? 4,
       status: convertedData.status ?? "Active",
       avatarUrl: convertedData.avatarUrl ?? null,

@@ -1,8 +1,15 @@
+export interface ChurchInfo {
+  churchId: string;
+  roleId: string | null;
+}
+
 export type AuthLoginOutputDTO = {
-  token: string;
   userId: string;
-  email: string | null;
-  isSuperAdmin: boolean;
-  fullName: string | null;
+  memberId: string;
+  email: string;
+  fullName: string;
   avatarUrl: string | null;
+  isSuperAdmin: boolean;
+  churches: ChurchInfo[];
+  sessionToken: string;
 };

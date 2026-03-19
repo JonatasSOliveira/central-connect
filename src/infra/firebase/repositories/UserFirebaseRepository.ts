@@ -19,10 +19,12 @@ export class UserFirebaseRepository
     const convertedData = convertTimestampsToDates(data);
     const params: UserParams = {
       id,
-      ...convertedData,
-      userRoleId: convertedData.userRoleId ?? "",
+      memberId: convertedData.memberId ?? null,
+      googleAccessToken: convertedData.googleAccessToken ?? null,
+      googleRefreshToken: convertedData.googleRefreshToken ?? null,
       isActive: convertedData.isActive ?? true,
       isSuperAdmin: convertedData.isSuperAdmin ?? false,
+      lastLoginAt: convertedData.lastLoginAt ?? null,
     };
     return new User(params);
   }
@@ -31,9 +33,9 @@ export class UserFirebaseRepository
     return convertDatesToTimestamps({ ...entity });
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByMemberId(memberId: string): Promise<User | null> {
     const snapshot = await this.collection
-      .where("email", "==", email)
+      .where("memberId", "==", memberId)
       .limit(1)
       .get();
     if (snapshot.empty) return null;

@@ -1,10 +1,16 @@
 import { AuthLoginUseCase } from "@/application/use-cases/auth/AuthLoginUseCase";
+import { CreateMemberWithChurch } from "@/application/use-cases/member/CreateMemberWithChurch";
+import { LinkUserToMember } from "@/application/use-cases/member/LinkUserToMember";
+import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
 import type { IInviteRepository } from "@/domain/ports/IInviteRepository";
+import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { ITokenService } from "@/domain/ports/ITokenService";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
+import { ChurchFirebaseRepository } from "@/infra/firebase/repositories/ChurchFirebaseRepository";
 import { InviteFirebaseRepository } from "@/infra/firebase/repositories/InviteFirebaseRepository";
+import { MemberChurchFirebaseRepository } from "@/infra/firebase/repositories/MemberChurchFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase/repositories/MemberFirebaseRepository";
 import { UserFirebaseRepository } from "@/infra/firebase/repositories/UserFirebaseRepository";
 import { GoogleAuthFirebaseService } from "@/infra/firebase/services/GoogleAuthFirebaseService";
@@ -17,8 +23,12 @@ class Container {
   private _tokenService: ITokenService | null = null;
   private _userRepository: IUserRepository | null = null;
   private _memberRepository: IMemberRepository | null = null;
+  private _memberChurchRepository: IMemberChurchRepository | null = null;
+  private _churchRepository: IChurchRepository | null = null;
   private _inviteRepository: IInviteRepository | null = null;
   private _authLoginUseCase: AuthLoginUseCase | null = null;
+  private _createMemberWithChurch: CreateMemberWithChurch | null = null;
+  private _linkUserToMember: LinkUserToMember | null = null;
 
   private constructor() {}
 
@@ -57,6 +67,20 @@ class Container {
     return this._memberRepository;
   }
 
+  get memberChurchRepository(): IMemberChurchRepository {
+    if (!this._memberChurchRepository) {
+      this._memberChurchRepository = new MemberChurchFirebaseRepository();
+    }
+    return this._memberChurchRepository;
+  }
+
+  get churchRepository(): IChurchRepository {
+    if (!this._churchRepository) {
+      this._churchRepository = new ChurchFirebaseRepository();
+    }
+    return this._churchRepository;
+  }
+
   get inviteRepository(): IInviteRepository {
     if (!this._inviteRepository) {
       this._inviteRepository = new InviteFirebaseRepository();
@@ -71,10 +95,28 @@ class Container {
         this.tokenService,
         this.userRepository,
         this.memberRepository,
+        this.memberChurchRepository,
         this.inviteRepository,
       );
     }
     return this._authLoginUseCase;
+  }
+
+  get createMemberWithChurch(): CreateMemberWithChurch {
+    if (!this._createMemberWithChurch) {
+      this._createMemberWithChurch = new CreateMemberWithChurch(
+        this.memberRepository,
+        this.memberChurchRepository,
+      );
+    }
+    return this._createMemberWithChurch;
+  }
+
+  get linkUserToMember(): LinkUserToMember {
+    if (!this._linkUserToMember) {
+      this._linkUserToMember = new LinkUserToMember(this.userRepository);
+    }
+    return this._linkUserToMember;
   }
 }
 

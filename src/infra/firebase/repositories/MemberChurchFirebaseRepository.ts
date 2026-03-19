@@ -1,0 +1,58 @@
+import type { DocumentData } from "firebase-admin/firestore";
+import {
+  MemberChurch,
+  type MemberChurchParams,
+} from "@/domain/entities/MemberChurch";
+import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import {
+  convertDatesToTimestamps,
+  convertTimestampsToDates,
+} from "../helpers/firebaseHelpers";
+import { BaseFirebaseRepository } from "./BaseFirebaseRepository";
+
+export class MemberChurchFirebaseRepository
+  extends BaseFirebaseRepository<MemberChurch>
+  implements IMemberChurchRepository
+{
+  constructor() {
+    super("memberChurches");
+  }
+
+  protected toEntity(data: DocumentData, id: string): MemberChurch {
+    const convertedData = convertTimestampsToDates(data);
+    const params: MemberChurchParams = {
+      id,
+      memberId: convertedData.memberId ?? "",
+      churchId: convertedData.churchId ?? "",
+      roleId: convertedData.roleId ?? null,
+    };
+    return new MemberChurch(params);
+  }
+
+  protected toFirestoreData(entity: MemberChurch): DocumentData {
+    return convertDatesToTimestamps({ ...entity });
+  }
+
+  async findByMemberId(memberId: string): Promise<MemberChurch[]> {
+    const snapshot = await this.collection
+      .where("memberId", "==", memberId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
+  async findByMemberIdAndChurchId(
+    memberId: string,
+    churchId: string,
+  ): Promise<MemberChurch | null> {
+    const snapshot = await this.collection
+      .where("memberId", "==", memberId)
+      .where("churchId", "==", churchId)
+      .limit(1)
+      .get();
+    if (snapshot.empty) return null;
+    const doc = snapshot.docs[0];
+    return this.toEntity(doc.data() as DocumentData, doc.id);
+  }
+}

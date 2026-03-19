@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { AuthLoginInputSchema } from "@/application/dtos/auth/AuthLoginInputDTO";
 import { container } from "@/infra/di/container";
@@ -29,6 +30,17 @@ export async function POST(request: NextRequest) {
 
   const result = await container.authLoginUseCase.execute(parsed.data);
   const errorCode = "error" in result ? result.error?.code : undefined;
+
+  if (result.ok && result.value?.sessionToken) {
+    const cookieStore = await cookies();
+    cookieStore.set("session", result.value.sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+      path: "/",
+    });
+  }
 
   return NextResponse.json(result, {
     status: getHttpStatus(errorCode),

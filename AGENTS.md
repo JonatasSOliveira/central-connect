@@ -147,7 +147,7 @@ export default function Button({ children, onClick }) {
 
 ### Git Commits
 
-**NUNCA fazer commits automaticamente**. Apenas fazer commit quando o usuário solicitar explicitamente.
+**NUNCA criar branches automaticamente**. Apenas criar branch quando o usuário solicitar explicitamente.
 
 **Estrutura de branches:**
 - `master` - Branch principal, produção

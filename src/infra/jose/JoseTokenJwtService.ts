@@ -1,5 +1,4 @@
 import { jwtVerify, SignJWT } from "jose";
-import type { TokenPayload } from "@/application/dtos/auth/TokenPayload";
 import type { ITokenService } from "@/domain/ports/ITokenService";
 
 export class JoseTokenJwtService implements ITokenService {
@@ -10,8 +9,8 @@ export class JoseTokenJwtService implements ITokenService {
     this.secret = new TextEncoder().encode(process.env.JWT_SECRET);
   }
 
-  async generateToken(userId: string, email: string): Promise<string> {
-    const jwt = new SignJWT({ userId, email })
+  async generateToken(payload: Record<string, unknown>): Promise<string> {
+    const jwt = new SignJWT(payload)
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime(this.expirationTime);
@@ -19,11 +18,8 @@ export class JoseTokenJwtService implements ITokenService {
     return jwt.sign(this.secret);
   }
 
-  async verifyToken(token: string): Promise<TokenPayload> {
+  async verifyToken(token: string): Promise<Record<string, unknown>> {
     const { payload } = await jwtVerify(token, this.secret);
-    return {
-      userId: payload.userId as string,
-      email: payload.email as string,
-    };
+    return payload as Record<string, unknown>;
   }
 }

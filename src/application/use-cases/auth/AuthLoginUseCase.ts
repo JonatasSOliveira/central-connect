@@ -1,7 +1,12 @@
 import { Member, type MemberParams } from "@/domain/entities/Member";
+import {
+  MemberChurch,
+  type MemberChurchParams,
+} from "@/domain/entities/MemberChurch";
 import { User, type UserParams } from "@/domain/entities/User";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
 import type { IInviteRepository } from "@/domain/ports/IInviteRepository";
+import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { ITokenService } from "@/domain/ports/ITokenService";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
@@ -10,6 +15,11 @@ import type { AuthLoginInputDTO } from "../../dtos/auth/AuthLoginInputDTO";
 import type { AuthLoginOutputDTO } from "../../dtos/auth/AuthLoginOutputDTO";
 import { AuthErrors } from "../../errors/authErrors";
 import { BaseUseCase } from "../BaseUseCase";
+
+interface ChurchInfo {
+  churchId: string;
+  roleId: string | null;
+}
 
 export class AuthLoginUseCase extends BaseUseCase<
   AuthLoginInputDTO,
@@ -20,6 +30,7 @@ export class AuthLoginUseCase extends BaseUseCase<
     private readonly tokenService: ITokenService,
     private readonly userRepository: IUserRepository,
     private readonly memberRepository: IMemberRepository,
+    private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly inviteRepository: IInviteRepository,
   ) {
     super();
@@ -32,20 +43,37 @@ export class AuthLoginUseCase extends BaseUseCase<
         return this.buildErrorResponse(AuthErrors.INVALID_GOOGLE_TOKEN);
       }
 
-      const existingUser = await this.userRepository.findByEmail(
+      const existingMember = await this.memberRepository.findByEmail(
         googleUser.email,
       );
 
-      if (existingUser) {
-        const member = existingUser.memberId
-          ? await this.memberRepository.findById(existingUser.memberId)
-          : null;
-        return this.buildSuccessResponse(existingUser, member);
+      if (existingMember) {
+        const existingUser = await this.userRepository.findByMemberId(
+          existingMember.id,
+        );
+
+        if (existingUser) {
+          const churches = await this.getMemberChurches(existingMember.id);
+          return this.buildSuccessResponse(
+            existingUser,
+            existingMember,
+            churches,
+          );
+        }
+
+        const newUser = await this.createUser(existingMember.id);
+        const churches = await this.getMemberChurches(existingMember.id);
+        return this.buildSuccessResponse(newUser, existingMember, churches);
       }
 
       if (this.isSuperAdminEmail(googleUser.email)) {
-        const newUser = await this.createUser(googleUser.email, true);
-        return this.buildSuccessResponse(newUser);
+        const newMember = await this.createMember(
+          googleUser.email,
+          googleUser.name,
+          googleUser.picture,
+        );
+        const newUser = await this.createUser(newMember.id, true);
+        return this.buildSuccessResponse(newUser, newMember, []);
       }
 
       const invite = await this.inviteRepository.findByEmail(googleUser.email);
@@ -53,18 +81,25 @@ export class AuthLoginUseCase extends BaseUseCase<
         return this.buildErrorResponse(AuthErrors.NO_INVITE_FOUND);
       }
 
-      const newUser = await this.createUserWithInvite(
+      const newMember = await this.createMember(
         googleUser.email,
         googleUser.name,
         googleUser.picture,
+      );
+
+      await this.createMemberChurch(
+        newMember.id,
         invite.churchId,
         invite.roleId,
       );
 
       await this.inviteRepository.markAsUsed(invite.id);
 
-      const member = await this.memberRepository.findById(newUser.memberId!);
-      return this.buildSuccessResponse(newUser, member);
+      const newUser = await this.createUser(newMember.id);
+
+      return this.buildSuccessResponse(newUser, newMember, [
+        { churchId: invite.churchId, roleId: invite.roleId },
+      ]);
     } catch {
       return this.buildErrorResponse(AuthErrors.INTERNAL_ERROR);
     }
@@ -74,21 +109,92 @@ export class AuthLoginUseCase extends BaseUseCase<
     return this.googleAuthService.verifyGoogleToken(googleToken);
   }
 
+  private async createMember(
+    email: string,
+    name: string | undefined,
+    picture: string | undefined,
+  ): Promise<Member> {
+    const memberParams: MemberParams = {
+      email,
+      fullName: name ?? "",
+      avatarUrl: picture ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const member = new Member(memberParams);
+    return this.memberRepository.create(member);
+  }
+
+  private async createMemberChurch(
+    memberId: string,
+    churchId: string,
+    roleId: string,
+  ): Promise<MemberChurch> {
+    const memberChurchParams: MemberChurchParams = {
+      memberId,
+      churchId,
+      roleId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const memberChurch = new MemberChurch(memberChurchParams);
+    return this.memberChurchRepository.create(memberChurch);
+  }
+
+  private async createUser(
+    memberId: string,
+    isSuperAdmin = false,
+  ): Promise<User> {
+    const userParams: UserParams = {
+      memberId,
+      isSuperAdmin,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const user = new User(userParams);
+    return this.userRepository.create(user);
+  }
+
+  private async getMemberChurches(memberId: string): Promise<ChurchInfo[]> {
+    const memberChurches =
+      await this.memberChurchRepository.findByMemberId(memberId);
+    return memberChurches.map((mc) => ({
+      churchId: mc.churchId,
+      roleId: mc.roleId,
+    }));
+  }
+
   private async buildSuccessResponse(
     user: User,
-    member?: Member | null,
+    member: Member,
+    churches: ChurchInfo[],
   ): Promise<Result<AuthLoginOutputDTO>> {
-    const token = await this.generateTokenForUser(user);
+    const defaultChurchId = churches.length === 1 ? churches[0].churchId : null;
+
+    const sessionPayload = {
+      userId: user.id,
+      memberId: member.id,
+      email: member.email,
+      fullName: member.fullName,
+      avatarUrl: member.avatarUrl,
+      isSuperAdmin: user.isSuperAdmin,
+      churchId: defaultChurchId,
+    };
+
+    const sessionToken = await this.tokenService.generateToken(sessionPayload);
 
     return {
       ok: true,
       value: {
-        token,
         userId: user.id,
-        email: user.email,
+        memberId: member.id,
+        email: member.email,
+        fullName: member.fullName,
+        avatarUrl: member.avatarUrl,
         isSuperAdmin: user.isSuperAdmin,
-        fullName: member?.fullName ?? null,
-        avatarUrl: member?.avatarUrl ?? null,
+        churches,
+        sessionToken,
       },
     };
   }
@@ -99,59 +205,8 @@ export class AuthLoginUseCase extends BaseUseCase<
     return { ok: false, error };
   }
 
-  private async generateTokenForUser(user: User): Promise<string> {
-    return this.tokenService.generateToken(user.id, user.email!);
-  }
-
   private isSuperAdminEmail(email: string): boolean {
     const superAdminEmails = process.env.SUPER_ADMIN_EMAILS?.split(",") ?? [];
     return superAdminEmails.includes(email);
-  }
-
-  private async createUser(
-    email: string,
-    isSuperAdmin: boolean,
-  ): Promise<User> {
-    const userParams: UserParams = {
-      email,
-      isSuperAdmin,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const user = new User(userParams);
-    return this.userRepository.create(user);
-  }
-
-  private async createUserWithInvite(
-    email: string,
-    googleName: string | undefined,
-    googlePicture: string | undefined,
-    churchId: string,
-    roleId: string,
-  ): Promise<User> {
-    const memberParams: MemberParams = {
-      fullName: googleName ?? "",
-      avatarUrl: googlePicture ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const member = new Member(memberParams);
-    const createdMember = await this.memberRepository.create(member);
-
-    const userParams: UserParams = {
-      email,
-      memberId: createdMember.id,
-      churchId,
-      userRoleId: roleId,
-      isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    const user = new User(userParams);
-    return this.userRepository.create(user);
   }
 }
