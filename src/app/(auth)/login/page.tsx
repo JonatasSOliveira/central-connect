@@ -1,27 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Church } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { useLoginScreen } from "@/features/auth/hooks/useLoginScreen";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { login, isLoading } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-
-  const handleGoogleLogin = async () => {
-    setError(null);
-
-    try {
-      const token = await signInWithGoogle();
-      await login(token);
-      router.push("/home");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
-    }
-  };
+  const { isLoading, error, handleGoogleLogin } = useLoginScreen();
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-background">
@@ -90,64 +74,4 @@ export default function LoginPage() {
       </div>
     </main>
   );
-}
-
-async function signInWithGoogle(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") {
-      reject(new Error("Sign in only works on client"));
-      return;
-    }
-
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      reject(new Error("Google Client ID not configured"));
-      return;
-    }
-
-    window.google.accounts.id.renderButton(
-      document.getElementById("g-signin2"),
-      { theme: "outline", size: "large" },
-    );
-
-    window.google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        reject(new Error("Google Sign-In not available"));
-        return;
-      }
-    });
-
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: (response: { credential: string }) => {
-          resolve(response.credential);
-        },
-      });
-      window.google.accounts.id.prompt();
-    };
-    script.onerror = () => reject(new Error("Failed to load Google SDK"));
-    document.body.appendChild(script);
-  });
-}
-
-declare global {
-  interface Window {
-    google: {
-      accounts: {
-        id: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: { credential: string }) => void;
-          }) => void;
-          prompt: (callback?: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void;
-          renderButton: (element: HTMLElement | null, config: { theme: string; size: string }) => void;
-        };
-      };
-    };
-  }
 }

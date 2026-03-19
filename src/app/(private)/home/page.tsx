@@ -1,10 +1,10 @@
 "use client";
 
 import { Church } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { userName } = useHomeScreen();
 
   return (
     <main className="min-h-screen p-6 bg-background">
@@ -14,7 +14,7 @@ export default function HomePage() {
             Central Connect
           </h1>
           <p className="text-muted-foreground mt-1">
-            Bem-vindo, {user?.fullName || "Usuário"}
+            Bem-vindo, {userName}
           </p>
         </header>
 

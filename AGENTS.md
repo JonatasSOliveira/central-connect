@@ -49,57 +49,121 @@ O projeto utiliza duas fontes do Google Fonts:
 
 ## 3. Arquitetura e Regras de Dependência
 
+### Visão Geral da Arquitetura
+
+O projeto segue uma arquitetura híbrida que combina:
+
+1. **Zustand** → Estado global (auth, igreja selecionada, tema)
+2. **Feature-based Hooks** → Lógica de tela desacoplada da UI
+3. **Clean Architecture** → Domínio e regras de negócio isolados
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                           UI Layer                              │
+│  app/(pages)/page.tsx → Componentes puros → Só renderizam      │
+├─────────────────────────────────────────────────────────────────┤
+│                       Hooks Layer (Features)                    │
+│  features/[feature]/hooks/*.ts → Lógica de tela desacoplada    │
+├─────────────────────────────────────────────────────────────────┤
+│                      Zustand (Stores)                           │
+│  stores/*.ts → Estado global (auth, church, tema)              │
+├─────────────────────────────────────────────────────────────────┤
+│                       API Layer                                 │
+│  app/api/*/route.ts → Route Handlers                           │
+├─────────────────────────────────────────────────────────────────┤
+│                     Application Layer                           │
+│  application/use-cases/*.ts → Casos de uso                     │
+├─────────────────────────────────────────────────────────────────┤
+│                       Infra Layer                               │
+│  infra/firebase/repositories/*.ts → Implementações Firebase   │
+├─────────────────────────────────────────────────────────────────┤
+│                       Domain Layer                              │
+│  domain/entities/*.ts → Entidades de negócio                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 ### Estrutura de Pastas
 
 ```
 src/
-├── domain/              # Entidades, ports e erros (núcleo do negócio)
-│   ├── entities/        # User, Schedule, ChurchFunction, ScheduleMember
-│   ├── ports/           # Interfaces para repositories
-│   └── errors/          # Erros específicos do domínio
+├── stores/                    # Zustand (estado global)
+│   ├── authStore.ts          # user, churches, login/logout
+│   └── ...
 │
-├── application/         # Casos de uso e regras de negócio
-│   ├── use-cases/       # Um arquivo por caso de uso
-│   ├── dtos/           # Input/Output tipados com Zod
-│   └── services/       # Orquestração entre use cases
+├── features/                  # Hooks organizados por feature
+│   ├── auth/
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts           # Hook de autenticação
+│   │   │   └── useLoginScreen.ts    # Lógica da tela de login
+│   │   └── types/
+│   │
+│   ├── home/
+│   │   └── hooks/
+│   │       └── useHomeScreen.ts
+│   │
+│   ├── schedules/
+│   │   └── hooks/
+│   │       ├── useSchedules.ts
+│   │       └── useScheduleForm.ts
+│   │
+│   └── members/
+│       └── hooks/
+│           ├── useMembers.ts
+│           └── useMemberForm.ts
 │
-├── infra/              # Implementações externas
-│   ├── firebase/       # Repositories Firebase
-│   │   └── repositories/
-│   └── http/           # Cliente HTTP (se necessário)
+├── domain/                    # Entidades, ports e erros
+│   ├── entities/
+│   ├── ports/
+│   └── errors/
 │
-├── app/                # Next.js App Router
-│   ├── api/            # Route Handlers (server-side)
-│   └── (pages)/        # Páginas e layouts
+├── application/               # Casos de uso e regras de negócio
+│   ├── use-cases/
+│   ├── dtos/
+│   └── services/
 │
-├── components/         # Componentes React
-│   ├── ui/             # Componentes base (shadcn-like)
-│   └── modules/        # Componentes compostos por feature
+├── infra/                     # Implementações externas
+│   ├── firebase-admin/        # Firebase Admin SDK (server-side)
+│   │   ├── firebaseConfig.ts
+│   │   ├── repositories/
+│   │   └── services/
+│   ├── firebase-client/       # Firebase Client SDK (client-side)
+│   │   ├── firebaseConfig.ts
+│   │   └── services/
+│   └── jose/
 │
-├── hooks/              # Hooks que consomem APIs internas
+├── app/                       # Next.js App Router
+│   ├── api/
+│   └── (pages)/
 │
-└── shared/            # Utilitários compartilhados
+├── components/                # Componentes React
+│   ├── ui/                    # shadcn-like
+│   └── modules/               # Componentes compostos
+│
+└── shared/
     ├── utils/
     ├── constants/
     └── types/
 ```
 
-### Regras de Dependência (Clean Architecture)
+### Regras de Dependência
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        UI/Layers                            │
-│   components → hooks → app/api → infra → application → domain│
-└─────────────────────────────────────────────────────────────┘
+| Camada | Pode importar de |
+|--------|------------------|
+| `domain` | Nada (é o núcleo) |
+| `application` | `domain` |
+| `infra/firebase-admin` | `domain`, `application` (server-side apenas) |
+| `infra/firebase-client` | `domain`, `application` (client-side apenas) |
+| `stores` | `domain`, `application` |
+| `features/*/hooks` | `domain`, `application`, `stores`, `infra/firebase-client` |
+| `components` | `features/*/hooks`, `stores` |
+| `app/(pages)/*` | `components`, `features/*/hooks` |
 
-- domain        → Não importa nada externo
-- application   → Importa apenas domain
-- infra        → Importa application e domain
-- hooks        → Importa apenas tipos de domain/dtos (nunca infra diretamente)
-- components   → Importa apenas hooks e tipos (nunca infra diretamente)
-```
-
-**Regra de Ouro**: Componentes React **nunca** podem importar diretamente de `@/infra/*`. Todas as comunicações com o backend devem passar pelos hooks.
+**Regras de Ouro**:
+1. Componentes React **nunca** podem importar diretamente de `@/infra/*`
+2. Todas as comunicações com backend passam pelos hooks
+3. Hooks de tela ficam dentro de `features/[nome]/hooks/`
+4. **Server-side** usa `infra/firebase-admin`
+5. **Client-side** usa `infra/firebase-client`
 
 ## 4. Padrões de Código Obrigatórios
 
@@ -213,7 +277,7 @@ Para verificar se está funcionando, execute `pnpm build` e acesso `http://local
 ### Passo a Passo
 
 1. **Definir a entidade no domínio**
-   - Criar/entidade em `src/domain/entities/`
+   - Criar entidade em `src/domain/entities/`
    - Definir tipos e validações básicas
 
 2. **Criar o port (interface)**
@@ -237,20 +301,24 @@ Para verificar se está funcionando, execute `pnpm build` e acesso `http://local
    - Criar arquivo em `src/app/api/[recurso]/route.ts`
    - Mapear HTTP method para use case
 
-7. **Criar o hook**
-   - Criar em `src/hooks/`
+7. **Criar o store (se necessário)**
+   - Criar em `src/stores/[feature]Store.ts` (Zustand)
+   - Apenas para estado verdadeiramente global
+
+8. **Criar o hook de feature**
+   - Criar em `src/features/[feature]/hooks/`
    - Consumir API interna via `fetch`
    - Tipar retorno corretamente
 
-8. **Criar componentes**
+9. **Criar componentes**
    - Adicionar em `src/components/modules/`
    - Usar hooks criados
    - Não importar de infra!
 
-9. **Testar**
-   - Verificar build: `pnpm build`
-   - Verificar lint: `pnpm lint`
-   - Verificar format: `pnpm format`
+10. **Testar**
+    - Verificar build: `pnpm build`
+    - Verificar lint: `pnpm lint`
+    - Verificar format: `pnpm format`
 
 ### Exemplo de Fluxo Completo
 
@@ -304,33 +372,51 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(user, { status: 201 });
 }
 
-// 6. hooks/useUsers.ts
+// 6. stores/userStore.ts (Zustand - para estado global)
+import { create } from 'zustand';
+
+interface UserState {
+  users: User[];
+  loading: boolean;
+  fetchUsers: () => Promise<void>;
+}
+
+export const useUserStore = create<UserState>((set) => ({
+  users: [],
+  loading: false,
+  fetchUsers: async () => {
+    set({ loading: true });
+    const res = await fetch('/api/users');
+    const users = await res.json();
+    set({ users, loading: false });
+  },
+}));
+
+// 7. features/users/hooks/useUsers.ts (hook de tela)
 'use client';
-import { useState, useCallback } from 'react';
-import type { User } from '@/domain/entities/User';
+import { useUserStore } from '@/stores/userStore';
 
 export function useUsers() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { users, loading, fetchUsers } = useUserStore();
 
-  const createUser = useCallback(async (data: unknown) => {
-    setLoading(true);
-    const response = await fetch('/api/users', {
+  const createUser = async (data: unknown) => {
+    const res = await fetch('/api/users', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    const user = await response.json();
-    setUsers((prev) => [...prev, user]);
-    setLoading(false);
+    const user = await res.json();
+    useUserStore.setState((state) => ({
+      users: [...state.users, user],
+    }));
     return user;
-  }, []);
+  };
 
-  return { users, loading, createUser };
+  return { users, loading, fetchUsers, createUser };
 }
 
-// 7. components/modules/UserForm.tsx
+// 8. components/modules/UserForm.tsx
 'use client';
-import { useUsers } from '@/hooks/useUsers';
+import { useUsers } from '@/features/users/hooks/useUsers';
 import { Button } from '@/components/ui/Button';
 
 export function UserForm() {
@@ -408,6 +494,28 @@ Central Connect é um sistema de **gestão de escalas ministeriais** para igreja
 | Draft | Escala em rascunho (não visível aos membros) |
 | Published | Escala publicada (visível aos membros) |
 
+### Firebase
+
+O projeto usa duas bibliotecas Firebase:
+
+| Biblioteca | Uso | Importar de |
+|------------|-----|-------------|
+| **Firebase Admin** | Server-side (APIs, repositories) | `@/infra/firebase-admin/*` |
+| **Firebase SDK** | Client-side (auth, UI) | `@/infra/firebase-client/*` |
+
+**Client-side auth (useLoginScreen):**
+```typescript
+import { signInWithGoogle } from "@/infra/firebase-client/services/googleAuth";
+
+const firebaseUser = await signInWithGoogle();
+const idToken = firebaseUser.idToken;
+```
+
+**Server-side auth (container.ts):**
+```typescript
+import { GoogleAuthFirebaseService } from "@/infra/firebase-admin/services/GoogleAuthFirebaseService";
+```
+
 ---
 
 ## Referência Rápida
@@ -425,6 +533,8 @@ pnpm format       # Formatar código
 import { User } from '@/domain/entities/User';
 import { IUserRepository } from '@/domain/ports/IUserRepository';
 import { CreateUserDTO } from '@/application/dtos/CreateUserDTO';
-import { useUsers } from '@/hooks/useUsers';
+import { useAuthStore } from '@/stores/authStore';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { signInWithGoogle } from '@/infra/firebase-client/services/googleAuth';
 import { Button } from '@/components/ui/Button';
 ```

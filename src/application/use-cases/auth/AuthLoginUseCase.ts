@@ -100,7 +100,8 @@ export class AuthLoginUseCase extends BaseUseCase<
       return this.buildSuccessResponse(newUser, newMember, [
         { churchId: invite.churchId, roleId: invite.roleId },
       ]);
-    } catch {
+    } catch (error) {
+      console.error("[AuthLoginUseCase] Error:", error);
       return this.buildErrorResponse(AuthErrors.INTERNAL_ERROR);
     }
   }

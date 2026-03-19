@@ -8,12 +8,12 @@ import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchReposi
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { ITokenService } from "@/domain/ports/ITokenService";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
-import { ChurchFirebaseRepository } from "@/infra/firebase/repositories/ChurchFirebaseRepository";
-import { InviteFirebaseRepository } from "@/infra/firebase/repositories/InviteFirebaseRepository";
-import { MemberChurchFirebaseRepository } from "@/infra/firebase/repositories/MemberChurchFirebaseRepository";
-import { MemberFirebaseRepository } from "@/infra/firebase/repositories/MemberFirebaseRepository";
-import { UserFirebaseRepository } from "@/infra/firebase/repositories/UserFirebaseRepository";
-import { GoogleAuthFirebaseService } from "@/infra/firebase/services/GoogleAuthFirebaseService";
+import { ChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/ChurchFirebaseRepository";
+import { InviteFirebaseRepository } from "@/infra/firebase-admin/repositories/InviteFirebaseRepository";
+import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
+import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
+import { UserFirebaseRepository } from "@/infra/firebase-admin/repositories/UserFirebaseRepository";
+import { GoogleAuthFirebaseService } from "@/infra/firebase-admin/services/GoogleAuthFirebaseService";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
 
 class Container {

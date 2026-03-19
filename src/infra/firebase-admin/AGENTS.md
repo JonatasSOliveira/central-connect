@@ -1,11 +1,11 @@
-# AGENTS.md - Firebase Repositories
+# AGENTS.md - Firebase Admin Repositories
 
-Regras para criação de repositories Firebase.
+Regras para criação de repositories Firebase Admin (server-side).
 
 ## Estrutura
 
 ```
-src/infra/firebase/
+src/infra/firebase-admin/
 ├── firebaseConfig.ts           # Configuração do Firebase Admin
 ├── repositories/
 │   ├── BaseFirebaseRepository.ts  # Classe abstrata com métodos comuns
