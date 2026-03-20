@@ -1,4 +1,5 @@
 import { AuthLoginUseCase } from "@/application/use-cases/auth/AuthLoginUseCase";
+import { CreateChurch } from "@/application/use-cases/church/CreateChurch";
 import { CreateMemberWithChurch } from "@/application/use-cases/member/CreateMemberWithChurch";
 import { LinkUserToMember } from "@/application/use-cases/member/LinkUserToMember";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
@@ -27,6 +28,7 @@ class Container {
   private _churchRepository: IChurchRepository | null = null;
   private _inviteRepository: IInviteRepository | null = null;
   private _authLoginUseCase: AuthLoginUseCase | null = null;
+  private _createChurch: CreateChurch | null = null;
   private _createMemberWithChurch: CreateMemberWithChurch | null = null;
   private _linkUserToMember: LinkUserToMember | null = null;
 
@@ -100,6 +102,13 @@ class Container {
       );
     }
     return this._authLoginUseCase;
+  }
+
+  get createChurch(): CreateChurch {
+    if (!this._createChurch) {
+      this._createChurch = new CreateChurch(this.churchRepository);
+    }
+    return this._createChurch;
   }
 
   get createMemberWithChurch(): CreateMemberWithChurch {
