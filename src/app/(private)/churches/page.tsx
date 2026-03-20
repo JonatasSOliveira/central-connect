@@ -1,11 +1,21 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Building2, Plus, Inbox } from "lucide-react";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useChurches } from "@/features/churches/hooks/useChurches";
 
 export default function ChurchesPage() {
+  const router = useRouter();
   const { churches } = useChurches();
+
+  const handleCreateChurch = () => {
+    router.push("/churches/form");
+  };
+
+  const handleEditChurch = (churchId: string) => {
+    router.push(`/churches/${churchId}/edit`);
+  };
 
   return (
     <ListTemplate>
@@ -17,7 +27,7 @@ export default function ChurchesPage() {
       <ListTemplate.Action
         label="Nova Igreja"
         icon={Plus}
-        disabled
+        onClick={handleCreateChurch}
       />
 
       {churches.length === 0 ? (
@@ -25,6 +35,10 @@ export default function ChurchesPage() {
           icon={Inbox}
           title="Nenhuma igreja cadastrada"
           description="Clique em Nova Igreja para cadastrar a primeira igreja da plataforma."
+          action={{
+            label: "Cadastrar Igreja",
+            onClick: handleCreateChurch,
+          }}
         />
       ) : (
         <ListTemplate.List>
@@ -33,6 +47,7 @@ export default function ChurchesPage() {
               key={church.id}
               icon={Building2}
               title={church.name}
+              onClick={() => handleEditChurch(church.id)}
             />
           ))}
         </ListTemplate.List>

@@ -5,14 +5,13 @@ import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { CardAdmin } from "@/components/ui/card-admin";
 import { CardItem } from "@/components/ui/card-item";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { PrivateFooter } from "@/components/modules/private-footer";
 
 export default function HomePage() {
   const { userName, isSuperAdmin } = useHomeScreen();
 
   return (
-    <main className="min-h-[100dvh] p-6 app-background flex flex-col">
-      <div className="max-w-2xl mx-auto flex-1">
+    <div className="p-6 app-background">
+      <div className="max-w-2xl mx-auto">
         <PrivateHeader title={`Olá, ${userName}`} showBackButton={false} />
 
         {isSuperAdmin && (
@@ -50,7 +49,6 @@ export default function HomePage() {
           />
         </div>
       </div>
-      <PrivateFooter />
-    </main>
+    </div>
   );
 }

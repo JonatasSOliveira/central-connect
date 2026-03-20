@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Inter } from "next/font/google";
 import "./globals.css";
+import { Footer } from "@/components/modules/footer";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const inter = Inter({
@@ -41,9 +42,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${inter.variable} ${dmSans.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${dmSans.variable} antialiased flex flex-col h-[100dvh]`}
+      >
         <ServiceWorkerRegistration />
-        {children}
+        <main className="flex flex-1 flex-col">{children}</main>
+        <Footer />
       </body>
     </html>
   );

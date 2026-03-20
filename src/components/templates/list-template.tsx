@@ -1,5 +1,4 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
-import { PrivateFooter } from "@/components/modules/private-footer";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -166,17 +165,7 @@ function EmptyStateComponent({
 }
 
 export function ListTemplate({ children, className }: ListTemplateProps) {
-  return (
-    <main
-      className={cn(
-        "min-h-[100dvh] p-6 app-background flex flex-col",
-        className,
-      )}
-    >
-      <div className="max-w-2xl mx-auto flex-1 w-full">{children}</div>
-      <PrivateFooter />
-    </main>
-  );
+  return <div className={cn("p-6 app-background", className)}>{children}</div>;
 }
 
 ListTemplate.Header = PrivateHeader;
@@ -184,6 +173,5 @@ ListTemplate.List = List;
 ListTemplate.Item = ListItem;
 ListTemplate.Action = Action;
 ListTemplate.EmptyState = EmptyStateComponent;
-ListTemplate.Footer = PrivateFooter;
 
 export { Action, EmptyStateComponent, List, ListItem };

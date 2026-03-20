@@ -535,6 +535,7 @@ export function UserForm() {
 - ❌ Misturar responsabilidades (um arquivo = uma responsabilidade)
 - ❌ Usar `any` em TypeScript
 - ❌ Criar APIs que expõem dados de outras igrejas (verificar `churchId` sempre)
+- ❌ **Commitar qualquer alteração sem o usuário solicitar explicitamente** - Sempre perguntar antes de commitar
 
 ### Atenção Especial
 

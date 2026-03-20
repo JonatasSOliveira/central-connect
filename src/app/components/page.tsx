@@ -1,7 +1,16 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { ChurchFormData } from "@/application/dtos/church/ChurchDTO";
+import {
+  ChurchFormSchema,
+  churchFormDefaultValues,
+} from "@/application/dtos/church/ChurchDTO";
+import { Form, FormTemplate } from "@/components/templates/form-template";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,6 +19,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/sonner";
 
 interface ComponentConfig {
   name: string;
@@ -156,11 +169,168 @@ const components: ComponentConfig[] = [
       </div>
     ),
   },
+  {
+    name: "Input",
+    description:
+      "Campo de entrada de texto com suporte a placeholder, disabled e validação.",
+    render: () => (
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-4 bg-primary rounded-full" />
+            <h4 className="text-sm font-medium text-foreground">Default</h4>
+          </div>
+          <Input placeholder="Digite aqui..." />
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-4 bg-primary rounded-full" />
+            <h4 className="text-sm font-medium text-foreground">With Label</h4>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="example">Nome</Label>
+            <Input id="example" placeholder="Digite seu nome..." />
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-4 bg-primary rounded-full" />
+            <h4 className="text-sm font-medium text-foreground">Disabled</h4>
+          </div>
+          <Input placeholder="Disabled" disabled />
+        </div>
+      </div>
+    ),
+  },
+  {
+    name: "Label",
+    description: "Rótulo para campos de formulário com suporte a required.",
+    render: () => (
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <Label>Label Normal</Label>
+          <Input placeholder="Input..." />
+        </div>
+        <div className="space-y-1.5">
+          <Label>
+            Label Required <span className="text-destructive">*</span>
+          </Label>
+          <Input placeholder="Campo obrigatório..." />
+        </div>
+      </div>
+    ),
+  },
+  {
+    name: "FormField",
+    description:
+      "Campo de formulário reutilizável com label, input e mensagem de erro integrados.",
+    render: () => {
+      const form = useForm<ChurchFormData>({
+        resolver: zodResolver(ChurchFormSchema),
+        defaultValues: churchFormDefaultValues,
+      });
+
+      return (
+        <FormTemplate>
+          <FormTemplate.Header
+            title="Exemplo de Formulário"
+            description="Demonstração do FormField com validação"
+          />
+          <Form<ChurchFormData> form={form} onSubmit={() => {}}>
+            <FormTemplate.Content>
+              <FormField<ChurchFormData>
+                form={form}
+                name="name"
+                label="Nome da Igreja"
+                placeholder="Digite o nome da igreja"
+                required
+              />
+            </FormTemplate.Content>
+            <FormTemplate.Footer onCancel={() => {}} isLoading={false} />
+          </Form>
+        </FormTemplate>
+      );
+    },
+  },
+  {
+    name: "FormTemplate",
+    description:
+      "Compound component para estruturar formulários com Header, Content, Footer e Form.",
+    render: () => (
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-4 bg-primary rounded-full" />
+            <h4 className="text-sm font-medium text-foreground">Estrutura</h4>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            O FormTemplate é composto por:
+          </p>
+          <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+            <li>
+              <code className="bg-muted px-1 rounded">FormTemplate.Header</code>{" "}
+              - Título e descrição
+            </li>
+            <li>
+              <code className="bg-muted px-1 rounded">
+                FormTemplate.Content
+              </code>{" "}
+              - Campos do formulário
+            </li>
+            <li>
+              <code className="bg-muted px-1 rounded">FormTemplate.Footer</code>{" "}
+              - Botões de ação
+            </li>
+            <li>
+              <code className="bg-muted px-1 rounded">Form</code> - Formulário
+              com react-hook-form
+            </li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    name: "Toaster",
+    description:
+      "Notificações toast para feedback de ações (sucesso, erro, info).",
+    render: () => (
+      <div className="flex flex-wrap gap-3">
+        <Button
+          variant="default"
+          onClick={() => toast.success("Igreja criada com sucesso!")}
+        >
+          Success
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={() => toast.error("Ocorreu um erro.")}
+        >
+          Error
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => toast.info("Informação importante.")}
+        >
+          Info
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => toast.warning("Atenção: dados não salvos.")}
+        >
+          Warning
+        </Button>
+      </div>
+    ),
+  },
 ];
 
 export default function ComponentsPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
+      <Toaster />
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         <Link
           href="/"

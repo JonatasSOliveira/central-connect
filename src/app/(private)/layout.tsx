@@ -21,9 +21,9 @@ export default function PrivateLayout({
 
   if (isLoading) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-background">
+      <div className="flex flex-1 items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </main>
+      </div>
     );
   }
 

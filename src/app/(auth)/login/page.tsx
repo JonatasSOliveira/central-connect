@@ -8,7 +8,7 @@ export default function LoginPage() {
   const { isLoading, error, handleGoogleLogin } = useLoginScreen();
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-background">
+    <div className="flex h-full items-center justify-center p-6 bg-background">
       <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500">
         <div className="relative mb-8">
           <div className="w-28 h-28 rounded-3xl bg-primary/10 flex items-center justify-center">
@@ -72,6 +72,6 @@ export default function LoginPage() {
           Made for Ministries
         </p>
       </div>
-    </main>
+    </div>
   );
 }
