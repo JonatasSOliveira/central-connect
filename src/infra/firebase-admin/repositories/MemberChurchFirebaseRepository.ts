@@ -1,13 +1,10 @@
 import type { DocumentData } from "firebase-admin/firestore";
-import {
-  MemberChurch,
-  type MemberChurchParams,
-} from "@/domain/entities/MemberChurch";
+import type { MemberChurch } from "@/domain/entities/MemberChurch";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import {
-  convertDatesToTimestamps,
-  convertTimestampsToDates,
-} from "../helpers/firebaseHelpers";
+  memberChurchFromPersistence,
+  memberChurchToPersistence,
+} from "../mappers/memberChurchMapper";
 import { BaseFirebaseRepository } from "./BaseFirebaseRepository";
 
 export class MemberChurchFirebaseRepository
@@ -19,18 +16,11 @@ export class MemberChurchFirebaseRepository
   }
 
   protected toEntity(data: DocumentData, id: string): MemberChurch {
-    const convertedData = convertTimestampsToDates(data);
-    const params: MemberChurchParams = {
-      id,
-      memberId: convertedData.memberId ?? "",
-      churchId: convertedData.churchId ?? "",
-      roleId: convertedData.roleId ?? null,
-    };
-    return new MemberChurch(params);
+    return memberChurchFromPersistence(data, id);
   }
 
   protected toFirestoreData(entity: MemberChurch): DocumentData {
-    return convertDatesToTimestamps({ ...entity });
+    return memberChurchToPersistence(entity);
   }
 
   async findByMemberId(memberId: string): Promise<MemberChurch[]> {

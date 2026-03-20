@@ -1,10 +1,10 @@
 import type { DocumentData } from "firebase-admin/firestore";
-import { Member, type MemberParams } from "@/domain/entities/Member";
+import type { Member } from "@/domain/entities/Member";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import {
-  convertDatesToTimestamps,
-  convertTimestampsToDates,
-} from "../helpers/firebaseHelpers";
+  memberFromPersistence,
+  memberToPersistence,
+} from "../mappers/memberMapper";
 import { BaseFirebaseRepository } from "./BaseFirebaseRepository";
 
 export class MemberFirebaseRepository
@@ -16,23 +16,11 @@ export class MemberFirebaseRepository
   }
 
   protected toEntity(data: DocumentData, id: string): Member {
-    const convertedData = convertTimestampsToDates(data);
-    const params: MemberParams = {
-      id,
-      email: convertedData.email ?? "",
-      fullName: convertedData.fullName ?? "",
-      phone: convertedData.phone ?? null,
-      maxServicesPerMonth: convertedData.maxServicesPerMonth ?? 4,
-      status: convertedData.status ?? "Active",
-      avatarUrl: convertedData.avatarUrl ?? null,
-      birthDate: convertedData.birthDate ?? null,
-      notes: convertedData.notes ?? null,
-    };
-    return new Member(params);
+    return memberFromPersistence(data, id);
   }
 
   protected toFirestoreData(entity: Member): DocumentData {
-    return convertDatesToTimestamps({ ...entity });
+    return memberToPersistence(entity);
   }
 
   async findByEmail(email: string): Promise<Member | null> {

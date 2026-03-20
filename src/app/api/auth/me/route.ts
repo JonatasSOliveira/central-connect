@@ -1,6 +1,17 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { container } from "@/infra/di/container";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
+
+interface SessionPayload {
+  userId: string;
+  memberId: string;
+  email: string;
+  fullName: string;
+  avatarUrl: string | null;
+  isSuperAdmin: boolean;
+  churchId: string | null;
+}
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -12,7 +23,21 @@ export async function GET() {
 
   try {
     const tokenService = new JoseTokenJwtService();
-    const session = await tokenService.verifyToken(token);
+    const session = (await tokenService.verifyToken(
+      token,
+    )) as unknown as SessionPayload;
+
+    const memberRepository = container.memberRepository;
+    const member = await memberRepository.findById(session.memberId);
+
+    if (!member) {
+      const response = NextResponse.json(
+        { ok: false, value: null },
+        { status: 401 },
+      );
+      response.cookies.delete("session");
+      return response;
+    }
 
     return NextResponse.json({
       ok: true,

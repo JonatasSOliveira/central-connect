@@ -1,6 +1,12 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { type App, cert, initializeApp } from "firebase-admin/app";
+import {
+  type App,
+  cert,
+  getApp,
+  getApps,
+  initializeApp,
+} from "firebase-admin/app";
 import { type Firestore, getFirestore } from "firebase-admin/firestore";
 
 const CREDENTIALS_PATH = path.join(
@@ -13,15 +19,18 @@ function getCredentials() {
   return JSON.parse(fileContent);
 }
 
-let firebaseApp: App | null = null;
-let firestoreDb: Firestore | null = null;
+let firebaseApp: App;
+let firestoreDb: Firestore;
 
 export function getFirebaseApp(): App {
-  if (!firebaseApp) {
+  if (getApps().length === 0) {
     firebaseApp = initializeApp({
       credential: cert(getCredentials()),
     });
+  } else {
+    firebaseApp = getApp();
   }
+
   return firebaseApp;
 }
 

@@ -20,8 +20,7 @@ export interface FirebaseUser {
 export async function signInWithGoogle(): Promise<FirebaseUser> {
   const auth = getFirebaseAuth();
   const result = await signInWithPopup(auth, googleProvider);
-  const credential = GoogleAuthProvider.credentialFromResult(result);
-  const idToken = credential?.idToken ?? (await result.user.getIdToken());
+  const idToken = await result.user.getIdToken();
 
   return {
     uid: result.user.uid,

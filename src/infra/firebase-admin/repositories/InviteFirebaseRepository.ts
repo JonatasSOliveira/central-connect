@@ -1,11 +1,11 @@
 import type { DocumentData } from "firebase-admin/firestore";
 import { Timestamp } from "firebase-admin/firestore";
-import { Invite, type InviteParams } from "@/domain/entities/Invite";
+import type { Invite } from "@/domain/entities/Invite";
 import type { IInviteRepository } from "@/domain/ports/IInviteRepository";
 import {
-  convertDatesToTimestamps,
-  convertTimestampsToDates,
-} from "../helpers/firebaseHelpers";
+  inviteFromPersistence,
+  inviteToPersistence,
+} from "../mappers/inviteMapper";
 import { BaseFirebaseRepository } from "./BaseFirebaseRepository";
 
 export class InviteFirebaseRepository
@@ -17,20 +17,11 @@ export class InviteFirebaseRepository
   }
 
   protected toEntity(data: DocumentData, id: string): Invite {
-    const convertedData = convertTimestampsToDates(data);
-    const params: InviteParams = {
-      id,
-      email: convertedData.email ?? "",
-      roleId: convertedData.roleId ?? "",
-      churchId: convertedData.churchId ?? "",
-      isUsed: convertedData.isUsed ?? false,
-      usedAt: convertedData.usedAt ?? null,
-    };
-    return new Invite(params);
+    return inviteFromPersistence(data, id);
   }
 
   protected toFirestoreData(entity: Invite): DocumentData {
-    return convertDatesToTimestamps({ ...entity });
+    return inviteToPersistence(entity);
   }
 
   async findByEmail(email: string): Promise<Invite | null> {

@@ -1,10 +1,10 @@
 import type { DocumentData } from "firebase-admin/firestore";
-import { Church, type ChurchParams } from "@/domain/entities/Church";
+import type { Church } from "@/domain/entities/Church";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import {
-  convertDatesToTimestamps,
-  convertTimestampsToDates,
-} from "../helpers/firebaseHelpers";
+  churchFromPersistence,
+  churchToPersistence,
+} from "../mappers/churchMapper";
 import { BaseFirebaseRepository } from "./BaseFirebaseRepository";
 
 export class ChurchFirebaseRepository
@@ -16,15 +16,10 @@ export class ChurchFirebaseRepository
   }
 
   protected toEntity(data: DocumentData, id: string): Church {
-    const convertedData = convertTimestampsToDates(data);
-    const params: ChurchParams = {
-      id,
-      name: convertedData.name ?? "",
-    };
-    return new Church(params);
+    return churchFromPersistence(data, id);
   }
 
   protected toFirestoreData(entity: Church): DocumentData {
-    return convertDatesToTimestamps({ ...entity });
+    return churchToPersistence(entity);
   }
 }

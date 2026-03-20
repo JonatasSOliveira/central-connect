@@ -43,6 +43,6 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json(result, {
-    status: getHttpStatus(errorCode),
+    status: result.ok ? 200 : getHttpStatus(errorCode),
   });
 }

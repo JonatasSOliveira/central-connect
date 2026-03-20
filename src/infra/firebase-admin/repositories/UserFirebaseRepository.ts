@@ -1,10 +1,7 @@
 import type { DocumentData } from "firebase-admin/firestore";
-import { User, type UserParams } from "@/domain/entities/User";
+import type { User } from "@/domain/entities/User";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
-import {
-  convertDatesToTimestamps,
-  convertTimestampsToDates,
-} from "../helpers/firebaseHelpers";
+import { userFromPersistence, userToPersistence } from "../mappers/userMapper";
 import { BaseFirebaseRepository } from "./BaseFirebaseRepository";
 
 export class UserFirebaseRepository
@@ -16,21 +13,11 @@ export class UserFirebaseRepository
   }
 
   protected toEntity(data: DocumentData, id: string): User {
-    const convertedData = convertTimestampsToDates(data);
-    const params: UserParams = {
-      id,
-      memberId: convertedData.memberId ?? null,
-      googleAccessToken: convertedData.googleAccessToken ?? null,
-      googleRefreshToken: convertedData.googleRefreshToken ?? null,
-      isActive: convertedData.isActive ?? true,
-      isSuperAdmin: convertedData.isSuperAdmin ?? false,
-      lastLoginAt: convertedData.lastLoginAt ?? null,
-    };
-    return new User(params);
+    return userFromPersistence(data, id);
   }
 
   protected toFirestoreData(entity: User): DocumentData {
-    return convertDatesToTimestamps({ ...entity });
+    return userToPersistence(entity);
   }
 
   async findByMemberId(memberId: string): Promise<User | null> {
