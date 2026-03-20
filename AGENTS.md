@@ -136,8 +136,9 @@ src/
 │   └── (pages)/
 │
 ├── components/                # Componentes React
-│   ├── ui/                    # shadcn-like
-│   └── modules/               # Componentes compostos
+│   ├── ui/                    # Atoms (shadcn-like)
+│   ├── modules/               # Molecules (componentes compostos)
+│   └── templates/            # Templates (estruturas de página)
 │
 └── shared/
     ├── utils/
@@ -196,6 +197,97 @@ export default function Button({ children, onClick }) {
   return <button onClick={onClick}>{children}</button>;
 }
 ```
+
+### Atomic Design
+
+O projeto segue o padrão **Atomic Design** para organização de componentes:
+
+```
+src/components/
+├── ui/           # Atoms (elementos básicos)
+│   ├── button.tsx
+│   ├── card.tsx
+│   ├── empty-state.tsx
+│   └── ...
+│
+├── modules/      # Molecules (combinações simples)
+│   ├── card-item.tsx
+│   ├── private-header.tsx
+│   └── private-footer.tsx
+│
+└── templates/    # Templates (estruturas de página)
+    ├── list-template.tsx
+    └── page-template.tsx
+```
+
+**Níveis de Atomic Design:**
+
+| Nível | Descrição | Exemplos |
+|-------|-----------|----------|
+| **Atoms** | Elementos básicos e indivisíveis | Button, Input, Card |
+| **Molecules** | Combinações simples de atoms | CardItem, EmptyState |
+| **Templates** | Estruturas completas de página | ListTemplate, PageTemplate |
+
+### Compound Components
+
+Compound Components permitem criar APIs declarativas e flexíveis:
+
+```tsx
+// Uso do ListTemplate
+<ListTemplate>
+  <ListTemplate.Header title="Igrejas" subtitle="Gerencie..." />
+  <ListTemplate.Action label="Nova" icon={Plus} onClick={handleAdd} />
+  
+  {items.length === 0 ? (
+    <ListTemplate.EmptyState
+      icon={Inbox}
+      title="Nenhuma igreja"
+      description="Cadastre sua primeira igreja"
+    />
+  ) : (
+    <ListTemplate.List>
+      {items.map(item => (
+        <ListTemplate.Item
+          key={item.id}
+          icon={Building2}
+          title={item.name}
+          onClick={() => handleSelect(item.id)}
+        />
+      ))}
+    </ListTemplate.List>
+  )}
+</ListTemplate>
+```
+
+**Implementação do Compound Component:**
+
+```tsx
+// templates/list-template.tsx
+interface ListTemplateProps {
+  children: React.ReactNode;
+}
+
+function Header({ title, subtitle }: { title: string; subtitle?: string }) {
+  return <header>...</header>;
+}
+
+function List({ children }: { children: React.ReactNode }) {
+  return <div className="grid">{children}</div>;
+}
+
+export function ListTemplate({ children }: ListTemplateProps) {
+  return <main>{children}</main>;
+}
+
+ListTemplate.Header = Header;
+ListTemplate.List = List;
+```
+
+**Benefícios:**
+- **DRY**: Template reutilizável para todas as listagens
+- **Consistência**: Mesma estrutura visual em todas as páginas
+- **Composição**: Cada parte é independente e testável
+- **Flexibilidade**: Pode usar apenas as partes necessárias
 
 ### API REST
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { PrivateFooter } from "@/components/modules/private-footer";
 
 interface Church {
   churchId: string;
@@ -46,15 +47,15 @@ export default function SelectChurchPage() {
 
   if (loadingChurches) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-background">
+      <main className="min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 bg-background">
-      <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500">
+    <main className="min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-background">
+      <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500 flex-1 justify-center">
         <div className="relative mb-8">
           <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
             <Building2 className="w-10 h-10 text-primary" strokeWidth={1.5} />
@@ -88,6 +89,7 @@ export default function SelectChurchPage() {
           ))}
         </div>
       </div>
+      <PrivateFooter />
     </main>
   );
 }

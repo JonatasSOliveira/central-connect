@@ -1,39 +1,56 @@
 "use client";
 
-import { Church } from "lucide-react";
+import { Church, Building2 } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
+import { CardAdmin } from "@/components/ui/card-admin";
+import { CardItem } from "@/components/ui/card-item";
+import { PrivateHeader } from "@/components/modules/private-header";
+import { PrivateFooter } from "@/components/modules/private-footer";
 
 export default function HomePage() {
-  const { userName } = useHomeScreen();
+  const { userName, isSuperAdmin } = useHomeScreen();
 
   return (
-    <main className="min-h-screen p-6 bg-background">
-      <div className="max-w-2xl mx-auto">
-        <header className="mb-8">
-          <h1 className="font-heading text-3xl font-bold text-foreground">
-            Central Connect
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Bem-vindo, {userName}
-          </p>
-        </header>
+    <main className="min-h-[100dvh] p-6 app-background flex flex-col">
+      <div className="max-w-2xl mx-auto flex-1">
+        <PrivateHeader title={`Olá, ${userName}`} showBackButton={false} />
 
-        <div className="grid grid-cols-1 gap-4">
-          <div className="rounded-xl border bg-card text-card-foreground shadow p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Church className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-lg">Próximos eventos</h2>
-                <p className="text-muted-foreground text-sm">
-                  Em breve...
-                </p>
-              </div>
+        {isSuperAdmin && (
+          <>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Configurações
+              </span>
+              <div className="flex-1 h-px bg-border" />
             </div>
-          </div>
+
+            <div className="grid grid-cols-1 gap-3 mb-6">
+              <CardAdmin
+                title="Igrejas"
+                description="Gerencie as igrejas cadastradas"
+                icon={Building2}
+                href="/churches"
+              />
+            </div>
+          </>
+        )}
+
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Ações Rápidas
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        <div className="grid grid-cols-1 gap-3">
+          <CardItem
+            title="Minhas Escalas"
+            description="Veja suas próximas atividades"
+            icon={Church}
+          />
         </div>
       </div>
+      <PrivateFooter />
     </main>
   );
 }
