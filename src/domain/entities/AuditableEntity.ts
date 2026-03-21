@@ -23,6 +23,16 @@ export abstract class AuditableEntity extends BaseEntity {
   get deletedByUserId(): string | null {
     return this._deletedByUserId;
   }
+
+  toJSON(): object {
+    return {
+      id: this.id,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      createdByUserId: this.createdByUserId,
+      updatedByUserId: this.updatedByUserId,
+    };
+  }
 }
 
 export interface AuditableEntityParams extends BaseEntityParams {

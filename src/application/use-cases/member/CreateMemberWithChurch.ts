@@ -6,7 +6,7 @@ import {
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { Result } from "@/shared/types/Result";
-import { MemberErrors } from "../../errors/memberErrors";
+import { MemberErrors } from "../../errors/MemberErrors";
 import { BaseUseCase } from "../BaseUseCase";
 
 export interface CreateMemberWithChurchInput {

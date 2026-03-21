@@ -8,26 +8,31 @@ interface PrivateHeaderProps {
   title: string;
   subtitle?: string;
   showBackButton?: boolean;
+  backHref?: string;
 }
 
 export function PrivateHeader({
   title,
   subtitle,
   showBackButton = true,
+  backHref = "/home",
 }: PrivateHeaderProps) {
   const router = useRouter();
 
+  const handleBack = () => {
+    router.push(backHref);
+  };
+
   return (
-    <header className="pt-2 pb-4">
+    <header className="pt-2 pb-2">
       {showBackButton && (
         <Button
           variant="ghost"
           size="sm"
-          className="mb-4 -ml-2 h-9 px-3 text-muted-foreground hover:text-foreground"
-          onClick={() => router.back()}
+          className="mb-4 -ml-2 h-9 w-auto min-w-9 px-3 text-muted-foreground hover:text-foreground cursor-pointer"
+          onClick={handleBack}
         >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Voltar
+          <ChevronLeft className="w-5 h-5" /> Voltar
         </Button>
       )}
 

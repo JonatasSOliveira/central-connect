@@ -93,7 +93,7 @@ function ListItem({
         className={cn(
           "group flex w-full items-center gap-4 rounded-xl border border-border/50 bg-card p-4 text-left transition-all duration-200",
           "hover:border-primary/30 hover:shadow-sm hover:shadow-primary/5",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer",
           className,
         )}
       >

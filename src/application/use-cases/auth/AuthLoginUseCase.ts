@@ -13,7 +13,7 @@ import type { IUserRepository } from "@/domain/ports/IUserRepository";
 import type { Result } from "@/shared/types/Result";
 import type { AuthLoginInputDTO } from "../../dtos/auth/AuthLoginInputDTO";
 import type { AuthLoginOutputDTO } from "../../dtos/auth/AuthLoginOutputDTO";
-import { AuthErrors } from "../../errors/authErrors";
+import { AuthErrors } from "../../errors/AuthErrors";
 import { BaseUseCase } from "../BaseUseCase";
 
 interface ChurchInfo {

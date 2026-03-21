@@ -12,3 +12,10 @@ export type ChurchFormData = z.infer<typeof ChurchFormSchema>;
 export const churchFormDefaultValues: ChurchFormData = {
   name: "",
 };
+
+export const ChurchListItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export type ChurchListItemDTO = z.infer<typeof ChurchListItemSchema>;

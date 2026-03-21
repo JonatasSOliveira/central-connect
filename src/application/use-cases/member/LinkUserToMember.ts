@@ -1,7 +1,7 @@
 import { User, type UserParams } from "@/domain/entities/User";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
 import type { Result } from "@/shared/types/Result";
-import { UserErrors } from "../../errors/userErrors";
+import { UserErrors } from "../../errors/UserErrors";
 import { BaseUseCase } from "../BaseUseCase";
 
 export interface LinkUserToMemberInput {

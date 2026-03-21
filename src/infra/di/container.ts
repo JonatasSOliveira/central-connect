@@ -1,5 +1,8 @@
 import { AuthLoginUseCase } from "@/application/use-cases/auth/AuthLoginUseCase";
 import { CreateChurch } from "@/application/use-cases/church/CreateChurch";
+import { GetChurch } from "@/application/use-cases/church/GetChurch";
+import { ListChurches } from "@/application/use-cases/church/ListChurches";
+import { UpdateChurch } from "@/application/use-cases/church/UpdateChurch";
 import { CreateMemberWithChurch } from "@/application/use-cases/member/CreateMemberWithChurch";
 import { LinkUserToMember } from "@/application/use-cases/member/LinkUserToMember";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
@@ -29,6 +32,9 @@ class Container {
   private _inviteRepository: IInviteRepository | null = null;
   private _authLoginUseCase: AuthLoginUseCase | null = null;
   private _createChurch: CreateChurch | null = null;
+  private _getChurch: GetChurch | null = null;
+  private _listChurches: ListChurches | null = null;
+  private _updateChurch: UpdateChurch | null = null;
   private _createMemberWithChurch: CreateMemberWithChurch | null = null;
   private _linkUserToMember: LinkUserToMember | null = null;
 
@@ -109,6 +115,27 @@ class Container {
       this._createChurch = new CreateChurch(this.churchRepository);
     }
     return this._createChurch;
+  }
+
+  get getChurch(): GetChurch {
+    if (!this._getChurch) {
+      this._getChurch = new GetChurch(this.churchRepository);
+    }
+    return this._getChurch;
+  }
+
+  get listChurches(): ListChurches {
+    if (!this._listChurches) {
+      this._listChurches = new ListChurches(this.churchRepository);
+    }
+    return this._listChurches;
+  }
+
+  get updateChurch(): UpdateChurch {
+    if (!this._updateChurch) {
+      this._updateChurch = new UpdateChurch(this.churchRepository);
+    }
+    return this._updateChurch;
   }
 
   get createMemberWithChurch(): CreateMemberWithChurch {

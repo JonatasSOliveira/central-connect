@@ -1,7 +1,7 @@
 import { Church, type ChurchParams } from "@/domain/entities/Church";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { Result } from "@/shared/types/Result";
-import { ChurchErrors } from "../../errors/churchErrors";
+import { ChurchErrors } from "../../errors/ChurchErrors";
 import { BaseUseCase } from "../BaseUseCase";
 
 export interface CreateChurchInput {

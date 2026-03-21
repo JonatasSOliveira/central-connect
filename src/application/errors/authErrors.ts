@@ -15,4 +15,16 @@ export const AuthErrors = {
     code: "INTERNAL_ERROR",
     message: "Erro ao processar login. Tente novamente",
   },
+  UNAUTHORIZED: {
+    code: "UNAUTHORIZED",
+    message: "Não autenticado",
+  },
+  INVALID_TOKEN: {
+    code: "INVALID_TOKEN",
+    message: "Token inválido ou expirado",
+  },
+  NOT_AUTHORIZED: {
+    code: "NOT_AUTHORIZED",
+    message: "Você não tem permissão para realizar esta ação",
+  },
 } as const;

@@ -2,16 +2,21 @@ import { type NextRequest, NextResponse } from "next/server";
 import { CreateChurchInputSchema } from "@/application/dtos/church/CreateChurchDTO";
 import { container } from "@/infra/di/container";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { requireSuperAdmin, validateSession } from "../_lib/auth";
+import { requireSuperAdmin, validateSession } from "../../_lib/auth";
 
-export async function GET() {
+interface RouteParams {
+  params: Promise<{ churchId: string }>;
+}
+
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const auth = await validateSession();
 
   if (!auth.ok) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const result = await container.listChurches.execute();
+  const { churchId } = await params;
+  const result = await container.getChurch.execute({ churchId });
 
   if (!result.ok) {
     const errorCode = result.error?.code;
@@ -23,7 +28,7 @@ export async function GET() {
   return NextResponse.json(result, { status: 200 });
 }
 
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   const auth = await validateSession();
 
   if (!auth.ok) {
@@ -61,14 +66,17 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const result = await container.createChurch.execute({
+  const { churchId } = await params;
+
+  const result = await container.updateChurch.execute({
+    churchId,
     name: parsed.data.name,
-    createdByUserId: auth.user.userId,
+    updatedByUserId: auth.user.userId,
   });
 
   const errorCode = "error" in result ? result.error?.code : undefined;
 
   return NextResponse.json(result, {
-    status: result.ok ? 201 : getHttpStatus(errorCode),
+    status: result.ok ? 200 : getHttpStatus(errorCode),
   });
 }
