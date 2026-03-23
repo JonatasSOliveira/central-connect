@@ -1,8 +1,7 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Building2, Plus, Inbox } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useChurches } from "@/features/churches/hooks/useChurches";
 
@@ -18,32 +17,11 @@ export default function ChurchesPage() {
     router.push(`/churches/${churchId}/edit`);
   };
 
-  if (isLoading) {
-    return (
-      <ListTemplate>
-        <ListTemplate.Header
-          title="Igrejas"
-          subtitle="Gerencie as igrejas da plataforma"
-          showBackButton={false}
-        />
-        <ListTemplate.Action
-          label="Nova Igreja"
-          icon={Plus}
-          onClick={handleCreateChurch}
-        />
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        </div>
-      </ListTemplate>
-    );
-  }
-
   return (
-    <ListTemplate>
+    <ListTemplate isLoading={isLoading}>
       <ListTemplate.Header
         title="Igrejas"
         subtitle="Gerencie as igrejas da plataforma"
-        backHref="/home"
       />
 
       <ListTemplate.Action

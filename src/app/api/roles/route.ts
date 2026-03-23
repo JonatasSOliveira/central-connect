@@ -4,6 +4,25 @@ import { roleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 import { requireSuperAdmin, validateSession } from "../_lib/auth";
 
+export async function GET() {
+  const auth = await validateSession();
+
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
+  }
+
+  const result = await roleContainer.listRoles.execute();
+
+  if (!result.ok) {
+    const errorCode = result.error?.code;
+    return NextResponse.json(result, {
+      status: getHttpStatus(errorCode),
+    });
+  }
+
+  return NextResponse.json(result, { status: 200 });
+}
+
 export async function POST(request: NextRequest) {
   const auth = await validateSession();
 

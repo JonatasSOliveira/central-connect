@@ -1,6 +1,6 @@
 "use client";
 
-import { Church, Building2 } from "lucide-react";
+import { Church, Building2, UserRoundKey } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { CardAdmin } from "@/components/ui/card-admin";
 import { CardItem } from "@/components/ui/card-item";
@@ -29,6 +29,12 @@ export default function HomePage() {
                 description="Gerencie as igrejas cadastradas"
                 icon={Building2}
                 href="/churches"
+              />
+              <CardAdmin
+                title="Cargos"
+                description="Gerencie as permissões dos cargos"
+                icon={UserRoundKey}
+                href="/roles"
               />
             </div>
           </>

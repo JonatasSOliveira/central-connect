@@ -1,0 +1,105 @@
+"use client";
+
+import { Check, ChevronDown } from "lucide-react";
+import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Permission, PermissionGroups } from "@/domain/enums/Permission";
+
+interface PermissionSelectProps {
+  value: Permission[];
+  onChange: (value: Permission[]) => void;
+  disabled?: boolean;
+}
+
+const permissionLabels: Record<Permission, string> = {
+  [Permission.CHURCH_READ]: "Igreja: Leitura",
+  [Permission.CHURCH_WRITE]: "Igreja: Escrita",
+  [Permission.CHURCH_SELF_READ]: "Igreja: Leitura Própria",
+  [Permission.CHURCH_SELF_WRITE]: "Igreja: Edição Própria",
+  [Permission.MEMBER_READ]: "Membros: Leitura",
+  [Permission.MEMBER_WRITE]: "Membros: Escrita",
+  [Permission.SCHEDULE_READ]: "Escalas: Leitura",
+  [Permission.SCHEDULE_WRITE]: "Escalas: Escrita",
+  [Permission.ROLE_READ]: "Cargos: Leitura",
+  [Permission.ROLE_WRITE]: "Cargos: Escrita",
+  [Permission.INVITE_READ]: "Convites: Leitura",
+  [Permission.INVITE_WRITE]: "Convites: Escrita",
+};
+
+const groupLabels: Record<string, string> = {
+  CHURCH: "Igreja",
+  MEMBER: "Membros",
+  SCHEDULE: "Escalas",
+  ROLE: "Cargos",
+  INVITE: "Convites",
+};
+
+export function PermissionSelect({
+  value,
+  onChange,
+  disabled,
+}: PermissionSelectProps) {
+  const [open, setOpen] = React.useState(false);
+
+  const selectedCount = value.length;
+  const displayText =
+    selectedCount === 0
+      ? "Selecione as permissões"
+      : `${selectedCount} permissões selecionadas`;
+
+  const handleToggle = (permission: Permission) => {
+    const newValue = value.includes(permission)
+      ? value.filter((p) => p !== permission)
+      : [...value, permission];
+    onChange(newValue);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        <Button
+          variant="outline"
+          className="w-full justify-between font-normal"
+        >
+          {displayText}
+          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[calc(100vw-2rem)] p-0" align="start">
+        <div className="max-h-[300px] overflow-y-auto p-2">
+          {Object.entries(PermissionGroups).map(([groupKey, permissions]) => (
+            <div key={groupKey} className="mb-3">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-2 px-2">
+                {groupLabels[groupKey]}
+              </h3>
+              {permissions.map((permission) => (
+                <label
+                  key={permission}
+                  className="flex items-center gap-2 px-2 py-1.5 hover:bg-accent rounded-md cursor-pointer"
+                >
+                  <Checkbox
+                    checked={value.includes(permission)}
+                    onCheckedChange={() => handleToggle(permission)}
+                    disabled={disabled}
+                  />
+                  <span className="text-sm flex-1">
+                    {permissionLabels[permission]}
+                  </span>
+                  {value.includes(permission) && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </label>
+              ))}
+            </div>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
