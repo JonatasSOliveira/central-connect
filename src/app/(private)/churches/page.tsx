@@ -2,19 +2,25 @@
 
 import { Building2, Plus, Inbox } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useChurches } from "@/features/churches/hooks/useChurches";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function ChurchesPage() {
   const router = useRouter();
-  const { churches, isLoading } = useChurches();
+  const { user } = useAuth();
+  const { churches, isLoading, deleteChurch } = useChurches();
 
   usePermissions({
     requiredPermissions: [Permission.CHURCH_READ],
     redirectTo: "/home",
   });
+
+  const canDelete =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.CHURCH_DELETE);
 
   const handleCreateChurch = () => {
     router.push("/churches/new");
@@ -22,6 +28,15 @@ export default function ChurchesPage() {
 
   const handleEditChurch = (churchId: string) => {
     router.push(`/churches/${churchId}/edit`);
+  };
+
+  const handleDeleteChurch = async (churchId: string) => {
+    const success = await deleteChurch(churchId);
+    if (success) {
+      toast.success("Igreja excluída com sucesso");
+    } else {
+      toast.error("Erro ao excluir igreja");
+    }
   };
 
   return (
@@ -55,6 +70,14 @@ export default function ChurchesPage() {
               icon={Building2}
               title={church.name}
               onClick={() => handleEditChurch(church.id)}
+              actions={
+                canDelete
+                  ? {
+                      onEdit: () => handleEditChurch(church.id),
+                      onDelete: () => handleDeleteChurch(church.id),
+                    }
+                  : undefined
+              }
             />
           ))}
         </ListTemplate.List>

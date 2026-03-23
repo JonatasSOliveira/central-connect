@@ -2,19 +2,25 @@
 
 import { Plus, Inbox, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useRoles } from "@/features/roles/hooks/useRoles";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function RolesPage() {
   const router = useRouter();
-  const { roles, isLoading } = useRoles();
+  const { user } = useAuth();
+  const { roles, isLoading, deleteRole } = useRoles();
 
   usePermissions({
     requiredPermissions: [Permission.ROLE_READ],
     redirectTo: "/home",
   });
+
+  const canDelete =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.ROLE_DELETE);
 
   const handleCreateRole = () => {
     router.push("/roles/new");
@@ -22,6 +28,15 @@ export default function RolesPage() {
 
   const handleEditRole = (roleId: string) => {
     router.push(`/roles/${roleId}/edit`);
+  };
+
+  const handleDeleteRole = async (roleId: string) => {
+    const success = await deleteRole(roleId);
+    if (success) {
+      toast.success("Cargo excluído com sucesso");
+    } else {
+      toast.error("Erro ao excluir cargo");
+    }
   };
 
   return (
@@ -55,6 +70,14 @@ export default function RolesPage() {
               icon={Shield}
               title={role.name}
               onClick={() => handleEditRole(role.id)}
+              actions={
+                canDelete
+                  ? {
+                      onEdit: () => handleEditRole(role.id),
+                      onDelete: () => handleDeleteRole(role.id),
+                    }
+                  : undefined
+              }
             />
           ))}
         </ListTemplate.List>

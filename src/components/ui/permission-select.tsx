@@ -19,15 +19,19 @@ interface PermissionSelectProps {
 const permissionLabels: Record<Permission, string> = {
   [Permission.CHURCH_READ]: "Igreja: Leitura",
   [Permission.CHURCH_WRITE]: "Igreja: Escrita",
+  [Permission.CHURCH_DELETE]: "Igreja: Excluir",
   [Permission.CHURCH_SELF_READ]: "Igreja: Leitura Própria",
   [Permission.CHURCH_SELF_WRITE]: "Igreja: Edição Própria",
   [Permission.MEMBER_READ]: "Membros: Leitura",
   [Permission.MEMBER_WRITE]: "Membros: Escrita",
+  [Permission.MEMBER_DELETE]: "Membros: Excluir",
   [Permission.MEMBER_SELF_WRITE]: "Membros: Edição Própria",
   [Permission.SCHEDULE_READ]: "Escalas: Leitura",
   [Permission.SCHEDULE_WRITE]: "Escalas: Escrita",
+  [Permission.SCHEDULE_DELETE]: "Escalas: Excluir",
   [Permission.ROLE_READ]: "Cargos: Leitura",
   [Permission.ROLE_WRITE]: "Cargos: Escrita",
+  [Permission.ROLE_DELETE]: "Cargos: Excluir",
 };
 
 const groupLabels: Record<string, string> = {

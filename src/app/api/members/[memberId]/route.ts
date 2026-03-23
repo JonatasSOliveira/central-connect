@@ -159,29 +159,33 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  if (!auth.user.isSuperAdmin) {
+  const { user } = auth;
+  const { memberId } = await params;
+
+  const canDeleteMember =
+    user.isSuperAdmin || user.permissions.includes(Permission.MEMBER_DELETE);
+
+  if (!canDeleteMember) {
     return NextResponse.json(
       {
         ok: false,
         error: {
           code: "NOT_AUTHORIZED",
-          message: "Apenas super administradores podem excluir membros",
+          message: "Sem permissão para excluir este membro",
         },
       },
       { status: 403 },
     );
   }
 
-  const _p = await params;
+  const result = await memberContainer.deleteMember.execute({ memberId });
 
-  return NextResponse.json(
-    {
-      ok: false,
-      error: {
-        code: "NOT_IMPLEMENTED",
-        message: "Funcionalidade não implementada",
-      },
-    },
-    { status: 501 },
-  );
+  if (!result.ok) {
+    const errorCode = result.error?.code;
+    return NextResponse.json(result, {
+      status: getHttpStatus(errorCode),
+    });
+  }
+
+  return new NextResponse(null, { status: 204 });
 }

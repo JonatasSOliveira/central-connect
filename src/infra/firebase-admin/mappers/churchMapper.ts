@@ -10,6 +10,7 @@ export function churchToPersistence(church: Church): DocumentData {
     name: church.name,
     createdAt: church.createdAt,
     updatedAt: church.updatedAt,
+    deletedAt: church.deletedAt,
   });
 }
 

@@ -1,4 +1,5 @@
 import { CreateChurch } from "@/application/use-cases/church/CreateChurch";
+import { DeleteChurch } from "@/application/use-cases/church/DeleteChurch";
 import { GetChurch } from "@/application/use-cases/church/GetChurch";
 import { ListChurches } from "@/application/use-cases/church/ListChurches";
 import { UpdateChurch } from "@/application/use-cases/church/UpdateChurch";
@@ -11,6 +12,7 @@ class ChurchContainer {
   private static _getChurch: GetChurch | null = null;
   private static _listChurches: ListChurches | null = null;
   private static _updateChurch: UpdateChurch | null = null;
+  private static _deleteChurch: DeleteChurch | null = null;
 
   private constructor() {}
 
@@ -55,6 +57,15 @@ class ChurchContainer {
       );
     }
     return ChurchContainer._updateChurch;
+  }
+
+  static get deleteChurch(): DeleteChurch {
+    if (!ChurchContainer._deleteChurch) {
+      ChurchContainer._deleteChurch = new DeleteChurch(
+        ChurchContainer.churchRepository,
+      );
+    }
+    return ChurchContainer._deleteChurch;
   }
 }
 

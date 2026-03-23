@@ -1,8 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { CreateChurchInputSchema } from "@/application/dtos/church/CreateChurchDTO";
+import { Permission } from "@/domain/enums/Permission";
 import { churchContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { requireSuperAdmin, validateSession } from "../../_lib/auth";
+import { validateSession } from "../../_lib/auth";
 
 interface RouteParams {
   params: Promise<{ churchId: string }>;
@@ -35,10 +36,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const superAdminCheck = requireSuperAdmin(auth.user);
-  if (superAdminCheck) {
+  const { user } = auth;
+  const { churchId } = await params;
+
+  if (user.isSuperAdmin || user.permissions.includes(Permission.CHURCH_WRITE)) {
+  } else {
     return NextResponse.json(
-      { ok: false, error: superAdminCheck.error },
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para editar esta igreja",
+        },
+      },
       { status: 403 },
     );
   }
@@ -66,8 +76,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
   }
 
-  const { churchId } = await params;
-
   const result = await churchContainer.updateChurch.execute({
     churchId,
     name: parsed.data.name,
@@ -79,4 +87,42 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   return NextResponse.json(result, {
     status: result.ok ? 200 : getHttpStatus(errorCode),
   });
+}
+
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+  const auth = await validateSession();
+
+  if (!auth.ok) {
+    return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
+  }
+
+  const { user } = auth;
+  const { churchId } = await params;
+
+  const canDeleteChurch =
+    user.isSuperAdmin || user.permissions.includes(Permission.CHURCH_DELETE);
+
+  if (!canDeleteChurch) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para excluir esta igreja",
+        },
+      },
+      { status: 403 },
+    );
+  }
+
+  const result = await churchContainer.deleteChurch.execute({ churchId });
+
+  if (!result.ok) {
+    const errorCode = result.error?.code;
+    return NextResponse.json(result, {
+      status: getHttpStatus(errorCode),
+    });
+  }
+
+  return new NextResponse(null, { status: 204 });
 }

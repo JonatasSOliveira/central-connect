@@ -2,19 +2,25 @@
 
 import { User, Plus, Inbox } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useMembers } from "@/features/members/hooks/useMembers";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export default function MembersPage() {
   const router = useRouter();
-  const { members, isLoading } = useMembers();
+  const { user } = useAuth();
+  const { members, isLoading, deleteMember } = useMembers();
 
   usePermissions({
     requiredPermissions: [Permission.MEMBER_READ],
     redirectTo: "/home",
   });
+
+  const canDelete =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.MEMBER_DELETE);
 
   const handleCreateMember = () => {
     router.push("/members/new");
@@ -22,6 +28,15 @@ export default function MembersPage() {
 
   const handleEditMember = (memberId: string) => {
     router.push(`/members/${memberId}/edit`);
+  };
+
+  const handleDeleteMember = async (memberId: string) => {
+    const success = await deleteMember(memberId);
+    if (success) {
+      toast.success("Membro excluído com sucesso");
+    } else {
+      toast.error("Erro ao excluir membro");
+    }
   };
 
   return (
@@ -56,6 +71,14 @@ export default function MembersPage() {
               title={member.fullName}
               description={member.churches.map((c) => c.churchName).join(", ")}
               onClick={() => handleEditMember(member.id)}
+              actions={
+                canDelete
+                  ? {
+                      onEdit: () => handleEditMember(member.id),
+                      onDelete: () => handleDeleteMember(member.id),
+                    }
+                  : undefined
+              }
             />
           ))}
         </ListTemplate.List>

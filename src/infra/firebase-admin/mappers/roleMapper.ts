@@ -16,6 +16,7 @@ export function roleToPersistence(role: UserRole): DocumentData {
     isSystem: role.isSystem,
     createdAt: role.createdAt,
     updatedAt: role.updatedAt,
+    deletedAt: role.deletedAt,
   });
 }
 

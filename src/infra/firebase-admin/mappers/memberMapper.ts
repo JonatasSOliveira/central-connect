@@ -17,6 +17,7 @@ export function memberToPersistence(member: Member): DocumentData {
     notes: member.notes,
     createdAt: member.createdAt,
     updatedAt: member.updatedAt,
+    deletedAt: member.deletedAt,
   });
 }
 

@@ -1,8 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { UpdateRoleInputSchema } from "@/application/dtos/role/UpdateRoleDTO";
+import { Permission } from "@/domain/enums/Permission";
 import { roleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { requireSuperAdmin, validateSession } from "../../_lib/auth";
+import { validateSession } from "../../_lib/auth";
 
 interface RouteParams {
   params: Promise<{ roleId: string }>;
@@ -35,10 +36,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const superAdminCheck = requireSuperAdmin(auth.user);
-  if (superAdminCheck) {
+  const { user } = auth;
+
+  if (user.isSuperAdmin || user.permissions.includes(Permission.ROLE_WRITE)) {
+  } else {
     return NextResponse.json(
-      { ok: false, error: superAdminCheck.error },
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para editar este cargo",
+        },
+      },
       { status: 403 },
     );
   }
@@ -86,20 +95,33 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const superAdminCheck = requireSuperAdmin(auth.user);
-  if (superAdminCheck) {
+  const { user } = auth;
+  const { roleId } = await params;
+
+  const canDeleteRole =
+    user.isSuperAdmin || user.permissions.includes(Permission.ROLE_DELETE);
+
+  if (!canDeleteRole) {
     return NextResponse.json(
-      { ok: false, error: superAdminCheck.error },
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para excluir este cargo",
+        },
+      },
       { status: 403 },
     );
   }
 
-  const { roleId } = await params;
   const result = await roleContainer.deleteRole.execute({ roleId });
 
-  const errorCode = "error" in result ? result.error?.code : undefined;
+  if (!result.ok) {
+    const errorCode = result.error?.code;
+    return NextResponse.json(result, {
+      status: getHttpStatus(errorCode),
+    });
+  }
 
-  return NextResponse.json(result, {
-    status: result.ok ? 204 : getHttpStatus(errorCode),
-  });
+  return new NextResponse(null, { status: 204 });
 }

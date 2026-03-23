@@ -18,11 +18,13 @@ export abstract class BaseFirebaseRepository<Entity extends BaseEntity> {
   async findById(id: string): Promise<Entity | null> {
     const doc = await this.collection.doc(id).get();
     if (!doc.exists) return null;
-    return this.toEntity(doc.data() as DocumentData, doc.id);
+    const data = doc.data() as DocumentData;
+    if (data.deletedAt) return null;
+    return this.toEntity(data, doc.id);
   }
 
   async findAll(): Promise<Entity[]> {
-    const snapshot = await this.collection.get();
+    const snapshot = await this.collection.where("deletedAt", "==", null).get();
     return snapshot.docs.map((doc) =>
       this.toEntity(doc.data() as DocumentData, doc.id),
     );
@@ -43,6 +45,8 @@ export abstract class BaseFirebaseRepository<Entity extends BaseEntity> {
   }
 
   async delete(id: string): Promise<void> {
-    await this.collection.doc(id).delete();
+    await this.collection
+      .doc(id)
+      .set({ deletedAt: new Date() }, { merge: true });
   }
 }

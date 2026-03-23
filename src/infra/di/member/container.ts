@@ -1,4 +1,5 @@
 import { CreateMember } from "@/application/use-cases/member/CreateMember";
+import { DeleteMember } from "@/application/use-cases/member/DeleteMember";
 import { GetMember } from "@/application/use-cases/member/GetMember";
 import { ListMembers } from "@/application/use-cases/member/ListMembers";
 import { UpdateMember } from "@/application/use-cases/member/UpdateMember";
@@ -20,6 +21,7 @@ class MemberContainer {
   private static _createMember: CreateMember | null = null;
   private static _getMember: GetMember | null = null;
   private static _updateMember: UpdateMember | null = null;
+  private static _deleteMember: DeleteMember | null = null;
 
   private constructor() {}
 
@@ -93,6 +95,15 @@ class MemberContainer {
       );
     }
     return MemberContainer._updateMember;
+  }
+
+  static get deleteMember(): DeleteMember {
+    if (!MemberContainer._deleteMember) {
+      MemberContainer._deleteMember = new DeleteMember(
+        MemberContainer.memberRepository,
+      );
+    }
+    return MemberContainer._deleteMember;
   }
 }
 
