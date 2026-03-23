@@ -2,7 +2,6 @@
 
 import { Check, ChevronDown } from "lucide-react";
 import * as React from "react";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Popover,
@@ -24,6 +23,7 @@ const permissionLabels: Record<Permission, string> = {
   [Permission.CHURCH_SELF_WRITE]: "Igreja: Edição Própria",
   [Permission.MEMBER_READ]: "Membros: Leitura",
   [Permission.MEMBER_WRITE]: "Membros: Escrita",
+  [Permission.MEMBER_SELF_WRITE]: "Membros: Edição Própria",
   [Permission.SCHEDULE_READ]: "Escalas: Leitura",
   [Permission.SCHEDULE_WRITE]: "Escalas: Escrita",
   [Permission.ROLE_READ]: "Cargos: Leitura",
@@ -59,14 +59,14 @@ export function PermissionSelect({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <Button
-          variant="outline"
-          className="w-full justify-between font-normal"
-        >
+      <PopoverTrigger
+        className="h-12 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-2 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 flex items-center justify-between font-normal md:h-8 md:px-2.5 md:py-1 md:text-sm"
+        style={{ width: "100%", display: "flex" }}
+      >
+        <span className={selectedCount === 0 ? "text-muted-foreground" : ""}>
           {displayText}
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
+        </span>
+        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="w-[calc(100vw-2rem)] p-0" align="start">
         <div className="max-h-[300px] overflow-y-auto p-2">

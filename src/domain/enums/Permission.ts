@@ -6,6 +6,7 @@ export enum Permission {
 
   MEMBER_READ = "member:read",
   MEMBER_WRITE = "member:write",
+  MEMBER_SELF_WRITE = "member:self:write",
 
   SCHEDULE_READ = "schedule:read",
   SCHEDULE_WRITE = "schedule:write",
@@ -21,7 +22,11 @@ export const PermissionGroups = {
     Permission.CHURCH_SELF_READ,
     Permission.CHURCH_SELF_WRITE,
   ],
-  MEMBER: [Permission.MEMBER_READ, Permission.MEMBER_WRITE],
+  MEMBER: [
+    Permission.MEMBER_READ,
+    Permission.MEMBER_WRITE,
+    Permission.MEMBER_SELF_WRITE,
+  ],
   SCHEDULE: [Permission.SCHEDULE_READ, Permission.SCHEDULE_WRITE],
   ROLE: [Permission.ROLE_READ, Permission.ROLE_WRITE],
 } as const;

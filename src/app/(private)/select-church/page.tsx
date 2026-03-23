@@ -65,7 +65,8 @@ export default function SelectChurchPage() {
           Selecione uma igreja
         </h1>
         <p className="text-muted-foreground text-center mt-2">
-          Você pertence a {churches.length} igreja{churches.length !== 1 ? "s" : ""}
+          Você pertence a {churches.length} igreja
+          {churches.length !== 1 ? "s" : ""}
         </p>
 
         <div className="w-full mt-8 space-y-3">

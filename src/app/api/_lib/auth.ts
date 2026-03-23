@@ -2,6 +2,11 @@ import { cookies } from "next/headers";
 import { AuthErrors } from "@/application/errors/AuthErrors";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
 
+export interface ChurchInfo {
+  churchId: string;
+  roleId: string | null;
+}
+
 export interface SessionPayload {
   userId: string;
   memberId: string;
@@ -10,6 +15,7 @@ export interface SessionPayload {
   avatarUrl: string | null;
   isSuperAdmin: boolean;
   churchId: string | null;
+  churches: ChurchInfo[];
   permissions: string[];
 }
 

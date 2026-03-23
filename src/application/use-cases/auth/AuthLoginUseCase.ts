@@ -186,6 +186,7 @@ export class AuthLoginUseCase extends BaseUseCase<
       avatarUrl: member.avatarUrl,
       isSuperAdmin: user.isSuperAdmin,
       churchId: defaultChurchId,
+      churches,
       permissions,
     };
 

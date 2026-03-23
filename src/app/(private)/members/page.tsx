@@ -54,7 +54,7 @@ export default function MembersPage() {
               key={member.id}
               icon={User}
               title={member.fullName}
-              description={member.churchName ?? undefined}
+              description={member.churches.map((c) => c.churchName).join(", ")}
               onClick={() => handleEditMember(member.id)}
             />
           ))}

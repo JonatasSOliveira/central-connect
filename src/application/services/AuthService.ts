@@ -1,5 +1,10 @@
 import type { AuthLoginOutputDTO } from "../dtos/auth/AuthLoginOutputDTO";
 
+export interface CurrentUserChurch {
+  churchId: string;
+  roleId: string | null;
+}
+
 export interface CurrentUser {
   userId: string;
   memberId: string;
@@ -8,6 +13,7 @@ export interface CurrentUser {
   avatarUrl: string | null;
   isSuperAdmin: boolean;
   churchId: string | null;
+  churches: CurrentUserChurch[];
   permissions: string[];
 }
 

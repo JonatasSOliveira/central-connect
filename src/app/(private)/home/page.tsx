@@ -37,7 +37,8 @@ export default function HomePage() {
     requiredPermissions: [Permission.CHURCH_READ],
   });
 
-  const canShowAdminSection = canManageMembers || canManageRoles || canManageChurches;
+  const canShowAdminSection =
+    canManageMembers || canManageRoles || canManageChurches;
 
   return (
     <div className="p-6 app-background">

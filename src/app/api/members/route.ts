@@ -1,8 +1,34 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { CreateMemberInputSchema } from "@/application/dtos/member/CreateMemberDTO";
+import { Permission } from "@/domain/enums/Permission";
 import { memberContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { requireSuperAdmin, validateSession } from "../_lib/auth";
+import { validateSession } from "../_lib/auth";
+
+function buildUserChurches(
+  isSuperAdmin: boolean,
+  userChurches: { churchId: string; roleId: string | null }[],
+  permissions: string[],
+): {
+  churchId: string;
+  roleId: string | null;
+  hasMemberRead: boolean;
+  hasMemberWrite: boolean;
+}[] {
+  if (isSuperAdmin) {
+    return userChurches.map((c) => ({
+      ...c,
+      hasMemberRead: true,
+      hasMemberWrite: true,
+    }));
+  }
+
+  return userChurches.map((c) => ({
+    churchId: c.churchId,
+    roleId: c.roleId,
+    hasMemberRead: permissions.includes(Permission.MEMBER_READ),
+    hasMemberWrite: permissions.includes(Permission.MEMBER_WRITE),
+  }));
+}
 
 export async function GET() {
   const auth = await validateSession();
@@ -11,7 +37,16 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const result = await memberContainer.listMembers.execute();
+  const { user } = auth;
+
+  const result = await memberContainer.listMembers.execute({
+    isSuperAdmin: user.isSuperAdmin,
+    userChurches: buildUserChurches(
+      user.isSuperAdmin,
+      user.churches,
+      user.permissions,
+    ),
+  });
 
   if (!result.ok) {
     const errorCode = result.error?.code;
@@ -30,10 +65,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const superAdminCheck = requireSuperAdmin(auth.user);
-  if (superAdminCheck) {
+  const { user } = auth;
+
+  const canCreateMember =
+    user.isSuperAdmin || user.permissions.includes(Permission.MEMBER_WRITE);
+
+  if (!canCreateMember) {
     return NextResponse.json(
-      { ok: false, error: superAdminCheck.error },
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para criar membros",
+        },
+      },
       { status: 403 },
     );
   }
@@ -54,11 +99,35 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  const { CreateMemberInputSchema } = await import(
+    "@/application/dtos/member/CreateMemberDTO"
+  );
   const parsed = CreateMemberInputSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(apiError("VALIDATION_ERROR", parsed.error), {
       status: 400,
     });
+  }
+
+  if (!user.isSuperAdmin) {
+    const userWritableChurchIds = user.churches
+      .filter((c) => user.permissions.includes(Permission.MEMBER_WRITE))
+      .map((c) => c.churchId);
+
+    for (const churchInfo of parsed.data.churches) {
+      if (!userWritableChurchIds.includes(churchInfo.churchId)) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: {
+              code: "NOT_AUTHORIZED",
+              message: "Sem permissão para adicionar membros a esta igreja",
+            },
+          },
+          { status: 403 },
+        );
+      }
+    }
   }
 
   const result = await memberContainer.createMember.execute(parsed.data);

@@ -1,9 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { MemberListItem } from "@/application/dtos/member/ListMembersDTO";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface UseMembersReturn {
   members: MemberListItem[];
@@ -11,8 +9,6 @@ interface UseMembersReturn {
 }
 
 export function useMembers(): UseMembersReturn {
-  const router = useRouter();
-  const { user } = useAuth();
   const [members, setMembers] = useState<MemberListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -33,7 +29,7 @@ export function useMembers(): UseMembersReturn {
     };
 
     fetchMembers();
-  }, [user, router]);
+  }, []);
 
   return { members, isLoading };
 }

@@ -1,20 +1,27 @@
+import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
+import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { Result } from "@/shared/types/Result";
-import type { GetMemberOutput } from "../../dtos/member/GetMemberDTO";
+import type {
+  GetMemberInput,
+  GetMemberOutput,
+} from "../../dtos/member/GetMemberDTO";
 import { BaseUseCase } from "../BaseUseCase";
 
-export class GetMember extends BaseUseCase<string, GetMemberOutput> {
+export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
   constructor(
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
+    private readonly churchRepository: IChurchRepository,
+    private readonly roleRepository: IRoleRepository,
   ) {
     super();
   }
 
-  async execute(id: string): Promise<Result<GetMemberOutput>> {
+  async execute(input: GetMemberInput): Promise<Result<GetMemberOutput>> {
     try {
-      const member = await this.memberRepository.findById(id);
+      const member = await this.memberRepository.findById(input.memberId);
 
       if (!member) {
         return {
@@ -26,10 +33,51 @@ export class GetMember extends BaseUseCase<string, GetMemberOutput> {
         };
       }
 
-      const memberChurches =
-        await this.memberChurchRepository.findByMemberId(id);
-      const churchId =
-        memberChurches.length > 0 ? memberChurches[0].churchId : null;
+      const memberChurches = await this.memberChurchRepository.findByMemberId(
+        input.memberId,
+      );
+
+      const userChurchMap = new Map(
+        (input.userChurches ?? []).map((uc) => [uc.churchId, uc]),
+      );
+
+      const churchesWithPermission = await Promise.all(
+        memberChurches.map(async (mc) => {
+          const userChurch = userChurchMap.get(mc.churchId);
+          const church = await this.churchRepository.findById(mc.churchId);
+          const role = mc.roleId
+            ? await this.roleRepository.findById(mc.roleId)
+            : null;
+
+          let userPermission: "write" | "read" | null = null;
+
+          if (input.isSuperAdmin) {
+            userPermission = "write";
+          } else if (userChurch) {
+            if (userChurch.hasMemberWrite) {
+              userPermission = "write";
+            } else if (userChurch.hasMemberRead) {
+              userPermission = "read";
+            }
+          }
+
+          return {
+            churchId: mc.churchId,
+            churchName: church?.name ?? "Igreja não encontrada",
+            roleId: mc.roleId ?? "",
+            roleName: role?.name ?? "Cargo não encontrado",
+            userPermission,
+          };
+        }),
+      );
+
+      let visibleChurches = churchesWithPermission.filter(
+        (c) => c.userPermission !== null,
+      );
+
+      if (input.isSuperAdmin) {
+        visibleChurches = churchesWithPermission;
+      }
 
       return {
         ok: true,
@@ -40,7 +88,7 @@ export class GetMember extends BaseUseCase<string, GetMemberOutput> {
           phone: member.phone,
           status: member.status,
           avatarUrl: member.avatarUrl,
-          churchId,
+          churches: visibleChurches,
         },
       };
     } catch {

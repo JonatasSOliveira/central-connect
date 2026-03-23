@@ -1,10 +1,37 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { Permission } from "@/domain/enums/Permission";
 import { memberContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { requireSuperAdmin, validateSession } from "../../_lib/auth";
+import { validateSession } from "../../_lib/auth";
 
 interface RouteParams {
   params: Promise<{ memberId: string }>;
+}
+
+function buildUserChurches(
+  isSuperAdmin: boolean,
+  userChurches: { churchId: string; roleId: string | null }[],
+  permissions: string[],
+): {
+  churchId: string;
+  roleId: string | null;
+  hasMemberRead: boolean;
+  hasMemberWrite: boolean;
+}[] {
+  if (isSuperAdmin) {
+    return userChurches.map((c) => ({
+      ...c,
+      hasMemberRead: true,
+      hasMemberWrite: true,
+    }));
+  }
+
+  return userChurches.map((c) => ({
+    churchId: c.churchId,
+    roleId: c.roleId,
+    hasMemberRead: permissions.includes(Permission.MEMBER_READ),
+    hasMemberWrite: permissions.includes(Permission.MEMBER_WRITE),
+  }));
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
@@ -14,8 +41,18 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
+  const { user } = auth;
   const { memberId } = await params;
-  const result = await memberContainer.getMember.execute(memberId);
+
+  const result = await memberContainer.getMember.execute({
+    memberId,
+    isSuperAdmin: user.isSuperAdmin,
+    userChurches: buildUserChurches(
+      user.isSuperAdmin,
+      user.churches,
+      user.permissions,
+    ),
+  });
 
   if (!result.ok) {
     const errorCode = result.error?.code;
@@ -34,10 +71,24 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const superAdminCheck = requireSuperAdmin(auth.user);
-  if (superAdminCheck) {
+  const { user } = auth;
+  const { memberId } = await params;
+
+  const canEditMember =
+    user.isSuperAdmin ||
+    user.permissions.includes(Permission.MEMBER_WRITE) ||
+    (user.permissions.includes(Permission.MEMBER_SELF_WRITE) &&
+      memberId === user.memberId);
+
+  if (!canEditMember) {
     return NextResponse.json(
-      { ok: false, error: superAdminCheck.error },
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para editar este membro",
+        },
+      },
       { status: 403 },
     );
   }
@@ -58,8 +109,41 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
   }
 
-  const { memberId } = await params;
-  const result = await memberContainer.getMember.execute(memberId);
+  const { UpdateMemberInputSchema } = await import(
+    "@/application/dtos/member/CreateMemberDTO"
+  );
+  const parsed = UpdateMemberInputSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(apiError("VALIDATION_ERROR", parsed.error), {
+      status: 400,
+    });
+  }
+
+  if (!user.isSuperAdmin && parsed.data.churches) {
+    const userWritableChurchIds = user.churches
+      .filter((c) => user.permissions.includes(Permission.MEMBER_WRITE))
+      .map((c) => c.churchId);
+
+    for (const churchInfo of parsed.data.churches) {
+      if (!userWritableChurchIds.includes(churchInfo.churchId)) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: {
+              code: "NOT_AUTHORIZED",
+              message: "Sem permissão para adicionar membros a esta igreja",
+            },
+          },
+          { status: 403 },
+        );
+      }
+    }
+  }
+
+  const result = await memberContainer.updateMember.execute({
+    memberId,
+    input: parsed.data,
+  });
 
   const errorCode = "error" in result ? result.error?.code : undefined;
 
@@ -75,20 +159,29 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const superAdminCheck = requireSuperAdmin(auth.user);
-  if (superAdminCheck) {
+  if (!auth.user.isSuperAdmin) {
     return NextResponse.json(
-      { ok: false, error: superAdminCheck.error },
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Apenas super administradores podem excluir membros",
+        },
+      },
       { status: 403 },
     );
   }
 
-  const { memberId } = await params;
-  const result = await memberContainer.getMember.execute(memberId);
+  const _p = await params;
 
-  const errorCode = "error" in result ? result.error?.code : undefined;
-
-  return NextResponse.json(result, {
-    status: result.ok ? 200 : getHttpStatus(errorCode),
-  });
+  return NextResponse.json(
+    {
+      ok: false,
+      error: {
+        code: "NOT_IMPLEMENTED",
+        message: "Funcionalidade não implementada",
+      },
+    },
+    { status: 501 },
+  );
 }

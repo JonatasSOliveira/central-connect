@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, X } from "lucide-react";
 import type { ReactNode } from "react";
 import type { SubmitHandler, UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,7 @@ function FormFooter({
   return (
     <div
       className={cn(
-        "flex flex-col-reverse sm:flex-row gap-2 pt-4 border-t border-border/50",
+        "flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-border/50",
         className,
       )}
     >
@@ -68,13 +69,21 @@ function FormFooter({
           variant="outline"
           onClick={onCancel}
           disabled={isLoading}
-          className="flex-1"
+          className="flex-1 min-h-12"
         >
+          <X className="w-4 h-4 mr-2" />
           {cancelLabel}
         </Button>
       )}
-      <Button type="submit" disabled={isLoading} className="flex-1">
-        {isLoading ? "Salvando..." : submitLabel}
+      <Button type="submit" disabled={isLoading} className="flex-1 min-h-12">
+        {isLoading ? (
+          "Salvando..."
+        ) : (
+          <>
+            <Check className="w-4 h-4 mr-2" />
+            {submitLabel}
+          </>
+        )}
       </Button>
     </div>
   );

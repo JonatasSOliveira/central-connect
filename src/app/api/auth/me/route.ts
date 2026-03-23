@@ -18,6 +18,7 @@ export async function GET() {
       avatarUrl: auth.user.avatarUrl ?? null,
       isSuperAdmin: auth.user.isSuperAdmin,
       churchId: auth.user.churchId ?? null,
+      churches: auth.user.churches,
       permissions: auth.user.permissions,
     },
   });

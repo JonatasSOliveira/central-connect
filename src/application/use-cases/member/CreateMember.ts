@@ -48,15 +48,17 @@ export class CreateMember extends BaseUseCase<
       const member = new Member(memberParams);
       const createdMember = await this.memberRepository.create(member);
 
-      const memberChurchParams: MemberChurchParams = {
-        memberId: createdMember.id,
-        churchId: input.churchId,
-        roleId: input.roleId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      const memberChurch = new MemberChurch(memberChurchParams);
-      await this.memberChurchRepository.create(memberChurch);
+      for (const churchInfo of input.churches) {
+        const memberChurchParams: MemberChurchParams = {
+          memberId: createdMember.id,
+          churchId: churchInfo.churchId,
+          roleId: churchInfo.roleId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        const memberChurch = new MemberChurch(memberChurchParams);
+        await this.memberChurchRepository.create(memberChurch);
+      }
 
       return {
         ok: true,
