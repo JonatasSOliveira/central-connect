@@ -1,0 +1,84 @@
+import { AuthLoginUseCase } from "@/application/use-cases/auth/AuthLoginUseCase";
+import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
+import type { IInviteRepository } from "@/domain/ports/IInviteRepository";
+import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
+import type { ITokenService } from "@/domain/ports/ITokenService";
+import type { IUserRepository } from "@/domain/ports/IUserRepository";
+import { InviteFirebaseRepository } from "@/infra/firebase-admin/repositories/InviteFirebaseRepository";
+import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
+import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
+import { UserFirebaseRepository } from "@/infra/firebase-admin/repositories/UserFirebaseRepository";
+import { GoogleAuthFirebaseService } from "@/infra/firebase-admin/services/GoogleAuthFirebaseService";
+import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
+
+class AuthContainer {
+  private static _googleAuthService: IGoogleAuthService | null = null;
+  private static _tokenService: ITokenService | null = null;
+  private static _userRepository: IUserRepository | null = null;
+  private static _memberRepository: IMemberRepository | null = null;
+  private static _memberChurchRepository: IMemberChurchRepository | null = null;
+  private static _inviteRepository: IInviteRepository | null = null;
+  private static _authLoginUseCase: AuthLoginUseCase | null = null;
+
+  private constructor() {}
+
+  static get googleAuthService(): IGoogleAuthService {
+    if (!AuthContainer._googleAuthService) {
+      AuthContainer._googleAuthService = new GoogleAuthFirebaseService();
+    }
+    return AuthContainer._googleAuthService;
+  }
+
+  static get tokenService(): ITokenService {
+    if (!AuthContainer._tokenService) {
+      AuthContainer._tokenService = new JoseTokenJwtService();
+    }
+    return AuthContainer._tokenService;
+  }
+
+  static get userRepository(): IUserRepository {
+    if (!AuthContainer._userRepository) {
+      AuthContainer._userRepository = new UserFirebaseRepository();
+    }
+    return AuthContainer._userRepository;
+  }
+
+  static get memberRepository(): IMemberRepository {
+    if (!AuthContainer._memberRepository) {
+      AuthContainer._memberRepository = new MemberFirebaseRepository();
+    }
+    return AuthContainer._memberRepository;
+  }
+
+  static get memberChurchRepository(): IMemberChurchRepository {
+    if (!AuthContainer._memberChurchRepository) {
+      AuthContainer._memberChurchRepository =
+        new MemberChurchFirebaseRepository();
+    }
+    return AuthContainer._memberChurchRepository;
+  }
+
+  static get inviteRepository(): IInviteRepository {
+    if (!AuthContainer._inviteRepository) {
+      AuthContainer._inviteRepository = new InviteFirebaseRepository();
+    }
+    return AuthContainer._inviteRepository;
+  }
+
+  static get authLoginUseCase(): AuthLoginUseCase {
+    if (!AuthContainer._authLoginUseCase) {
+      AuthContainer._authLoginUseCase = new AuthLoginUseCase(
+        AuthContainer.googleAuthService,
+        AuthContainer.tokenService,
+        AuthContainer.userRepository,
+        AuthContainer.memberRepository,
+        AuthContainer.memberChurchRepository,
+        AuthContainer.inviteRepository,
+      );
+    }
+    return AuthContainer._authLoginUseCase;
+  }
+}
+
+export const authContainer = AuthContainer;

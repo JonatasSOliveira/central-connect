@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { CreateChurchInputSchema } from "@/application/dtos/church/CreateChurchDTO";
-import { container } from "@/infra/di/container";
+import { churchContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 import { requireSuperAdmin, validateSession } from "../../_lib/auth";
 
@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   }
 
   const { churchId } = await params;
-  const result = await container.getChurch.execute({ churchId });
+  const result = await churchContainer.getChurch.execute({ churchId });
 
   if (!result.ok) {
     const errorCode = result.error?.code;
@@ -68,7 +68,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
   const { churchId } = await params;
 
-  const result = await container.updateChurch.execute({
+  const result = await churchContainer.updateChurch.execute({
     churchId,
     name: parsed.data.name,
     updatedByUserId: auth.user.userId,

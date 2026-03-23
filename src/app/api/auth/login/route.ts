@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { AuthLoginInputSchema } from "@/application/dtos/auth/AuthLoginInputDTO";
-import { container } from "@/infra/di/container";
+import { authContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 
 export async function POST(request: NextRequest) {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const result = await container.authLoginUseCase.execute(parsed.data);
+  const result = await authContainer.authLoginUseCase.execute(parsed.data);
   const errorCode = "error" in result ? result.error?.code : undefined;
 
   if (result.ok && result.value?.sessionToken) {

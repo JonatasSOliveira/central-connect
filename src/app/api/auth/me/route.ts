@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { container } from "@/infra/di/container";
+import { memberContainer } from "@/infra/di";
 import { validateSession } from "../../_lib/auth";
 
 export async function GET() {
@@ -9,8 +9,9 @@ export async function GET() {
     return NextResponse.json({ ok: false, value: null }, { status: 401 });
   }
 
-  const memberRepository = container.memberRepository;
-  const member = await memberRepository.findById(auth.user.memberId);
+  const member = await memberContainer.memberRepository.findById(
+    auth.user.memberId,
+  );
 
   if (!member) {
     const response = NextResponse.json(

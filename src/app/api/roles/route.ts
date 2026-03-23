@@ -1,27 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { CreateChurchInputSchema } from "@/application/dtos/church/CreateChurchDTO";
-import { churchContainer } from "@/infra/di";
+import { CreateRoleInputSchema } from "@/application/dtos/role/CreateRoleDTO";
+import { roleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 import { requireSuperAdmin, validateSession } from "../_lib/auth";
-
-export async function GET() {
-  const auth = await validateSession();
-
-  if (!auth.ok) {
-    return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
-  }
-
-  const result = await churchContainer.listChurches.execute();
-
-  if (!result.ok) {
-    const errorCode = result.error?.code;
-    return NextResponse.json(result, {
-      status: getHttpStatus(errorCode),
-    });
-  }
-
-  return NextResponse.json(result, { status: 200 });
-}
 
 export async function POST(request: NextRequest) {
   const auth = await validateSession();
@@ -54,17 +35,14 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const parsed = CreateChurchInputSchema.safeParse(body);
+  const parsed = CreateRoleInputSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(apiError("VALIDATION_ERROR", parsed.error), {
       status: 400,
     });
   }
 
-  const result = await churchContainer.createChurch.execute({
-    name: parsed.data.name,
-    createdByUserId: auth.user.userId,
-  });
+  const result = await roleContainer.createRole.execute(parsed.data);
 
   const errorCode = "error" in result ? result.error?.code : undefined;
 
