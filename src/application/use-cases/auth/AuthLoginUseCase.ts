@@ -1,11 +1,6 @@
 import { Member, type MemberParams } from "@/domain/entities/Member";
-import {
-  MemberChurch,
-  type MemberChurchParams,
-} from "@/domain/entities/MemberChurch";
 import { User, type UserParams } from "@/domain/entities/User";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
-import type { IInviteRepository } from "@/domain/ports/IInviteRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { ITokenService } from "@/domain/ports/ITokenService";
@@ -31,7 +26,6 @@ export class AuthLoginUseCase extends BaseUseCase<
     private readonly userRepository: IUserRepository,
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
-    private readonly inviteRepository: IInviteRepository,
   ) {
     super();
   }
@@ -76,30 +70,7 @@ export class AuthLoginUseCase extends BaseUseCase<
         return this.buildSuccessResponse(newUser, newMember, []);
       }
 
-      const invite = await this.inviteRepository.findByEmail(googleUser.email);
-      if (!invite) {
-        return this.buildErrorResponse(AuthErrors.NO_INVITE_FOUND);
-      }
-
-      const newMember = await this.createMember(
-        googleUser.email,
-        googleUser.name,
-        googleUser.picture,
-      );
-
-      await this.createMemberChurch(
-        newMember.id,
-        invite.churchId,
-        invite.roleId,
-      );
-
-      await this.inviteRepository.markAsUsed(invite.id);
-
-      const newUser = await this.createUser(newMember.id);
-
-      return this.buildSuccessResponse(newUser, newMember, [
-        { churchId: invite.churchId, roleId: invite.roleId },
-      ]);
+      return this.buildErrorResponse(AuthErrors.NO_INVITE_FOUND);
     } catch (error) {
       console.error("[AuthLoginUseCase] Error:", error);
       return this.buildErrorResponse(AuthErrors.INTERNAL_ERROR);
@@ -124,22 +95,6 @@ export class AuthLoginUseCase extends BaseUseCase<
     };
     const member = new Member(memberParams);
     return this.memberRepository.create(member);
-  }
-
-  private async createMemberChurch(
-    memberId: string,
-    churchId: string,
-    roleId: string,
-  ): Promise<MemberChurch> {
-    const memberChurchParams: MemberChurchParams = {
-      memberId,
-      churchId,
-      roleId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    const memberChurch = new MemberChurch(memberChurchParams);
-    return this.memberChurchRepository.create(memberChurch);
   }
 
   private async createUser(

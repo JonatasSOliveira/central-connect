@@ -28,8 +28,6 @@ const permissionLabels: Record<Permission, string> = {
   [Permission.SCHEDULE_WRITE]: "Escalas: Escrita",
   [Permission.ROLE_READ]: "Cargos: Leitura",
   [Permission.ROLE_WRITE]: "Cargos: Escrita",
-  [Permission.INVITE_READ]: "Convites: Leitura",
-  [Permission.INVITE_WRITE]: "Convites: Escrita",
 };
 
 const groupLabels: Record<string, string> = {
@@ -37,7 +35,6 @@ const groupLabels: Record<string, string> = {
   MEMBER: "Membros",
   SCHEDULE: "Escalas",
   ROLE: "Cargos",
-  INVITE: "Convites",
 };
 
 export function PermissionSelect({

@@ -1,18 +1,17 @@
-import { CreateMemberWithChurch } from "@/application/use-cases/member/CreateMemberWithChurch";
-import { LinkUserToMember } from "@/application/use-cases/member/LinkUserToMember";
+import { CreateMember } from "@/application/use-cases/member/CreateMember";
+import { GetMember } from "@/application/use-cases/member/GetMember";
+import { ListMembers } from "@/application/use-cases/member/ListMembers";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
-import type { IUserRepository } from "@/domain/ports/IUserRepository";
 import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
-import { UserFirebaseRepository } from "@/infra/firebase-admin/repositories/UserFirebaseRepository";
 
 class MemberContainer {
   private static _memberRepository: IMemberRepository | null = null;
   private static _memberChurchRepository: IMemberChurchRepository | null = null;
-  private static _userRepository: IUserRepository | null = null;
-  private static _createMemberWithChurch: CreateMemberWithChurch | null = null;
-  private static _linkUserToMember: LinkUserToMember | null = null;
+  private static _listMembers: ListMembers | null = null;
+  private static _createMember: CreateMember | null = null;
+  private static _getMember: GetMember | null = null;
 
   private constructor() {}
 
@@ -31,30 +30,33 @@ class MemberContainer {
     return MemberContainer._memberChurchRepository;
   }
 
-  static get userRepository(): IUserRepository {
-    if (!MemberContainer._userRepository) {
-      MemberContainer._userRepository = new UserFirebaseRepository();
-    }
-    return MemberContainer._userRepository;
-  }
-
-  static get createMemberWithChurch(): CreateMemberWithChurch {
-    if (!MemberContainer._createMemberWithChurch) {
-      MemberContainer._createMemberWithChurch = new CreateMemberWithChurch(
+  static get listMembers(): ListMembers {
+    if (!MemberContainer._listMembers) {
+      MemberContainer._listMembers = new ListMembers(
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
       );
     }
-    return MemberContainer._createMemberWithChurch;
+    return MemberContainer._listMembers;
   }
 
-  static get linkUserToMember(): LinkUserToMember {
-    if (!MemberContainer._linkUserToMember) {
-      MemberContainer._linkUserToMember = new LinkUserToMember(
-        MemberContainer.userRepository,
+  static get createMember(): CreateMember {
+    if (!MemberContainer._createMember) {
+      MemberContainer._createMember = new CreateMember(
+        MemberContainer.memberRepository,
+        MemberContainer.memberChurchRepository,
       );
     }
-    return MemberContainer._linkUserToMember;
+    return MemberContainer._createMember;
+  }
+
+  static get getMember(): GetMember {
+    if (!MemberContainer._getMember) {
+      MemberContainer._getMember = new GetMember(
+        MemberContainer.memberRepository,
+      );
+    }
+    return MemberContainer._getMember;
   }
 }
 

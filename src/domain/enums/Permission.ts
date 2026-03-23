@@ -12,9 +12,6 @@ export enum Permission {
 
   ROLE_READ = "role:read",
   ROLE_WRITE = "role:write",
-
-  INVITE_READ = "invite:read",
-  INVITE_WRITE = "invite:write",
 }
 
 export const PermissionGroups = {
@@ -27,7 +24,6 @@ export const PermissionGroups = {
   MEMBER: [Permission.MEMBER_READ, Permission.MEMBER_WRITE],
   SCHEDULE: [Permission.SCHEDULE_READ, Permission.SCHEDULE_WRITE],
   ROLE: [Permission.ROLE_READ, Permission.ROLE_WRITE],
-  INVITE: [Permission.INVITE_READ, Permission.INVITE_WRITE],
 } as const;
 
 export const AllPermissions = Object.values(Permission);
