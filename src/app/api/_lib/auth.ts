@@ -10,6 +10,7 @@ export interface SessionPayload {
   avatarUrl: string | null;
   isSuperAdmin: boolean;
   churchId: string | null;
+  permissions: string[];
 }
 
 export interface AuthSuccess {

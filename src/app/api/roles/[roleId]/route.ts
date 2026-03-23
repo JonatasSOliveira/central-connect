@@ -1,8 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  GetRoleOutputSchema,
-  ListRolesOutputSchema,
-} from "@/application/dtos/role/ListRolesDTO";
 import { UpdateRoleInputSchema } from "@/application/dtos/role/UpdateRoleDTO";
 import { roleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";

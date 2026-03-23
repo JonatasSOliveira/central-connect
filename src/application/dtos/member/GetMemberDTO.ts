@@ -1,14 +1,9 @@
-import { z } from "zod";
-
-export const GetMemberOutputSchema = z.object({
-  id: z.string(),
-  email: z.string(),
-  fullName: z.string(),
-  phone: z.string().nullable(),
-  status: z.enum(["Active", "Inactive", "Paused"]),
-  avatarUrl: z.string().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-export type GetMemberOutput = z.infer<typeof GetMemberOutputSchema>;
+export type GetMemberOutput = {
+  id: string;
+  email: string;
+  fullName: string;
+  phone: string | null;
+  status: "Active" | "Inactive" | "Paused";
+  avatarUrl: string | null;
+  churchId: string | null;
+};

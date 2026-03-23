@@ -47,10 +47,7 @@ class RoleContainer {
 
   static get listRoles(): ListRoles {
     if (!RoleContainer._listRoles) {
-      RoleContainer._listRoles = new ListRoles(
-        RoleContainer.roleRepository,
-        RoleContainer.rolePermissionRepository,
-      );
+      RoleContainer._listRoles = new ListRoles(RoleContainer.roleRepository);
     }
     return RoleContainer._listRoles;
   }

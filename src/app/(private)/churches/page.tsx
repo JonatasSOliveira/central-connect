@@ -4,10 +4,17 @@ import { Building2, Plus, Inbox } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useChurches } from "@/features/churches/hooks/useChurches";
+import { Permission } from "@/domain/enums/Permission";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 export default function ChurchesPage() {
   const router = useRouter();
   const { churches, isLoading } = useChurches();
+
+  usePermissions({
+    requiredPermissions: [Permission.CHURCH_READ],
+    redirectTo: "/home",
+  });
 
   const handleCreateChurch = () => {
     router.push("/churches/new");

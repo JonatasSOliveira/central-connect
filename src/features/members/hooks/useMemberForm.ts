@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
 import {
   type CreateMemberInput,
   CreateMemberInputSchema,
@@ -23,6 +24,7 @@ interface UseMemberFormReturn {
   onSubmit: (data: CreateMemberInput) => Promise<void>;
   isEdit: boolean;
   roles: RoleListItem[];
+  churches: ChurchListItemDTO[];
 }
 
 export function useMemberForm({
@@ -33,6 +35,7 @@ export function useMemberForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
   const [roles, setRoles] = useState<RoleListItem[]>([]);
+  const [churches, setChurches] = useState<ChurchListItemDTO[]>([]);
 
   const form = useForm<CreateMemberInput>({
     resolver: zodResolver(CreateMemberInputSchema),
@@ -59,7 +62,20 @@ export function useMemberForm({
       }
     };
 
+    const fetchChurches = async () => {
+      try {
+        const response = await fetch("/api/churches");
+        const data = await response.json();
+        if (data.ok) {
+          setChurches(data.value.churches);
+        }
+      } catch (error) {
+        console.error("Error fetching churches:", error);
+      }
+    };
+
     fetchRoles();
+    fetchChurches();
   }, []);
 
   useEffect(() => {
@@ -144,5 +160,6 @@ export function useMemberForm({
     onSubmit,
     isEdit: mode === "edit",
     roles,
+    churches,
   };
 }

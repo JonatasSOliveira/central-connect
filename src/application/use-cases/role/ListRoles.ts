@@ -1,14 +1,10 @@
-import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { Result } from "@/shared/types/Result";
 import type { ListRolesOutput } from "../../dtos/role/ListRolesDTO";
 import { BaseUseCase } from "../BaseUseCase";
 
 export class ListRoles extends BaseUseCase<undefined, ListRolesOutput> {
-  constructor(
-    private readonly roleRepository: IRoleRepository,
-    private readonly rolePermissionRepository: IRolePermissionRepository,
-  ) {
+  constructor(private readonly roleRepository: IRoleRepository) {
     super();
   }
 
@@ -16,24 +12,15 @@ export class ListRoles extends BaseUseCase<undefined, ListRolesOutput> {
     try {
       const roles = await this.roleRepository.findAll();
 
-      const rolesWithPermissions = await Promise.all(
-        roles.map(async (role) => {
-          const rolePermissions =
-            await this.rolePermissionRepository.findByRoleId(role.id);
-          return {
-            id: role.id,
-            name: role.name,
-            description: role.description,
-            permissions: rolePermissions.map((rp) => rp.permission),
-            isSystem: role.isSystem,
-          };
-        }),
-      );
+      const rolesList = roles.map((role) => ({
+        id: role.id,
+        name: role.name,
+      }));
 
       return {
         ok: true,
         value: {
-          roles: rolesWithPermissions,
+          roles: rolesList,
         },
       };
     } catch {

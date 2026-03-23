@@ -20,7 +20,7 @@ export function MemberForm({
   backHref = "/members",
 }: MemberFormProps) {
   const router = useRouter();
-  const { form, isLoading, isFetching, onSubmit, isEdit, roles } =
+  const { form, isLoading, isFetching, onSubmit, isEdit, roles, churches } =
     useMemberForm({
       mode,
       memberId,
@@ -57,13 +57,12 @@ export function MemberForm({
               form={form}
               name="email"
               label="Email"
-              placeholder="email@exemplo.com"
               required
             >
               <input
                 type="email"
                 placeholder="email@exemplo.com"
-                className="w-full px-3 py-2 border rounded-md"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 {...form.register("email")}
               />
             </FormField>
@@ -89,12 +88,17 @@ export function MemberForm({
               label="Igreja"
               required
             >
-              <input
-                type="text"
-                placeholder="ID da igreja"
-                className="w-full px-3 py-2 border rounded-md"
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 {...form.register("churchId")}
-              />
+              >
+                <option value="">Selecione uma igreja</option>
+                {churches.map((church) => (
+                  <option key={church.id} value={church.id}>
+                    {church.name}
+                  </option>
+                ))}
+              </select>
             </FormField>
 
             <FormField<CreateMemberInput>
@@ -104,7 +108,7 @@ export function MemberForm({
               required
             >
               <select
-                className="w-full px-3 py-2 border rounded-md"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 {...form.register("roleId")}
               >
                 <option value="">Selecione um cargo</option>

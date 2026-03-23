@@ -26,9 +26,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   initialize: async () => {
     try {
+      console.log("[authStore] initialize: fetching current user...");
       const currentUser = await authService.getCurrentUser();
+      console.log("[authStore] initialize: currentUser received:", {
+        userId: currentUser?.userId,
+        permissions: currentUser?.permissions,
+        isSuperAdmin: currentUser?.isSuperAdmin,
+      });
       set({ user: currentUser, isInitialized: true });
-    } catch {
+    } catch (error) {
+      console.error("[authStore] initialize: error:", error);
       set({ user: null, isInitialized: true });
     } finally {
       set({ isLoading: false });
@@ -39,6 +46,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ isLoading: true });
     try {
       const result = await authService.login(googleToken);
+      console.log("[authStore] login: result.permissions:", result.permissions);
       set({
         user: {
           userId: result.userId,
@@ -49,6 +57,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
           isSuperAdmin: result.isSuperAdmin,
           churchId:
             result.churches.length === 1 ? result.churches[0].churchId : null,
+          permissions: result.permissions,
         },
       });
     } finally {

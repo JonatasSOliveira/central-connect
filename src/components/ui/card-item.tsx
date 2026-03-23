@@ -8,6 +8,7 @@ interface CardItemProps {
   className?: string;
   onClick?: () => void;
   href?: string;
+  variant?: "default" | "destructive";
 }
 
 export function CardItem({
@@ -17,11 +18,26 @@ export function CardItem({
   className,
   onClick,
   href,
+  variant = "default",
 }: CardItemProps) {
+  const iconBgClass =
+    variant === "destructive" ? "bg-destructive/10" : "bg-primary/10";
+  const iconColorClass =
+    variant === "destructive" ? "text-destructive" : "text-primary";
+  const borderHoverClass =
+    variant === "destructive"
+      ? "hover:border-destructive hover:shadow-sm hover:shadow-destructive/5"
+      : "hover:border-primary/30 hover:shadow-sm hover:shadow-primary/5";
+
   const cardContent = (
     <>
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-        <Icon className="h-5 w-5 text-primary" strokeWidth={1.5} />
+      <div
+        className={cn(
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+          iconBgClass,
+        )}
+      >
+        <Icon className={cn("h-5 w-5", iconColorClass)} strokeWidth={1.5} />
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-[15px] text-foreground truncate">
@@ -45,7 +61,7 @@ export function CardItem({
         href={href}
         className={cn(
           "group flex items-center gap-4 rounded-xl border border-border/50 bg-card p-4 transition-all duration-200",
-          "hover:border-primary/30 hover:shadow-sm hover:shadow-primary/5",
+          borderHoverClass,
           className,
         )}
       >
@@ -61,7 +77,7 @@ export function CardItem({
         onClick={onClick}
         className={cn(
           "group flex w-full items-center gap-4 rounded-xl border border-border/50 bg-card p-4 text-left transition-all duration-200",
-          "hover:border-primary/30 hover:shadow-sm hover:shadow-primary/5",
+          borderHoverClass,
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           className,
         )}

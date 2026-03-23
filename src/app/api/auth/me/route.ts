@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { memberContainer } from "@/infra/di";
 import { validateSession } from "../../_lib/auth";
 
 export async function GET() {
@@ -7,19 +6,6 @@ export async function GET() {
 
   if (!auth.ok) {
     return NextResponse.json({ ok: false, value: null }, { status: 401 });
-  }
-
-  const member = await memberContainer.memberRepository.findById(
-    auth.user.memberId,
-  );
-
-  if (!member) {
-    const response = NextResponse.json(
-      { ok: false, value: null },
-      { status: 401 },
-    );
-    response.cookies.delete("session");
-    return response;
   }
 
   return NextResponse.json({
@@ -32,6 +18,7 @@ export async function GET() {
       avatarUrl: auth.user.avatarUrl ?? null,
       isSuperAdmin: auth.user.isSuperAdmin,
       churchId: auth.user.churchId ?? null,
+      permissions: auth.user.permissions,
     },
   });
 }

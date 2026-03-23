@@ -11,5 +11,6 @@ export type AuthLoginOutputDTO = {
   avatarUrl: string | null;
   isSuperAdmin: boolean;
   churches: ChurchInfo[];
+  permissions: string[];
   sessionToken: string;
 };

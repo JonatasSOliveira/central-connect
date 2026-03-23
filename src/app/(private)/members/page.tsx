@@ -4,10 +4,17 @@ import { User, Plus, Inbox } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useMembers } from "@/features/members/hooks/useMembers";
+import { Permission } from "@/domain/enums/Permission";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 export default function MembersPage() {
   const router = useRouter();
   const { members, isLoading } = useMembers();
+
+  usePermissions({
+    requiredPermissions: [Permission.MEMBER_READ],
+    redirectTo: "/home",
+  });
 
   const handleCreateMember = () => {
     router.push("/members/new");
@@ -47,7 +54,7 @@ export default function MembersPage() {
               key={member.id}
               icon={User}
               title={member.fullName}
-              description={member.email}
+              description={member.churchName ?? undefined}
               onClick={() => handleEditMember(member.id)}
             />
           ))}

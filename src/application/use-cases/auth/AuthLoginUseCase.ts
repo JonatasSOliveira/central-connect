@@ -1,8 +1,10 @@
 import { Member, type MemberParams } from "@/domain/entities/Member";
 import { User, type UserParams } from "@/domain/entities/User";
+import { Permission } from "@/domain/enums/Permission";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
+import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { ITokenService } from "@/domain/ports/ITokenService";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
 import type { Result } from "@/shared/types/Result";
@@ -26,6 +28,7 @@ export class AuthLoginUseCase extends BaseUseCase<
     private readonly userRepository: IUserRepository,
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
+    private readonly rolePermissionRepository: IRolePermissionRepository,
   ) {
     super();
   }
@@ -48,16 +51,30 @@ export class AuthLoginUseCase extends BaseUseCase<
 
         if (existingUser) {
           const churches = await this.getMemberChurches(existingMember.id);
+          const permissions = await this.getPermissionsForChurches(
+            churches,
+            existingUser.isSuperAdmin,
+          );
           return this.buildSuccessResponse(
             existingUser,
             existingMember,
             churches,
+            permissions,
           );
         }
 
         const newUser = await this.createUser(existingMember.id);
         const churches = await this.getMemberChurches(existingMember.id);
-        return this.buildSuccessResponse(newUser, existingMember, churches);
+        const permissions = await this.getPermissionsForChurches(
+          churches,
+          newUser.isSuperAdmin,
+        );
+        return this.buildSuccessResponse(
+          newUser,
+          existingMember,
+          churches,
+          permissions,
+        );
       }
 
       if (this.isSuperAdminEmail(googleUser.email)) {
@@ -67,7 +84,12 @@ export class AuthLoginUseCase extends BaseUseCase<
           googleUser.picture,
         );
         const newUser = await this.createUser(newMember.id, true);
-        return this.buildSuccessResponse(newUser, newMember, []);
+        return this.buildSuccessResponse(
+          newUser,
+          newMember,
+          [],
+          this.getAllPermissions(),
+        );
       }
 
       return this.buildErrorResponse(AuthErrors.NO_INVITE_FOUND);
@@ -121,10 +143,38 @@ export class AuthLoginUseCase extends BaseUseCase<
     }));
   }
 
+  private async getPermissionsForChurches(
+    churches: ChurchInfo[],
+    isSuperAdmin: boolean,
+  ): Promise<string[]> {
+    if (isSuperAdmin) {
+      return this.getAllPermissions();
+    }
+
+    const permissionsSet = new Set<string>();
+
+    for (const church of churches) {
+      if (church.roleId) {
+        const rolePermissions =
+          await this.rolePermissionRepository.findByRoleId(church.roleId);
+        rolePermissions.forEach((rp) => {
+          permissionsSet.add(rp.permission);
+        });
+      }
+    }
+
+    return Array.from(permissionsSet);
+  }
+
+  private getAllPermissions(): string[] {
+    return Object.values(Permission);
+  }
+
   private async buildSuccessResponse(
     user: User,
     member: Member,
     churches: ChurchInfo[],
+    permissions: string[],
   ): Promise<Result<AuthLoginOutputDTO>> {
     const defaultChurchId = churches.length === 1 ? churches[0].churchId : null;
 
@@ -136,6 +186,7 @@ export class AuthLoginUseCase extends BaseUseCase<
       avatarUrl: member.avatarUrl,
       isSuperAdmin: user.isSuperAdmin,
       churchId: defaultChurchId,
+      permissions,
     };
 
     const sessionToken = await this.tokenService.generateToken(sessionPayload);
@@ -150,6 +201,7 @@ export class AuthLoginUseCase extends BaseUseCase<
         avatarUrl: member.avatarUrl,
         isSuperAdmin: user.isSuperAdmin,
         churches,
+        permissions,
         sessionToken,
       },
     };

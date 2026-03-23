@@ -4,10 +4,17 @@ import { Plus, Inbox, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useRoles } from "@/features/roles/hooks/useRoles";
+import { Permission } from "@/domain/enums/Permission";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 export default function RolesPage() {
   const router = useRouter();
   const { roles, isLoading } = useRoles();
+
+  usePermissions({
+    requiredPermissions: [Permission.ROLE_READ],
+    redirectTo: "/home",
+  });
 
   const handleCreateRole = () => {
     router.push("/roles/new");
@@ -47,7 +54,6 @@ export default function RolesPage() {
               key={role.id}
               icon={Shield}
               title={role.name}
-              description={role.isSystem ? "Cargo do sistema" : undefined}
               onClick={() => handleEditRole(role.id)}
             />
           ))}

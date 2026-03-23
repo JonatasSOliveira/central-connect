@@ -17,13 +17,6 @@ export function useMembers(): UseMembersReturn {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (user && !user.isSuperAdmin) {
-      router.push("/home");
-      return;
-    }
-
-    if (!user) return;
-
     const fetchMembers = async () => {
       try {
         const response = await fetch("/api/members");

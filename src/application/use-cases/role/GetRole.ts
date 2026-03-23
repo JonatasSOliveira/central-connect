@@ -44,8 +44,6 @@ export class GetRole extends BaseUseCase<GetRoleInput, GetRoleOutput> {
           description: role.description,
           permissions,
           isSystem: role.isSystem,
-          createdAt: role.createdAt,
-          updatedAt: role.updatedAt,
         },
       };
     } catch {

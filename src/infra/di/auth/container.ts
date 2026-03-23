@@ -2,10 +2,12 @@ import { AuthLoginUseCase } from "@/application/use-cases/auth/AuthLoginUseCase"
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
+import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { ITokenService } from "@/domain/ports/ITokenService";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
 import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
+import { RolePermissionFirebaseRepository } from "@/infra/firebase-admin/repositories/RolePermissionFirebaseRepository";
 import { UserFirebaseRepository } from "@/infra/firebase-admin/repositories/UserFirebaseRepository";
 import { GoogleAuthFirebaseService } from "@/infra/firebase-admin/services/GoogleAuthFirebaseService";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
@@ -16,6 +18,8 @@ class AuthContainer {
   private static _userRepository: IUserRepository | null = null;
   private static _memberRepository: IMemberRepository | null = null;
   private static _memberChurchRepository: IMemberChurchRepository | null = null;
+  private static _rolePermissionRepository: IRolePermissionRepository | null =
+    null;
   private static _authLoginUseCase: AuthLoginUseCase | null = null;
 
   private constructor() {}
@@ -56,6 +60,14 @@ class AuthContainer {
     return AuthContainer._memberChurchRepository;
   }
 
+  static get rolePermissionRepository(): IRolePermissionRepository {
+    if (!AuthContainer._rolePermissionRepository) {
+      AuthContainer._rolePermissionRepository =
+        new RolePermissionFirebaseRepository();
+    }
+    return AuthContainer._rolePermissionRepository;
+  }
+
   static get authLoginUseCase(): AuthLoginUseCase {
     if (!AuthContainer._authLoginUseCase) {
       AuthContainer._authLoginUseCase = new AuthLoginUseCase(
@@ -64,6 +76,7 @@ class AuthContainer {
         AuthContainer.userRepository,
         AuthContainer.memberRepository,
         AuthContainer.memberChurchRepository,
+        AuthContainer.rolePermissionRepository,
       );
     }
     return AuthContainer._authLoginUseCase;
