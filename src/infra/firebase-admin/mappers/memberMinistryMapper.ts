@@ -17,6 +17,10 @@ export function memberMinistryToPersistence(
     ministryId: memberMinistry.ministryId,
     createdAt: memberMinistry.createdAt,
     updatedAt: memberMinistry.updatedAt,
+<<<<<<< Updated upstream
+=======
+    deletedAt: memberMinistry.deletedAt,
+>>>>>>> Stashed changes
   });
 }
 

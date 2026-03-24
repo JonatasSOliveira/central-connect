@@ -24,7 +24,11 @@ export class MinistryRoleFirebaseRepository
   }
 
   async findByMinistryId(ministryId: string): Promise<MinistryRole[]> {
+<<<<<<< Updated upstream
     const snapshot = await this.collection
+=======
+    const snapshot = await this.buildActiveQuery()
+>>>>>>> Stashed changes
       .where("ministryId", "==", ministryId)
       .get();
     return snapshot.docs.map((doc) =>
@@ -33,7 +37,11 @@ export class MinistryRoleFirebaseRepository
   }
 
   async findByChurchId(churchId: string): Promise<MinistryRole[]> {
+<<<<<<< Updated upstream
     const snapshot = await this.collection
+=======
+    const snapshot = await this.buildActiveQuery()
+>>>>>>> Stashed changes
       .where("churchId", "==", churchId)
       .get();
     return snapshot.docs.map((doc) =>

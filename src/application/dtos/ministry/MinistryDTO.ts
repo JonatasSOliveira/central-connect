@@ -1,12 +1,20 @@
 import { z } from "zod";
 
 export const MinistryRoleFormSchema = z.object({
+<<<<<<< Updated upstream
+=======
+  id: z.string().nullable().optional(),
+>>>>>>> Stashed changes
   name: z.string().min(1, "Nome é obrigatório").max(100),
 });
 
 export type MinistryRoleFormData = z.infer<typeof MinistryRoleFormSchema>;
 
 export const MinistryFormSchema = z.object({
+<<<<<<< Updated upstream
+=======
+  churchId: z.string().min(1, "Igreja é obrigatória"),
+>>>>>>> Stashed changes
   name: z.string().min(1, "Nome é obrigatório").max(100),
   minMembersPerService: z.coerce.number().int().min(0).default(1),
   idealMembersPerService: z.coerce.number().int().min(0).default(2),
@@ -15,6 +23,10 @@ export const MinistryFormSchema = z.object({
 });
 
 export type MinistryFormData = z.infer<typeof MinistryFormSchema>;
+<<<<<<< Updated upstream
+=======
+export type MinistryFormInput = z.input<typeof MinistryFormSchema>;
+>>>>>>> Stashed changes
 
 export const MinistryRoleListItemSchema = z.object({
   id: z.string(),

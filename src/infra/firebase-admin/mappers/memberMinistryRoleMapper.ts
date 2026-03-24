@@ -18,6 +18,10 @@ export function memberMinistryRoleToPersistence(
     ministryRoleId: memberMinistryRole.ministryRoleId,
     createdAt: memberMinistryRole.createdAt,
     updatedAt: memberMinistryRole.updatedAt,
+<<<<<<< Updated upstream
+=======
+    deletedAt: memberMinistryRole.deletedAt,
+>>>>>>> Stashed changes
   });
 }
 

@@ -39,6 +39,21 @@ export class CreateMinistry extends BaseUseCase<
     input: CreateMinistryInput,
   ): Promise<Result<CreateMinistryOutput>> {
     try {
+<<<<<<< Updated upstream
+=======
+      const existingMinistry =
+        await this.ministryRepository.findByChurchIdAndName(
+          input.churchId,
+          input.name,
+        );
+      if (existingMinistry) {
+        return {
+          ok: false,
+          error: MinistryErrors.MINISTRY_ALREADY_EXISTS,
+        };
+      }
+
+>>>>>>> Stashed changes
       const ministryParams: MinistryParams = {
         churchId: input.churchId,
         name: input.name,
