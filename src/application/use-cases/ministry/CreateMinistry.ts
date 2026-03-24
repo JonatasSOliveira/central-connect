@@ -88,6 +88,7 @@ export class CreateMinistry extends BaseUseCase<
         value: {
           ministry: {
             id: createdMinistry.id,
+            churchId: createdMinistry.churchId,
             name: createdMinistry.name,
             minMembersPerService: createdMinistry.minMembersPerService,
             idealMembersPerService: createdMinistry.idealMembersPerService,

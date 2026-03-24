@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Church, Building2, UserRoundKey, Users, LogOut } from "lucide-react";
+import {
+  Church,
+  Building2,
+  UserRoundKey,
+  Users,
+  LogOut,
+  HandHeart,
+} from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { CardAdmin } from "@/components/ui/card-admin";
 import { CardItem } from "@/components/ui/card-item";
@@ -37,8 +44,15 @@ export default function HomePage() {
     requiredPermissions: [Permission.CHURCH_READ],
   });
 
+  const { hasPermission: canManageMinistries } = usePermissions({
+    requiredPermissions: [Permission.MINISTRY_READ],
+  });
+
   const canShowAdminSection =
-    canManageMembers || canManageRoles || canManageChurches;
+    canManageMembers ||
+    canManageRoles ||
+    canManageChurches ||
+    canManageMinistries;
 
   return (
     <div className="p-6 app-background">
@@ -77,6 +91,14 @@ export default function HomePage() {
                   description="Gerencie as permissões dos cargos do sistema"
                   icon={UserRoundKey}
                   href="/roles"
+                />
+              )}
+              {canManageMinistries && (
+                <CardAdmin
+                  title="Ministérios"
+                  description="Gerencie os ministérios da igreja"
+                  icon={HandHeart}
+                  href="/ministries"
                 />
               )}
             </div>

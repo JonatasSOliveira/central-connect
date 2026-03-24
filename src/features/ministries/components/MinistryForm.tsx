@@ -24,13 +24,15 @@ export function MinistryForm({
   const router = useRouter();
   const {
     form,
-    fields,
-    append,
-    remove,
+    editableFields,
+    editableAppend,
+    editableRemove,
     isLoading,
     isFetching,
     onSubmit,
     isEdit,
+    editableChurches,
+    canChangeChurch,
   } = useMinistryForm({ mode, ministryId });
 
   const handleCancel = () => {
@@ -43,8 +45,12 @@ export function MinistryForm({
     : "Preencha os dados do ministério";
 
   const handleAddRole = () => {
-    append({ name: "", id: null });
+    editableAppend({ name: "", id: null });
   };
+
+  const showChurchSelect =
+    (canChangeChurch && editableChurches.length > 1) ||
+    (!canChangeChurch && editableChurches.length === 1);
 
   if (isFetching) {
     return (
@@ -64,6 +70,55 @@ export function MinistryForm({
       <FormTemplate>
         <FormTemplate.Form<MinistryFormInput> form={form} onSubmit={onSubmit}>
           <FormTemplate.Content>
+            {showChurchSelect &&
+              canChangeChurch &&
+              editableChurches.length > 1 && (
+                <FormField<MinistryFormInput>
+                  form={form}
+                  name="churchId"
+                  label="Igreja"
+                  required
+                >
+                  <select
+                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:h-10 md:text-sm"
+                    {...form.register("churchId")}
+                  >
+                    <option value="">Selecione</option>
+                    {editableChurches.map((church) => (
+                      <option key={church.id} value={church.id}>
+                        {church.name}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+              )}
+
+            {!canChangeChurch && editableChurches.length === 1 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">
+                  Igreja
+                </label>
+                <Input
+                  value={editableChurches[0].name}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+            )}
+
+            {canChangeChurch && editableChurches.length === 1 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">
+                  Igreja
+                </label>
+                <Input
+                  value={editableChurches[0].name}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+            )}
+
             <FormField<MinistryFormInput>
               form={form}
               name="name"
@@ -123,14 +178,14 @@ export function MinistryForm({
                 </Button>
               </div>
 
-              {fields.length === 0 && (
+              {editableFields.length === 0 && (
                 <p className="text-sm text-muted-foreground py-2">
                   Nenhuma função adicionada. Clique em "Adicionar função" para
                   incluir.
                 </p>
               )}
 
-              {fields.map((field, index) => (
+              {editableFields.map((field, index) => (
                 <div
                   key={field.id}
                   className="flex items-start gap-2 p-3 rounded-lg border border-border/50 bg-card"
@@ -153,7 +208,7 @@ export function MinistryForm({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => remove(index)}
+                    onClick={() => editableRemove(index)}
                     className="shrink-0 text-muted-foreground hover:text-destructive"
                   >
                     <Trash2 className="w-4 h-4" />

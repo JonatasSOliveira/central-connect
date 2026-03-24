@@ -37,6 +37,7 @@ export const MinistryListItemSchema = z.object({
 export type MinistryListItemDTO = z.infer<typeof MinistryListItemSchema>;
 
 export const MinistryDetailSchema = MinistryListItemSchema.extend({
+  churchId: z.string(),
   minMembersPerService: z.number(),
   idealMembersPerService: z.number(),
   notes: z.string().nullable(),
