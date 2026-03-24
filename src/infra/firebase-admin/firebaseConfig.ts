@@ -9,14 +9,10 @@ import {
 } from "firebase-admin/app";
 import { type Firestore, getFirestore } from "firebase-admin/firestore";
 
-const CREDENTIALS_PATH = path.join(
-  process.cwd(),
-  "FirebaseAdminCredentials.json",
-);
-
 function getCredentials() {
-  const fileContent = fs.readFileSync(CREDENTIALS_PATH, "utf-8");
-  return JSON.parse(fileContent);
+  const raw = process.env.FIREBASE_CREDENTIALS;
+  if (!raw) throw new Error("FIREBASE_CREDENTIALS não definida");
+  return JSON.parse(raw);
 }
 
 let firebaseApp: App;
