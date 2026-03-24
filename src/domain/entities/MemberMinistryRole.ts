@@ -1,15 +1,17 @@
 import { AuditableEntity, type AuditableEntityParams } from "./AuditableEntity";
 
-export class MemberMinistry extends AuditableEntity {
+export class MemberMinistryRole extends AuditableEntity {
   protected readonly _churchId: string;
   protected readonly _memberId: string;
   protected readonly _ministryId: string;
+  protected readonly _ministryRoleId: string;
 
-  constructor(params: MemberMinistryParams) {
+  constructor(params: MemberMinistryRoleParams) {
     super(params);
     this._churchId = params.churchId;
     this._memberId = params.memberId;
     this._ministryId = params.ministryId;
+    this._ministryRoleId = params.ministryRoleId;
   }
 
   get churchId(): string {
@@ -23,10 +25,15 @@ export class MemberMinistry extends AuditableEntity {
   get ministryId(): string {
     return this._ministryId;
   }
+
+  get ministryRoleId(): string {
+    return this._ministryRoleId;
+  }
 }
 
-export interface MemberMinistryParams extends AuditableEntityParams {
+export interface MemberMinistryRoleParams extends AuditableEntityParams {
   churchId: string;
   memberId: string;
   ministryId: string;
+  ministryRoleId: string;
 }
