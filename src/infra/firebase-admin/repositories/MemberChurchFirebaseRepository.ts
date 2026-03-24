@@ -24,7 +24,7 @@ export class MemberChurchFirebaseRepository
   }
 
   async findByMemberId(memberId: string): Promise<MemberChurch[]> {
-    const snapshot = await this.collection
+    const snapshot = await this.buildActiveQuery()
       .where("memberId", "==", memberId)
       .get();
     return snapshot.docs.map((doc) =>
@@ -36,7 +36,7 @@ export class MemberChurchFirebaseRepository
     memberId: string,
     churchId: string,
   ): Promise<MemberChurch | null> {
-    const snapshot = await this.collection
+    const snapshot = await this.buildActiveQuery()
       .where("memberId", "==", memberId)
       .where("churchId", "==", churchId)
       .limit(1)

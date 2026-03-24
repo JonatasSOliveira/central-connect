@@ -257,10 +257,23 @@ export function useMemberForm({
       } else {
         if (!memberId) return;
 
+        const payload: Record<string, unknown> = {
+          fullName: formData.fullName,
+          phone: formData.phone ?? undefined,
+        };
+
+        if (formData.email !== undefined) {
+          payload.email = formData.email || undefined;
+        }
+
+        if (canChangeChurch) {
+          payload.churches = formData.churches;
+        }
+
         const response = await fetch(`/api/members/${memberId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
 
         const data = await response.json();
@@ -279,12 +292,6 @@ export function useMemberForm({
     }
   };
 
-  const handleSubmit = form.handleSubmit(onSubmit);
-
-  const wrappedSubmit = async (data: CreateMemberInput) => {
-    await handleSubmit(data as unknown as Parameters<typeof handleSubmit>[0]);
-  };
-
   return {
     form,
     editableFields,
@@ -292,7 +299,7 @@ export function useMemberForm({
     editableRemove,
     isLoading,
     isFetching,
-    onSubmit: wrappedSubmit,
+    onSubmit,
     isEdit: mode === "edit",
     roles,
     editableChurches,
