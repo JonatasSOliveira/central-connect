@@ -1,25 +1,26 @@
-import { BaseEntity, type BaseEntityParams } from "./BaseEntity";
-
-export class RolePermission extends BaseEntity {
+export class RolePermission {
   protected readonly _userRoleId: string;
-  protected readonly _permissionId: string;
+  protected readonly _permission: string;
 
   constructor(params: RolePermissionParams) {
-    super(params);
     this._userRoleId = params.userRoleId;
-    this._permissionId = params.permissionId;
+    this._permission = params.permission;
   }
 
   get userRoleId(): string {
     return this._userRoleId;
   }
 
-  get permissionId(): string {
-    return this._permissionId;
+  get permission(): string {
+    return this._permission;
+  }
+
+  get compositeId(): string {
+    return `${this._userRoleId}:${this._permission}`;
   }
 }
 
-export interface RolePermissionParams extends BaseEntityParams {
+export interface RolePermissionParams {
   userRoleId: string;
-  permissionId: string;
+  permission: string;
 }
