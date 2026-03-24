@@ -45,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         ok: false,
         error: {
           code: "NOT_AUTHORIZED",
-          message: "Sem permissão para editar este cargo",
+          message: "Sem permissão para editar este cargo do sistema",
         },
       },
       { status: 403 },
@@ -107,7 +107,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
         ok: false,
         error: {
           code: "NOT_AUTHORIZED",
-          message: "Sem permissão para excluir este cargo",
+          message: "Sem permissão para excluir este cargo do sistema",
         },
       },
       { status: 403 },

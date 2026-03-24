@@ -29,16 +29,16 @@ const permissionLabels: Record<Permission, string> = {
   [Permission.SCHEDULE_READ]: "Escalas: Leitura",
   [Permission.SCHEDULE_WRITE]: "Escalas: Escrita",
   [Permission.SCHEDULE_DELETE]: "Escalas: Excluir",
-  [Permission.ROLE_READ]: "Cargos: Leitura",
-  [Permission.ROLE_WRITE]: "Cargos: Escrita",
-  [Permission.ROLE_DELETE]: "Cargos: Excluir",
+  [Permission.ROLE_READ]: "Cargos do sistema: Leitura",
+  [Permission.ROLE_WRITE]: "Cargos do sistema: Escrita",
+  [Permission.ROLE_DELETE]: "Cargos do sistema: Excluir",
 };
 
 const groupLabels: Record<string, string> = {
   CHURCH: "Igreja",
   MEMBER: "Membros",
   SCHEDULE: "Escalas",
-  ROLE: "Cargos",
+  ROLE: "Cargos do sistema",
 };
 
 export function PermissionSelect({

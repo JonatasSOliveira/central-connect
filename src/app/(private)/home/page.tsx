@@ -73,8 +73,8 @@ export default function HomePage() {
               )}
               {canManageRoles && (
                 <CardAdmin
-                  title="Cargos"
-                  description="Gerencie as permissões dos cargos"
+                  title="Cargos do Sistema"
+                  description="Gerencie as permissões dos cargos do sistema"
                   icon={UserRoundKey}
                   href="/roles"
                 />

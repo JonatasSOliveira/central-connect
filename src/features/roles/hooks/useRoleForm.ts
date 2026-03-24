@@ -65,11 +65,11 @@ export function useRoleForm({
               permissions: data.value.permissions,
             });
           } else {
-            toast.error("Cargo não encontrado");
+            toast.error("Cargo do sistema não encontrado");
             router.push("/roles");
           }
         } catch {
-          toast.error("Erro ao carregar dados do cargo");
+          toast.error("Erro ao carregar dados do cargo do sistema");
         } finally {
           setIsFetching(false);
         }
@@ -93,10 +93,10 @@ export function useRoleForm({
         const data = await response.json();
 
         if (data.ok) {
-          toast.success("Cargo criado com sucesso!");
+          toast.success("Cargo do sistema criado com sucesso!");
           router.push("/roles");
         } else {
-          toast.error(data.error?.message || "Erro ao criar cargo");
+          toast.error(data.error?.message || "Erro ao criar cargo do sistema");
         }
       } else {
         if (!roleId) return;
@@ -110,10 +110,12 @@ export function useRoleForm({
         const data = await response.json();
 
         if (data.ok) {
-          toast.success("Cargo atualizado com sucesso!");
+          toast.success("Cargo do sistema atualizado com sucesso!");
           router.push("/roles");
         } else {
-          toast.error(data.error?.message || "Erro ao atualizar cargo");
+          toast.error(
+            data.error?.message || "Erro ao atualizar cargo do sistema",
+          );
         }
       }
     } catch {

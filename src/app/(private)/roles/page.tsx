@@ -33,9 +33,9 @@ export default function RolesPage() {
   const handleDeleteRole = async (roleId: string) => {
     const success = await deleteRole(roleId);
     if (success) {
-      toast.success("Cargo excluído com sucesso");
+      toast.success("Cargo do sistema excluído com sucesso");
     } else {
-      toast.error("Erro ao excluir cargo");
+      toast.error("Erro ao excluir cargo do sistema");
     }
   };
 
@@ -47,7 +47,7 @@ export default function RolesPage() {
       />
 
       <ListTemplate.Action
-        label="Novo cargo"
+        label="Novo cargo do sistema"
         icon={Plus}
         onClick={handleCreateRole}
       />
@@ -55,10 +55,10 @@ export default function RolesPage() {
       {roles.length === 0 ? (
         <ListTemplate.EmptyState
           icon={Inbox}
-          title="Nenhum cargo cadastrado"
-          description="Clique em Novo cargo para cadastrar o primeiro cargo do sistema."
+          title="Nenhum cargo do sistema cadastrado"
+          description="Clique em Novo cargo do sistema para cadastrar o primeiro cargo do sistema."
           action={{
-            label: "Cadastrar cargo",
+            label: "Cadastrar cargo do sistema",
             onClick: handleCreateRole,
           }}
         />

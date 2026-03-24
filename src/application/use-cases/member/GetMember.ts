@@ -65,7 +65,7 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
             churchId: mc.churchId,
             churchName: church?.name ?? "Igreja não encontrada",
             roleId: mc.roleId ?? "",
-            roleName: role?.name ?? "Cargo não encontrado",
+            roleName: role?.name ?? "Cargo do sistema não encontrado",
             userPermission,
           };
         }),

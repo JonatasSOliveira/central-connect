@@ -28,10 +28,10 @@ export function RoleForm({ mode, roleId, backHref = "/roles" }: RoleFormProps) {
     router.push(backHref);
   };
 
-  const title = isEdit ? "Editar Cargo" : "Novo Cargo";
+  const title = isEdit ? "Editar Cargo do Sistema" : "Novo Cargo do Sistema";
   const subtitle = isEdit
-    ? "Altere os dados do cargo"
-    : "Preencha os dados do cargo";
+    ? "Altere os dados do cargo do sistema"
+    : "Preencha os dados do cargo do sistema";
 
   const permissions = form.watch("permissions") as Permission[];
 
@@ -59,7 +59,7 @@ export function RoleForm({ mode, roleId, backHref = "/roles" }: RoleFormProps) {
               form={form}
               name="name"
               label="Nome"
-              placeholder="Nome do cargo"
+              placeholder="Nome do cargo do sistema"
               required
             />
 

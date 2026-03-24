@@ -169,7 +169,7 @@ export function MemberForm({
                     <FormField<CreateMemberInput>
                       form={form}
                       name={`churches.${index}.roleId`}
-                      label="Cargo"
+                      label="Cargo do sistema"
                       required
                     >
                       <select
@@ -241,14 +241,14 @@ export function MemberForm({
               <FormField<CreateMemberInput>
                 form={form}
                 name="churches.0.roleId"
-                label="Cargo"
+                label="Cargo do sistema"
                 required
               >
                 <select
                   className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:h-10 md:text-sm"
                   {...form.register("churches.0.roleId")}
                 >
-                  <option value="">Selecione um cargo</option>
+                  <option value="">Selecione um cargo do sistema</option>
                   {roles.map((role) => (
                     <option key={role.id} value={role.id}>
                       {role.name}
