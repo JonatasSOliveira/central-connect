@@ -14,10 +14,7 @@ export function ministryToPersistence(ministry: Ministry): DocumentData {
     notes: ministry.notes,
     createdAt: ministry.createdAt,
     updatedAt: ministry.updatedAt,
-<<<<<<< Updated upstream
-=======
     deletedAt: ministry.deletedAt,
->>>>>>> Stashed changes
   });
 }
 

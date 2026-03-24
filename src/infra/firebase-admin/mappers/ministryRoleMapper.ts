@@ -17,10 +17,7 @@ export function ministryRoleToPersistence(
     name: ministryRole.name,
     createdAt: ministryRole.createdAt,
     updatedAt: ministryRole.updatedAt,
-<<<<<<< Updated upstream
-=======
     deletedAt: ministryRole.deletedAt,
->>>>>>> Stashed changes
   });
 }
 

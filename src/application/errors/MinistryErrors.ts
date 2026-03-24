@@ -3,13 +3,10 @@ export const MinistryErrors = {
     code: "MINISTRY_NOT_FOUND",
     message: "Ministério não encontrado",
   },
-<<<<<<< Updated upstream
-=======
   MINISTRY_ALREADY_EXISTS: {
     code: "MINISTRY_ALREADY_EXISTS",
     message: "Já existe um ministério com este nome nesta igreja",
   },
->>>>>>> Stashed changes
   MINISTRY_ROLE_NOT_FOUND: {
     code: "MINISTRY_ROLE_NOT_FOUND",
     message: "Função não encontrada",

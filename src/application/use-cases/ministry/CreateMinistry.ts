@@ -39,8 +39,6 @@ export class CreateMinistry extends BaseUseCase<
     input: CreateMinistryInput,
   ): Promise<Result<CreateMinistryOutput>> {
     try {
-<<<<<<< Updated upstream
-=======
       const existingMinistry =
         await this.ministryRepository.findByChurchIdAndName(
           input.churchId,
@@ -53,7 +51,6 @@ export class CreateMinistry extends BaseUseCase<
         };
       }
 
->>>>>>> Stashed changes
       const ministryParams: MinistryParams = {
         churchId: input.churchId,
         name: input.name,

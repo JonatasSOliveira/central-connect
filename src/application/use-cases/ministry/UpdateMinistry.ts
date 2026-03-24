@@ -58,8 +58,6 @@ export class UpdateMinistry extends BaseUseCase<
         };
       }
 
-<<<<<<< Updated upstream
-=======
       if (existingMinistry.name !== input.name) {
         const duplicateMinistry =
           await this.ministryRepository.findByChurchIdAndName(
@@ -75,7 +73,6 @@ export class UpdateMinistry extends BaseUseCase<
         }
       }
 
->>>>>>> Stashed changes
       const ministryParams: MinistryParams = {
         id: existingMinistry.id,
         churchId: existingMinistry.churchId,

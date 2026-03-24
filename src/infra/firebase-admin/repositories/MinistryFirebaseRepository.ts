@@ -24,19 +24,13 @@ export class MinistryFirebaseRepository
   }
 
   async findByChurchId(churchId: string): Promise<Ministry[]> {
-<<<<<<< Updated upstream
-    const snapshot = await this.collection
-=======
     const snapshot = await this.buildActiveQuery()
->>>>>>> Stashed changes
       .where("churchId", "==", churchId)
       .get();
     return snapshot.docs.map((doc) =>
       this.toEntity(doc.data() as DocumentData, doc.id),
     );
   }
-<<<<<<< Updated upstream
-=======
 
   async findByChurchIdAndName(
     churchId: string,
@@ -60,5 +54,4 @@ export class MinistryFirebaseRepository
     const doc = snapshot.docs[0];
     return this.toEntity(doc.data() as DocumentData, doc.id);
   }
->>>>>>> Stashed changes
 }
