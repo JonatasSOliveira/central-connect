@@ -3,7 +3,7 @@ import { AuditableEntity, type AuditableEntityParams } from "./AuditableEntity";
 export type MemberStatus = "Active" | "Inactive" | "Paused";
 
 export class Member extends AuditableEntity {
-  protected readonly _email: string;
+  protected readonly _email: string | null;
   protected readonly _fullName: string;
   protected readonly _phone: string | null;
   protected readonly _maxServicesPerMonth: number;
@@ -14,7 +14,7 @@ export class Member extends AuditableEntity {
 
   constructor(params: MemberParams) {
     super(params);
-    this._email = params.email;
+    this._email = params.email ?? null;
     this._fullName = params.fullName;
     this._phone = params.phone ?? null;
     this._maxServicesPerMonth = params.maxServicesPerMonth ?? 4;
@@ -24,7 +24,7 @@ export class Member extends AuditableEntity {
     this._notes = params.notes ?? null;
   }
 
-  get email(): string {
+  get email(): string | null {
     return this._email;
   }
 
@@ -58,7 +58,7 @@ export class Member extends AuditableEntity {
 }
 
 export interface MemberParams extends AuditableEntityParams {
-  email: string;
+  email?: string | null;
   fullName: string;
   phone?: string | null;
   maxServicesPerMonth?: number;

@@ -40,7 +40,7 @@ export class UpdateMember extends BaseUseCase<
       }
 
       const memberParams: MemberParams = {
-        email: input.email ?? member.email,
+        email: input.email !== undefined ? (input.email ?? null) : member.email,
         fullName: input.fullName ?? member.fullName,
         phone: input.phone !== undefined ? (input.phone ?? null) : member.phone,
         status: member.status,
@@ -76,7 +76,7 @@ export class UpdateMember extends BaseUseCase<
         ok: true,
         value: {
           id: result.id,
-          email: result.email,
+          email: result.email ?? "",
           fullName: result.fullName,
         },
       };

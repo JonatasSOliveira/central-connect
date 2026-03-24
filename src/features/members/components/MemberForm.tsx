@@ -83,7 +83,6 @@ export function MemberForm({
               form={form}
               name="email"
               label="Email"
-              required
             >
               <input
                 type="email"

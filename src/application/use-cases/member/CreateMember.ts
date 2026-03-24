@@ -25,21 +25,23 @@ export class CreateMember extends BaseUseCase<
 
   async execute(input: CreateMemberInput): Promise<Result<CreateMemberOutput>> {
     try {
-      const existingMember = await this.memberRepository.findByEmail(
-        input.email,
-      );
-      if (existingMember) {
-        return {
-          ok: false,
-          error: {
-            code: "MEMBER_ALREADY_EXISTS",
-            message: "Já existe um membro com este email",
-          },
-        };
+      if (input.email) {
+        const existingMember = await this.memberRepository.findByEmail(
+          input.email,
+        );
+        if (existingMember) {
+          return {
+            ok: false,
+            error: {
+              code: "MEMBER_ALREADY_EXISTS",
+              message: "Já existe um membro com este email",
+            },
+          };
+        }
       }
 
       const memberParams: MemberParams = {
-        email: input.email,
+        email: input.email ?? null,
         fullName: input.fullName,
         phone: input.phone ?? null,
         createdAt: new Date(),
@@ -64,7 +66,7 @@ export class CreateMember extends BaseUseCase<
         ok: true,
         value: {
           id: createdMember.id,
-          email: createdMember.email,
+          email: createdMember.email ?? "",
           fullName: createdMember.fullName,
           phone: createdMember.phone,
           status: createdMember.status,

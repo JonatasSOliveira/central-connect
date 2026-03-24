@@ -24,6 +24,7 @@ export class MemberFirebaseRepository
   }
 
   async findByEmail(email: string): Promise<Member | null> {
+    if (!email) return null;
     const snapshot = await this.collection
       .where("email", "==", email)
       .limit(1)

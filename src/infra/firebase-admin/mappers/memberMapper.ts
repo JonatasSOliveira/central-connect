@@ -7,7 +7,7 @@ import {
 
 export function memberToPersistence(member: Member): DocumentData {
   return convertDatesToTimestamps({
-    email: member.email,
+    email: member.email ?? null,
     fullName: member.fullName,
     phone: member.phone,
     maxServicesPerMonth: member.maxServicesPerMonth,
