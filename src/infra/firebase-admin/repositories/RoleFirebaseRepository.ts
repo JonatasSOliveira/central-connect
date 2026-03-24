@@ -21,7 +21,7 @@ export class RoleFirebaseRepository
   }
 
   async findByName(name: string): Promise<UserRole | null> {
-    const snapshot = await this.collection
+    const snapshot = await this.buildActiveQuery()
       .where("name", "==", name)
       .limit(1)
       .get();

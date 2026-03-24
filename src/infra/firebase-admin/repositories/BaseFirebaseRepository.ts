@@ -1,6 +1,7 @@
 import type {
   CollectionReference,
   DocumentData,
+  Query,
 } from "firebase-admin/firestore";
 import type { BaseEntity } from "@/domain/entities/BaseEntity";
 import { getFirestoreDb } from "../firebaseConfig";
@@ -15,6 +16,10 @@ export abstract class BaseFirebaseRepository<Entity extends BaseEntity> {
   protected abstract toEntity(data: DocumentData, id: string): Entity;
   protected abstract toFirestoreData(entity: Entity): DocumentData;
 
+  protected buildActiveQuery(): Query<DocumentData> {
+    return this.collection.where("deletedAt", "==", null);
+  }
+
   async findById(id: string): Promise<Entity | null> {
     const doc = await this.collection.doc(id).get();
     if (!doc.exists) return null;
@@ -24,7 +29,7 @@ export abstract class BaseFirebaseRepository<Entity extends BaseEntity> {
   }
 
   async findAll(): Promise<Entity[]> {
-    const snapshot = await this.collection.where("deletedAt", "==", null).get();
+    const snapshot = await this.buildActiveQuery().get();
     return snapshot.docs.map((doc) =>
       this.toEntity(doc.data() as DocumentData, doc.id),
     );

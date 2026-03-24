@@ -17,6 +17,7 @@ export function memberChurchToPersistence(
     roleId: memberChurch.roleId,
     createdAt: memberChurch.createdAt,
     updatedAt: memberChurch.updatedAt,
+    deletedAt: memberChurch.deletedAt,
   });
 }
 
