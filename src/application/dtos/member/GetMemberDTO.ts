@@ -8,7 +8,7 @@ export type GetMemberChurchOutput = {
 
 export type GetMemberOutput = {
   id: string;
-  email: string;
+  email: string | null;
   fullName: string;
   phone: string | null;
   status: "Active" | "Inactive" | "Paused";

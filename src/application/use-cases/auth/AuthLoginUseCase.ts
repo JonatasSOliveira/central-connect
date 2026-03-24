@@ -197,7 +197,7 @@ export class AuthLoginUseCase extends BaseUseCase<
       value: {
         userId: user.id,
         memberId: member.id,
-        email: member.email,
+        email: member.email!,
         fullName: member.fullName,
         avatarUrl: member.avatarUrl,
         isSuperAdmin: user.isSuperAdmin,
