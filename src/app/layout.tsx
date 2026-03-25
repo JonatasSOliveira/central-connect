@@ -46,7 +46,7 @@ export default function RootLayout({
         className={`${inter.variable} ${dmSans.variable} antialiased flex flex-col h-[100dvh]`}
       >
         <ServiceWorkerRegistration />
-        <main className="flex flex-1 flex-col">{children}</main>
+        <main className="flex flex-col h-full overflow-hidden">{children}</main>
         <Footer />
       </body>
     </html>

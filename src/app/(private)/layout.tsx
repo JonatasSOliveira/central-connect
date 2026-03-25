@@ -31,5 +31,11 @@ export default function PrivateLayout({
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto pt-16 pb-14">
+        {children}
+      </div>
+    </div>
+  );
 }

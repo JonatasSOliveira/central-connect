@@ -3,12 +3,14 @@
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { getContrastColor } from "@/lib/utils";
 
 interface PrivateHeaderProps {
   title: string;
   subtitle?: string;
   showBackButton?: boolean;
   backHref?: string;
+  bgColor?: string;
 }
 
 export function PrivateHeader({
@@ -16,6 +18,7 @@ export function PrivateHeader({
   subtitle,
   showBackButton = true,
   backHref = "/home",
+  bgColor,
 }: PrivateHeaderProps) {
   const router = useRouter();
 
@@ -23,26 +26,47 @@ export function PrivateHeader({
     router.push(backHref);
   };
 
+  const textColor = bgColor ? getContrastColor(bgColor) : null;
+  const bgStyle = bgColor ? { backgroundColor: bgColor } : undefined;
+  const textClass = textColor === "white" ? "text-white" : "text-black";
+  const mutedTextClass =
+    textColor === "white" ? "text-white/80" : "text-black/60";
+  const hoverClass = bgColor
+    ? textColor === "white"
+      ? "hover:bg-white/20"
+      : "hover:bg-black/20"
+    : "";
+
   return (
-    <header className="pt-2 pb-2">
-      {showBackButton && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mb-4 -ml-2 h-9 w-auto min-w-9 px-3 text-muted-foreground hover:text-foreground cursor-pointer"
-          onClick={handleBack}
-        >
-          <ChevronLeft className="w-5 h-5" /> Voltar
-        </Button>
-      )}
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 h-16 px-4 flex items-center border-b ${bgColor ? "" : "bg-primary text-primary-foreground"}`}
+      style={bgStyle}
+    >
+      <div className="flex items-center gap-3 w-full">
+        {showBackButton && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`-ml-2 h-9 w-auto min-w-9 px-2 cursor-pointer ${bgColor ? textClass + " " + hoverClass : ""}`}
+            onClick={handleBack}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+        )}
 
-      <h1 className="font-heading text-2xl font-bold text-foreground">
-        {title}
-      </h1>
-
-      {subtitle && (
-        <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
-      )}
+        <div className="flex-1 min-w-0">
+          <h1
+            className={`font-heading text-lg font-bold truncate ${bgColor ? textClass : ""}`}
+          >
+            {title}
+          </h1>
+          {subtitle && (
+            <p className={`text-xs truncate ${bgColor ? mutedTextClass : ""}`}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+      </div>
     </header>
   );
 }

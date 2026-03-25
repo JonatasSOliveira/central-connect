@@ -105,14 +105,6 @@ export default function HomePage() {
           </>
         )}
 
-        <CardItem
-          title="Sair"
-          description="Encerrar sessão atual"
-          icon={LogOut}
-          onClick={() => setShowLogoutDialog(true)}
-          variant="destructive"
-        />
-
         <div className="flex items-center gap-3 mb-4">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Ações Rápidas
@@ -120,13 +112,21 @@ export default function HomePage() {
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-3 mb-6">
           <CardItem
             title="Minhas Escalas"
             description="Veja suas próximas atividades"
             icon={Church}
           />
         </div>
+
+        <CardItem
+          title="Sair"
+          description="Encerrar sessão atual"
+          icon={LogOut}
+          onClick={() => setShowLogoutDialog(true)}
+          variant="destructive"
+        />
       </div>
 
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

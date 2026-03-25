@@ -46,7 +46,7 @@ function FormHeader({ title, description, className }: FormHeaderProps) {
 }
 
 function FormContent({ children, className }: FormContentProps) {
-  return <div className={cn("space-y-4", className)}>{children}</div>;
+  return <div className={cn("space-y-4 pt-4", className)}>{children}</div>;
 }
 
 function FormFooter({

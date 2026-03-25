@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import { ChurchForm } from "@/features/churches/components/ChurchForm";
+import { PrivateHeader } from "@/components/modules/private-header";
 
 interface EditChurchPageProps {
   params: Promise<{ churchId: string }>;
@@ -10,5 +11,16 @@ interface EditChurchPageProps {
 export default function EditChurchPage({ params }: EditChurchPageProps) {
   const { churchId } = use(params);
 
-  return <ChurchForm mode="edit" churchId={churchId} backHref="/churches" />;
+  return (
+    <>
+      <PrivateHeader
+        title="Editar Igreja"
+        subtitle="Altere os dados da igreja"
+        backHref="/home"
+      />
+      <div className="px-4 pb-4">
+        <ChurchForm mode="edit" churchId={churchId} />
+      </div>
+    </>
+  );
 }

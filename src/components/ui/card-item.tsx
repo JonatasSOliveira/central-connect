@@ -24,10 +24,8 @@ export function CardItem({
     variant === "destructive" ? "bg-destructive/10" : "bg-primary/10";
   const iconColorClass =
     variant === "destructive" ? "text-destructive" : "text-primary";
-  const borderHoverClass =
-    variant === "destructive"
-      ? "hover:border-destructive hover:shadow-sm hover:shadow-destructive/5"
-      : "hover:border-primary/30 hover:shadow-sm hover:shadow-primary/5";
+  const hoverClass =
+    variant === "destructive" ? "hover:bg-destructive/5" : "hover:bg-muted/50";
 
   const cardContent = (
     <>
@@ -60,8 +58,8 @@ export function CardItem({
       <a
         href={href}
         className={cn(
-          "group flex items-center gap-4 rounded-xl border border-border/50 bg-card p-4 transition-all duration-200",
-          borderHoverClass,
+          "group flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all duration-200",
+          hoverClass,
           className,
         )}
       >
@@ -76,8 +74,8 @@ export function CardItem({
         type="button"
         onClick={onClick}
         className={cn(
-          "group flex w-full items-center gap-4 rounded-xl border border-border/50 bg-card p-4 text-left transition-all duration-200",
-          borderHoverClass,
+          "group flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all duration-200",
+          hoverClass,
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           className,
         )}
@@ -90,7 +88,7 @@ export function CardItem({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-xl border border-border/50 bg-card p-4",
+        "flex items-center gap-4 rounded-xl border border-border bg-card p-4",
         className,
       )}
     >
