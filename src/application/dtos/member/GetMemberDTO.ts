@@ -4,6 +4,7 @@ export type GetMemberChurchOutput = {
   roleId: string;
   roleName: string;
   userPermission: "write" | "read" | null;
+  ministryIds: string[];
 };
 
 export type GetMemberOutput = {

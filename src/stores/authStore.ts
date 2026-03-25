@@ -47,8 +47,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
           fullName: result.fullName,
           avatarUrl: result.avatarUrl,
           isSuperAdmin: result.isSuperAdmin,
-          churchId:
-            result.churches.length === 1 ? result.churches[0].churchId : null,
+          churchId: null, // Always null to force church selection
           churches: result.churches,
           permissions: result.permissions,
         },

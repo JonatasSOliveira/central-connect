@@ -9,6 +9,7 @@ export const CreateMemberInputSchema = z.object({
       z.object({
         churchId: z.string().min(1, "Igreja é obrigatória"),
         roleId: z.string().min(1, "Cargo do sistema é obrigatório"),
+        ministryIds: z.array(z.string()),
       }),
     )
     .min(1, "Pelo menos uma igreja é obrigatória"),
@@ -25,6 +26,7 @@ export const UpdateMemberInputSchema = z.object({
       z.object({
         churchId: z.string().min(1, "Igreja é obrigatória"),
         roleId: z.string().min(1, "Cargo do sistema é obrigatório"),
+        ministryIds: z.array(z.string()),
       }),
     )
     .optional(),
@@ -50,4 +52,5 @@ export type MemberChurchInfo = {
   churchName: string;
   roleId: string;
   roleName: string;
+  ministryIds: string[];
 };

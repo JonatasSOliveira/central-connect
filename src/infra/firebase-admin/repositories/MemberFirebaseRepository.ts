@@ -33,4 +33,31 @@ export class MemberFirebaseRepository
     const doc = snapshot.docs[0];
     return this.toEntity(doc.data() as DocumentData, doc.id);
   }
+
+  async findBySearch(search: string): Promise<Member[]> {
+    if (!search?.trim()) {
+      return this.findAll();
+    }
+
+    const searchLower = search.toLowerCase().trim();
+    const searchUpper = searchLower.replace(/.$/, (c) =>
+      String.fromCharCode(c.charCodeAt(0) + 1),
+    );
+
+    const snapshot = await this.buildActiveQuery()
+      .orderBy("fullName")
+      .startAt(searchLower)
+      .endAt(searchUpper)
+      .get();
+
+    const members = snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+
+    return members.filter(
+      (m) =>
+        m.fullName.toLowerCase().startsWith(searchLower) ||
+        m.fullName.toLowerCase().includes(searchLower),
+    );
+  }
 }

@@ -675,6 +675,60 @@ export function UserForm() {
 }
 ```
 
+## 5.x Limite de Tamanho de Arquivos
+
+### Regra Geral
+- **Target:** 150 linhas por arquivo
+- **Hard limit:** 200 linhas
+- **Componentes pequenos:** 50-100 linhas (atoms)
+
+### Quando Fragmentar
+- Componente com mais de 3 responsabilidades distintas
+- Função de renderização com mais de 100 linhas
+- Mais de 7 useState/useEffect no mesmo componente
+- Mapeamento de lista com mais de 30 linhas de JSX
+
+### Como Fragmentar
+1. Identificar responsabilidades separáveis
+2. Extrair para componente próprio
+3. Manter composição no componente pai
+4. Componentes genéricos vão para `components/ui/`
+5. Componentes específicos da feature vão para `features/[nome]/components/`
+
+### Exemplo de Refatoração
+
+**Antes (>200 linhas):**
+```tsx
+// MemberForm.tsx - 412 linhas
+export function MemberForm() {
+  // ... tudo junto
+}
+```
+
+**Depois (<150 linhas cada):**
+```tsx
+// features/members/components/basic-info-section.tsx (~30 linhas)
+// features/members/components/church-section.tsx (~80 linhas)
+// features/members/components/ministry-selector.tsx (~70 linhas)
+export function MemberForm() {
+  return (
+    <FormTemplate>
+      <BasicInfoSection />
+      <ChurchSection />
+    </FormTemplate>
+  );
+}
+```
+
+### Checklist de Refatoração
+```
+□ Maior arquivo < 200 linhas
+□ Target por arquivo < 150 linhas
+□ Componentes UI genéricos em components/ui/
+□ Componentes específicos em features/[feature]/components/
+□ Single Responsibility Principle respeitado
+```
+
 ## 6. O Que Nunca Fazer
 
 ### Proibidos

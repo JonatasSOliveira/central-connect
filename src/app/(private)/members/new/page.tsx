@@ -1,6 +1,6 @@
 "use client";
 
-import { MemberForm } from "@/features/members/components/MemberForm";
+import { MemberForm } from "@/features/members/components";
 import { PrivateHeader } from "@/components/modules/private-header";
 
 export default function NewMemberPage() {

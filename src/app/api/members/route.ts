@@ -39,16 +39,54 @@ export async function GET(request: NextRequest) {
 
   const { user } = auth;
   const { searchParams } = new URL(request.url);
-  const churchIdFilter = searchParams.get("churchId");
+  const churchId = searchParams.get("churchId");
+  const search = searchParams.get("search");
+  const page = searchParams.get("page");
+  const limit = searchParams.get("limit");
+
+  if (!churchId) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "MISSING_CHURCH_ID",
+          message: "churchId é obrigatório",
+        },
+      },
+      { status: 400 },
+    );
+  }
+
+  const userChurches = buildUserChurches(
+    user.isSuperAdmin,
+    user.churches,
+    user.permissions,
+  );
+
+  const canAccessChurch =
+    user.isSuperAdmin ||
+    userChurches.some((c) => c.churchId === churchId && c.hasMemberRead);
+
+  if (!canAccessChurch) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para acessar membros desta igreja",
+        },
+      },
+      { status: 403 },
+    );
+  }
 
   const result = await memberContainer.listMembers.execute({
     isSuperAdmin: user.isSuperAdmin,
-    userChurches: buildUserChurches(
-      user.isSuperAdmin,
-      user.churches,
-      user.permissions,
-    ),
-    churchId: churchIdFilter,
+    userChurches,
+    churchId,
+    search: search ?? undefined,
+    page: page ? parseInt(page, 10) : undefined,
+    limit: limit ? parseInt(limit, 10) : undefined,
   });
 
   if (!result.ok) {

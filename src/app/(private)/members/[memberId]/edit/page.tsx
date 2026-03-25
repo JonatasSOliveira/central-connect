@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import { MemberForm } from "@/features/members/components/MemberForm";
+import { MemberForm } from "@/features/members/components";
 import { PrivateHeader } from "@/components/modules/private-header";
 
 interface EditMemberPageProps {

@@ -5,8 +5,11 @@ import type { Result } from "@/shared/types/Result";
 import type {
   ListMembersInput,
   ListMembersOutput,
+  PaginationInfo,
 } from "../../dtos/member/ListMembersDTO";
 import { BaseUseCase } from "../BaseUseCase";
+
+const DEFAULT_LIMIT = 50;
 
 export class ListMembers extends BaseUseCase<
   ListMembersInput,
@@ -22,7 +25,9 @@ export class ListMembers extends BaseUseCase<
 
   async execute(input: ListMembersInput): Promise<Result<ListMembersOutput>> {
     try {
-      const allMembers = await this.memberRepository.findAll();
+      const page = input.page ?? 1;
+      const limit = input.limit ?? DEFAULT_LIMIT;
+      const offset = (page - 1) * limit;
 
       let allChurches: Map<string, string> = new Map();
       let userReadableChurchIds: string[] = [];
@@ -39,7 +44,10 @@ export class ListMembers extends BaseUseCase<
         if (userReadableChurchIds.length === 0) {
           return {
             ok: true,
-            value: { members: [] },
+            value: {
+              members: [],
+              pagination: this.emptyPagination(page, limit),
+            },
           };
         }
 
@@ -51,7 +59,9 @@ export class ListMembers extends BaseUseCase<
         }
       }
 
-      const churchIdFilter = input.churchId ?? null;
+      const allMembers = input.search?.trim()
+        ? await this.memberRepository.findBySearch(input.search)
+        : await this.memberRepository.findAll();
 
       const membersWithChurchInfo = await Promise.all(
         allMembers.map(async (member) => {
@@ -70,9 +80,9 @@ export class ListMembers extends BaseUseCase<
             return null;
           }
 
-          if (churchIdFilter) {
+          if (input.churchId) {
             const hasChurch = memberChurches.some(
-              (mc) => mc.churchId === churchIdFilter,
+              (mc) => mc.churchId === input.churchId,
             );
             if (!hasChurch) {
               return null;
@@ -91,10 +101,26 @@ export class ListMembers extends BaseUseCase<
         (m) => m !== null,
       ) as ListMembersOutput["members"];
 
+      const sortedMembers = filteredMembers.sort((a, b) =>
+        a.fullName.localeCompare(b.fullName, "pt-BR", { sensitivity: "base" }),
+      );
+
+      const total = sortedMembers.length;
+      const paginatedMembers = sortedMembers.slice(offset, offset + limit);
+      const hasMore = offset + limit < total;
+
+      const pagination: PaginationInfo = {
+        page,
+        limit,
+        total,
+        hasMore,
+      };
+
       return {
         ok: true,
         value: {
-          members: filteredMembers,
+          members: paginatedMembers,
+          pagination,
         },
       };
     } catch {
@@ -106,5 +132,9 @@ export class ListMembers extends BaseUseCase<
         },
       };
     }
+  }
+
+  private emptyPagination(page: number, limit: number): PaginationInfo {
+    return { page, limit, total: 0, hasMore: false };
   }
 }

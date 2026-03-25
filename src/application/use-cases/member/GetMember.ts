@@ -1,5 +1,6 @@
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { Result } from "@/shared/types/Result";
@@ -13,6 +14,7 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
   constructor(
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
+    private readonly memberMinistryRepository: IMemberMinistryRepository,
     private readonly churchRepository: IChurchRepository,
     private readonly roleRepository: IRoleRepository,
   ) {
@@ -33,13 +35,21 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
         };
       }
 
-      const memberChurches = await this.memberChurchRepository.findByMemberId(
-        input.memberId,
-      );
+      const [memberChurches, memberMinistries] = await Promise.all([
+        this.memberChurchRepository.findByMemberId(input.memberId),
+        this.memberMinistryRepository.findByMemberId(input.memberId),
+      ]);
 
       const userChurchMap = new Map(
         (input.userChurches ?? []).map((uc) => [uc.churchId, uc]),
       );
+
+      const ministryIdsByChurch = new Map<string, string[]>();
+      for (const mm of memberMinistries) {
+        const existing = ministryIdsByChurch.get(mm.churchId) ?? [];
+        existing.push(mm.ministryId);
+        ministryIdsByChurch.set(mm.churchId, existing);
+      }
 
       const churchesWithPermission = await Promise.all(
         memberChurches.map(async (mc) => {
@@ -67,6 +77,7 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
             roleId: mc.roleId ?? "",
             roleName: role?.name ?? "Cargo do sistema não encontrado",
             userPermission,
+            ministryIds: ministryIdsByChurch.get(mc.churchId) ?? [],
           };
         }),
       );

@@ -2,9 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Loader2 } from "lucide-react";
+import { Building2, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CardItem } from "@/components/ui/card-item";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useSelectChurch } from "@/features/churches/hooks/useSelectChurch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Church {
   churchId: string;
@@ -12,37 +24,15 @@ interface Church {
 }
 
 export default function SelectChurchPage() {
-  const router = useRouter();
-  const { selectChurch, isLoading } = useAuth();
-  const [churches, setChurches] = useState<Church[]>([]);
-  const [selectedChurch, setSelectedChurch] = useState<string | null>(null);
-  const [loadingChurches, setLoadingChurches] = useState(true);
-
-  useEffect(() => {
-    const loadChurches = async () => {
-      try {
-        const response = await fetch("/api/auth/login");
-        const data = await response.json();
-        if (data.value?.churches) {
-          setChurches(data.value.churches);
-        }
-      } finally {
-        setLoadingChurches(false);
-      }
-    };
-
-    loadChurches();
-  }, []);
-
-  const handleSelectChurch = async (churchId: string) => {
-    setSelectedChurch(churchId);
-    try {
-      await selectChurch(churchId);
-      router.push("/home");
-    } catch {
-      setSelectedChurch(null);
-    }
-  };
+  const {
+    churches,
+    loadingChurches,
+    isLoading,
+    selectedChurch,
+    handleSelectChurch,
+  } = useSelectChurch();
+  const { logout } = useAuth();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   if (loadingChurches) {
     return (
@@ -88,7 +78,32 @@ export default function SelectChurchPage() {
             </Button>
           ))}
         </div>
+
+        <div className="mt-auto pt-8 w-full">
+          <CardItem
+            title="Sair"
+            description="Encerrar sessão atual"
+            icon={LogOut}
+            onClick={() => setShowLogoutDialog(true)}
+            variant="destructive"
+          />
+        </div>
       </div>
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sair</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja encerrar sua sessão?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={logout}>Sair</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

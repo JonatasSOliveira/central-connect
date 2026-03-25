@@ -2,6 +2,7 @@
 
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { getContrastColor } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ interface PrivateHeaderProps {
   showBackButton?: boolean;
   backHref?: string;
   bgColor?: string;
+  action?: ReactNode;
 }
 
 export function PrivateHeader({
@@ -19,6 +21,7 @@ export function PrivateHeader({
   showBackButton = true,
   backHref = "/home",
   bgColor,
+  action,
 }: PrivateHeaderProps) {
   const router = useRouter();
 
@@ -66,6 +69,8 @@ export function PrivateHeader({
             </p>
           )}
         </div>
+
+        {action && <div className="shrink-0">{action}</div>}
       </div>
     </header>
   );

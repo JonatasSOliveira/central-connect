@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
@@ -10,6 +10,7 @@ import {
   type CreateMemberInput,
   CreateMemberInputSchema,
 } from "@/application/dtos/member/CreateMemberDTO";
+import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
 import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -30,6 +31,7 @@ export interface ReadonlyChurch {
   churchName: string;
   roleId: string;
   roleName: string;
+  ministryIds: string[];
 }
 
 export interface UseMemberFormReturn {
@@ -51,7 +53,11 @@ export interface UseMemberFormReturn {
   editableChurches: ChurchListItemDTO[];
   readonlyChurches: ReadonlyChurch[];
   canChangeChurch: boolean;
-  isSelfEdit: boolean;
+  editableAppendMinistry: (churchIndex: number, ministryId: string) => void;
+  editableRemoveMinistry: (churchIndex: number, ministryIndex: number) => void;
+  getMinistriesByChurch: (churchId: string) => MinistryListItemDTO[];
+  fetchMinistriesByChurch: (churchId: string) => Promise<void>;
+  isLoadingMinistries: boolean;
 }
 
 export function useMemberForm({
@@ -70,14 +76,14 @@ export function useMemberForm({
   const [readonlyChurches, setReadonlyChurches] = useState<ReadonlyChurch[]>(
     [],
   );
+  const [ministriesMap, setMinistriesMap] = useState<
+    Map<string, MinistryListItemDTO[]>
+  >(new Map());
+  const [isLoadingMinistries, setIsLoadingMinistries] = useState(false);
 
   const isSuperAdmin = user?.isSuperAdmin ?? false;
   const hasMemberWrite =
     user?.permissions?.includes(Permission.MEMBER_WRITE) ?? false;
-  const isSelfEdit =
-    mode === "edit" &&
-    memberId === user?.memberId &&
-    user?.permissions?.includes(Permission.MEMBER_SELF_WRITE);
 
   const canChangeChurch = isSuperAdmin || hasMemberWrite;
 
@@ -100,7 +106,13 @@ export function useMemberForm({
       email: "",
       fullName: "",
       phone: "",
-      churches: [{ churchId: defaultEditableChurchId, roleId: "" }],
+      churches: [
+        {
+          churchId: defaultEditableChurchId,
+          roleId: "",
+          ministryIds: [],
+        },
+      ],
     },
     mode: "onBlur",
   });
@@ -114,50 +126,111 @@ export function useMemberForm({
     name: "churches",
   });
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const response = await fetch("/api/roles");
-        const data = await response.json();
-        if (data.ok) {
-          setRoles(data.value.roles);
-        }
-      } catch (error) {
-        console.error("Error fetching roles:", error);
-      }
-    };
-
-    const fetchEditableChurches = async () => {
-      if (!canChangeChurch) {
+  const fetchMinistriesByChurch = useCallback(
+    async (churchId: string) => {
+      if (!churchId || ministriesMap.has(churchId)) {
         return;
       }
 
+      setIsLoadingMinistries(true);
       try {
-        if (isSuperAdmin) {
-          const response = await fetch("/api/churches");
-          const data = await response.json();
-          if (data.ok) {
-            setEditableChurches(data.value.churches);
-          }
-        } else {
-          const userChurchIds = userWritableChurchIds;
-          const allChurchesResponse = await fetch("/api/churches");
-          const allChurchesData = await allChurchesResponse.json();
-          if (allChurchesData.ok) {
-            const filteredChurches = allChurchesData.value.churches.filter(
-              (church: ChurchListItemDTO) => userChurchIds.includes(church.id),
-            );
-            setEditableChurches(filteredChurches);
-          }
+        const response = await fetch(`/api/ministries?churchId=${churchId}`);
+        const data = await response.json();
+        if (data.ok) {
+          setMinistriesMap((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(churchId, data.value.ministries);
+            return newMap;
+          });
         }
       } catch (error) {
-        console.error("Error fetching editable churches:", error);
+        console.error("Error fetching ministries:", error);
+      } finally {
+        setIsLoadingMinistries(false);
       }
-    };
+    },
+    [ministriesMap],
+  );
 
+  const getMinistriesByChurch = useCallback(
+    (churchId: string): MinistryListItemDTO[] => {
+      return ministriesMap.get(churchId) || [];
+    },
+    [ministriesMap],
+  );
+
+  const editableAppendMinistry = useCallback(
+    (churchIndex: number, ministryId: string) => {
+      const currentIds =
+        form.getValues(`churches.${churchIndex}.ministryIds`) || [];
+      if (!currentIds.includes(ministryId)) {
+        form.setValue(`churches.${churchIndex}.ministryIds`, [
+          ...currentIds,
+          ministryId,
+        ]);
+      }
+    },
+    [form],
+  );
+
+  const editableRemoveMinistry = useCallback(
+    (churchIndex: number, ministryIndex: number) => {
+      const currentIds =
+        form.getValues(`churches.${churchIndex}.ministryIds`) || [];
+      form.setValue(
+        `churches.${churchIndex}.ministryIds`,
+        currentIds.filter((_, idx) => idx !== ministryIndex),
+      );
+    },
+    [form],
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchRoles = useCallback(async () => {
+    try {
+      const response = await fetch("/api/roles");
+      const data = await response.json();
+      if (data.ok) {
+        setRoles(data.value.roles);
+      }
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
+  }, []);
+
+  const fetchEditableChurches = useCallback(async () => {
+    if (!canChangeChurch) {
+      return;
+    }
+
+    try {
+      if (isSuperAdmin) {
+        const response = await fetch("/api/churches");
+        const data = await response.json();
+        if (data.ok) {
+          setEditableChurches(data.value.churches);
+        }
+      } else {
+        const userChurchIds = userWritableChurchIds;
+        const allChurchesResponse = await fetch("/api/churches");
+        const allChurchesData = await allChurchesResponse.json();
+        if (allChurchesData.ok) {
+          const filteredChurches = allChurchesData.value.churches.filter(
+            (church: ChurchListItemDTO) => userChurchIds.includes(church.id),
+          );
+          setEditableChurches(filteredChurches);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching editable churches:", error);
+    }
+  }, [canChangeChurch, isSuperAdmin, userWritableChurchIds]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
     fetchRoles();
     fetchEditableChurches();
-  }, [canChangeChurch, isSuperAdmin, userWritableChurchIds]);
+  }, []);
 
   useEffect(() => {
     if (mode === "edit" && memberId) {
@@ -170,7 +243,11 @@ export function useMemberForm({
           if (data.ok && data.value) {
             const memberData = data.value;
 
-            const editable: { churchId: string; roleId: string }[] = [];
+            const editable: {
+              churchId: string;
+              roleId: string;
+              ministryIds: string[];
+            }[] = [];
             const readonly: ReadonlyChurch[] = [];
 
             for (const church of memberData.churches) {
@@ -178,13 +255,16 @@ export function useMemberForm({
                 editable.push({
                   churchId: church.churchId,
                   roleId: church.roleId,
+                  ministryIds: church.ministryIds || [],
                 });
+                fetchMinistriesByChurch(church.churchId);
               } else if (church.userPermission === "read") {
                 readonly.push({
                   churchId: church.churchId,
                   churchName: church.churchName,
                   roleId: church.roleId,
                   roleName: church.roleName,
+                  ministryIds: church.ministryIds || [],
                 });
               }
             }
@@ -203,14 +283,21 @@ export function useMemberForm({
                 email: memberData.email,
                 fullName: memberData.fullName,
                 phone: memberData.phone ?? "",
-                churches: [{ churchId: defaultEditableChurchId, roleId: "" }],
+                churches: [
+                  {
+                    churchId: defaultEditableChurchId,
+                    roleId: "",
+                    ministryIds: [],
+                  },
+                ],
               });
+              fetchMinistriesByChurch(defaultEditableChurchId);
             } else {
               form.reset({
                 email: memberData.email,
                 fullName: memberData.fullName,
                 phone: memberData.phone ?? "",
-                churches: [{ churchId: "", roleId: "" }],
+                churches: [{ churchId: "", roleId: "", ministryIds: [] }],
               });
             }
           } else {
@@ -233,6 +320,7 @@ export function useMemberForm({
     router,
     defaultEditableChurchId,
     hasSingleWritableChurch,
+    fetchMinistriesByChurch,
   ]);
 
   const onSubmit = async (formData: CreateMemberInput) => {
@@ -305,6 +393,10 @@ export function useMemberForm({
     editableChurches,
     readonlyChurches,
     canChangeChurch,
-    isSelfEdit: Boolean(isSelfEdit),
+    editableAppendMinistry,
+    editableRemoveMinistry,
+    getMinistriesByChurch,
+    fetchMinistriesByChurch,
+    isLoadingMinistries,
   };
 }

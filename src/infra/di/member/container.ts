@@ -5,16 +5,20 @@ import { ListMembers } from "@/application/use-cases/member/ListMembers";
 import { UpdateMember } from "@/application/use-cases/member/UpdateMember";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import { ChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/ChurchFirebaseRepository";
 import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
+import { MemberMinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberMinistryFirebaseRepository";
 import { RoleFirebaseRepository } from "@/infra/firebase-admin/repositories/RoleFirebaseRepository";
 
 class MemberContainer {
   private static _memberRepository: IMemberRepository | null = null;
   private static _memberChurchRepository: IMemberChurchRepository | null = null;
+  private static _memberMinistryRepository: IMemberMinistryRepository | null =
+    null;
   private static _churchRepository: IChurchRepository | null = null;
   private static _roleRepository: IRoleRepository | null = null;
   private static _listMembers: ListMembers | null = null;
@@ -38,6 +42,14 @@ class MemberContainer {
         new MemberChurchFirebaseRepository();
     }
     return MemberContainer._memberChurchRepository;
+  }
+
+  static get memberMinistryRepository(): IMemberMinistryRepository {
+    if (!MemberContainer._memberMinistryRepository) {
+      MemberContainer._memberMinistryRepository =
+        new MemberMinistryFirebaseRepository();
+    }
+    return MemberContainer._memberMinistryRepository;
   }
 
   static get churchRepository(): IChurchRepository {
@@ -80,6 +92,7 @@ class MemberContainer {
       MemberContainer._getMember = new GetMember(
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
+        MemberContainer.memberMinistryRepository,
         MemberContainer.churchRepository,
         MemberContainer.roleRepository,
       );

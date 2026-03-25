@@ -9,8 +9,16 @@ export type MemberListItem = {
   churches: MemberChurchInfo[];
 };
 
+export type PaginationInfo = {
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
+};
+
 export type ListMembersOutput = {
   members: MemberListItem[];
+  pagination: PaginationInfo;
 };
 
 export type ListMembersInput = {
@@ -20,5 +28,8 @@ export type ListMembersInput = {
     roleId: string | null;
     hasMemberRead: boolean;
   }[];
-  churchId?: string | null;
+  churchId: string;
+  search?: string;
+  page?: number;
+  limit?: number;
 };
