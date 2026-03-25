@@ -19,8 +19,11 @@ export function useMinistries(): UseMinistriesReturn {
   const fetchMinistries = useCallback(async () => {
     if (!user) return;
 
-    const churchId = user.churches[0]?.churchId;
-    if (!churchId) {
+    const churchId = user.isSuperAdmin
+      ? undefined
+      : user.churchId || user.churches[0]?.churchId;
+
+    if (!user.isSuperAdmin && !churchId) {
       setMinistries([]);
       setIsLoading(false);
       return;
@@ -28,7 +31,10 @@ export function useMinistries(): UseMinistriesReturn {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/ministries?churchId=${churchId}`);
+      const url = churchId
+        ? `/api/ministries?churchId=${churchId}`
+        : "/api/ministries";
+      const response = await fetch(url);
       const data = await response.json();
 
       if (data.ok) {

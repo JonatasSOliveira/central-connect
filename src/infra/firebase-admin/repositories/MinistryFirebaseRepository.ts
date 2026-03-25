@@ -42,15 +42,16 @@ export class MinistryFirebaseRepository
       .where("name", "==", name)
       .limit(1);
 
+    const snapshot = await query.get();
+
+    if (snapshot.empty) return null;
+
     if (excludeId) {
-      const docs = await query.get();
-      const filtered = docs.docs.filter((doc) => doc.id !== excludeId);
+      const filtered = snapshot.docs.filter((doc) => doc.id !== excludeId);
       if (filtered.length === 0) return null;
       return this.toEntity(filtered[0].data() as DocumentData, filtered[0].id);
     }
 
-    const snapshot = await query.get();
-    if (snapshot.empty) return null;
     const doc = snapshot.docs[0];
     return this.toEntity(doc.data() as DocumentData, doc.id);
   }

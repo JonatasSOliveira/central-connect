@@ -30,19 +30,20 @@ export function MinistryForm({
     isLoading,
     isFetching,
     onSubmit,
-    isEdit,
     editableChurches,
     canChangeChurch,
+    memberOptions,
   } = useMinistryForm({ mode, ministryId });
 
   const handleCancel = () => {
     router.push(backHref);
   };
 
-  const title = isEdit ? "Editar Ministério" : "Novo Ministério";
-  const subtitle = isEdit
-    ? "Altere os dados do ministério"
-    : "Preencha os dados do ministério";
+  const title = mode === "edit" ? "Editar Ministério" : "Novo Ministério";
+  const subtitle =
+    mode === "edit"
+      ? "Altere os dados do ministério"
+      : "Preencha os dados do ministério";
 
   const handleAddRole = () => {
     editableAppend({ name: "", id: null });
@@ -70,53 +71,42 @@ export function MinistryForm({
       <FormTemplate>
         <FormTemplate.Form<MinistryFormInput> form={form} onSubmit={onSubmit}>
           <FormTemplate.Content>
-            {showChurchSelect &&
-              canChangeChurch &&
-              editableChurches.length > 1 && (
-                <FormField<MinistryFormInput>
-                  form={form}
-                  name="churchId"
-                  label="Igreja"
-                  required
-                >
-                  <select
-                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:h-10 md:text-sm"
-                    {...form.register("churchId")}
+            {showChurchSelect && (
+              <>
+                {canChangeChurch && editableChurches.length > 1 && (
+                  <FormField<MinistryFormInput>
+                    form={form}
+                    name="churchId"
+                    label="Igreja"
+                    required
                   >
-                    <option value="">Selecione</option>
-                    {editableChurches.map((church) => (
-                      <option key={church.id} value={church.id}>
-                        {church.name}
-                      </option>
-                    ))}
-                  </select>
-                </FormField>
-              )}
+                    <select
+                      className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:h-10 md:text-sm"
+                      {...form.register("churchId")}
+                    >
+                      <option value="">Selecione</option>
+                      {editableChurches.map((church) => (
+                        <option key={church.id} value={church.id}>
+                          {church.name}
+                        </option>
+                      ))}
+                    </select>
+                  </FormField>
+                )}
 
-            {!canChangeChurch && editableChurches.length === 1 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Igreja
-                </label>
-                <Input
-                  value={editableChurches[0].name}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-            )}
-
-            {canChangeChurch && editableChurches.length === 1 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Igreja
-                </label>
-                <Input
-                  value={editableChurches[0].name}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
+                {!canChangeChurch && editableChurches.length === 1 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Igreja
+                    </label>
+                    <Input
+                      value={editableChurches[0].name}
+                      disabled
+                      className="bg-muted"
+                    />
+                  </div>
+                )}
+              </>
             )}
 
             <FormField<MinistryFormInput>
@@ -126,6 +116,24 @@ export function MinistryForm({
               placeholder="Nome do ministério"
               required
             />
+
+            <FormField<MinistryFormInput>
+              form={form}
+              name="liderId"
+              label="Líder Responsável"
+            >
+              <select
+                className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:h-10 md:text-sm"
+                {...form.register("liderId")}
+              >
+                <option value="">Selecione</option>
+                {memberOptions.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.fullName}
+                  </option>
+                ))}
+              </select>
+            </FormField>
 
             <div className="grid grid-cols-2 gap-4">
               <FormField<MinistryFormInput>
@@ -221,7 +229,7 @@ export function MinistryForm({
           <FormTemplate.Footer
             onCancel={handleCancel}
             isLoading={isLoading}
-            submitLabel={isEdit ? "Salvar" : "Criar"}
+            submitLabel={mode === "edit" ? "Salvar" : "Criar"}
           />
         </FormTemplate.Form>
       </FormTemplate>

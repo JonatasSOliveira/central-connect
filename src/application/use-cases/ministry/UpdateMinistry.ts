@@ -20,7 +20,9 @@ export interface UpdateMinistryRoleInput {
 
 export interface UpdateMinistryInput {
   ministryId: string;
+  churchId: string;
   name: string;
+  liderId?: string | null;
   minMembersPerService: number;
   idealMembersPerService: number;
   notes?: string | null;
@@ -77,6 +79,7 @@ export class UpdateMinistry extends BaseUseCase<
         id: existingMinistry.id,
         churchId: existingMinistry.churchId,
         name: input.name,
+        liderId: input.liderId ?? null,
         minMembersPerService: input.minMembersPerService,
         idealMembersPerService: input.idealMembersPerService,
         notes: input.notes ?? null,
@@ -113,7 +116,6 @@ export class UpdateMinistry extends BaseUseCase<
             if (existingRole.name !== roleInput.name) {
               const roleParams: MinistryRoleParams = {
                 id: existingRole.id,
-                churchId: existingRole.churchId,
                 ministryId: existingRole.ministryId,
                 name: roleInput.name,
                 createdByUserId: existingRole.createdByUserId ?? null,
@@ -131,7 +133,6 @@ export class UpdateMinistry extends BaseUseCase<
           }
         } else {
           const roleParams: MinistryRoleParams = {
-            churchId: existingMinistry.churchId,
             ministryId: updatedMinistry.id,
             name: roleInput.name,
             createdByUserId: input.updatedByUserId,
@@ -151,6 +152,7 @@ export class UpdateMinistry extends BaseUseCase<
             id: updatedMinistry.id,
             churchId: updatedMinistry.churchId,
             name: updatedMinistry.name,
+            liderId: updatedMinistry.liderId,
             minMembersPerService: updatedMinistry.minMembersPerService,
             idealMembersPerService: updatedMinistry.idealMembersPerService,
             notes: updatedMinistry.notes,

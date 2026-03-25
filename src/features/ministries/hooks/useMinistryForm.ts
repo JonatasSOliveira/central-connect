@@ -8,12 +8,16 @@ import { toast } from "sonner";
 import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
 import type {
   MinistryDetailDTO,
-  MinistryFormData,
   MinistryFormInput,
 } from "@/application/dtos/ministry/MinistryDTO";
 import { MinistryFormSchema } from "@/application/dtos/ministry/MinistryDTO";
 import { Permission } from "@/domain/enums/Permission";
 import { useAuthStore } from "@/stores/authStore";
+
+interface MemberOption {
+  id: string;
+  fullName: string;
+}
 
 interface UseMinistryFormProps {
   mode: "create" | "edit";
@@ -34,10 +38,9 @@ export interface UseMinistryFormReturn {
   isLoading: boolean;
   isFetching: boolean;
   onSubmit: (data: MinistryFormInput) => Promise<void>;
-  isEdit: boolean;
   editableChurches: ChurchListItemDTO[];
   canChangeChurch: boolean;
-  defaultChurchId: string;
+  memberOptions: MemberOption[];
 }
 
 export function useMinistryForm({
@@ -52,6 +55,8 @@ export function useMinistryForm({
   const [editableChurches, setEditableChurches] = useState<ChurchListItemDTO[]>(
     [],
   );
+  const [members, setMembers] = useState<MemberOption[]>([]);
+  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
 
   const isSuperAdmin = user?.isSuperAdmin ?? false;
   const hasMinistryWrite =
@@ -76,6 +81,7 @@ export function useMinistryForm({
     defaultValues: {
       churchId: defaultChurchId,
       name: "",
+      liderId: null,
       minMembersPerService: 1,
       idealMembersPerService: 2,
       notes: "",
@@ -83,6 +89,8 @@ export function useMinistryForm({
     },
     mode: "onBlur",
   });
+
+  const watchChurchId = form.watch("churchId");
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -122,6 +130,43 @@ export function useMinistryForm({
   }, [canChangeChurch, isSuperAdmin, userWritableChurchIds]);
 
   useEffect(() => {
+    const fetchMembers = async () => {
+      if (!watchChurchId) {
+        setMembers([]);
+        return;
+      }
+
+      setIsLoadingMembers(true);
+      try {
+        const response = await fetch(`/api/members?churchId=${watchChurchId}`);
+        const data = await response.json();
+        if (data.ok) {
+          const membersData = data.value.members.map(
+            (m: { id: string; fullName: string }) => ({
+              id: m.id,
+              fullName: m.fullName,
+            }),
+          );
+          setMembers(membersData);
+        }
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      } finally {
+        setIsLoadingMembers(false);
+      }
+    };
+
+    fetchMembers();
+  }, [watchChurchId]);
+
+  const memberOptions = useMemo(() => {
+    if (!watchChurchId) {
+      return [];
+    }
+    return members;
+  }, [members, watchChurchId]);
+
+  useEffect(() => {
     if (mode === "edit" && ministryId) {
       const fetchMinistry = async () => {
         setIsFetching(true);
@@ -134,6 +179,7 @@ export function useMinistryForm({
             form.reset({
               churchId: ministryData.churchId,
               name: ministryData.name,
+              liderId: ministryData.liderId,
               minMembersPerService: ministryData.minMembersPerService,
               idealMembersPerService: ministryData.idealMembersPerService,
               notes: ministryData.notes ?? "",
@@ -212,9 +258,8 @@ export function useMinistryForm({
     isLoading,
     isFetching,
     onSubmit,
-    isEdit: mode === "edit",
     editableChurches,
     canChangeChurch,
-    defaultChurchId,
+    memberOptions,
   };
 }

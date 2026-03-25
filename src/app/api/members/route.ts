@@ -30,7 +30,7 @@ function buildUserChurches(
   }));
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const auth = await validateSession();
 
   if (!auth.ok) {
@@ -38,6 +38,8 @@ export async function GET() {
   }
 
   const { user } = auth;
+  const { searchParams } = new URL(request.url);
+  const churchIdFilter = searchParams.get("churchId");
 
   const result = await memberContainer.listMembers.execute({
     isSuperAdmin: user.isSuperAdmin,
@@ -46,6 +48,7 @@ export async function GET() {
       user.churches,
       user.permissions,
     ),
+    churchId: churchIdFilter,
   });
 
   if (!result.ok) {

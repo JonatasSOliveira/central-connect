@@ -12,7 +12,6 @@ export function ministryRoleToPersistence(
   ministryRole: MinistryRole,
 ): DocumentData {
   return convertDatesToTimestamps({
-    churchId: ministryRole.churchId,
     ministryId: ministryRole.ministryId,
     name: ministryRole.name,
     createdAt: ministryRole.createdAt,
@@ -28,7 +27,6 @@ export function ministryRoleFromPersistence(
   const convertedData = convertTimestampsToDates(data);
   const params: MinistryRoleParams = {
     id,
-    churchId: convertedData.churchId ?? "",
     ministryId: convertedData.ministryId ?? "",
     name: convertedData.name ?? "",
     createdAt: convertedData.createdAt,

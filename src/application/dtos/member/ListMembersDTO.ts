@@ -20,4 +20,5 @@ export type ListMembersInput = {
     roleId: string | null;
     hasMemberRead: boolean;
   }[];
+  churchId?: string | null;
 };

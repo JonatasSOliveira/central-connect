@@ -31,13 +31,4 @@ export class MinistryRoleFirebaseRepository
       this.toEntity(doc.data() as DocumentData, doc.id),
     );
   }
-
-  async findByChurchId(churchId: string): Promise<MinistryRole[]> {
-    const snapshot = await this.buildActiveQuery()
-      .where("churchId", "==", churchId)
-      .get();
-    return snapshot.docs.map((doc) =>
-      this.toEntity(doc.data() as DocumentData, doc.id),
-    );
-  }
 }

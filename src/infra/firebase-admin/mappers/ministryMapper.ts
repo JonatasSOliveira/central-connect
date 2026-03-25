@@ -9,6 +9,7 @@ export function ministryToPersistence(ministry: Ministry): DocumentData {
   return convertDatesToTimestamps({
     churchId: ministry.churchId,
     name: ministry.name,
+    liderId: ministry.liderId,
     minMembersPerService: ministry.minMembersPerService,
     idealMembersPerService: ministry.idealMembersPerService,
     notes: ministry.notes,
@@ -27,6 +28,7 @@ export function ministryFromPersistence(
     id,
     churchId: convertedData.churchId ?? "",
     name: convertedData.name ?? "",
+    liderId: convertedData.liderId ?? null,
     minMembersPerService: convertedData.minMembersPerService ?? 1,
     idealMembersPerService: convertedData.idealMembersPerService ?? 2,
     notes: convertedData.notes ?? null,

@@ -51,6 +51,8 @@ export class ListMembers extends BaseUseCase<
         }
       }
 
+      const churchIdFilter = input.churchId ?? null;
+
       const membersWithChurchInfo = await Promise.all(
         allMembers.map(async (member) => {
           const memberChurches =
@@ -66,6 +68,15 @@ export class ListMembers extends BaseUseCase<
 
           if (visibleChurches.length === 0) {
             return null;
+          }
+
+          if (churchIdFilter) {
+            const hasChurch = memberChurches.some(
+              (mc) => mc.churchId === churchIdFilter,
+            );
+            if (!hasChurch) {
+              return null;
+            }
           }
 
           return {

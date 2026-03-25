@@ -46,6 +46,7 @@ export class GetMinistry extends BaseUseCase<
             id: ministry.id,
             churchId: ministry.churchId,
             name: ministry.name,
+            liderId: ministry.liderId,
             minMembersPerService: ministry.minMembersPerService,
             idealMembersPerService: ministry.idealMembersPerService,
             notes: ministry.notes,
@@ -60,10 +61,7 @@ export class GetMinistry extends BaseUseCase<
     } catch {
       return {
         ok: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: "Erro ao buscar ministério",
-        },
+        error: MinistryErrors.MINISTRY_NOT_FOUND,
       };
     }
   }

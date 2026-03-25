@@ -3,6 +3,7 @@ import { AuditableEntity, type AuditableEntityParams } from "./AuditableEntity";
 export class Ministry extends AuditableEntity {
   protected readonly _churchId: string;
   protected readonly _name: string;
+  protected readonly _liderId: string | null;
   protected readonly _minMembersPerService: number;
   protected readonly _idealMembersPerService: number;
   protected readonly _notes: string | null;
@@ -11,6 +12,7 @@ export class Ministry extends AuditableEntity {
     super(params);
     this._churchId = params.churchId;
     this._name = params.name;
+    this._liderId = params.liderId ?? null;
     this._minMembersPerService = params.minMembersPerService;
     this._idealMembersPerService = params.idealMembersPerService;
     this._notes = params.notes ?? null;
@@ -22,6 +24,10 @@ export class Ministry extends AuditableEntity {
 
   get name(): string {
     return this._name;
+  }
+
+  get liderId(): string | null {
+    return this._liderId;
   }
 
   get minMembersPerService(): number {
@@ -40,6 +46,7 @@ export class Ministry extends AuditableEntity {
 export interface MinistryParams extends AuditableEntityParams {
   churchId: string;
   name: string;
+  liderId?: string | null;
   minMembersPerService: number;
   idealMembersPerService: number;
   notes?: string | null;

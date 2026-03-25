@@ -5,7 +5,7 @@ import type { MinistryListItemDTO } from "../../dtos/ministry/MinistryDTO";
 import { BaseUseCase } from "../BaseUseCase";
 
 export interface ListMinistriesInput {
-  churchId: string;
+  churchId?: string;
 }
 
 export interface ListMinistriesOutput {
@@ -27,9 +27,9 @@ export class ListMinistries extends BaseUseCase<
     input: ListMinistriesInput,
   ): Promise<Result<ListMinistriesOutput>> {
     try {
-      const ministries = await this.ministryRepository.findByChurchId(
-        input.churchId,
-      );
+      const ministries = input.churchId
+        ? await this.ministryRepository.findByChurchId(input.churchId)
+        : await this.ministryRepository.findAll();
 
       const ministryDTOs: MinistryListItemDTO[] = await Promise.all(
         ministries.map(async (ministry) => {
@@ -39,7 +39,9 @@ export class ListMinistries extends BaseUseCase<
 
           return {
             id: ministry.id,
+            churchId: ministry.churchId,
             name: ministry.name,
+            liderId: ministry.liderId,
             roles: roles.map((r) => ({
               id: r.id,
               name: r.name,

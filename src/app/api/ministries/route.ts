@@ -5,26 +5,6 @@ import { ministryContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 import { validateSession } from "../_lib/auth";
 
-function buildUserChurches(
-  isSuperAdmin: boolean,
-  userChurches: { churchId: string; roleId: string | null }[],
-  permissions: string[],
-): { churchId: string; hasRead: boolean; hasWrite: boolean }[] {
-  if (isSuperAdmin) {
-    return userChurches.map((c) => ({
-      churchId: c.churchId,
-      hasRead: true,
-      hasWrite: true,
-    }));
-  }
-
-  return userChurches.map((c) => ({
-    churchId: c.churchId,
-    hasRead: permissions.includes(Permission.MINISTRY_READ),
-    hasWrite: permissions.includes(Permission.MINISTRY_WRITE),
-  }));
-}
-
 export async function GET(request: NextRequest) {
   const auth = await validateSession();
 
@@ -35,12 +15,6 @@ export async function GET(request: NextRequest) {
   const { user } = auth;
   const { searchParams } = new URL(request.url);
   const churchId = searchParams.get("churchId");
-
-  const userChurches = buildUserChurches(
-    user.isSuperAdmin,
-    user.churches,
-    user.permissions,
-  );
 
   const hasReadAccess =
     user.isSuperAdmin || user.permissions.includes(Permission.MINISTRY_READ);
@@ -58,9 +32,26 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (churchId) {
-    const churchAccess = userChurches.find((c) => c.churchId === churchId);
-    if (!churchAccess?.hasRead && !user.isSuperAdmin) {
+  const churchIdToUse = user.isSuperAdmin
+    ? churchId || undefined
+    : churchId || user.churchId || user.churches[0]?.churchId;
+
+  if (!user.isSuperAdmin && !churchIdToUse) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NO_CHURCH_SELECTED",
+          message: "Nenhuma igreja selecionada",
+        },
+      },
+      { status: 400 },
+    );
+  }
+
+  if (churchId && !user.isSuperAdmin) {
+    const hasAccess = user.churches.some((c) => c.churchId === churchId);
+    if (!hasAccess) {
       return NextResponse.json(
         {
           ok: false,
@@ -75,7 +66,7 @@ export async function GET(request: NextRequest) {
   }
 
   const result = await ministryContainer.listMinistries.execute({
-    churchId: churchId || user.churches[0]?.churchId,
+    churchId: churchIdToUse,
   });
 
   if (!result.ok) {
@@ -137,11 +128,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (!user.isSuperAdmin) {
-    const userWritableChurchIds = user.churches
-      .filter((c) => user.permissions.includes(Permission.MINISTRY_WRITE))
-      .map((c) => c.churchId);
-
-    if (!userWritableChurchIds.includes(parsed.data.churchId)) {
+    const hasAccess = user.churches.some(
+      (c) => c.churchId === parsed.data.churchId,
+    );
+    if (!hasAccess) {
       return NextResponse.json(
         {
           ok: false,
@@ -156,7 +146,13 @@ export async function POST(request: NextRequest) {
   }
 
   const result = await ministryContainer.createMinistry.execute({
-    ...parsed.data,
+    churchId: parsed.data.churchId,
+    name: parsed.data.name,
+    liderId: parsed.data.liderId,
+    minMembersPerService: parsed.data.minMembersPerService,
+    idealMembersPerService: parsed.data.idealMembersPerService,
+    notes: parsed.data.notes,
+    roles: parsed.data.roles,
     createdByUserId: user.userId,
   });
 
