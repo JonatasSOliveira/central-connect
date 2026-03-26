@@ -1,7 +1,8 @@
 "use client";
 
-import { Church, Plus, Inbox } from "lucide-react";
+import { Church, Plus, Inbox, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
 import { useChurches } from "@/features/churches/hooks/useChurches";
@@ -12,7 +13,14 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 export default function ChurchesPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { churches, isLoading, deleteChurch } = useChurches();
+  const {
+    churches,
+    allChurchesCount,
+    isLoading,
+    searchQuery,
+    setSearch,
+    deleteChurch,
+  } = useChurches();
 
   usePermissions({
     requiredPermissions: [Permission.CHURCH_READ],
@@ -22,37 +30,32 @@ export default function ChurchesPage() {
   const canDelete =
     user?.isSuperAdmin || user?.permissions.includes(Permission.CHURCH_DELETE);
 
-  const handleCreateChurch = () => {
+  const handleCreateChurch = useCallback(() => {
     router.push("/churches/new");
-  };
+  }, [router]);
 
-  const handleEditChurch = (churchId: string) => {
-    router.push(`/churches/${churchId}/edit`);
-  };
+  const handleEditChurch = useCallback(
+    (churchId: string) => {
+      router.push(`/churches/${churchId}/edit`);
+    },
+    [router],
+  );
 
-  const handleDeleteChurch = async (churchId: string) => {
-    const success = await deleteChurch(churchId);
-    if (success) {
-      toast.success("Igreja excluída com sucesso");
-    } else {
-      toast.error("Erro ao excluir igreja");
-    }
-  };
+  const handleDeleteChurch = useCallback(
+    async (churchId: string) => {
+      const success = await deleteChurch(churchId);
+      if (success) {
+        toast.success("Igreja excluída com sucesso");
+      } else {
+        toast.error("Erro ao excluir igreja");
+      }
+    },
+    [deleteChurch],
+  );
 
-  return (
-    <ListTemplate isLoading={isLoading}>
-      <ListTemplate.Header
-        title="Igrejas"
-        subtitle="Gerencie as igrejas da plataforma"
-      />
-
-      <ListTemplate.Action
-        label="Nova Igreja"
-        icon={Plus}
-        onClick={handleCreateChurch}
-      />
-
-      {churches.length === 0 ? (
+  const renderContent = () => {
+    if (churches.length === 0 && allChurchesCount === 0 && !isLoading) {
+      return (
         <ListTemplate.EmptyState
           icon={Inbox}
           title="Nenhuma igreja cadastrada"
@@ -62,26 +65,67 @@ export default function ChurchesPage() {
             onClick: handleCreateChurch,
           }}
         />
-      ) : (
-        <ListTemplate.List>
-          {churches.map((church) => (
-            <ListTemplate.Item
-              key={church.id}
-              icon={Church}
-              title={church.name}
-              onClick={() => handleEditChurch(church.id)}
-              actions={
-                canDelete
-                  ? {
-                      onEdit: () => handleEditChurch(church.id),
-                      onDelete: () => handleDeleteChurch(church.id),
-                    }
-                  : undefined
-              }
-            />
-          ))}
-        </ListTemplate.List>
-      )}
+      );
+    }
+
+    if (churches.length === 0 && searchQuery.trim()) {
+      return (
+        <ListTemplate.EmptyState
+          icon={Search}
+          title="Nenhuma igreja encontrada"
+          description={`Não foram encontradas igrejas para "${searchQuery}"`}
+          action={{
+            label: "Limpar busca",
+            onClick: () => setSearch(""),
+          }}
+        />
+      );
+    }
+
+    return (
+      <ListTemplate.List>
+        {churches.map((church) => (
+          <ListTemplate.Item
+            key={church.id}
+            icon={Church}
+            title={church.name}
+            onClick={() => handleEditChurch(church.id)}
+            actions={
+              canDelete
+                ? {
+                    onEdit: () => handleEditChurch(church.id),
+                    onDelete: () => handleDeleteChurch(church.id),
+                  }
+                : undefined
+            }
+          />
+        ))}
+      </ListTemplate.List>
+    );
+  };
+
+  return (
+    <ListTemplate isLoading={isLoading}>
+      <ListTemplate.Header
+        title="Igrejas"
+        subtitle={`${allChurchesCount} igreja${allChurchesCount !== 1 ? "s" : ""}`}
+      />
+
+      <ListTemplate.SearchBar
+        value={searchQuery}
+        onChange={setSearch}
+        onClear={() => setSearch("")}
+        placeholder="Buscar por nome..."
+        resultsCount={churches.length}
+      />
+
+      <ListTemplate.Action
+        label="Nova Igreja"
+        icon={Plus}
+        onClick={handleCreateChurch}
+      />
+
+      {renderContent()}
     </ListTemplate>
   );
 }

@@ -24,6 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { SearchInput } from "@/components/ui/search-input";
 import { cn } from "@/lib/utils";
 
 interface ListTemplateProps {
@@ -68,8 +69,42 @@ interface ListEmptyStateProps {
   className?: string;
 }
 
+interface ListSearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+  onClear?: () => void;
+  placeholder?: string;
+  resultsCount?: number;
+  className?: string;
+}
+
 function List({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-1 gap-3">{children}</div>;
+}
+
+function SearchBar({
+  value,
+  onChange,
+  onClear,
+  placeholder = "Buscar...",
+  resultsCount,
+  className,
+}: ListSearchBarProps) {
+  return (
+    <div className={cn("space-y-3 mb-4", className)}>
+      <SearchInput
+        value={value}
+        onChange={onChange}
+        onClear={onClear}
+        placeholder={placeholder}
+      />
+      {value && resultsCount !== undefined && (
+        <p className="text-xs text-muted-foreground">
+          {resultsCount} resultado{resultsCount !== 1 ? "s" : ""} para "{value}"
+        </p>
+      )}
+    </div>
+  );
 }
 
 function ListItem({
@@ -322,6 +357,7 @@ export function ListTemplate({
 
 ListTemplate.Header = PrivateHeader;
 ListTemplate.List = List;
+ListTemplate.SearchBar = SearchBar;
 ListTemplate.Item = ListItem;
 ListTemplate.Action = Action;
 ListTemplate.EmptyState = EmptyStateComponent;

@@ -1,53 +1,70 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
-import { useAuthStore } from "@/stores/authStore";
+import { useChurchStore } from "@/stores/churchStore";
 
 interface UseMinistriesReturn {
   ministries: MinistryListItemDTO[];
+  allMinistriesCount: number;
   isLoading: boolean;
+  searchQuery: string;
+  setSearch: (value: string) => void;
   deleteMinistry: (ministryId: string) => Promise<boolean>;
   refresh: () => void;
 }
 
 export function useMinistries(): UseMinistriesReturn {
-  const { user } = useAuthStore();
-  const [ministries, setMinistries] = useState<MinistryListItemDTO[]>([]);
+  const { selectedChurch } = useChurchStore();
+  const churchId = selectedChurch?.id;
+
+  const [allMinistries, setAllMinistries] = useState<MinistryListItemDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchMinistries = useCallback(async () => {
-    if (!user) return;
-
-    const churchId = user.isSuperAdmin ? undefined : user.churches[0]?.churchId;
-
-    if (!user.isSuperAdmin && !churchId) {
-      setMinistries([]);
+    if (!churchId) {
+      setAllMinistries([]);
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
     try {
-      const url = churchId
-        ? `/api/ministries?churchId=${churchId}`
-        : "/api/ministries";
+      const url = `/api/ministries?churchId=${churchId}`;
       const response = await fetch(url);
       const data = await response.json();
 
       if (data.ok) {
-        setMinistries(data.value.ministries);
+        const sorted = [...data.value.ministries].sort((a, b) =>
+          a.name.localeCompare(b.name, "pt-BR"),
+        );
+        setAllMinistries(sorted);
       }
     } catch (error) {
       console.error("Error fetching ministries:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [churchId]);
 
   useEffect(() => {
     fetchMinistries();
   }, [fetchMinistries]);
+
+  const filteredMinistries = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return allMinistries;
+    }
+    const query = searchQuery.toLowerCase().trim();
+    return allMinistries.filter((ministry) =>
+      ministry.name.toLowerCase().includes(query),
+    );
+  }, [allMinistries, searchQuery]);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
 
   const deleteMinistry = useCallback(
     async (ministryId: string): Promise<boolean> => {
@@ -57,14 +74,14 @@ export function useMinistries(): UseMinistriesReturn {
         });
 
         if (response.status === 204) {
-          setMinistries((prev) => prev.filter((m) => m.id !== ministryId));
+          setAllMinistries((prev) => prev.filter((m) => m.id !== ministryId));
           return true;
         }
 
         const data = await response.json();
 
         if (data.ok) {
-          setMinistries((prev) => prev.filter((m) => m.id !== ministryId));
+          setAllMinistries((prev) => prev.filter((m) => m.id !== ministryId));
           return true;
         }
         return false;
@@ -76,5 +93,13 @@ export function useMinistries(): UseMinistriesReturn {
     [],
   );
 
-  return { ministries, isLoading, deleteMinistry, refresh: fetchMinistries };
+  return {
+    ministries: filteredMinistries,
+    allMinistriesCount: allMinistries.length,
+    isLoading,
+    searchQuery,
+    setSearch: handleSearch,
+    deleteMinistry,
+    refresh: fetchMinistries,
+  };
 }
