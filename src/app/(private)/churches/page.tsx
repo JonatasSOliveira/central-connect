@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Plus, Inbox } from "lucide-react";
+import { Church, Plus, Inbox } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
@@ -67,7 +67,7 @@ export default function ChurchesPage() {
           {churches.map((church) => (
             <ListTemplate.Item
               key={church.id}
-              icon={Building2}
+              icon={Church}
               title={church.name}
               onClick={() => handleEditChurch(church.id)}
               actions={

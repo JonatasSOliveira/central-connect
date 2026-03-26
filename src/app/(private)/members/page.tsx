@@ -27,12 +27,6 @@ export default function MembersPage() {
     redirectTo: "/home",
   });
 
-  useEffect(() => {
-    if (members.length === 0 && allMembersCount === 0 && !isLoading) {
-      router.push("/select-church");
-    }
-  }, [members.length, allMembersCount, isLoading, router]);
-
   const handleCreateMember = useCallback(() => {
     router.push("/members/new");
   }, [router]);

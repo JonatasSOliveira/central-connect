@@ -1,21 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Church,
-  Building2,
   UserRoundKey,
   Users,
   LogOut,
   HandHeart,
+  ArrowRightLeft,
 } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { CardAdmin } from "@/components/ui/card-admin";
 import { CardItem } from "@/components/ui/card-item";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,8 +29,9 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function HomePage() {
+  const router = useRouter();
   const { userName, selectedChurch } = useHomeScreen();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const { hasPermission: canManageMembers } = usePermissions({
@@ -60,7 +62,31 @@ export default function HomePage() {
         <PrivateHeader title={`Olá, ${userName}`} showBackButton={false} />
 
         <div className="py-4">
-          <p>Acessando a igreja {selectedChurch?.name}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <Church className="h-6 w-6 text-primary" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Igreja selecionada
+                </p>
+                <p className="font-heading text-lg font-semibold text-foreground">
+                  {selectedChurch?.name}
+                </p>
+              </div>
+            </div>
+            {user && user.churches && user.churches.length > 1 && (
+              <button
+                type="button"
+                onClick={() => router.push("/select-church")}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+              >
+                <ArrowRightLeft className="w-4 h-4" />
+                Trocar
+              </button>
+            )}
+          </div>
         </div>
 
         {canShowAdminSection && (
@@ -77,7 +103,7 @@ export default function HomePage() {
                 <CardAdmin
                   title="Igrejas"
                   description="Gerencie as igrejas cadastradas"
-                  icon={Building2}
+                  icon={Church}
                   href="/churches"
                 />
               )}

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const CreateMemberInputSchema = z.object({
-  email: z.string().email("Email inválido").optional(),
+  email: z.string().optional().or(z.literal("")),
   fullName: z.string().min(1, "Nome é obrigatório"),
   phone: z.string().optional(),
   churches: z
@@ -18,7 +18,7 @@ export const CreateMemberInputSchema = z.object({
 export type CreateMemberInput = z.infer<typeof CreateMemberInputSchema>;
 
 export const UpdateMemberInputSchema = z.object({
-  email: z.string().email("Email inválido").optional(),
+  email: z.string().optional().or(z.literal("")),
   fullName: z.string().min(1, "Nome é obrigatório").optional(),
   phone: z.string().optional(),
   churches: z

@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Building2, Loader2, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Church, Loader2, LogOut } from "lucide-react";
 import { CardItem } from "@/components/ui/card-item";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSelectChurchScreen } from "@/features/churches/hooks/useSelectChurch";
@@ -17,11 +15,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
-
-interface Church {
-  churchId: string;
-  roleId: string | null;
-}
 
 export default function SelectChurchPage() {
   const router = useRouter();
@@ -40,44 +33,44 @@ export default function SelectChurchPage() {
 
   if (loadingChurches) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center p-6 bg-background">
+      <div className="h-dvh flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center p-6 bg-background">
-      <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500 flex-1 justify-center">
-        <div className="relative mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Building2 className="w-10 h-10 text-primary" strokeWidth={1.5} />
-          </div>
+    <div className="h-full flex flex-col bg-background">
+      <div className="flex flex-col items-center p-6 pb-4">
+        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+          <Church className="w-12 h-12 text-primary" strokeWidth={1.5} />
         </div>
 
         <h1 className="font-heading text-2xl font-bold text-foreground text-center">
           Selecione uma igreja
         </h1>
-        <p className="text-muted-foreground text-center mt-2">
+        <p className="text-muted-foreground text-center mt-2 text-sm">
           Você pertence a {churches.length} igreja
           {churches.length !== 1 ? "s" : ""}
         </p>
+      </div>
 
-        <div className="w-full mt-8 space-y-3">
+      <div className="flex-1 overflow-y-auto px-6 min-h-0">
+        <div className="max-w-sm mx-auto space-y-3">
           {churches.map((church) => (
-            <Button
+            <CardItem
               key={church.id}
-              variant="outline"
-              size="lg"
-              className="w-full h-14 text-base font-medium justify-start px-4"
+              title={church.name}
+              description="Toque para selecionar"
+              icon={Church}
               onClick={() => handleSelectChurch(church)}
-            >
-              {church.name}
-            </Button>
+            />
           ))}
         </div>
+      </div>
 
-        <div className="mt-auto pt-8 w-full">
+      <div className="p-6 pt-4 bg-background border-t border-border shrink-0">
+        <div className="max-w-sm mx-auto">
           <CardItem
             title="Sair"
             description="Encerrar sessão atual"

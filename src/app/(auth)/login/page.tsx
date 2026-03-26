@@ -8,36 +8,36 @@ export default function LoginPage() {
   const { isLoading, error, handleGoogleLogin } = useLoginScreen();
 
   return (
-    <div className="flex h-full items-center justify-center p-6 bg-background">
-      <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500">
+    <div className="min-h-dvh flex flex-col items-center justify-center p-6 bg-background">
+      <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500 flex-1 justify-center">
         <div className="relative mb-8">
-          <div className="w-28 h-28 rounded-3xl bg-primary/10 flex items-center justify-center">
-            <Church className="w-14 h-14 text-primary" strokeWidth={1.5} />
+          <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center">
+            <Church className="w-12 h-12 text-primary" strokeWidth={1.5} />
           </div>
-          <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-xs font-bold">
+          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center">
+            <span className="text-primary-foreground text-[10px] font-bold">
               CC
             </span>
           </div>
         </div>
 
-        <h1 className="font-heading text-4xl font-bold text-foreground text-center leading-tight">
+        <h1 className="font-heading text-2xl font-bold text-foreground text-center leading-tight">
           Central Connect
         </h1>
-        <p className="text-muted-foreground text-center mt-3 text-lg">
+        <p className="text-muted-foreground text-center mt-2 text-sm">
           Gestão de escalas ministeriais
         </p>
 
         {error && (
-          <div className="w-full mt-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
+          <div className="w-full mt-6 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
             {error}
           </div>
         )}
 
-        <div className="w-full mt-12 space-y-4">
+        <div className="w-full mt-8 space-y-4">
           <Button
             size="lg"
-            className="w-full h-14 text-base font-medium gap-3"
+            className="w-full h-12 text-base font-medium gap-3"
             onClick={handleGoogleLogin}
             disabled={isLoading}
           >
@@ -68,7 +68,7 @@ export default function LoginPage() {
           </Button>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-12 text-center">
+        <p className="text-xs text-muted-foreground mt-8 text-center">
           Made for Ministries
         </p>
       </div>
