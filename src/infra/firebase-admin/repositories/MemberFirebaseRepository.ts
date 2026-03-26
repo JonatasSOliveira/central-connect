@@ -60,4 +60,12 @@ export class MemberFirebaseRepository
         m.fullName.toLowerCase().includes(searchLower),
     );
   }
+
+  async findByIds(ids: string[]): Promise<Member[]> {
+    if (ids.length === 0) return [];
+
+    const members = await Promise.all(ids.map((id) => this.findById(id)));
+
+    return members.filter((m): m is Member => m !== null);
+  }
 }

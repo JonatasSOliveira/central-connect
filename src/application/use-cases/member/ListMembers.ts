@@ -5,11 +5,8 @@ import type { Result } from "@/shared/types/Result";
 import type {
   ListMembersInput,
   ListMembersOutput,
-  PaginationInfo,
 } from "../../dtos/member/ListMembersDTO";
 import { BaseUseCase } from "../BaseUseCase";
-
-const DEFAULT_LIMIT = 50;
 
 export class ListMembers extends BaseUseCase<
   ListMembersInput,
@@ -25,103 +22,41 @@ export class ListMembers extends BaseUseCase<
 
   async execute(input: ListMembersInput): Promise<Result<ListMembersOutput>> {
     try {
-      const page = input.page ?? 1;
-      const limit = input.limit ?? DEFAULT_LIMIT;
-      const offset = (page - 1) * limit;
-
-      let allChurches: Map<string, string> = new Map();
-      let userReadableChurchIds: string[] = [];
-
-      if (input.isSuperAdmin) {
-        const churches = await this.churchRepository.findAll();
-        allChurches = new Map(churches.map((c) => [c.id, c.name]));
-        userReadableChurchIds = Array.from(allChurches.keys());
-      } else {
-        userReadableChurchIds = (input.userChurches ?? [])
-          .filter((c) => c.hasMemberRead)
-          .map((c) => c.churchId);
-
-        if (userReadableChurchIds.length === 0) {
-          return {
-            ok: true,
-            value: {
-              members: [],
-              pagination: this.emptyPagination(page, limit),
-            },
-          };
-        }
-
-        const churches = await this.churchRepository.findAll();
-        for (const church of churches) {
-          if (userReadableChurchIds.includes(church.id)) {
-            allChurches.set(church.id, church.name);
-          }
-        }
+      const church = await this.churchRepository.findById(input.churchId);
+      if (!church) {
+        return {
+          ok: true,
+          value: { members: [] },
+        };
       }
 
-      const allMembers = input.search?.trim()
-        ? await this.memberRepository.findBySearch(input.search)
-        : await this.memberRepository.findAll();
-
-      const membersWithChurchInfo = await Promise.all(
-        allMembers.map(async (member) => {
-          const memberChurches =
-            await this.memberChurchRepository.findByMemberId(member.id);
-
-          const visibleChurches = memberChurches
-            .filter((mc) => userReadableChurchIds.includes(mc.churchId))
-            .map((mc) => ({
-              churchId: mc.churchId,
-              churchName:
-                allChurches.get(mc.churchId) ?? "Igreja não encontrada",
-            }));
-
-          if (visibleChurches.length === 0) {
-            return null;
-          }
-
-          if (input.churchId) {
-            const hasChurch = memberChurches.some(
-              (mc) => mc.churchId === input.churchId,
-            );
-            if (!hasChurch) {
-              return null;
-            }
-          }
-
-          return {
-            id: member.id,
-            fullName: member.fullName,
-            churches: visibleChurches,
-          };
-        }),
+      const memberChurches = await this.memberChurchRepository.findByChurchId(
+        input.churchId,
       );
 
-      const filteredMembers = membersWithChurchInfo.filter(
-        (m) => m !== null,
-      ) as ListMembersOutput["members"];
+      if (memberChurches.length === 0) {
+        return {
+          ok: true,
+          value: { members: [] },
+        };
+      }
 
-      const sortedMembers = filteredMembers.sort((a, b) =>
+      const memberIds = memberChurches.map((mc) => mc.memberId);
+      const members = await this.memberRepository.findByIds(memberIds);
+
+      const sortedMembers = members.sort((a, b) =>
         a.fullName.localeCompare(b.fullName, "pt-BR", { sensitivity: "base" }),
       );
 
-      const total = sortedMembers.length;
-      const paginatedMembers = sortedMembers.slice(offset, offset + limit);
-      const hasMore = offset + limit < total;
-
-      const pagination: PaginationInfo = {
-        page,
-        limit,
-        total,
-        hasMore,
-      };
+      const memberListItems = sortedMembers.map((member) => ({
+        id: member.id,
+        fullName: member.fullName,
+        churches: [{ churchId: church.id, churchName: church.name }],
+      }));
 
       return {
         ok: true,
-        value: {
-          members: paginatedMembers,
-          pagination,
-        },
+        value: { members: memberListItems },
       };
     } catch {
       return {
@@ -132,9 +67,5 @@ export class ListMembers extends BaseUseCase<
         },
       };
     }
-  }
-
-  private emptyPagination(page: number, limit: number): PaginationInfo {
-    return { page, limit, total: 0, hasMore: false };
   }
 }

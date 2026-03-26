@@ -1,132 +1,59 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type {
-  MemberListItem,
-  PaginationInfo,
-} from "@/application/dtos/member/ListMembersDTO";
-import { useAuthStore } from "@/stores/authStore";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { MemberListItem } from "@/application/dtos/member/ListMembersDTO";
 import { useChurchStore } from "@/stores/churchStore";
-
-const DEFAULT_LIMIT = 50;
 
 export function useMembersListScreen() {
   const { selectedChurch } = useChurchStore();
   const churchId = selectedChurch?.id;
 
-  const [members, setMembers] = useState<MemberListItem[]>([]);
-  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [allMembers, setAllMembers] = useState<MemberListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [search, setSearch] = useState("");
-  const [localSearch, setLocalSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const currentPageRef = useRef(1);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isFetchingRef = useRef(false);
+  const fetchMembers = useCallback(async () => {
+    if (!churchId) return;
 
-  const fetchMembers = useCallback(
-    async (
-      isInitial: boolean,
-      churchId: string,
-      search: string,
-      page: number,
-    ) => {
-      if (!churchId || isFetchingRef.current) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/members?churchId=${churchId}`);
+      const data = await response.json();
 
-      isFetchingRef.current = true;
-
-      if (isInitial) {
-        setIsLoading(true);
-        currentPageRef.current = 1;
-      } else {
-        setIsLoadingMore(true);
+      if (data.ok) {
+        setAllMembers(data.value.members as MemberListItem[]);
       }
-
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
-
-      try {
-        const params = new URLSearchParams({
-          churchId: churchId,
-          page: String(page),
-          limit: String(DEFAULT_LIMIT),
-        });
-        if (search) {
-          params.append("search", search);
-        }
-
-        const response = await fetch(`/api/members?${params}`, {
-          signal: abortControllerRef.current.signal,
-        });
-        const data = await response.json();
-
-        if (data.ok) {
-          const newMembers = data.value.members as MemberListItem[];
-          const newPagination = data.value.pagination as PaginationInfo;
-
-          if (isInitial) {
-            setMembers(newMembers);
-            currentPageRef.current = 1;
-          } else {
-            setMembers((prev) => [...prev, ...newMembers]);
-            currentPageRef.current = page;
-          }
-          setPagination(newPagination);
-        }
-      } catch (error) {
-        if ((error as Error).name !== "AbortError") {
-          console.error("Error fetching members:", error);
-        }
-      } finally {
-        setIsLoading(false);
-        setIsLoadingMore(false);
-        isFetchingRef.current = false;
-      }
-    },
-    [],
-  );
-
-  const debouncedSearch = useCallback((s: string) => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    } finally {
+      setIsLoading(false);
     }
-    debounceRef.current = setTimeout(() => {
-      setSearch(s);
-    }, 300);
-  }, []);
-
-  const loadMore = useCallback(() => {
-    if (!isLoadingMore && pagination?.hasMore && churchId) {
-      fetchMembers(false, churchId, search, currentPageRef.current + 1);
-    }
-  }, [isLoadingMore, pagination?.hasMore, churchId, search, fetchMembers]);
-
-  const refresh = useCallback(() => {
-    if (churchId) {
-      setMembers([]);
-      setPagination(null);
-      currentPageRef.current = 1;
-      fetchMembers(true, churchId, search, 1);
-    }
-  }, [churchId, search, fetchMembers]);
+  }, [churchId]);
 
   useEffect(() => {
     if (!churchId) {
+      setAllMembers([]);
       setIsLoading(false);
       return;
     }
 
-    setMembers([]);
-    setPagination(null);
-    currentPageRef.current = 1;
-    fetchMembers(true, churchId, search, 1);
+    fetchMembers();
+  }, [churchId, fetchMembers]);
 
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [churchId, search, fetchMembers]);
+  const filteredMembers = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return allMembers;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    return allMembers.filter((member) =>
+      member.fullName.toLowerCase().includes(query),
+    );
+  }, [allMembers, searchQuery]);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
 
   const deleteMember = useCallback(
     async (memberId: string): Promise<boolean> => {
@@ -136,10 +63,7 @@ export function useMembersListScreen() {
         });
 
         if (response.status === 204 || response.ok) {
-          setMembers((prev) => prev.filter((m) => m.id !== memberId));
-          setPagination((prev) =>
-            prev ? { ...prev, total: prev.total - 1 } : null,
-          );
+          setAllMembers((prev) => prev.filter((m) => m.id !== memberId));
           return true;
         }
         return false;
@@ -152,18 +76,12 @@ export function useMembersListScreen() {
   );
 
   return {
-    members,
+    members: filteredMembers,
+    allMembersCount: allMembers.length,
     isLoading,
-    isLoadingMore,
-    hasMore: pagination?.hasMore ?? false,
-    total: pagination?.total ?? 0,
-    search,
-    setSearch: debouncedSearch,
-    loadMore,
-    refresh,
+    searchQuery,
+    setSearch: handleSearch,
+    refresh: fetchMembers,
     deleteMember,
-    localSearch,
-    setLocalSearch,
-    churchId,
   };
 }

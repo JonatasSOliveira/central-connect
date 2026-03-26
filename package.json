@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--inspect next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "biome lint .",
@@ -38,6 +38,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "firebase-tools": "^15.11.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"

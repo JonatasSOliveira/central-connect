@@ -40,9 +40,6 @@ export async function GET(request: NextRequest) {
   const { user } = auth;
   const { searchParams } = new URL(request.url);
   const churchId = searchParams.get("churchId");
-  const search = searchParams.get("search");
-  const page = searchParams.get("page");
-  const limit = searchParams.get("limit");
 
   if (!churchId) {
     return NextResponse.json(
@@ -84,9 +81,6 @@ export async function GET(request: NextRequest) {
     isSuperAdmin: user.isSuperAdmin,
     userChurches,
     churchId,
-    search: search ?? undefined,
-    page: page ? parseInt(page, 10) : undefined,
-    limit: limit ? parseInt(limit, 10) : undefined,
   });
 
   if (!result.ok) {

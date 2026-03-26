@@ -22,4 +22,12 @@ export class ChurchFirebaseRepository
   protected toFirestoreData(entity: Church): DocumentData {
     return churchToPersistence(entity);
   }
+
+  async findByIds(ids: string[]): Promise<Church[]> {
+    if (ids.length === 0) return [];
+
+    const churches = await Promise.all(ids.map((id) => this.findById(id)));
+
+    return churches.filter((c): c is Church => c !== null);
+  }
 }

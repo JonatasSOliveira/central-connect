@@ -1,8 +1,8 @@
 "use client";
 
-import { User, Plus, Inbox, Search, RefreshCw } from "lucide-react";
+import { User, Plus, Inbox, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { SearchInput } from "@/components/ui/search-input";
 import { ListTemplate } from "@/components/templates/list-template";
@@ -15,18 +15,11 @@ export default function MembersPage() {
 
   const {
     members,
+    allMembersCount,
     isLoading,
-    isLoadingMore,
-    hasMore,
-    total,
-    search,
+    searchQuery,
     setSearch,
-    loadMore,
-    refresh,
     deleteMember,
-    localSearch,
-    setLocalSearch,
-    churchId,
   } = useMembersListScreen();
 
   usePermissions({
@@ -35,36 +28,10 @@ export default function MembersPage() {
   });
 
   useEffect(() => {
-    if (churchId === null && !isLoading) {
+    if (members.length === 0 && allMembersCount === 0 && !isLoading) {
       router.push("/select-church");
     }
-  }, [churchId, isLoading, router]);
-
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setLocalSearch(search);
-  }, [search]);
-
-  useEffect(() => {
-    if (!loadMoreRef.current) return;
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
-          loadMore();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    observerRef.current.observe(loadMoreRef.current);
-
-    return () => {
-      observerRef.current?.disconnect();
-    };
-  }, [hasMore, isLoadingMore, loadMore]);
+  }, [members.length, allMembersCount, isLoading, router]);
 
   const handleCreateMember = useCallback(() => {
     router.push("/members/new");
@@ -90,7 +57,7 @@ export default function MembersPage() {
   );
 
   const renderContent = () => {
-    if (members.length === 0 && !isLoading) {
+    if (members.length === 0 && allMembersCount === 0 && !isLoading) {
       return (
         <ListTemplate.EmptyState
           icon={Inbox}
@@ -104,49 +71,36 @@ export default function MembersPage() {
       );
     }
 
-    if (members.length === 0 && localSearch.trim()) {
+    if (members.length === 0 && searchQuery.trim()) {
       return (
         <ListTemplate.EmptyState
           icon={Search}
           title="Nenhum membro encontrado"
-          description={`Não foram encontrados membros para "${localSearch}"`}
+          description={`Não foram encontrados membros para "${searchQuery}"`}
           action={{
             label: "Limpar busca",
-            onClick: () => {
-              setLocalSearch("");
-              setSearch("");
-            },
+            onClick: () => setSearch(""),
           }}
         />
       );
     }
 
     return (
-      <>
-        <ListTemplate.List>
-          {members.map((member) => (
-            <ListTemplate.Item
-              key={member.id}
-              icon={User}
-              title={member.fullName}
-              description={member.churches.map((c) => c.churchName).join(", ")}
-              onClick={() => handleEditMember(member.id)}
-              actions={{
-                onEdit: () => handleEditMember(member.id),
-                onDelete: () => handleDeleteMember(member.id),
-              }}
-            />
-          ))}
-        </ListTemplate.List>
-        <div ref={loadMoreRef} className="flex justify-center py-4">
-          {isLoadingMore && (
-            <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
-          )}
-          {!hasMore && members.length > 0 && (
-            <p className="text-xs text-muted-foreground">Fim da lista</p>
-          )}
-        </div>
-      </>
+      <ListTemplate.List>
+        {members.map((member) => (
+          <ListTemplate.Item
+            key={member.id}
+            icon={User}
+            title={member.fullName}
+            description={member.churches.map((c) => c.churchName).join(", ")}
+            onClick={() => handleEditMember(member.id)}
+            actions={{
+              onEdit: () => handleEditMember(member.id),
+              onDelete: () => handleDeleteMember(member.id),
+            }}
+          />
+        ))}
+      </ListTemplate.List>
     );
   };
 
@@ -154,19 +108,20 @@ export default function MembersPage() {
     <ListTemplate isLoading={isLoading}>
       <ListTemplate.Header
         title="Membros"
-        subtitle={`${total} membro${total !== 1 ? "s" : ""}`}
+        subtitle={`${allMembersCount} membro${allMembersCount !== 1 ? "s" : ""}`}
       />
 
       <div className="space-y-3 mb-4">
         <SearchInput
-          value={localSearch}
-          onChange={setLocalSearch}
+          value={searchQuery}
+          onChange={setSearch}
           onClear={() => setSearch("")}
           placeholder="Buscar por nome..."
         />
-        {localSearch && (
+        {searchQuery && (
           <p className="text-xs text-muted-foreground">
-            {total} resultado{total !== 1 ? "s" : ""} para "{localSearch}"
+            {members.length} resultado{members.length !== 1 ? "s" : ""} para "
+            {searchQuery}"
           </p>
         )}
       </div>

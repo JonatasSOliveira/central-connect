@@ -11,7 +11,12 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
-  const result = await churchContainer.listChurches.execute();
+  const { user } = auth;
+
+  const result = await churchContainer.listChurches.execute({
+    isSuperAdmin: user.isSuperAdmin,
+    userChurchIds: user.churches.map((c) => c.churchId),
+  });
 
   if (!result.ok) {
     const errorCode = result.error?.code;

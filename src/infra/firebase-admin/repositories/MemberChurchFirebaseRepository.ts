@@ -45,4 +45,13 @@ export class MemberChurchFirebaseRepository
     const doc = snapshot.docs[0];
     return this.toEntity(doc.data() as DocumentData, doc.id);
   }
+
+  async findByChurchId(churchId: string): Promise<MemberChurch[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("churchId", "==", churchId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
 }

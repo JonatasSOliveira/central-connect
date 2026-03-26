@@ -19,9 +19,7 @@ export function useMinistries(): UseMinistriesReturn {
   const fetchMinistries = useCallback(async () => {
     if (!user) return;
 
-    const churchId = user.isSuperAdmin
-      ? undefined
-      : user.churchId || user.churches[0]?.churchId;
+    const churchId = user.isSuperAdmin ? undefined : user.churches[0]?.churchId;
 
     if (!user.isSuperAdmin && !churchId) {
       setMinistries([]);
