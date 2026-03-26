@@ -12,7 +12,6 @@ export interface CurrentUser {
   fullName: string;
   avatarUrl: string | null;
   isSuperAdmin: boolean;
-  churchId: string | null;
   churches: CurrentUserChurch[];
   permissions: string[];
 }

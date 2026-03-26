@@ -13,7 +13,6 @@ interface AuthState {
 interface AuthActions {
   login: (googleToken: string) => Promise<void>;
   logout: () => Promise<void>;
-  selectChurch: (churchId: string) => Promise<void>;
   initialize: () => Promise<void>;
 }
 
@@ -47,7 +46,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
           fullName: result.fullName,
           avatarUrl: result.avatarUrl,
           isSuperAdmin: result.isSuperAdmin,
-          churchId: null, // Always null to force church selection
           churches: result.churches,
           permissions: result.permissions,
         },
@@ -62,18 +60,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
     try {
       await authService.logout();
       set({ user: null });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  selectChurch: async (churchId: string) => {
-    set({ isLoading: true });
-    try {
-      await authService.selectChurch(churchId);
-      set((state) => ({
-        user: state.user ? { ...state.user, churchId } : null,
-      }));
     } finally {
       set({ isLoading: false });
     }

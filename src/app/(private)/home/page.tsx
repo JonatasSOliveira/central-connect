@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function HomePage() {
-  const { userName } = useHomeScreen();
+  const { userName, selectedChurch } = useHomeScreen();
   const { logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
@@ -58,6 +58,10 @@ export default function HomePage() {
     <div className="p-6 app-background">
       <div className="max-w-2xl mx-auto">
         <PrivateHeader title={`Olá, ${userName}`} showBackButton={false} />
+
+        <div className="py-4">
+          <p>Acessando a igreja {selectedChurch?.name}</p>
+        </div>
 
         {canShowAdminSection && (
           <>

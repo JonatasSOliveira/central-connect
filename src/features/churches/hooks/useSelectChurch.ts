@@ -1,23 +1,26 @@
-import { AuthLoginOutputDTO } from "@/application/dtos/auth";
-import { ChurchInfo } from "@/application/dtos/auth/AuthLoginOutputDTO";
+import { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
+import { ListChurchesOutput } from "@/application/use-cases/church/ListChurches";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Result } from "@/shared/types/Result";
-import { useRouter } from "next/navigation";
+import { useChurchStore } from "@/stores/churchStore";
 import { useEffect, useState } from "react";
 
-export function useSelectChurch() {
-  const router = useRouter();
-  const { selectChurch, isLoading } = useAuth();
-  const [churches, setChurches] = useState<ChurchInfo[]>([]);
-  const [selectedChurch, setSelectedChurch] = useState<string | null>(null);
+interface SelectChurchScreenParams {
+  goToHome: () => void;
+}
+
+export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
+  const { isLoading } = useAuth();
+  const { selectChurch } = useChurchStore();
+  const [churches, setChurches] = useState<ChurchListItemDTO[]>([]);
   const [loadingChurches, setLoadingChurches] = useState(true);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     const loadChurches = async () => {
       try {
-        const response = await fetch("/api/auth/me");
-        const data: Result<Omit<AuthLoginOutputDTO, "sessionToken">> =
-          await response.json();
+        const response = await fetch("/api/churches");
+        const data: Result<ListChurchesOutput> = await response.json();
         if (!data.ok) {
           return;
         }
@@ -31,21 +34,18 @@ export function useSelectChurch() {
     loadChurches();
   }, []);
 
-  const handleSelectChurch = async (churchId: string) => {
-    setSelectedChurch(churchId);
-    try {
-      await selectChurch(churchId);
-      router.push("/home");
-    } catch {
-      setSelectedChurch(null);
-    }
+  const handleSelectChurch = async (church: ChurchListItemDTO) => {
+    selectChurch(church);
+    goToHome();
   };
 
   return {
     churches,
     loadingChurches,
     isLoading,
-    selectedChurch,
     handleSelectChurch,
+    selectChurch,
+    showLogoutDialog,
+    setShowLogoutDialog,
   };
 }

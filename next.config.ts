@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  experimental: {
+    serverSourceMaps: true,
+  },
 };
 
 export default nextConfig;

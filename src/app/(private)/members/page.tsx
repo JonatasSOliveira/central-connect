@@ -2,18 +2,16 @@
 
 import { User, Plus, Inbox, Search, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { SearchInput } from "@/components/ui/search-input";
 import { ListTemplate } from "@/components/templates/list-template";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
-import { useMembers } from "@/features/members/hooks/useMembers";
-import { useAuthStore } from "@/stores/authStore";
+import { useMembersListScreen } from "@/features/members/hooks/useMembers";
 
 export default function MembersPage() {
   const router = useRouter();
-  const churchId = useAuthStore((s) => s.user?.churchId);
 
   const {
     members,
@@ -26,9 +24,10 @@ export default function MembersPage() {
     loadMore,
     refresh,
     deleteMember,
-  } = useMembers();
-
-  const [localSearch, setLocalSearch] = useState("");
+    localSearch,
+    setLocalSearch,
+    churchId,
+  } = useMembersListScreen();
 
   usePermissions({
     requiredPermissions: [Permission.MEMBER_READ],
@@ -144,9 +143,7 @@ export default function MembersPage() {
             <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
           )}
           {!hasMore && members.length > 0 && (
-            <p className="text-xs text-muted-foreground">
-              Fim da lista
-            </p>
+            <p className="text-xs text-muted-foreground">Fim da lista</p>
           )}
         </div>
       </>

@@ -6,31 +6,20 @@ import type {
   PaginationInfo,
 } from "@/application/dtos/member/ListMembersDTO";
 import { useAuthStore } from "@/stores/authStore";
-
-interface UseMembersReturn {
-  members: MemberListItem[];
-  isLoading: boolean;
-  isLoadingMore: boolean;
-  hasMore: boolean;
-  total: number;
-  search: string;
-  setSearch: (search: string) => void;
-  loadMore: () => void;
-  refresh: () => void;
-  deleteMember: (memberId: string) => Promise<boolean>;
-}
+import { useChurchStore } from "@/stores/churchStore";
 
 const DEFAULT_LIMIT = 50;
 
-export function useMembers(): UseMembersReturn {
-  const user = useAuthStore((s) => s.user);
-  const churchId = user?.churchId;
+export function useMembersListScreen() {
+  const { selectedChurch } = useChurchStore();
+  const churchId = selectedChurch?.id;
 
   const [members, setMembers] = useState<MemberListItem[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [search, setSearch] = useState("");
+  const [localSearch, setLocalSearch] = useState("");
 
   const currentPageRef = useRef(1);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -38,8 +27,13 @@ export function useMembers(): UseMembersReturn {
   const isFetchingRef = useRef(false);
 
   const fetchMembers = useCallback(
-    async (isInitial: boolean, sid: string, s: string, page: number) => {
-      if (!sid || isFetchingRef.current) return;
+    async (
+      isInitial: boolean,
+      churchId: string,
+      search: string,
+      page: number,
+    ) => {
+      if (!churchId || isFetchingRef.current) return;
 
       isFetchingRef.current = true;
 
@@ -55,12 +49,12 @@ export function useMembers(): UseMembersReturn {
 
       try {
         const params = new URLSearchParams({
-          churchId: sid,
+          churchId: churchId,
           page: String(page),
           limit: String(DEFAULT_LIMIT),
         });
-        if (s) {
-          params.append("search", s);
+        if (search) {
+          params.append("search", search);
         }
 
         const response = await fetch(`/api/members?${params}`, {
@@ -168,5 +162,8 @@ export function useMembers(): UseMembersReturn {
     loadMore,
     refresh,
     deleteMember,
+    localSearch,
+    setLocalSearch,
+    churchId,
   };
 }
