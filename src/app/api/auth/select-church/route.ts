@@ -1,6 +1,20 @@
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
+import { AllPermissions } from "@/domain/enums/Permission";
+import { authContainer } from "@/infra/di";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
+
+interface SessionPayload {
+  userId: string;
+  memberId: string;
+  email: string;
+  fullName: string;
+  avatarUrl: string | null;
+  isSuperAdmin: boolean;
+  churchId: string | null;
+  churches: { churchId: string; roleId: string | null }[];
+  permissions: string[];
+}
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
@@ -15,7 +29,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const tokenService = new JoseTokenJwtService();
-    const session = await tokenService.verifyToken(token);
+    const rawSession = await tokenService.verifyToken(token);
+    const session = rawSession as unknown as SessionPayload;
 
     const body = await request.json();
     const { churchId } = body;
@@ -27,9 +42,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Recalcular permissões baseadas na igreja selecionada
+    let permissions: string[] = [];
+
+    if (session.isSuperAdmin) {
+      // SuperAdmin tem todas as permissões
+      permissions = AllPermissions;
+    } else {
+      // Buscar o MemberChurch do membro para esta igreja
+      const memberChurch =
+        await authContainer.memberChurchRepository.findByMemberIdAndChurchId(
+          session.memberId,
+          churchId,
+        );
+
+      if (memberChurch?.roleId) {
+        // Buscar permissões apenas do role desta igreja
+        const rolePermissions =
+          await authContainer.rolePermissionRepository.findByRoleId(
+            memberChurch.roleId,
+          );
+        permissions = rolePermissions.map(
+          (rp: { permission: string }) => rp.permission,
+        );
+      }
+    }
+
     const newSessionPayload = {
       ...session,
       churchId,
+      permissions,
     };
 
     const newToken = await tokenService.generateToken(newSessionPayload);

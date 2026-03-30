@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { signInWithGoogle } from "@/infra/firebase-client/services/googleAuth";
-import { useAuth } from "./useAuth";
+import { useAuthStore } from "@/stores/authStore";
 
 interface UseLoginScreenReturn {
   isLoading: boolean;
@@ -13,7 +13,7 @@ interface UseLoginScreenReturn {
 
 export function useLoginScreen(): UseLoginScreenReturn {
   const router = useRouter();
-  const { login } = useAuth();
+  const login = useAuthStore((state) => state.login);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,8 +23,14 @@ export function useLoginScreen(): UseLoginScreenReturn {
 
     try {
       const firebaseUser = await signInWithGoogle();
-      await login(firebaseUser.idToken);
-      router.push("/home");
+      const result = await login(firebaseUser.idToken);
+
+      if (result.errorMessage) {
+        setError(result.errorMessage);
+        return;
+      }
+
+      router.push("/select-church");
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Erro ao fazer login";

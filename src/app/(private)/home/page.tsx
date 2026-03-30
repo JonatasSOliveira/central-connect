@@ -1,14 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Church, Building2, UserRoundKey, Users, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Church,
+  UserRoundKey,
+  Users,
+  LogOut,
+  HandHeart,
+  ArrowRightLeft,
+} from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
+import { GreetingSection } from "@/features/home/components/greeting-section";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { CardAdmin } from "@/components/ui/card-admin";
 import { CardItem } from "@/components/ui/card-item";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,8 +30,9 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function HomePage() {
-  const { userName } = useHomeScreen();
-  const { logout } = useAuth();
+  const router = useRouter();
+  const { userName, avatarUrl, selectedChurch } = useHomeScreen();
+  const { user, logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const { hasPermission: canManageMembers } = usePermissions({
@@ -37,13 +47,50 @@ export default function HomePage() {
     requiredPermissions: [Permission.CHURCH_READ],
   });
 
+  const { hasPermission: canManageMinistries } = usePermissions({
+    requiredPermissions: [Permission.MINISTRY_READ],
+  });
+
   const canShowAdminSection =
-    canManageMembers || canManageRoles || canManageChurches;
+    canManageMembers ||
+    canManageRoles ||
+    canManageChurches ||
+    canManageMinistries;
 
   return (
     <div className="p-6 app-background">
       <div className="max-w-2xl mx-auto">
-        <PrivateHeader title={`Olá, ${userName}`} showBackButton={false} />
+        <PrivateHeader title="Central Connect" showBackButton={false} />
+
+        <GreetingSection userName={userName} avatarUrl={avatarUrl} />
+
+        <div className="py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <Church className="h-6 w-6 text-primary" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Igreja selecionada
+                </p>
+                <p className="font-heading text-lg font-semibold text-foreground">
+                  {selectedChurch?.name}
+                </p>
+              </div>
+            </div>
+            {user?.churches && user.churches.length > 1 && (
+              <button
+                type="button"
+                onClick={() => router.push("/select-church")}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+              >
+                <ArrowRightLeft className="w-4 h-4" />
+                Trocar
+              </button>
+            )}
+          </div>
+        </div>
 
         {canShowAdminSection && (
           <>
@@ -59,7 +106,7 @@ export default function HomePage() {
                 <CardAdmin
                   title="Igrejas"
                   description="Gerencie as igrejas cadastradas"
-                  icon={Building2}
+                  icon={Church}
                   href="/churches"
                 />
               )}
@@ -79,17 +126,17 @@ export default function HomePage() {
                   href="/roles"
                 />
               )}
+              {canManageMinistries && (
+                <CardAdmin
+                  title="Ministérios"
+                  description="Gerencie os ministérios da igreja"
+                  icon={HandHeart}
+                  href="/ministries"
+                />
+              )}
             </div>
           </>
         )}
-
-        <CardItem
-          title="Sair"
-          description="Encerrar sessão atual"
-          icon={LogOut}
-          onClick={() => setShowLogoutDialog(true)}
-          variant="destructive"
-        />
 
         <div className="flex items-center gap-3 mb-4">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -98,13 +145,21 @@ export default function HomePage() {
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-3 mb-6">
           <CardItem
             title="Minhas Escalas"
             description="Veja suas próximas atividades"
             icon={Church}
           />
         </div>
+
+        <CardItem
+          title="Sair"
+          description="Encerrar sessão atual"
+          icon={LogOut}
+          onClick={() => setShowLogoutDialog(true)}
+          variant="destructive"
+        />
       </div>
 
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

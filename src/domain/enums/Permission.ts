@@ -17,6 +17,10 @@ export enum Permission {
   ROLE_READ = "role:read",
   ROLE_WRITE = "role:write",
   ROLE_DELETE = "role:delete",
+
+  MINISTRY_READ = "ministry:read",
+  MINISTRY_WRITE = "ministry:write",
+  MINISTRY_DELETE = "ministry:delete",
 }
 
 export const PermissionGroups = {
@@ -39,6 +43,11 @@ export const PermissionGroups = {
     Permission.SCHEDULE_DELETE,
   ],
   ROLE: [Permission.ROLE_READ, Permission.ROLE_WRITE, Permission.ROLE_DELETE],
+  MINISTRY: [
+    Permission.MINISTRY_READ,
+    Permission.MINISTRY_WRITE,
+    Permission.MINISTRY_DELETE,
+  ],
 } as const;
 
 export const AllPermissions = Object.values(Permission);

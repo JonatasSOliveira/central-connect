@@ -7,4 +7,5 @@ export interface IMemberChurchRepository extends BaseRepository<MemberChurch> {
     memberId: string,
     churchId: string,
   ): Promise<MemberChurch | null>;
+  findByChurchId(churchId: string): Promise<MemberChurch[]>;
 }

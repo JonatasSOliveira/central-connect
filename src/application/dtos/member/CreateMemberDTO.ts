@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const CreateMemberInputSchema = z.object({
-  email: z.string().email("Email inválido").optional(),
+  email: z.string().optional().or(z.literal("")),
   fullName: z.string().min(1, "Nome é obrigatório"),
   phone: z.string().optional(),
   churches: z
@@ -9,6 +9,7 @@ export const CreateMemberInputSchema = z.object({
       z.object({
         churchId: z.string().min(1, "Igreja é obrigatória"),
         roleId: z.string().min(1, "Cargo do sistema é obrigatório"),
+        ministryIds: z.array(z.string()),
       }),
     )
     .min(1, "Pelo menos uma igreja é obrigatória"),
@@ -17,7 +18,7 @@ export const CreateMemberInputSchema = z.object({
 export type CreateMemberInput = z.infer<typeof CreateMemberInputSchema>;
 
 export const UpdateMemberInputSchema = z.object({
-  email: z.string().email("Email inválido").optional(),
+  email: z.string().optional().or(z.literal("")),
   fullName: z.string().min(1, "Nome é obrigatório").optional(),
   phone: z.string().optional(),
   churches: z
@@ -25,6 +26,7 @@ export const UpdateMemberInputSchema = z.object({
       z.object({
         churchId: z.string().min(1, "Igreja é obrigatória"),
         roleId: z.string().min(1, "Cargo do sistema é obrigatório"),
+        ministryIds: z.array(z.string()),
       }),
     )
     .optional(),
@@ -50,4 +52,5 @@ export type MemberChurchInfo = {
   churchName: string;
   roleId: string;
   roleName: string;
+  ministryIds: string[];
 };

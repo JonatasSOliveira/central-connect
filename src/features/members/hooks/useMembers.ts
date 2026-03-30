@@ -1,38 +1,59 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MemberListItem } from "@/application/dtos/member/ListMembersDTO";
+import { useChurchStore } from "@/stores/churchStore";
 
-interface UseMembersReturn {
-  members: MemberListItem[];
-  isLoading: boolean;
-  deleteMember: (memberId: string) => Promise<boolean>;
-  refresh: () => void;
-}
+export function useMembersListScreen() {
+  const { selectedChurch } = useChurchStore();
+  const churchId = selectedChurch?.id;
 
-export function useMembers(): UseMembersReturn {
-  const [members, setMembers] = useState<MemberListItem[]>([]);
+  const [allMembers, setAllMembers] = useState<MemberListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchMembers = useCallback(async () => {
+    if (!churchId) return;
+
     setIsLoading(true);
     try {
-      const response = await fetch("/api/members");
+      const response = await fetch(`/api/members?churchId=${churchId}`);
       const data = await response.json();
 
       if (data.ok) {
-        setMembers(data.value.members);
+        setAllMembers(data.value.members as MemberListItem[]);
       }
     } catch (error) {
       console.error("Error fetching members:", error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [churchId]);
 
   useEffect(() => {
+    if (!churchId) {
+      setAllMembers([]);
+      setIsLoading(false);
+      return;
+    }
+
     fetchMembers();
-  }, [fetchMembers]);
+  }, [churchId, fetchMembers]);
+
+  const filteredMembers = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return allMembers;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    return allMembers.filter((member) =>
+      member.fullName.toLowerCase().includes(query),
+    );
+  }, [allMembers, searchQuery]);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
 
   const deleteMember = useCallback(
     async (memberId: string): Promise<boolean> => {
@@ -41,15 +62,8 @@ export function useMembers(): UseMembersReturn {
           method: "DELETE",
         });
 
-        if (response.status === 204) {
-          setMembers((prev) => prev.filter((m) => m.id !== memberId));
-          return true;
-        }
-
-        const data = await response.json();
-
-        if (data.ok) {
-          setMembers((prev) => prev.filter((m) => m.id !== memberId));
+        if (response.status === 204 || response.ok) {
+          setAllMembers((prev) => prev.filter((m) => m.id !== memberId));
           return true;
         }
         return false;
@@ -61,5 +75,13 @@ export function useMembers(): UseMembersReturn {
     [],
   );
 
-  return { members, isLoading, deleteMember, refresh: fetchMembers };
+  return {
+    members: filteredMembers,
+    allMembersCount: allMembers.length,
+    isLoading,
+    searchQuery,
+    setSearch: handleSearch,
+    refresh: fetchMembers,
+    deleteMember,
+  };
 }

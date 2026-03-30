@@ -30,7 +30,7 @@ function buildUserChurches(
   }));
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const auth = await validateSession();
 
   if (!auth.ok) {
@@ -38,14 +38,49 @@ export async function GET() {
   }
 
   const { user } = auth;
+  const { searchParams } = new URL(request.url);
+  const churchId = searchParams.get("churchId");
+
+  if (!churchId) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "MISSING_CHURCH_ID",
+          message: "churchId é obrigatório",
+        },
+      },
+      { status: 400 },
+    );
+  }
+
+  const userChurches = buildUserChurches(
+    user.isSuperAdmin,
+    user.churches,
+    user.permissions,
+  );
+
+  const canAccessChurch =
+    user.isSuperAdmin ||
+    userChurches.some((c) => c.churchId === churchId && c.hasMemberRead);
+
+  if (!canAccessChurch) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para acessar membros desta igreja",
+        },
+      },
+      { status: 403 },
+    );
+  }
 
   const result = await memberContainer.listMembers.execute({
     isSuperAdmin: user.isSuperAdmin,
-    userChurches: buildUserChurches(
-      user.isSuperAdmin,
-      user.churches,
-      user.permissions,
-    ),
+    userChurches,
+    churchId,
   });
 
   if (!result.ok) {
@@ -111,7 +146,7 @@ export async function POST(request: NextRequest) {
 
   if (!user.isSuperAdmin) {
     const userWritableChurchIds = user.churches
-      .filter((c) => user.permissions.includes(Permission.MEMBER_WRITE))
+      .filter(() => user.permissions.includes(Permission.MEMBER_WRITE))
       .map((c) => c.churchId);
 
     for (const churchInfo of parsed.data.churches) {

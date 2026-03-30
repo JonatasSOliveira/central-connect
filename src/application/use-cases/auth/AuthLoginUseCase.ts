@@ -1,6 +1,7 @@
 import { Member, type MemberParams } from "@/domain/entities/Member";
 import { User, type UserParams } from "@/domain/entities/User";
 import { Permission } from "@/domain/enums/Permission";
+import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
@@ -29,6 +30,7 @@ export class AuthLoginUseCase extends BaseUseCase<
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly rolePermissionRepository: IRolePermissionRepository,
+    private readonly churchRepository: IChurchRepository,
   ) {
     super();
   }
@@ -50,7 +52,10 @@ export class AuthLoginUseCase extends BaseUseCase<
         );
 
         if (existingUser) {
-          const churches = await this.getMemberChurches(existingMember.id);
+          const churches = await this.getMemberChurches(
+            existingMember.id,
+            existingUser.isSuperAdmin,
+          );
           const permissions = await this.getPermissionsForChurches(
             churches,
             existingUser.isSuperAdmin,
@@ -64,7 +69,10 @@ export class AuthLoginUseCase extends BaseUseCase<
         }
 
         const newUser = await this.createUser(existingMember.id);
-        const churches = await this.getMemberChurches(existingMember.id);
+        const churches = await this.getMemberChurches(
+          existingMember.id,
+          newUser.isSuperAdmin,
+        );
         const permissions = await this.getPermissionsForChurches(
           churches,
           newUser.isSuperAdmin,
@@ -84,10 +92,11 @@ export class AuthLoginUseCase extends BaseUseCase<
           googleUser.picture,
         );
         const newUser = await this.createUser(newMember.id, true);
+        const churches = await this.getMemberChurches(newMember.id, true);
         return this.buildSuccessResponse(
           newUser,
           newMember,
-          [],
+          churches,
           this.getAllPermissions(),
         );
       }
@@ -134,7 +143,18 @@ export class AuthLoginUseCase extends BaseUseCase<
     return this.userRepository.create(user);
   }
 
-  private async getMemberChurches(memberId: string): Promise<ChurchInfo[]> {
+  private async getMemberChurches(
+    memberId: string,
+    isSuperAdmin: boolean,
+  ): Promise<ChurchInfo[]> {
+    if (isSuperAdmin) {
+      const allChurches = await this.churchRepository.findAll();
+      return allChurches.map((church) => ({
+        churchId: church.id,
+        roleId: null,
+      }));
+    }
+
     const memberChurches =
       await this.memberChurchRepository.findByMemberId(memberId);
     return memberChurches.map((mc) => ({
@@ -197,7 +217,7 @@ export class AuthLoginUseCase extends BaseUseCase<
       value: {
         userId: user.id,
         memberId: member.id,
-        email: member.email!,
+        email: member.email ?? "",
         fullName: member.fullName,
         avatarUrl: member.avatarUrl,
         isSuperAdmin: user.isSuperAdmin,

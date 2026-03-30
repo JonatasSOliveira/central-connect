@@ -1,20 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface UseChurchesReturn {
   churches: ChurchListItemDTO[];
+  allChurchesCount: number;
   isLoading: boolean;
+  searchQuery: string;
+  setSearch: (value: string) => void;
   deleteChurch: (churchId: string) => Promise<boolean>;
   refresh: () => void;
 }
 
 export function useChurches(): UseChurchesReturn {
   const { user } = useAuth();
-  const [churches, setChurches] = useState<ChurchListItemDTO[]>([]);
+  const [allChurches, setAllChurches] = useState<ChurchListItemDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchChurches = useCallback(async () => {
     if (!user) return;
@@ -25,7 +29,10 @@ export function useChurches(): UseChurchesReturn {
       const data = await response.json();
 
       if (data.ok) {
-        setChurches(data.value.churches);
+        const sorted = [...data.value.churches].sort((a, b) =>
+          a.name.localeCompare(b.name, "pt-BR"),
+        );
+        setAllChurches(sorted);
       }
     } catch (error) {
       console.error("Error fetching churches:", error);
@@ -38,6 +45,20 @@ export function useChurches(): UseChurchesReturn {
     fetchChurches();
   }, [fetchChurches]);
 
+  const filteredChurches = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return allChurches;
+    }
+    const query = searchQuery.toLowerCase().trim();
+    return allChurches.filter((church) =>
+      church.name.toLowerCase().includes(query),
+    );
+  }, [allChurches, searchQuery]);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value);
+  }, []);
+
   const deleteChurch = useCallback(
     async (churchId: string): Promise<boolean> => {
       try {
@@ -46,14 +67,14 @@ export function useChurches(): UseChurchesReturn {
         });
 
         if (response.status === 204) {
-          setChurches((prev) => prev.filter((c) => c.id !== churchId));
+          setAllChurches((prev) => prev.filter((c) => c.id !== churchId));
           return true;
         }
 
         const data = await response.json();
 
         if (data.ok) {
-          setChurches((prev) => prev.filter((c) => c.id !== churchId));
+          setAllChurches((prev) => prev.filter((c) => c.id !== churchId));
           return true;
         }
         return false;
@@ -65,5 +86,13 @@ export function useChurches(): UseChurchesReturn {
     [],
   );
 
-  return { churches, isLoading, deleteChurch, refresh: fetchChurches };
+  return {
+    churches: filteredChurches,
+    allChurchesCount: allChurches.length,
+    isLoading,
+    searchQuery,
+    setSearch: handleSearch,
+    deleteChurch,
+    refresh: fetchChurches,
+  };
 }

@@ -121,7 +121,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
   if (!user.isSuperAdmin && parsed.data.churches) {
     const userWritableChurchIds = user.churches
-      .filter((c) => user.permissions.includes(Permission.MEMBER_WRITE))
+      .filter(() => user.permissions.includes(Permission.MEMBER_WRITE))
       .map((c) => c.churchId);
 
     for (const churchInfo of parsed.data.churches) {

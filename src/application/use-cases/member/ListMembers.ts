@@ -22,69 +22,41 @@ export class ListMembers extends BaseUseCase<
 
   async execute(input: ListMembersInput): Promise<Result<ListMembersOutput>> {
     try {
-      const allMembers = await this.memberRepository.findAll();
-
-      let allChurches: Map<string, string> = new Map();
-      let userReadableChurchIds: string[] = [];
-
-      if (input.isSuperAdmin) {
-        const churches = await this.churchRepository.findAll();
-        allChurches = new Map(churches.map((c) => [c.id, c.name]));
-        userReadableChurchIds = Array.from(allChurches.keys());
-      } else {
-        userReadableChurchIds = (input.userChurches ?? [])
-          .filter((c) => c.hasMemberRead)
-          .map((c) => c.churchId);
-
-        if (userReadableChurchIds.length === 0) {
-          return {
-            ok: true,
-            value: { members: [] },
-          };
-        }
-
-        const churches = await this.churchRepository.findAll();
-        for (const church of churches) {
-          if (userReadableChurchIds.includes(church.id)) {
-            allChurches.set(church.id, church.name);
-          }
-        }
+      const church = await this.churchRepository.findById(input.churchId);
+      if (!church) {
+        return {
+          ok: true,
+          value: { members: [] },
+        };
       }
 
-      const membersWithChurchInfo = await Promise.all(
-        allMembers.map(async (member) => {
-          const memberChurches =
-            await this.memberChurchRepository.findByMemberId(member.id);
-
-          const visibleChurches = memberChurches
-            .filter((mc) => userReadableChurchIds.includes(mc.churchId))
-            .map((mc) => ({
-              churchId: mc.churchId,
-              churchName:
-                allChurches.get(mc.churchId) ?? "Igreja não encontrada",
-            }));
-
-          if (visibleChurches.length === 0) {
-            return null;
-          }
-
-          return {
-            id: member.id,
-            fullName: member.fullName,
-            churches: visibleChurches,
-          };
-        }),
+      const memberChurches = await this.memberChurchRepository.findByChurchId(
+        input.churchId,
       );
 
-      const filteredMembers = membersWithChurchInfo.filter(
-        (m) => m !== null,
-      ) as ListMembersOutput["members"];
+      if (memberChurches.length === 0) {
+        return {
+          ok: true,
+          value: { members: [] },
+        };
+      }
+
+      const memberIds = memberChurches.map((mc) => mc.memberId);
+      const members = await this.memberRepository.findByIds(memberIds);
+
+      const sortedMembers = members.sort((a, b) =>
+        a.fullName.localeCompare(b.fullName, "pt-BR", { sensitivity: "base" }),
+      );
+
+      const memberListItems = sortedMembers.map((member) => ({
+        id: member.id,
+        fullName: member.fullName,
+        churches: [{ churchId: church.id, churchName: church.name }],
+      }));
 
       return {
         ok: true,
-        value: {
-          members: filteredMembers,
-        },
+        value: { members: memberListItems },
       };
     } catch {
       return {

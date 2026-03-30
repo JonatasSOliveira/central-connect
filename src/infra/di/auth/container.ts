@@ -1,10 +1,12 @@
 import { AuthLoginUseCase } from "@/application/use-cases/auth/AuthLoginUseCase";
+import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { ITokenService } from "@/domain/ports/ITokenService";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
+import { ChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/ChurchFirebaseRepository";
 import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
 import { RolePermissionFirebaseRepository } from "@/infra/firebase-admin/repositories/RolePermissionFirebaseRepository";
@@ -20,6 +22,7 @@ class AuthContainer {
   private static _memberChurchRepository: IMemberChurchRepository | null = null;
   private static _rolePermissionRepository: IRolePermissionRepository | null =
     null;
+  private static _churchRepository: IChurchRepository | null = null;
   private static _authLoginUseCase: AuthLoginUseCase | null = null;
 
   private constructor() {}
@@ -68,6 +71,13 @@ class AuthContainer {
     return AuthContainer._rolePermissionRepository;
   }
 
+  static get churchRepository(): IChurchRepository {
+    if (!AuthContainer._churchRepository) {
+      AuthContainer._churchRepository = new ChurchFirebaseRepository();
+    }
+    return AuthContainer._churchRepository;
+  }
+
   static get authLoginUseCase(): AuthLoginUseCase {
     if (!AuthContainer._authLoginUseCase) {
       AuthContainer._authLoginUseCase = new AuthLoginUseCase(
@@ -77,6 +87,7 @@ class AuthContainer {
         AuthContainer.memberRepository,
         AuthContainer.memberChurchRepository,
         AuthContainer.rolePermissionRepository,
+        AuthContainer.churchRepository,
       );
     }
     return AuthContainer._authLoginUseCase;

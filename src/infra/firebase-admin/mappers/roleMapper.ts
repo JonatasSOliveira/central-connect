@@ -44,7 +44,7 @@ export function rolePermissionToPersistence(
 
 export function rolePermissionFromPersistence(
   data: DocumentData,
-  id: string,
+  _id: string,
 ): RolePermission {
   const params: RolePermissionParams = {
     userRoleId: data.userRoleId ?? "",

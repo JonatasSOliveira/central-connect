@@ -47,6 +47,104 @@ O projeto utiliza duas fontes do Google Fonts:
 <p className="text-sm">Corpo do texto</p>
 ```
 
+## 2.2 Padrões Visuais (UI/UX)
+
+### Estilo: Flat Design
+
+O projeto utiliza o padrão **Flat Design** para uma interface limpa, moderna e consistente.
+
+### Princípios Visuais
+
+| Princípio | Descrição |
+|-----------|-----------|
+| **Cores Sólidas** | Sem gradientes em elementos estruturais (header, cards) |
+| **Bordas Sutiles** | Usar `border-primary/20` ou `border-border` |
+| **Hierarquia Clara** | Sombras leves (`shadow-sm`) para elementos elevados |
+| **shadcn/ui Compliant** | Seguir padrões do design system |
+
+### Cores do Tema
+
+| Variável | Uso |
+|----------|-----|
+| `--primary` | Header, botões principais, ícones de destaque |
+| `--primary-foreground` | Texto sobre primary |
+| `--card` | Fundo de cards |
+| `--muted` | Fundos sutis, hover states |
+| `--border` | Bordas de cards e elementos |
+| `--background` | Fundo da página |
+
+### Regras de Estilo por Componente
+
+#### Header (PrivateHeader)
+```tsx
+className="bg-primary text-primary-foreground"
+```
+- ✅ Cor sólida primary
+- ✅ Texto em primary-foreground
+- ❌ Sem gradientes
+
+#### CardAdmin (cards administrativos)
+```tsx
+className="bg-card border-primary/20 hover:border-primary/30"
+```
+- ✅ Fundo `bg-card` (sólido)
+- ✅ Borda sutil `border-primary/20`
+- ✅ Hover com borda mais visível
+- ❌ Sem gradiente `from-primary/5`
+
+#### CardItem (itens de lista)
+```tsx
+className="bg-card border-border hover:bg-muted/50"
+```
+- ✅ Fundo `bg-card` (sólido)
+- ✅ Borda `border-border`
+- ✅ Hover com fundo sutil
+
+#### Ícones em Cards
+```tsx
+className="bg-primary/10 text-primary"
+```
+- ✅ Fundo colorido sutil `bg-primary/10`
+- ✅ Ícone com cor primary
+
+#### Footer
+```tsx
+className="bg-background border-t"
+```
+- ✅ Fundo `bg-background`
+- ✅ Borda superior sutil
+
+### Checklist de Implementação
+
+```
+✅ Header: bg-primary text-primary-foreground (sempre)
+✅ Cards Admin: bg-card border-primary/20
+✅ Cards Item: bg-card border-border
+✅ Ícones: bg-primary/10 text-primary
+✅ Footer: bg-background border-t
+✅ Sem gradientes em elementos estruturais
+```
+
+### Exemplo de Estrutura Visual
+
+```
+┌─────────────────────────────┐
+│ ████████████████████████████ │  ← Header: bg-primary
+├─────────────────────────────┤
+│                             │
+│ ┌─────────────────────────┐ │
+│ │ ●  Título              → │ │  ← Card: bg-card, border-primary/20
+│ │    Descrição             │ │
+│ └─────────────────────────┘ │
+│                             │
+│ ┌─────────────────────────┐ │
+│ │ ●  Item                → │ │  ← Item: bg-card, border-border
+│ └─────────────────────────┘ │
+│                             │
+└─────────────────────────────┘
+░░░░░░░░░░░░░░░░░░░░░░░░░░░ │  ← Footer: bg-background, border-t
+```
+
 ## 3. Arquitetura e Regras de Dependência
 
 ### Visão Geral da Arquitetura
@@ -207,7 +305,15 @@ src/components/
 ├── ui/           # Atoms (elementos básicos)
 │   ├── button.tsx
 │   ├── card.tsx
+│   ├── card-admin.tsx
+│   ├── card-item.tsx
 │   ├── empty-state.tsx
+│   ├── form-field.tsx
+│   ├── form-select.tsx
+│   ├── input.tsx
+│   ├── label.tsx
+│   ├── list-item-card.tsx
+│   ├── number-stepper.tsx
 │   └── ...
 │
 ├── modules/      # Molecules (combinações simples)
@@ -216,6 +322,7 @@ src/components/
 │   └── private-footer.tsx
 │
 └── templates/    # Templates (estruturas de página)
+    ├── form-template.tsx
     ├── list-template.tsx
     └── page-template.tsx
 ```
@@ -227,6 +334,52 @@ src/components/
 | **Atoms** | Elementos básicos e indivisíveis | Button, Input, Card |
 | **Molecules** | Combinações simples de atoms | CardItem, EmptyState |
 | **Templates** | Estruturas completas de página | ListTemplate, PageTemplate |
+
+### Componentes de Formulário Mobile-First
+
+Para garantir uma experiência mobile otimizada, o projeto possui componentes específicos para formulários:
+
+#### NumberStepper
+Input numérico com botões +/- para facilitar a interação em touch screens.
+
+```tsx
+<NumberStepper
+  label="Quantidade"
+  value={quantity}
+  onChange={setQuantity}
+  min={0}
+  max={99}
+/>
+```
+
+#### ListItemCard
+Card para itens de lista com suporte a ações (remover, editar).
+
+```tsx
+<ListItemCard
+  index={0}
+  onRemove={handleRemove}
+>
+  <Input placeholder="Nome da função" />
+</ListItemCard>
+```
+
+#### FormSelect
+Select estilizado com ícone de seta customizado.
+
+```tsx
+<FormSelect
+  label="Igreja"
+  value={churchId}
+  onChange={setChurchId}
+  options={[
+    { value: "1", label: "Igreja Central" },
+    { value: "2", label: "Igreja Norte" }
+  ]}
+  placeholder="Selecione"
+  required
+/>
+```
 
 ### Compound Components
 
@@ -520,6 +673,60 @@ export function UserForm() {
 
   return <Button onClick={handleSubmit}>Create User</Button>;
 }
+```
+
+## 5.x Limite de Tamanho de Arquivos
+
+### Regra Geral
+- **Target:** 150 linhas por arquivo
+- **Hard limit:** 200 linhas
+- **Componentes pequenos:** 50-100 linhas (atoms)
+
+### Quando Fragmentar
+- Componente com mais de 3 responsabilidades distintas
+- Função de renderização com mais de 100 linhas
+- Mais de 7 useState/useEffect no mesmo componente
+- Mapeamento de lista com mais de 30 linhas de JSX
+
+### Como Fragmentar
+1. Identificar responsabilidades separáveis
+2. Extrair para componente próprio
+3. Manter composição no componente pai
+4. Componentes genéricos vão para `components/ui/`
+5. Componentes específicos da feature vão para `features/[nome]/components/`
+
+### Exemplo de Refatoração
+
+**Antes (>200 linhas):**
+```tsx
+// MemberForm.tsx - 412 linhas
+export function MemberForm() {
+  // ... tudo junto
+}
+```
+
+**Depois (<150 linhas cada):**
+```tsx
+// features/members/components/basic-info-section.tsx (~30 linhas)
+// features/members/components/church-section.tsx (~80 linhas)
+// features/members/components/ministry-selector.tsx (~70 linhas)
+export function MemberForm() {
+  return (
+    <FormTemplate>
+      <BasicInfoSection />
+      <ChurchSection />
+    </FormTemplate>
+  );
+}
+```
+
+### Checklist de Refatoração
+```
+□ Maior arquivo < 200 linhas
+□ Target por arquivo < 150 linhas
+□ Componentes UI genéricos em components/ui/
+□ Componentes específicos em features/[feature]/components/
+□ Single Responsibility Principle respeitado
 ```
 
 ## 6. O Que Nunca Fazer

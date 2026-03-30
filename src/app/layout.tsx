@@ -43,10 +43,11 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${inter.variable} ${dmSans.variable} antialiased flex flex-col h-[100dvh]`}
+        suppressHydrationWarning
+        className={`${inter.variable} ${dmSans.variable} antialiased flex flex-col h-dvh`}
       >
         <ServiceWorkerRegistration />
-        <main className="flex flex-1 flex-col">{children}</main>
+        <main className="flex flex-col h-full overflow-hidden">{children}</main>
         <Footer />
       </body>
     </html>
