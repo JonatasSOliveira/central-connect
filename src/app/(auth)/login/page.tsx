@@ -1,6 +1,7 @@
 "use client";
 
-import { Church } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useLoginScreen } from "@/features/auth/hooks/useLoginScreen";
 
@@ -10,15 +11,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center p-6 bg-background">
       <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500 flex-1 justify-center">
-        <div className="relative mb-8">
-          <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center">
-            <Church className="w-12 h-12 text-primary" strokeWidth={1.5} />
-          </div>
-          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-[10px] font-bold">
-              CC
-            </span>
-          </div>
+        <div className="mb-8">
+          <Image
+            src="/logo-central-redonda.svg"
+            alt="Central Connect"
+            width={112}
+            height={112}
+            className="object-contain"
+          />
         </div>
 
         <h1 className="font-heading text-2xl font-bold text-foreground text-center leading-tight">
@@ -29,8 +29,11 @@ export default function LoginPage() {
         </p>
 
         {error && (
-          <div className="w-full mt-6 p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">
-            {error}
+          <div className="w-full mt-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive leading-relaxed">{error}</p>
+            </div>
           </div>
         )}
 

@@ -11,6 +11,7 @@ import {
   ArrowRightLeft,
 } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
+import { GreetingSection } from "@/features/home/components/greeting-section";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { CardAdmin } from "@/components/ui/card-admin";
 import { CardItem } from "@/components/ui/card-item";
@@ -30,7 +31,7 @@ import {
 
 export default function HomePage() {
   const router = useRouter();
-  const { userName, selectedChurch } = useHomeScreen();
+  const { userName, avatarUrl, selectedChurch } = useHomeScreen();
   const { user, logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
@@ -59,7 +60,9 @@ export default function HomePage() {
   return (
     <div className="p-6 app-background">
       <div className="max-w-2xl mx-auto">
-        <PrivateHeader title={`Olá, ${userName}`} showBackButton={false} />
+        <PrivateHeader title="Central Connect" showBackButton={false} />
+
+        <GreetingSection userName={userName} avatarUrl={avatarUrl} />
 
         <div className="py-4">
           <div className="flex items-center justify-between">
@@ -76,7 +79,7 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            {user && user.churches && user.churches.length > 1 && (
+            {user?.churches && user.churches.length > 1 && (
               <button
                 type="button"
                 onClick={() => router.push("/select-church")}

@@ -1,3 +1,4 @@
+import type { Result } from "@/shared/types/Result";
 import type { AuthLoginOutputDTO } from "../dtos/auth/AuthLoginOutputDTO";
 
 export interface CurrentUserChurch {
@@ -17,7 +18,7 @@ export interface CurrentUser {
 }
 
 export class AuthService {
-  async login(googleToken: string): Promise<AuthLoginOutputDTO> {
+  async login(googleToken: string): Promise<Result<AuthLoginOutputDTO>> {
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -26,11 +27,18 @@ export class AuthService {
 
     const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error?.code ?? "LOGIN_FAILED");
+    if (!response.ok || !data.ok) {
+      return {
+        ok: false,
+        error: {
+          code: data.error?.code ?? "UNKNOWN_ERROR",
+          message:
+            data.error?.message ?? "Erro ao fazer login. Tente novamente",
+        },
+      };
     }
 
-    return data.value;
+    return { ok: true, value: data.value };
   }
 
   async getCurrentUser(): Promise<CurrentUser | null> {
@@ -50,16 +58,27 @@ export class AuthService {
     });
   }
 
-  async selectChurch(churchId: string): Promise<void> {
+  async selectChurch(churchId: string): Promise<Result<{ success: boolean }>> {
     const response = await fetch("/api/auth/select-church", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ churchId }),
     });
 
-    if (!response.ok) {
-      throw new Error("SELECT_CHURCH_FAILED");
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      return {
+        ok: false,
+        error: {
+          code: data.error?.code ?? "SELECT_CHURCH_FAILED",
+          message:
+            data.error?.message ?? "Erro ao selecionar igreja. Tente novamente",
+        },
+      };
     }
+
+    return { ok: true, value: { success: true } };
   }
 }
 

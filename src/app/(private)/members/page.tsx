@@ -2,7 +2,7 @@
 
 import { User, Plus, Inbox, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { toast } from "sonner";
 import { SearchInput } from "@/components/ui/search-input";
 import { ListTemplate } from "@/components/templates/list-template";

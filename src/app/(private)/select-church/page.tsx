@@ -1,6 +1,7 @@
 "use client";
 
 import { Church, Loader2, LogOut } from "lucide-react";
+import Image from "next/image";
 import { CardItem } from "@/components/ui/card-item";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSelectChurchScreen } from "@/features/churches/hooks/useSelectChurch";
@@ -42,9 +43,13 @@ export default function SelectChurchPage() {
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="flex flex-col items-center p-6 pb-4">
-        <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-          <Church className="w-12 h-12 text-primary" strokeWidth={1.5} />
-        </div>
+        <Image
+          src="/logo-central-redonda.svg"
+          alt="Central Connect"
+          width={80}
+          height={80}
+          className="object-contain mb-4"
+        />
 
         <h1 className="font-heading text-2xl font-bold text-foreground text-center">
           Selecione uma igreja

@@ -23,7 +23,7 @@ export default function RootPage() {
     } else {
       router.push("/login");
     }
-  }, [isAuthenticated, isLoading, user, router]);
+  }, [isAuthenticated, isLoading, user, router, selectedChurch]);
 
   return (
     <div className="flex flex-1 items-center justify-center bg-background">
