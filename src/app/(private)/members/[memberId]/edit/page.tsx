@@ -3,8 +3,6 @@
 import { use } from "react";
 import { MemberForm } from "@/features/members/components";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 interface EditMemberPageProps {
   params: Promise<{ memberId: string }>;
@@ -12,11 +10,6 @@ interface EditMemberPageProps {
 
 export default function EditMemberPage({ params }: EditMemberPageProps) {
   const { memberId } = use(params);
-
-  usePermissions({
-    requiredPermissions: [Permission.MEMBER_WRITE],
-    redirectTo: "/members",
-  });
 
   return (
     <>

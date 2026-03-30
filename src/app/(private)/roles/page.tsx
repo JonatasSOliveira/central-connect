@@ -27,8 +27,6 @@ export default function RolesPage() {
     redirectTo: "/home",
   });
 
-  const canWrite =
-    user?.isSuperAdmin || user?.permissions.includes(Permission.ROLE_WRITE);
   const canDelete =
     user?.isSuperAdmin || user?.permissions.includes(Permission.ROLE_DELETE);
 
@@ -93,10 +91,10 @@ export default function RolesPage() {
             title={role.name}
             onClick={() => handleEditRole(role.id)}
             actions={
-              canWrite || canDelete
+              canDelete
                 ? {
-                    onEdit: canWrite ? () => handleEditRole(role.id) : undefined,
-                    onDelete: canDelete ? () => handleDeleteRole(role.id) : undefined,
+                    onEdit: () => handleEditRole(role.id),
+                    onDelete: () => handleDeleteRole(role.id),
                   }
                 : undefined
             }
@@ -121,13 +119,11 @@ export default function RolesPage() {
         resultsCount={roles.length}
       />
 
-      {canWrite && (
-        <ListTemplate.Action
-          label="Novo cargo do sistema"
-          icon={Plus}
-          onClick={handleCreateRole}
-        />
-      )}
+      <ListTemplate.Action
+        label="Novo cargo do sistema"
+        icon={Plus}
+        onClick={handleCreateRole}
+      />
 
       {renderContent()}
     </ListTemplate>

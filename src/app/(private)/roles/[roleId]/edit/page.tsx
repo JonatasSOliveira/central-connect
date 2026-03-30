@@ -3,8 +3,6 @@
 import { use } from "react";
 import { RoleForm } from "@/features/roles/components/RoleForm";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
 
 interface EditRolePageProps {
   params: Promise<{ roleId: string }>;
@@ -12,11 +10,6 @@ interface EditRolePageProps {
 
 export default function EditRolePage({ params }: EditRolePageProps) {
   const { roleId } = use(params);
-
-  usePermissions({
-    requiredPermissions: [Permission.ROLE_WRITE],
-    redirectTo: "/roles",
-  });
 
   return (
     <>
