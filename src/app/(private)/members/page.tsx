@@ -8,10 +8,12 @@ import { SearchInput } from "@/components/ui/search-input";
 import { ListTemplate } from "@/components/templates/list-template";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMembersListScreen } from "@/features/members/hooks/useMembers";
 
 export default function MembersPage() {
   const router = useRouter();
+  const { user } = useAuth();
 
   const {
     members,
@@ -26,6 +28,11 @@ export default function MembersPage() {
     requiredPermissions: [Permission.MEMBER_READ],
     redirectTo: "/home",
   });
+
+  const canWrite =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.MEMBER_WRITE);
+  const canDelete =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.MEMBER_DELETE);
 
   const handleCreateMember = useCallback(() => {
     router.push("/members/new");
@@ -88,10 +95,16 @@ export default function MembersPage() {
             title={member.fullName}
             description={member.churches.map((c) => c.churchName).join(", ")}
             onClick={() => handleEditMember(member.id)}
-            actions={{
-              onEdit: () => handleEditMember(member.id),
-              onDelete: () => handleDeleteMember(member.id),
-            }}
+            actions={
+              canWrite || canDelete
+                ? {
+                    onEdit: canWrite ? () => handleEditMember(member.id) : undefined,
+                    onDelete: canDelete
+                      ? () => handleDeleteMember(member.id)
+                      : undefined,
+                  }
+                : undefined
+            }
           />
         ))}
       </ListTemplate.List>
@@ -120,11 +133,13 @@ export default function MembersPage() {
         )}
       </div>
 
-      <ListTemplate.Action
-        label="Novo membro"
-        icon={Plus}
-        onClick={handleCreateMember}
-      />
+      {canWrite && (
+        <ListTemplate.Action
+          label="Novo membro"
+          icon={Plus}
+          onClick={handleCreateMember}
+        />
+      )}
 
       {renderContent()}
     </ListTemplate>

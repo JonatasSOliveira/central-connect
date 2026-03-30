@@ -27,6 +27,8 @@ export default function ChurchesPage() {
     redirectTo: "/home",
   });
 
+  const canWrite =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.CHURCH_WRITE);
   const canDelete =
     user?.isSuperAdmin || user?.permissions.includes(Permission.CHURCH_DELETE);
 
@@ -91,10 +93,12 @@ export default function ChurchesPage() {
             title={church.name}
             onClick={() => handleEditChurch(church.id)}
             actions={
-              canDelete
+              canWrite || canDelete
                 ? {
-                    onEdit: () => handleEditChurch(church.id),
-                    onDelete: () => handleDeleteChurch(church.id),
+                    onEdit: canWrite ? () => handleEditChurch(church.id) : undefined,
+                    onDelete: canDelete
+                      ? () => handleDeleteChurch(church.id)
+                      : undefined,
                   }
                 : undefined
             }
@@ -119,11 +123,13 @@ export default function ChurchesPage() {
         resultsCount={churches.length}
       />
 
-      <ListTemplate.Action
-        label="Nova Igreja"
-        icon={Plus}
-        onClick={handleCreateChurch}
-      />
+      {canWrite && (
+        <ListTemplate.Action
+          label="Nova Igreja"
+          icon={Plus}
+          onClick={handleCreateChurch}
+        />
+      )}
 
       {renderContent()}
     </ListTemplate>

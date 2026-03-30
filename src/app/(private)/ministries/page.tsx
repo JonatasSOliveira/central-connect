@@ -27,6 +27,9 @@ export default function MinistriesPage() {
     redirectTo: "/home",
   });
 
+  const canWrite =
+    user?.isSuperAdmin ||
+    user?.permissions.includes(Permission.MINISTRY_WRITE);
   const canDelete =
     user?.isSuperAdmin ||
     user?.permissions.includes(Permission.MINISTRY_DELETE);
@@ -93,10 +96,14 @@ export default function MinistriesPage() {
             description={`${ministry.roles.length} função(ões)`}
             onClick={() => handleEditMinistry(ministry.id)}
             actions={
-              canDelete
+              canWrite || canDelete
                 ? {
-                    onEdit: () => handleEditMinistry(ministry.id),
-                    onDelete: () => handleDeleteMinistry(ministry.id),
+                    onEdit: canWrite
+                      ? () => handleEditMinistry(ministry.id)
+                      : undefined,
+                    onDelete: canDelete
+                      ? () => handleDeleteMinistry(ministry.id)
+                      : undefined,
                   }
                 : undefined
             }
@@ -121,11 +128,13 @@ export default function MinistriesPage() {
         resultsCount={ministries.length}
       />
 
-      <ListTemplate.Action
-        label="Novo ministry"
-        icon={Plus}
-        onClick={handleCreateMinistry}
-      />
+      {canWrite && (
+        <ListTemplate.Action
+          label="Novo ministry"
+          icon={Plus}
+          onClick={handleCreateMinistry}
+        />
+      )}
 
       {renderContent()}
     </ListTemplate>
