@@ -1,6 +1,6 @@
-import * as fs from "fs";
-import * as readline from "readline";
-import { getFirestoreDb } from "./_firebase-admin.ts";
+import * as fs from "node:fs";
+import * as readline from "node:readline";
+import { getFirestoreDb } from "./_firebase-admin";
 
 function parseCSV(content: string): string[][] {
   const lines = content.split("\n");
@@ -59,7 +59,7 @@ async function createMinistry(
   db: FirebaseFirestore.Firestore,
   churchId: string,
   name: string,
-  liderId: string | null,
+  leaderId: string | null,
   minMembers: number,
   idealMembers: number,
   notes: string,
@@ -73,7 +73,7 @@ async function createMinistry(
     .set({
       churchId,
       name,
-      liderId,
+      leaderId,
       minMembersPerService: minMembers,
       idealMembersPerService: idealMembers,
       notes: notes || null,
@@ -192,16 +192,18 @@ async function main() {
 
     const liderName = colMap.lider >= 0 ? row[colMap.lider]?.trim() : "";
     const minMembers =
-      colMap.minMembers >= 0 ? parseInt(row[colMap.minMembers]) || 1 : 1;
+      colMap.minMembers >= 0 ? parseInt(row[colMap.minMembers], 10) || 1 : 1;
     const idealMembers =
-      colMap.idealMembers >= 0 ? parseInt(row[colMap.idealMembers]) || 2 : 2;
+      colMap.idealMembers >= 0
+        ? parseInt(row[colMap.idealMembers], 10) || 2
+        : 2;
     const notes = colMap.notes >= 0 ? row[colMap.notes]?.trim() : "";
 
-    let liderId: string | null = null;
+    let leaderId: string | null = null;
 
     if (liderName) {
-      liderId = await getMemberIdByName(db, liderName);
-      if (!liderId) {
+      leaderId = await getMemberIdByName(db, liderName);
+      if (!leaderId) {
         leadersNotFound.push(liderName);
       }
     }
@@ -210,7 +212,7 @@ async function main() {
       db,
       churchId,
       name,
-      liderId,
+      leaderId,
       minMembers,
       idealMembers,
       notes,

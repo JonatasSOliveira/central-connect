@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
 
   if (!user.isSuperAdmin) {
     const userWritableChurchIds = user.churches
-      .filter((c) => user.permissions.includes(Permission.MEMBER_WRITE))
+      .filter(() => user.permissions.includes(Permission.MEMBER_WRITE))
       .map((c) => c.churchId);
 
     for (const churchInfo of parsed.data.churches) {

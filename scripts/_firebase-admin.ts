@@ -1,7 +1,7 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import * as fs from "fs";
-import * as path from "path";
 
 function loadEnvFile(envPath: string): void {
   if (!fs.existsSync(envPath)) return;

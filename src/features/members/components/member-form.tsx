@@ -38,7 +38,9 @@ export function MemberForm({ mode, memberId }: MemberFormProps) {
     memberId,
   });
 
-  const [addingMinistryTo, setAddingMinistryTo] = useState<number | null>(null);
+  const [_addingMinistryTo, setAddingMinistryTo] = useState<number | null>(
+    null,
+  );
   const [selectedMinistryId, setSelectedMinistryId] = useState("");
 
   const hasSingleWritableChurch =
@@ -58,7 +60,7 @@ export function MemberForm({ mode, memberId }: MemberFormProps) {
     fetchMinistriesByChurch,
   ]);
 
-  const handleAddMinistry = (churchIndex: number) => {
+  const _handleAddMinistry = (churchIndex: number) => {
     if (selectedMinistryId) {
       editableAppendMinistry(churchIndex, selectedMinistryId);
       setSelectedMinistryId("");

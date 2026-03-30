@@ -1,6 +1,6 @@
-import * as fs from "fs";
-import * as readline from "readline";
-import { getFirestoreDb } from "./_firebase-admin.ts";
+import * as fs from "node:fs";
+import * as readline from "node:readline";
+import { getFirestoreDb } from "./_firebase-admin";
 
 interface VolunteerRow {
   fullName: string;
@@ -59,7 +59,7 @@ function formatPhone(phone: string): string | null {
   return phone.trim();
 }
 
-async function findMinistryByName(
+async function _findMinistryByName(
   db: FirebaseFirestore.Firestore,
   churchId: string,
   ministryName: string,
@@ -379,7 +379,6 @@ async function main() {
 
   for (let i = 0; i < validRows.length; i++) {
     const volunteer = validRows[i];
-    const lineNumber = i + 2;
 
     process.stdout.write(
       `[${i + 1}/${validRows.length}] ${volunteer.fullName}... `,

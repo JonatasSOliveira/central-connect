@@ -1,9 +1,9 @@
-import { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
-import { ListChurchesOutput } from "@/application/use-cases/church/ListChurches";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { Result } from "@/shared/types/Result";
-import { useChurchStore } from "@/stores/churchStore";
 import { useEffect, useState } from "react";
+import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
+import type { ListChurchesOutput } from "@/application/use-cases/church/ListChurches";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import type { Result } from "@/shared/types/Result";
+import { useChurchStore } from "@/stores/churchStore";
 
 interface SelectChurchScreenParams {
   goToHome: () => void;

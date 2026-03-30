@@ -133,7 +133,7 @@ export function ChurchSection({
                   shouldValidate: true,
                 })
               }
-              onMinistryChange={(value) =>
+              onMinistryChange={(_value) =>
                 form.setValue(`churches.${index}.ministryIds`, [])
               }
               onFetchMinistries={fetchMinistriesByChurch}

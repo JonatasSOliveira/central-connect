@@ -226,11 +226,10 @@ export function useMemberForm({
     }
   }, [canChangeChurch, isSuperAdmin, userWritableChurchIds]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchRoles();
     fetchEditableChurches();
-  }, []);
+  }, [fetchRoles, fetchEditableChurches]);
 
   useEffect(() => {
     if (mode === "edit" && memberId) {

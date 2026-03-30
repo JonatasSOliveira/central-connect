@@ -10,8 +10,12 @@ interface AuthState {
   isInitialized: boolean;
 }
 
+interface LoginResult {
+  errorMessage: string | null;
+}
+
 interface AuthActions {
-  login: (googleToken: string) => Promise<void>;
+  login: (googleToken: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
 }
@@ -36,23 +40,29 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   login: async (googleToken: string) => {
     set({ isLoading: true });
-    try {
-      const result = await authService.login(googleToken);
-      set({
-        user: {
-          userId: result.userId,
-          memberId: result.memberId,
-          email: result.email,
-          fullName: result.fullName,
-          avatarUrl: result.avatarUrl,
-          isSuperAdmin: result.isSuperAdmin,
-          churches: result.churches,
-          permissions: result.permissions,
-        },
-      });
-    } finally {
+
+    const result = await authService.login(googleToken);
+
+    if (!result.ok) {
       set({ isLoading: false });
+      return { errorMessage: result.error.message };
     }
+
+    set({
+      user: {
+        userId: result.value.userId,
+        memberId: result.value.memberId,
+        email: result.value.email,
+        fullName: result.value.fullName,
+        avatarUrl: result.value.avatarUrl,
+        isSuperAdmin: result.value.isSuperAdmin,
+        churches: result.value.churches,
+        permissions: result.value.permissions,
+      },
+      isLoading: false,
+    });
+
+    return { errorMessage: null };
   },
 
   logout: async () => {

@@ -28,7 +28,7 @@ interface UseRoleFormReturn {
   isEdit: boolean;
 }
 
-const defaultPermissions = Object.values(Permission);
+const _defaultPermissions = Object.values(Permission);
 
 export function useRoleForm({
   mode,
