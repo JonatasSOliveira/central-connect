@@ -1,4 +1,4 @@
-import type { DocumentData, Query } from "firebase-admin/firestore";
+import type { DocumentData } from "firebase-admin/firestore";
 import type { Service } from "@/domain/entities/Service";
 import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
 import {
@@ -27,7 +27,6 @@ export class ServiceFirebaseRepository
     const snapshot = await this.collection
       .where("churchId", "==", churchId)
       .where("deletedAt", "==", null)
-      .orderBy("date", "asc")
       .get();
 
     return snapshot.docs.map((doc) => this.toEntity(doc.data(), doc.id));
@@ -41,12 +40,13 @@ export class ServiceFirebaseRepository
     const snapshot = await this.collection
       .where("churchId", "==", churchId)
       .where("deletedAt", "==", null)
-      .where("date", ">=", startDate)
-      .where("date", "<=", endDate)
-      .orderBy("date", "asc")
       .get();
 
-    return snapshot.docs.map((doc) => this.toEntity(doc.data(), doc.id));
+    return snapshot.docs
+      .map((doc) => this.toEntity(doc.data(), doc.id))
+      .filter(
+        (service) => service.date >= startDate && service.date <= endDate,
+      );
   }
 
   async findByDateAndLocation(
@@ -60,18 +60,22 @@ export class ServiceFirebaseRepository
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const query: Query = this.collection
+    const snapshot = await this.collection
       .where("churchId", "==", churchId)
-      .where("date", ">=", startOfDay)
-      .where("date", "<=", endOfDay)
-      .where("time", "==", time)
-      .where("deletedAt", "==", null);
-
-    const snapshot = await query.get();
+      .where("deletedAt", "==", null)
+      .get();
 
     const results = snapshot.docs
       .map((doc) => this.toEntity(doc.data(), doc.id))
-      .filter((service) => service.location === location);
+      .filter((service) => {
+        const serviceDate = service.date;
+        return (
+          serviceDate >= startOfDay &&
+          serviceDate <= endOfDay &&
+          service.time === time &&
+          service.location === location
+        );
+      });
 
     return results[0] ?? null;
   }

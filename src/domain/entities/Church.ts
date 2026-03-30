@@ -11,17 +11,6 @@ export class Church extends AuditableEntity {
   get name(): string {
     return this._name;
   }
-
-  toJSON(): object {
-    return {
-      id: this.id,
-      name: this.name,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      createdByUserId: this.createdByUserId,
-      updatedByUserId: this.updatedByUserId,
-    };
-  }
 }
 
 export interface ChurchParams extends AuditableEntityParams {

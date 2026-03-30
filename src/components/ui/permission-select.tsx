@@ -35,6 +35,13 @@ const permissionLabels: Record<Permission, string> = {
   [Permission.MINISTRY_READ]: "Ministérios: Leitura",
   [Permission.MINISTRY_WRITE]: "Ministérios: Escrita",
   [Permission.MINISTRY_DELETE]: "Ministérios: Excluir",
+  [Permission.SERVICE_READ]: "Cultos: Leitura",
+  [Permission.SERVICE_WRITE]: "Cultos: Escrita",
+  [Permission.SERVICE_DELETE]: "Cultos: Excluir",
+  [Permission.SERVICE_TEMPLATE_READ]: "Modelos de culto: Leitura",
+  [Permission.SERVICE_TEMPLATE_WRITE]: "Modelos de culto: Escrita",
+  [Permission.SERVICE_TEMPLATE_DELETE]: "Modelos de culto: Excluir",
+  [Permission.SERVICE_TEMPLATE_GENERATE]: "Modelos de culto: Gerar semana",
 };
 
 const groupLabels: Record<string, string> = {
@@ -43,6 +50,8 @@ const groupLabels: Record<string, string> = {
   SCHEDULE: "Escalas",
   ROLE: "Cargos do sistema",
   MINISTRY: "Ministérios",
+  SERVICE: "Cultos",
+  SERVICE_TEMPLATE: "Modelos de culto",
 };
 
 export function PermissionSelect({

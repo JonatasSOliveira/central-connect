@@ -27,7 +27,6 @@ export class ServiceTemplateFirebaseRepository
     const snapshot = await this.collection
       .where("churchId", "==", churchId)
       .where("deletedAt", "==", null)
-      .orderBy("dayOfWeek")
       .get();
 
     return snapshot.docs.map((doc) => this.toEntity(doc.data(), doc.id));
@@ -36,10 +35,11 @@ export class ServiceTemplateFirebaseRepository
   async findActiveByChurchId(churchId: string): Promise<ServiceTemplate[]> {
     const snapshot = await this.collection
       .where("churchId", "==", churchId)
-      .where("isActive", "==", true)
       .where("deletedAt", "==", null)
       .get();
 
-    return snapshot.docs.map((doc) => this.toEntity(doc.data(), doc.id));
+    return snapshot.docs
+      .map((doc) => this.toEntity(doc.data(), doc.id))
+      .filter((template) => template.isActive);
   }
 }

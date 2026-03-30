@@ -13,3 +13,19 @@ export const ListServicesQuerySchema = z.object({
 });
 
 export type ListServicesQuery = z.infer<typeof ListServicesQuerySchema>;
+
+export type ServiceListItem = {
+  id: string;
+  churchId: string;
+  serviceTemplateId: string | null;
+  title: string;
+  date: Date;
+  time: string;
+  shift: string | null;
+  location: string | null;
+  description: string | null;
+};
+
+export type ListServicesOutput = {
+  services: ServiceListItem[];
+};

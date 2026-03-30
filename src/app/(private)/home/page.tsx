@@ -9,6 +9,8 @@ import {
   LogOut,
   HandHeart,
   ArrowRightLeft,
+  CalendarDays,
+  Settings2,
 } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { GreetingSection } from "@/features/home/components/greeting-section";
@@ -51,11 +53,21 @@ export default function HomePage() {
     requiredPermissions: [Permission.MINISTRY_READ],
   });
 
+  const { hasPermission: canManageServices } = usePermissions({
+    requiredPermissions: [Permission.SERVICE_READ],
+  });
+
+  const { hasPermission: canManageServiceTemplates } = usePermissions({
+    requiredPermissions: [Permission.SERVICE_TEMPLATE_READ],
+  });
+
   const canShowAdminSection =
     canManageMembers ||
     canManageRoles ||
     canManageChurches ||
-    canManageMinistries;
+    canManageMinistries ||
+    canManageServices ||
+    canManageServiceTemplates;
 
   return (
     <div className="p-6 app-background">
@@ -132,6 +144,22 @@ export default function HomePage() {
                   description="Gerencie os ministérios da igreja"
                   icon={HandHeart}
                   href="/ministries"
+                />
+              )}
+              {canManageServices && (
+                <CardAdmin
+                  title="Cultos"
+                  description="Gerencie os cultos da igreja"
+                  icon={CalendarDays}
+                  href="/services"
+                />
+              )}
+              {canManageServiceTemplates && (
+                <CardAdmin
+                  title="Modelos de Culto"
+                  description="Configure modelos de cultos recorrentes"
+                  icon={Settings2}
+                  href="/service-templates"
                 />
               )}
             </div>
