@@ -1,7 +1,6 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useLoginScreen } from "@/features/auth/hooks/useLoginScreen";
 
@@ -12,12 +11,10 @@ export default function LoginPage() {
     <div className="min-h-dvh flex flex-col items-center justify-center p-6 bg-background">
       <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500 flex-1 justify-center">
         <div className="mb-8">
-          <Image
+          <img
             src="/logo-central-redonda.svg"
             alt="Central Connect"
-            width={112}
-            height={112}
-            className="object-contain"
+            className="w-28 h-28 object-contain"
           />
         </div>
 

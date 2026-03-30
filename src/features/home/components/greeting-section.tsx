@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { getInitials, getTimeOfDayGreeting } from "../hooks/useHomeScreen";
 
 interface GreetingSectionProps {
@@ -15,7 +14,11 @@ export function GreetingSection({ userName, avatarUrl }: GreetingSectionProps) {
     <div className="flex items-center gap-4 py-4 mb-2">
       <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center overflow-hidden shrink-0">
         {avatarUrl ? (
-          <Image src={avatarUrl} alt={userName} fill className="object-cover" />
+          <img
+            src={avatarUrl}
+            alt={userName}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <span className="text-primary-foreground text-lg font-bold">
             {getInitials(userName)}
