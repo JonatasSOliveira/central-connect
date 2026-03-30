@@ -127,7 +127,7 @@ export async function PUT(
     ministryId,
     churchId: ministry.churchId,
     name: parsed.data.name,
-    liderId: parsed.data.liderId,
+    leaderId: parsed.data.leaderId,
     minMembersPerService: parsed.data.minMembersPerService,
     idealMembersPerService: parsed.data.idealMembersPerService,
     notes: parsed.data.notes,

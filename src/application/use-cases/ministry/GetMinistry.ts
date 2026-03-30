@@ -46,7 +46,7 @@ export class GetMinistry extends BaseUseCase<
             id: ministry.id,
             churchId: ministry.churchId,
             name: ministry.name,
-            liderId: ministry.liderId,
+            leaderId: ministry.leaderId,
             minMembersPerService: ministry.minMembersPerService,
             idealMembersPerService: ministry.idealMembersPerService,
             notes: ministry.notes,

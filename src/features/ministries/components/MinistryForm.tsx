@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { MinistryFormInput } from "@/application/dtos/ministry/MinistryDTO";
 import { FormTemplate } from "@/components/templates/form-template";
@@ -98,8 +98,8 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
 
           <FormSelect
             label="Líder Responsável"
-            value={form.watch("liderId") || ""}
-            onChange={(value) => form.setValue("liderId", value || null)}
+            value={form.watch("leaderId") || ""}
+            onChange={(value) => form.setValue("leaderId", value || null)}
             options={memberOptions.map((member) => ({
               value: member.id,
               label: member.fullName,

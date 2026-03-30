@@ -13,7 +13,7 @@ import { BaseUseCase } from "../BaseUseCase";
 export interface CreateMinistryInput {
   churchId: string;
   name: string;
-  liderId?: string | null;
+  leaderId?: string | null;
   minMembersPerService: number;
   idealMembersPerService: number;
   notes?: string | null;
@@ -55,7 +55,7 @@ export class CreateMinistry extends BaseUseCase<
       const ministryParams: MinistryParams = {
         churchId: input.churchId,
         name: input.name,
-        liderId: input.liderId ?? null,
+        leaderId: input.leaderId ?? null,
         minMembersPerService: input.minMembersPerService,
         idealMembersPerService: input.idealMembersPerService,
         notes: input.notes ?? null,
@@ -91,7 +91,7 @@ export class CreateMinistry extends BaseUseCase<
             id: createdMinistry.id,
             churchId: createdMinistry.churchId,
             name: createdMinistry.name,
-            liderId: createdMinistry.liderId,
+            leaderId: createdMinistry.leaderId,
             minMembersPerService: createdMinistry.minMembersPerService,
             idealMembersPerService: createdMinistry.idealMembersPerService,
             notes: createdMinistry.notes,

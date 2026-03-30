@@ -56,7 +56,7 @@ export function useMinistryForm({
     [],
   );
   const [members, setMembers] = useState<MemberOption[]>([]);
-  const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+  const [_isLoadingMembers, setIsLoadingMembers] = useState(false);
 
   const isSuperAdmin = user?.isSuperAdmin ?? false;
   const hasMinistryWrite =
@@ -81,7 +81,7 @@ export function useMinistryForm({
     defaultValues: {
       churchId: defaultChurchId,
       name: "",
-      liderId: null,
+      leaderId: null,
       minMembersPerService: 1,
       idealMembersPerService: 2,
       notes: "",
@@ -179,7 +179,7 @@ export function useMinistryForm({
             form.reset({
               churchId: ministryData.churchId,
               name: ministryData.name,
-              liderId: ministryData.liderId,
+              leaderId: ministryData.leaderId,
               minMembersPerService: ministryData.minMembersPerService,
               idealMembersPerService: ministryData.idealMembersPerService,
               notes: ministryData.notes ?? "",

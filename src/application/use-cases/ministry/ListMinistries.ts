@@ -41,7 +41,7 @@ export class ListMinistries extends BaseUseCase<
             id: ministry.id,
             churchId: ministry.churchId,
             name: ministry.name,
-            liderId: ministry.liderId,
+            leaderId: ministry.leaderId,
             roles: roles.map((r) => ({
               id: r.id,
               name: r.name,

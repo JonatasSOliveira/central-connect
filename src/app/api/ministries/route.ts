@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
   const result = await ministryContainer.createMinistry.execute({
     churchId: parsed.data.churchId,
     name: parsed.data.name,
-    liderId: parsed.data.liderId,
+    leaderId: parsed.data.leaderId,
     minMembersPerService: parsed.data.minMembersPerService,
     idealMembersPerService: parsed.data.idealMembersPerService,
     notes: parsed.data.notes,
