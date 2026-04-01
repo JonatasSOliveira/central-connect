@@ -22,8 +22,14 @@ export function useServices() {
   const [services, setServices] = useState<ServiceListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [startDate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
+
+  const [filters, setFilters] = useState<{
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+  }>({
+    startDate: undefined,
+    endDate: undefined,
+  });
 
   const fetchServices = useCallback(async () => {
     if (!churchId) return;
@@ -32,11 +38,11 @@ export function useServices() {
     try {
       const params = new URLSearchParams({ churchId });
 
-      if (startDate) {
-        params.append("startDate", startDate.toISOString());
+      if (filters.startDate) {
+        params.append("startDate", filters.startDate.toISOString());
       }
-      if (endDate) {
-        params.append("endDate", endDate.toISOString());
+      if (filters.endDate) {
+        params.append("endDate", filters.endDate.toISOString());
       }
 
       const response = await fetch(`/api/services?${params.toString()}`);
@@ -50,7 +56,7 @@ export function useServices() {
     } finally {
       setIsLoading(false);
     }
-  }, [churchId, startDate, endDate]);
+  }, [churchId, filters.startDate, filters.endDate]);
 
   useEffect(() => {
     if (!churchId) {
@@ -62,30 +68,35 @@ export function useServices() {
     fetchServices();
   }, [churchId, fetchServices]);
 
+  const applyFilters = useCallback(
+    (startDate: Date | undefined, endDate: Date | undefined) => {
+      setFilters({ startDate, endDate });
+    },
+    [],
+  );
+
   const filteredServices = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return services;
+    let result = services;
+
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (service) =>
+          service.title.toLowerCase().includes(query) ||
+          service.location?.toLowerCase().includes(query) ||
+          service.shift?.toLowerCase().includes(query),
+      );
     }
 
-    const query = searchQuery.toLowerCase().trim();
-    return services.filter(
-      (service) =>
-        service.title.toLowerCase().includes(query) ||
-        service.location?.toLowerCase().includes(query) ||
-        service.shift?.toLowerCase().includes(query),
-    );
+    return result.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateA - dateB;
+    });
   }, [services, searchQuery]);
 
   const handleSearch = useCallback((value: string) => {
     setSearchQuery(value);
-  }, []);
-
-  const handleStartDateChange = useCallback((date: Date | undefined) => {
-    setStartDate(date);
-  }, []);
-
-  const handleEndDateChange = useCallback((date: Date | undefined) => {
-    setEndDate(date);
   }, []);
 
   const deleteService = useCallback(
@@ -113,11 +124,9 @@ export function useServices() {
     allServicesCount: services.length,
     isLoading,
     searchQuery,
-    startDate,
-    endDate,
+    filters,
     setSearch: handleSearch,
-    setStartDate: handleStartDateChange,
-    setEndDate: handleEndDateChange,
+    applyFilters,
     refresh: fetchServices,
     deleteService,
   };
