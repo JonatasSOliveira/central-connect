@@ -56,6 +56,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
         fullName: result.value.fullName,
         avatarUrl: result.value.avatarUrl,
         isSuperAdmin: result.value.isSuperAdmin,
+        churchId: result.value.churchId,
+        churchName: result.value.churchName,
         churches: result.value.churches,
         permissions: result.value.permissions,
       },

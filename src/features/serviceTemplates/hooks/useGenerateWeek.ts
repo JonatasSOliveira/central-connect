@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { useChurchStore } from "@/stores/churchStore";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export interface GenerateWeekResult {
   createdCount: number;
@@ -16,8 +16,8 @@ export interface GenerateWeekResult {
 }
 
 export function useGenerateWeek() {
-  const { selectedChurch } = useChurchStore();
-  const churchId = selectedChurch?.id;
+  const { user } = useAuth();
+  const churchId = user?.churchId ?? null;
 
   const [isLoading, setIsLoading] = useState(false);
 

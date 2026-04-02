@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useChurchStore } from "@/stores/churchStore";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const ServiceTemplateFormSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
@@ -45,8 +45,8 @@ export function useServiceTemplateForm({
   onSuccess,
   onError,
 }: UseServiceTemplateFormProps) {
-  const { selectedChurch } = useChurchStore();
-  const churchId = selectedChurch?.id;
+  const { user } = useAuth();
+  const churchId = user?.churchId ?? null;
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
@@ -108,14 +108,11 @@ export function useServiceTemplateForm({
 
     try {
       if (mode === "create") {
-        const response = await fetch(
-          `/api/service-templates?churchId=${churchId}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-          },
-        );
+        const response = await fetch(`/api/service-templates`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
 
         const data = await response.json();
 

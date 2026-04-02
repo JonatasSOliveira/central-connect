@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useChurchStore } from "@/stores/churchStore";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export interface ServiceListItem {
   id: string;
@@ -16,8 +16,8 @@ export interface ServiceListItem {
 }
 
 export function useServices() {
-  const { selectedChurch } = useChurchStore();
-  const churchId = selectedChurch?.id;
+  const { user } = useAuth();
+  const churchId = user?.churchId ?? null;
 
   const [services, setServices] = useState<ServiceListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +36,7 @@ export function useServices() {
 
     setIsLoading(true);
     try {
-      const params = new URLSearchParams({ churchId });
+      const params = new URLSearchParams();
 
       if (filters.startDate) {
         params.append("startDate", filters.startDate.toISOString());

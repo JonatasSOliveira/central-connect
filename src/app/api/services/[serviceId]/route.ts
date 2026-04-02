@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { Permission } from "@/domain/enums/Permission";
 import { serviceContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { validateSession } from "../../_lib/auth";
+import { getChurchIdFromSession, validateSession } from "../../_lib/auth";
 
 export async function GET(
   request: NextRequest,
@@ -17,15 +17,16 @@ export async function GET(
   const { user } = auth;
   const { serviceId } = await params;
   const { searchParams } = new URL(request.url);
-  const churchId = searchParams.get("churchId");
+  const queryChurchId = searchParams.get("churchId");
+  const churchId = getChurchIdFromSession(user, queryChurchId);
 
   if (!churchId) {
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "MISSING_CHURCH_ID",
-          message: "churchId é obrigatório",
+          code: "NO_CHURCH_SELECTED",
+          message: "Nenhuma igreja selecionada",
         },
       },
       { status: 400 },
@@ -109,15 +110,16 @@ export async function PUT(
 
   const { serviceId } = await params;
   const { searchParams } = new URL(request.url);
-  const churchId = searchParams.get("churchId");
+  const queryChurchId = searchParams.get("churchId");
+  const churchId = getChurchIdFromSession(user, queryChurchId);
 
   if (!churchId) {
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "MISSING_CHURCH_ID",
-          message: "churchId é obrigatório",
+          code: "NO_CHURCH_SELECTED",
+          message: "Nenhuma igreja selecionada",
         },
       },
       { status: 400 },
@@ -177,15 +179,16 @@ export async function DELETE(
 
   const { serviceId } = await params;
   const { searchParams } = new URL(request.url);
-  const churchId = searchParams.get("churchId");
+  const queryChurchId = searchParams.get("churchId");
+  const churchId = getChurchIdFromSession(user, queryChurchId);
 
   if (!churchId) {
     return NextResponse.json(
       {
         ok: false,
         error: {
-          code: "MISSING_CHURCH_ID",
-          message: "churchId é obrigatório",
+          code: "NO_CHURCH_SELECTED",
+          message: "Nenhuma igreja selecionada",
         },
       },
       { status: 400 },

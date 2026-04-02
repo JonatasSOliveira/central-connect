@@ -6,6 +6,7 @@ import { UpdateService } from "@/application/use-cases/service/UpdateService";
 import { CreateServiceTemplate } from "@/application/use-cases/serviceTemplate/CreateServiceTemplate";
 import { DeleteServiceTemplate } from "@/application/use-cases/serviceTemplate/DeleteServiceTemplate";
 import { GenerateWeekServices } from "@/application/use-cases/serviceTemplate/GenerateWeekServices";
+import { GetServiceTemplate } from "@/application/use-cases/serviceTemplate/GetServiceTemplate";
 import { ListServiceTemplates } from "@/application/use-cases/serviceTemplate/ListServiceTemplates";
 import { UpdateServiceTemplate } from "@/application/use-cases/serviceTemplate/UpdateServiceTemplate";
 import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
@@ -23,6 +24,7 @@ class ServiceContainer {
   private static _updateService: UpdateService | null = null;
   private static _deleteService: DeleteService | null = null;
   private static _listServiceTemplates: ListServiceTemplates | null = null;
+  private static _getServiceTemplate: GetServiceTemplate | null = null;
   private static _createServiceTemplate: CreateServiceTemplate | null = null;
   private static _updateServiceTemplate: UpdateServiceTemplate | null = null;
   private static _deleteServiceTemplate: DeleteServiceTemplate | null = null;
@@ -97,6 +99,15 @@ class ServiceContainer {
       );
     }
     return ServiceContainer._listServiceTemplates;
+  }
+
+  static get getServiceTemplate(): GetServiceTemplate {
+    if (!ServiceContainer._getServiceTemplate) {
+      ServiceContainer._getServiceTemplate = new GetServiceTemplate(
+        ServiceContainer.serviceTemplateRepository,
+      );
+    }
+    return ServiceContainer._getServiceTemplate;
   }
 
   static get createServiceTemplate(): CreateServiceTemplate {

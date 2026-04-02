@@ -1,17 +1,16 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useChurchStore } from "@/stores/churchStore";
 
 export function useHomeScreen() {
   const { user } = useAuth();
-  const { selectedChurch } = useChurchStore();
 
   return {
     userName: user?.fullName || "Usuário",
     avatarUrl: user?.avatarUrl || null,
     isSuperAdmin: user?.isSuperAdmin ?? false,
-    selectedChurch,
+    churchId: user?.churchId ?? null,
+    churchName: user?.churchName ?? null,
   };
 }
 

@@ -33,7 +33,7 @@ import {
 
 export default function HomePage() {
   const router = useRouter();
-  const { userName, avatarUrl, selectedChurch } = useHomeScreen();
+  const { userName, avatarUrl, churchName } = useHomeScreen();
   const { user, logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
@@ -87,7 +87,7 @@ export default function HomePage() {
                   Igreja selecionada
                 </p>
                 <p className="font-heading text-lg font-semibold text-foreground">
-                  {selectedChurch?.name}
+                  {churchName || "Selecione uma igreja"}
                 </p>
               </div>
             </div>

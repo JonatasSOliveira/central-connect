@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useChurchStore } from "@/stores/churchStore";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 const ServiceFormSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
@@ -35,8 +35,8 @@ export function useServiceForm({
   onSuccess,
   onError,
 }: UseServiceFormProps) {
-  const { selectedChurch } = useChurchStore();
-  const churchId = selectedChurch?.id;
+  const { user } = useAuth();
+  const churchId = user?.churchId ?? null;
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
@@ -105,7 +105,7 @@ export function useServiceForm({
 
     try {
       if (mode === "create") {
-        const response = await fetch(`/api/services?churchId=${churchId}`, {
+        const response = await fetch(`/api/services`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),

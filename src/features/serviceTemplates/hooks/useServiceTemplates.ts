@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useChurchStore } from "@/stores/churchStore";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export interface ServiceTemplateListItem {
   id: string;
@@ -15,8 +15,8 @@ export interface ServiceTemplateListItem {
 }
 
 export function useServiceTemplates() {
-  const { selectedChurch } = useChurchStore();
-  const churchId = selectedChurch?.id;
+  const { user } = useAuth();
+  const churchId = user?.churchId ?? null;
 
   const [templates, setTemplates] = useState<ServiceTemplateListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,9 +27,7 @@ export function useServiceTemplates() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/service-templates?churchId=${churchId}`,
-      );
+      const response = await fetch(`/api/service-templates`);
       const data = await response.json();
 
       if (data.ok) {

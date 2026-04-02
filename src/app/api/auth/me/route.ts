@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { churchContainer } from "@/infra/di";
 import { validateSession } from "../../_lib/auth";
 
 export async function GET() {
@@ -6,6 +7,18 @@ export async function GET() {
 
   if (!auth.ok) {
     return NextResponse.json({ ok: false, value: null }, { status: 401 });
+  }
+
+  const { user } = auth;
+
+  let churchName: string | null = null;
+  if (user.churchId) {
+    const churchResult = await churchContainer.getChurch.execute({
+      churchId: user.churchId,
+    });
+    if (churchResult.ok) {
+      churchName = churchResult.value.church.name;
+    }
   }
 
   return NextResponse.json({
@@ -18,6 +31,7 @@ export async function GET() {
       avatarUrl: auth.user.avatarUrl ?? null,
       isSuperAdmin: auth.user.isSuperAdmin,
       churchId: auth.user.churchId ?? null,
+      churchName: churchName,
       churches: auth.user.churches,
       permissions: auth.user.permissions,
     },

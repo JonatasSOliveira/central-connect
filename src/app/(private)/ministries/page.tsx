@@ -28,8 +28,7 @@ export default function MinistriesPage() {
   });
 
   const canWrite =
-    user?.isSuperAdmin ||
-    user?.permissions.includes(Permission.MINISTRY_WRITE);
+    user?.isSuperAdmin || user?.permissions.includes(Permission.MINISTRY_WRITE);
   const canDelete =
     user?.isSuperAdmin ||
     user?.permissions.includes(Permission.MINISTRY_DELETE);
@@ -94,7 +93,9 @@ export default function MinistriesPage() {
             icon={HeartHandshake}
             title={ministry.name}
             description={`${ministry.roles.length} função(ões)`}
-            onClick={canWrite ? () => handleEditMinistry(ministry.id) : undefined}
+            onClick={
+              canWrite ? () => handleEditMinistry(ministry.id) : undefined
+            }
             actions={
               canWrite || canDelete
                 ? {
@@ -117,7 +118,7 @@ export default function MinistriesPage() {
     <ListTemplate isLoading={isLoading}>
       <ListTemplate.Header
         title="Ministérios"
-        subtitle={`${allMinistriesCount} ministry${allMinistriesCount !== 1 ? "s" : ""}`}
+        subtitle={`${allMinistriesCount} ministério${allMinistriesCount !== 1 ? "s" : ""}`}
       />
 
       <ListTemplate.SearchBar
