@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
+import { authService } from "@/application/services/AuthService";
 import type { ListChurchesOutput } from "@/application/use-cases/church/ListChurches";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { Result } from "@/shared/types/Result";
-import { useChurchStore } from "@/stores/churchStore";
 
 interface SelectChurchScreenParams {
   goToHome: () => void;
 }
 
 export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
-  const { isLoading } = useAuth();
-  const { selectChurch } = useChurchStore();
+  const { isLoading, initialize } = useAuth();
   const [churches, setChurches] = useState<ChurchListItemDTO[]>([]);
   const [loadingChurches, setLoadingChurches] = useState(true);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -35,7 +34,8 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
   }, []);
 
   const handleSelectChurch = async (church: ChurchListItemDTO) => {
-    selectChurch(church);
+    await authService.selectChurch(church.id);
+    await initialize();
     goToHome();
   };
 
@@ -44,7 +44,6 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
     loadingChurches,
     isLoading,
     handleSelectChurch,
-    selectChurch,
     showLogoutDialog,
     setShowLogoutDialog,
   };

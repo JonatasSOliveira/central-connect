@@ -21,6 +21,14 @@ export enum Permission {
   MINISTRY_READ = "ministry:read",
   MINISTRY_WRITE = "ministry:write",
   MINISTRY_DELETE = "ministry:delete",
+
+  SERVICE_READ = "service:read",
+  SERVICE_WRITE = "service:write",
+  SERVICE_DELETE = "service:delete",
+  SERVICE_TEMPLATE_READ = "service_template:read",
+  SERVICE_TEMPLATE_WRITE = "service_template:write",
+  SERVICE_TEMPLATE_DELETE = "service_template:delete",
+  SERVICE_TEMPLATE_GENERATE = "service_template:generate",
 }
 
 export const PermissionGroups = {
@@ -47,6 +55,17 @@ export const PermissionGroups = {
     Permission.MINISTRY_READ,
     Permission.MINISTRY_WRITE,
     Permission.MINISTRY_DELETE,
+  ],
+  SERVICE: [
+    Permission.SERVICE_READ,
+    Permission.SERVICE_WRITE,
+    Permission.SERVICE_DELETE,
+  ],
+  SERVICE_TEMPLATE: [
+    Permission.SERVICE_TEMPLATE_READ,
+    Permission.SERVICE_TEMPLATE_WRITE,
+    Permission.SERVICE_TEMPLATE_DELETE,
+    Permission.SERVICE_TEMPLATE_GENERATE,
   ],
 } as const;
 

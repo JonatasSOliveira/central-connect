@@ -3,7 +3,7 @@ import { MinistryFormSchema } from "@/application/dtos/ministry/MinistryDTO";
 import { Permission } from "@/domain/enums/Permission";
 import { ministryContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { validateSession } from "../_lib/auth";
+import { getChurchIdFromSession, validateSession } from "../_lib/auth";
 
 export async function GET(request: NextRequest) {
   const auth = await validateSession();
@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
 
   const { user } = auth;
   const { searchParams } = new URL(request.url);
-  const churchId = searchParams.get("churchId");
+  const queryChurchId = searchParams.get("churchId");
+  const churchId = getChurchIdFromSession(user, queryChurchId);
 
   const hasReadAccess =
     user.isSuperAdmin || user.permissions.includes(Permission.MINISTRY_READ);
@@ -32,11 +33,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const churchIdToUse = user.isSuperAdmin
-    ? churchId || undefined
-    : churchId || user.churchId || user.churches[0]?.churchId;
-
-  if (!user.isSuperAdmin && !churchIdToUse) {
+  if (!churchId && !user.isSuperAdmin) {
     return NextResponse.json(
       {
         ok: false,
@@ -49,8 +46,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (churchId && !user.isSuperAdmin) {
-    const hasAccess = user.churches.some((c) => c.churchId === churchId);
+  if (queryChurchId && !user.isSuperAdmin) {
+    const hasAccess = user.churches.some((c) => c.churchId === queryChurchId);
     if (!hasAccess) {
       return NextResponse.json(
         {
@@ -66,7 +63,7 @@ export async function GET(request: NextRequest) {
   }
 
   const result = await ministryContainer.listMinistries.execute({
-    churchId: churchIdToUse,
+    churchId: churchId || undefined,
   });
 
   if (!result.ok) {

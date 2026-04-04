@@ -79,7 +79,7 @@ interface ListSearchBarProps {
 }
 
 function List({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 gap-3">{children}</div>;
+  return <div className="grid grid-cols-1 gap-3 mt-4">{children}</div>;
 }
 
 function SearchBar({
@@ -274,7 +274,7 @@ function Action({
   className,
 }: ListActionProps) {
   return (
-    <div className={cn("flex justify-end mb-4", className)}>
+    <div className={cn("flex justify-end", className)}>
       <Button onClick={onClick} disabled={disabled}>
         <Icon className="w-4 h-4 mr-2" />
         {label}

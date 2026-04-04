@@ -34,7 +34,7 @@ interface FormProps<T extends Record<string, unknown>> {
 
 function FormHeader({ title, description, className }: FormHeaderProps) {
   return (
-    <div className={cn("mb-6", className)}>
+    <div className={cn("mb-6 mt-4", className)}>
       <h1 className="text-xl font-heading font-semibold text-foreground">
         {title}
       </h1>

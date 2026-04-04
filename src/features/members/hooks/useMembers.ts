@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MemberListItem } from "@/application/dtos/member/ListMembersDTO";
-import { useChurchStore } from "@/stores/churchStore";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function useMembersListScreen() {
-  const { selectedChurch } = useChurchStore();
-  const churchId = selectedChurch?.id;
+  const { user } = useAuth();
+  const churchId = user?.churchId ?? null;
 
   const [allMembers, setAllMembers] = useState<MemberListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,7 +17,7 @@ export function useMembersListScreen() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/members?churchId=${churchId}`);
+      const response = await fetch(`/api/members`);
       const data = await response.json();
 
       if (data.ok) {

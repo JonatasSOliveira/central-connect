@@ -4,20 +4,24 @@ import type { DayOfWeek } from "./DayOfWeek";
 export class Service extends AuditableEntity {
   protected readonly _churchId: string;
   protected readonly _serviceTemplateId: string | null;
+  protected readonly _title: string;
   protected readonly _dayOfWeek: DayOfWeek;
   protected readonly _shift: string;
   protected readonly _time: string;
   protected readonly _date: Date;
+  protected readonly _location: string | null;
   protected readonly _description: string | null;
 
   constructor(params: ServiceParams) {
     super(params);
     this._churchId = params.churchId;
     this._serviceTemplateId = params.serviceTemplateId ?? null;
+    this._title = params.title;
     this._dayOfWeek = params.dayOfWeek;
     this._shift = params.shift;
     this._time = params.time;
     this._date = params.date;
+    this._location = params.location ?? null;
     this._description = params.description ?? null;
   }
 
@@ -27,6 +31,10 @@ export class Service extends AuditableEntity {
 
   get serviceTemplateId(): string | null {
     return this._serviceTemplateId;
+  }
+
+  get title(): string {
+    return this._title;
   }
 
   get dayOfWeek(): DayOfWeek {
@@ -45,6 +53,10 @@ export class Service extends AuditableEntity {
     return this._date;
   }
 
+  get location(): string | null {
+    return this._location;
+  }
+
   get description(): string | null {
     return this._description;
   }
@@ -53,9 +65,11 @@ export class Service extends AuditableEntity {
 export interface ServiceParams extends AuditableEntityParams {
   churchId: string;
   serviceTemplateId?: string | null;
+  title: string;
   dayOfWeek: DayOfWeek;
   shift: string;
   time: string;
   date: Date;
+  location?: string | null;
   description?: string | null;
 }

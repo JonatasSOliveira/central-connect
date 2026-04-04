@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
-import { useChurchStore } from "@/stores/churchStore";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface UseMinistriesReturn {
   ministries: MinistryListItemDTO[];
@@ -15,8 +15,8 @@ interface UseMinistriesReturn {
 }
 
 export function useMinistries(): UseMinistriesReturn {
-  const { selectedChurch } = useChurchStore();
-  const churchId = selectedChurch?.id;
+  const { user } = useAuth();
+  const churchId = user?.churchId ?? null;
 
   const [allMinistries, setAllMinistries] = useState<MinistryListItemDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +31,7 @@ export function useMinistries(): UseMinistriesReturn {
 
     setIsLoading(true);
     try {
-      const url = `/api/ministries?churchId=${churchId}`;
+      const url = `/api/ministries`;
       const response = await fetch(url);
       const data = await response.json();
 

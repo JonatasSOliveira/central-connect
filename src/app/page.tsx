@@ -4,18 +4,16 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useChurchStore } from "@/stores/churchStore";
 
 export default function RootPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, user } = useAuth();
-  const { selectedChurch } = useChurchStore();
 
   useEffect(() => {
     if (isLoading) return;
 
     if (isAuthenticated) {
-      if (user?.isSuperAdmin || selectedChurch) {
+      if (user?.isSuperAdmin || user?.churchId) {
         router.push("/home");
       } else {
         router.push("/select-church");
@@ -23,7 +21,7 @@ export default function RootPage() {
     } else {
       router.push("/login");
     }
-  }, [isAuthenticated, isLoading, user, router, selectedChurch]);
+  }, [isAuthenticated, isLoading, user, router]);
 
   return (
     <div className="flex flex-1 items-center justify-center bg-background">

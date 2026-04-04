@@ -55,6 +55,16 @@ export async function validateSession(): Promise<AuthSuccess | AuthError> {
   }
 }
 
+export function getChurchIdFromSession(
+  user: SessionPayload,
+  queryChurchId: string | null,
+): string | null {
+  if (queryChurchId) {
+    return queryChurchId;
+  }
+  return user.churchId;
+}
+
 export function requireSuperAdmin(user: SessionPayload): AuthError | null {
   if (!user.isSuperAdmin) {
     return {
