@@ -1,3 +1,4 @@
+import type { IScaleRepository } from "@/domain/ports/IScaleRepository";
 import type { IMinistryRepository } from "@/domain/ports/IMinistryRepository";
 import type { IMinistryRoleRepository } from "@/domain/ports/IMinistryRoleRepository";
 import type { Result } from "@/shared/types/Result";
@@ -6,6 +7,7 @@ import { BaseUseCase } from "../BaseUseCase";
 
 export interface ListMinistriesInput {
   churchId?: string;
+  excludeServiceId?: string;
 }
 
 export interface ListMinistriesOutput {
@@ -19,6 +21,7 @@ export class ListMinistries extends BaseUseCase<
   constructor(
     private readonly ministryRepository: IMinistryRepository,
     private readonly ministryRoleRepository: IMinistryRoleRepository,
+    private readonly scaleRepository?: IScaleRepository,
   ) {
     super();
   }
@@ -27,9 +30,20 @@ export class ListMinistries extends BaseUseCase<
     input: ListMinistriesInput,
   ): Promise<Result<ListMinistriesOutput>> {
     try {
-      const ministries = input.churchId
+      let ministries = input.churchId
         ? await this.ministryRepository.findByChurchId(input.churchId)
         : await this.ministryRepository.findAll();
+
+      if (input.excludeServiceId && this.scaleRepository) {
+        const scales = await this.scaleRepository.findByFilters(
+          input.churchId || "",
+          {
+            serviceId: input.excludeServiceId,
+          },
+        );
+        const existingMinistryIds = new Set(scales.map((s) => s.ministryId));
+        ministries = ministries.filter((m) => !existingMinistryIds.has(m.id));
+      }
 
       const ministryDTOs: MinistryListItemDTO[] = await Promise.all(
         ministries.map(async (ministry) => {

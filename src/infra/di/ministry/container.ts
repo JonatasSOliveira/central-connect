@@ -11,6 +11,7 @@ import { MemberMinistryFirebaseRepository } from "@/infra/firebase-admin/reposit
 import { MemberMinistryRoleFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberMinistryRoleFirebaseRepository";
 import { MinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MinistryFirebaseRepository";
 import { MinistryRoleFirebaseRepository } from "@/infra/firebase-admin/repositories/MinistryRoleFirebaseRepository";
+import { scaleContainer } from "@/infra/di/scale/container";
 
 class MinistryContainer {
   private static _createMinistry: CreateMinistry | null = null;
@@ -62,6 +63,7 @@ class MinistryContainer {
       MinistryContainer._listMinistries = new ListMinistries(
         MinistryContainer.ministryRepository,
         MinistryContainer.ministryRoleRepository,
+        scaleContainer.scaleRepository,
       );
     }
     return MinistryContainer._listMinistries;
