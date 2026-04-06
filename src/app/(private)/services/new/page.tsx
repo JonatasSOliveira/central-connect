@@ -22,10 +22,7 @@ export default function NewServicePage() {
         backHref="/services"
       />
       <div className="px-4 pb-4">
-        <ServiceForm
-          mode="create"
-          goBack={() => router.push("/services")}
-        />
+        <ServiceForm mode="create" goBack={() => router.push("/services")} />
       </div>
     </>
   );

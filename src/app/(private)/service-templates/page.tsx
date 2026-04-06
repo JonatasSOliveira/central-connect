@@ -108,7 +108,9 @@ export default function ServiceTemplatesPage() {
             icon={Settings2}
             title={template.title}
             description={`${dayOfWeekLabels[template.dayOfWeek] || template.dayOfWeek} • ${template.shift} • ${template.time}${template.location ? ` • ${template.location}` : ""}${template.isActive ? "" : " • Inativo"}`}
-            onClick={canWrite ? () => handleEditTemplate(template.id) : undefined}
+            onClick={
+              canWrite ? () => handleEditTemplate(template.id) : undefined
+            }
             actions={{
               onEdit: canWrite
                 ? () => handleEditTemplate(template.id)
@@ -144,7 +146,9 @@ export default function ServiceTemplatesPage() {
       </div>
 
       <div className="flex justify-end gap-2">
-        {canGenerate && <GenerateWeekDialog onSuccess={() => window.location.reload()} />}
+        {canGenerate && (
+          <GenerateWeekDialog onSuccess={() => window.location.reload()} />
+        )}
         {canWrite && (
           <ListTemplate.Action
             label="Novo modelo"

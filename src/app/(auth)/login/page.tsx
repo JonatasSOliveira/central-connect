@@ -29,7 +29,9 @@ export default function LoginPage() {
           <div className="w-full mt-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-              <p className="text-sm text-destructive leading-relaxed">{error}</p>
+              <p className="text-sm text-destructive leading-relaxed">
+                {error}
+              </p>
             </div>
           </div>
         )}
