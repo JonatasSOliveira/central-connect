@@ -5,13 +5,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
 import type {
   MinistryDetailDTO,
   MinistryFormInput,
 } from "@/application/dtos/ministry/MinistryDTO";
 import { MinistryFormSchema } from "@/application/dtos/ministry/MinistryDTO";
-import { Permission } from "@/domain/enums/Permission";
 import { useAuthStore } from "@/stores/authStore";
 
 interface MemberOption {
@@ -38,8 +36,6 @@ export interface UseMinistryFormReturn {
   isLoading: boolean;
   isFetching: boolean;
   onSubmit: (data: MinistryFormInput) => Promise<void>;
-  editableChurches: ChurchListItemDTO[];
-  canChangeChurch: boolean;
   memberOptions: MemberOption[];
 }
 
@@ -52,34 +48,14 @@ export function useMinistryForm({
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
-  const [editableChurches, setEditableChurches] = useState<ChurchListItemDTO[]>(
-    [],
-  );
   const [members, setMembers] = useState<MemberOption[]>([]);
   const [_isLoadingMembers, setIsLoadingMembers] = useState(false);
 
-  const isSuperAdmin = user?.isSuperAdmin ?? false;
-  const hasMinistryWrite =
-    user?.permissions?.includes(Permission.MINISTRY_WRITE) ?? false;
-  const canChangeChurch = isSuperAdmin || hasMinistryWrite;
-
-  const userChurches = user?.churches ?? [];
-  const userWritableChurchIds = useMemo(() => {
-    if (isSuperAdmin) {
-      return userChurches.map((c) => c.churchId);
-    }
-    return hasMinistryWrite ? userChurches.map((c) => c.churchId) : [];
-  }, [isSuperAdmin, hasMinistryWrite, userChurches]);
-
-  const hasSingleWritableChurch = userWritableChurchIds.length === 1;
-  const defaultChurchId = hasSingleWritableChurch
-    ? userWritableChurchIds[0]
-    : "";
+  const churchId = user?.churchId ?? null;
 
   const form = useForm<MinistryFormInput>({
     resolver: zodResolver(MinistryFormSchema),
     defaultValues: {
-      churchId: defaultChurchId,
       name: "",
       leaderId: null,
       minMembersPerService: 1,
@@ -90,55 +66,21 @@ export function useMinistryForm({
     mode: "onBlur",
   });
 
-  const watchChurchId = form.watch("churchId");
-
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "roles",
   });
 
   useEffect(() => {
-    const fetchEditableChurches = async () => {
-      if (!canChangeChurch) {
-        return;
-      }
-
-      try {
-        if (isSuperAdmin) {
-          const response = await fetch("/api/churches");
-          const data = await response.json();
-          if (data.ok) {
-            setEditableChurches(data.value.churches);
-          }
-        } else {
-          const allChurchesResponse = await fetch("/api/churches");
-          const allChurchesData = await allChurchesResponse.json();
-          if (allChurchesData.ok) {
-            const filteredChurches = allChurchesData.value.churches.filter(
-              (church: ChurchListItemDTO) =>
-                userWritableChurchIds.includes(church.id),
-            );
-            setEditableChurches(filteredChurches);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching editable churches:", error);
-      }
-    };
-
-    fetchEditableChurches();
-  }, [canChangeChurch, isSuperAdmin, userWritableChurchIds]);
-
-  useEffect(() => {
     const fetchMembers = async () => {
-      if (!watchChurchId) {
+      if (!churchId) {
         setMembers([]);
         return;
       }
 
       setIsLoadingMembers(true);
       try {
-        const response = await fetch(`/api/members?churchId=${watchChurchId}`);
+        const response = await fetch(`/api/members?churchId=${churchId}`);
         const data = await response.json();
         if (data.ok) {
           const membersData = data.value.members.map(
@@ -157,14 +99,14 @@ export function useMinistryForm({
     };
 
     fetchMembers();
-  }, [watchChurchId]);
+  }, [churchId]);
 
   const memberOptions = useMemo(() => {
-    if (!watchChurchId) {
+    if (!churchId) {
       return [];
     }
     return members;
-  }, [members, watchChurchId]);
+  }, [members, churchId]);
 
   useEffect(() => {
     if (mode === "edit" && ministryId) {
@@ -177,7 +119,6 @@ export function useMinistryForm({
           if (data.ok && data.value) {
             const ministryData: MinistryDetailDTO = data.value.ministry;
             form.reset({
-              churchId: ministryData.churchId,
               name: ministryData.name,
               leaderId: ministryData.leaderId,
               minMembersPerService: ministryData.minMembersPerService,
@@ -258,8 +199,6 @@ export function useMinistryForm({
     isLoading,
     isFetching,
     onSubmit,
-    editableChurches,
-    canChangeChurch,
     memberOptions,
   };
 }

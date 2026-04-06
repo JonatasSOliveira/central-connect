@@ -27,8 +27,6 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
     isLoading,
     isFetching,
     onSubmit,
-    editableChurches,
-    canChangeChurch,
     memberOptions,
   } = useMinistryForm({ mode, ministryId });
 
@@ -39,10 +37,6 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
   const handleAddRole = () => {
     editableAppend({ name: "", id: null });
   };
-
-  const showChurchSelect =
-    (canChangeChurch && editableChurches.length > 1) ||
-    (!canChangeChurch && editableChurches.length === 1);
 
   if (isFetching) {
     return (
@@ -56,38 +50,6 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
     <FormTemplate>
       <FormTemplate.Form<MinistryFormInput> form={form} onSubmit={onSubmit}>
         <FormTemplate.Content>
-          {showChurchSelect && (
-            <>
-              {canChangeChurch && editableChurches.length > 1 && (
-                <FormSelect
-                  label="Igreja"
-                  value={form.watch("churchId")}
-                  onChange={(value) => form.setValue("churchId", value)}
-                  options={editableChurches.map((church) => ({
-                    value: church.id,
-                    label: church.name,
-                  }))}
-                  placeholder="Selecione"
-                  required
-                  error={form.formState.errors.churchId?.message as string}
-                />
-              )}
-
-              {!canChangeChurch && editableChurches.length === 1 && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Igreja
-                  </label>
-                  <Input
-                    value={editableChurches[0].name}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-              )}
-            </>
-          )}
-
           <FormField<MinistryFormInput>
             form={form}
             name="name"
