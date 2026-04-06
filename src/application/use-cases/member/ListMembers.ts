@@ -1,5 +1,6 @@
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { Result } from "@/shared/types/Result";
 import type {
@@ -16,6 +17,7 @@ export class ListMembers extends BaseUseCase<
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly churchRepository: IChurchRepository,
+    private readonly memberMinistryRepository: IMemberMinistryRepository,
   ) {
     super();
   }
@@ -30,9 +32,22 @@ export class ListMembers extends BaseUseCase<
         };
       }
 
-      const memberChurches = await this.memberChurchRepository.findByChurchId(
+      let memberChurches = await this.memberChurchRepository.findByChurchId(
         input.churchId,
       );
+
+      if (input.ministryId) {
+        const memberMinistries =
+          await this.memberMinistryRepository.findByMinistryId(
+            input.ministryId,
+          );
+        const memberIdsWithMinistry = new Set(
+          memberMinistries.map((mm) => mm.memberId),
+        );
+        memberChurches = memberChurches.filter((mc) =>
+          memberIdsWithMinistry.has(mc.memberId),
+        );
+      }
 
       if (memberChurches.length === 0) {
         return {

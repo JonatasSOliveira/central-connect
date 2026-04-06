@@ -159,7 +159,9 @@ export function useScaleForm({
 
       try {
         const [membersResponse, ministryResponse] = await Promise.all([
-          fetch(`/api/members?churchId=${user.churchId}`),
+          fetch(
+            `/api/members?churchId=${user.churchId}&ministryId=${watchMinistryId}`,
+          ),
           fetch(`/api/ministries/${watchMinistryId}`),
         ]);
 

@@ -72,6 +72,7 @@ class MemberContainer {
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
         MemberContainer.churchRepository,
+        MemberContainer.memberMinistryRepository,
       );
     }
     return MemberContainer._listMembers;
