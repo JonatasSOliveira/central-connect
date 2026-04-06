@@ -10,9 +10,9 @@ export enum Permission {
   MEMBER_DELETE = "member:delete",
   MEMBER_SELF_WRITE = "member:self:write",
 
-  SCHEDULE_READ = "schedule:read",
-  SCHEDULE_WRITE = "schedule:write",
-  SCHEDULE_DELETE = "schedule:delete",
+  SCALE_READ = "scale:read",
+  SCALE_WRITE = "scale:write",
+  SCALE_DELETE = "scale:delete",
 
   ROLE_READ = "role:read",
   ROLE_WRITE = "role:write",
@@ -45,10 +45,10 @@ export const PermissionGroups = {
     Permission.MEMBER_DELETE,
     Permission.MEMBER_SELF_WRITE,
   ],
-  SCHEDULE: [
-    Permission.SCHEDULE_READ,
-    Permission.SCHEDULE_WRITE,
-    Permission.SCHEDULE_DELETE,
+  SCALE: [
+    Permission.SCALE_READ,
+    Permission.SCALE_WRITE,
+    Permission.SCALE_DELETE,
   ],
   ROLE: [Permission.ROLE_READ, Permission.ROLE_WRITE, Permission.ROLE_DELETE],
   MINISTRY: [

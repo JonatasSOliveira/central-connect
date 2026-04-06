@@ -12,6 +12,8 @@ export { Ministry } from "./Ministry";
 export { MinistryRole } from "./MinistryRole";
 export { Notification } from "./Notification";
 export { Permission } from "./Permission";
+export { Scale } from "./Scale";
+export { ScaleMember } from "./ScaleMember";
 export { RolePermission } from "./RolePermission";
 export { Schedule } from "./Schedule";
 export { Service } from "./Service";

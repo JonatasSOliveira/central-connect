@@ -8,4 +8,6 @@ export type { IMemberMinistryRoleRepository } from "./IMemberMinistryRoleReposit
 export type { IMemberRepository } from "./IMemberRepository";
 export type { IMinistryRepository } from "./IMinistryRepository";
 export type { IMinistryRoleRepository } from "./IMinistryRoleRepository";
+export type { IScaleRepository } from "./IScaleRepository";
+export type { IScaleMemberRepository } from "./IScaleMemberRepository";
 export type { IUserRepository } from "./IUserRepository";
