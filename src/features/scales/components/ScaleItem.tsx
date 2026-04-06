@@ -27,6 +27,8 @@ interface ScaleItemActions {
 interface ScaleItemProps {
   icon: LucideIcon;
   title: string;
+  subtitle?: string;
+  tertiary?: string;
   description?: string;
   status?: "draft" | "published";
   onClick?: () => void;
@@ -37,6 +39,8 @@ interface ScaleItemProps {
 export function ScaleItem({
   icon: Icon,
   title,
+  subtitle,
+  tertiary,
   description,
   status,
   onClick,
@@ -95,14 +99,24 @@ export function ScaleItem({
         <Icon className="h-5 w-5 text-primary" strokeWidth={1.5} />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <h3 className="font-semibold text-[15px] text-foreground truncate">
             {title}
           </h3>
           {statusBadge}
         </div>
-        {description && (
+        {subtitle && (
           <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            {subtitle}
+          </p>
+        )}
+        {tertiary && (
+          <p className="text-xs text-muted-foreground/70 truncate">
+            {tertiary}
+          </p>
+        )}
+        {description && !subtitle && !tertiary && (
+          <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
             {description}
           </p>
         )}
@@ -167,9 +181,17 @@ export function ScaleItem({
   if (onClick) {
     return (
       <>
-        <button
-          type="button"
+        {/* biome-ignore lint: div required to avoid nested button with PopoverTrigger */}
+        <div
+          role="button"
+          tabIndex={0}
           onClick={onClick}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onClick();
+            }
+          }}
           className={cn(
             "w-full text-left",
             baseClasses,
@@ -179,7 +201,7 @@ export function ScaleItem({
           )}
         >
           {itemContent}
-        </button>
+        </div>
         {deleteDialog}
       </>
     );

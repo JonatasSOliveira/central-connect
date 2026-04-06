@@ -14,6 +14,8 @@ import { useScales } from "../hooks/useScales";
 interface ServiceOption {
   id: string;
   title: string;
+  date: Date | string;
+  time: string;
 }
 
 interface MinistryOption {
@@ -54,9 +56,16 @@ export function ScaleList() {
         if (servicesData.ok) {
           setServices(
             servicesData.value.services.map(
-              (s: { id: string; title: string }) => ({
+              (s: {
+                id: string;
+                title: string;
+                date: Date | string;
+                time: string;
+              }) => ({
                 id: s.id,
                 title: s.title,
+                date: s.date,
+                time: s.time,
               }),
             ),
           );
@@ -107,6 +116,21 @@ export function ScaleList() {
   const getServiceTitle = (serviceId: string) => {
     const service = services.find((s) => s.id === serviceId);
     return service?.title ?? "Culto não encontrado";
+  };
+
+  const getServiceDateTime = (serviceId: string) => {
+    const service = services.find((s) => s.id === serviceId);
+    if (!service) return null;
+
+    const date = new Date(service.date);
+    const dayName = date.toLocaleDateString("pt-BR", { weekday: "short" });
+    const shortDate = date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    return `${dayName} ${shortDate} - ${service.time}`;
   };
 
   const getMinistryName = (ministryId: string) => {
@@ -177,7 +201,9 @@ export function ScaleList() {
           <ScaleItem
             key={scale.id}
             icon={ListChecks}
-            title={`${getMinistryName(scale.ministryId)} - ${getServiceTitle(scale.serviceId)}`}
+            title={getMinistryName(scale.ministryId)}
+            subtitle={getServiceDateTime(scale.serviceId) ?? undefined}
+            tertiary={getServiceTitle(scale.serviceId)}
             status={scale.status}
             description={scale.notes ?? undefined}
             onClick={() => handleEditScale(scale.id)}
