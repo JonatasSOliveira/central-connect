@@ -30,6 +30,7 @@ export class ListScales extends BaseUseCase<ListScalesInput, ListScalesOutput> {
         value: {
           scales: scales.map((s) => ({
             id: s.id,
+            churchId: s.churchId,
             serviceId: s.serviceId,
             ministryId: s.ministryId,
             status: s.status,

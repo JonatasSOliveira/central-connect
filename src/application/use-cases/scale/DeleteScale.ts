@@ -1,4 +1,6 @@
 import type { IScaleRepository } from "@/domain/ports/IScaleRepository";
+import type { IScaleAttendanceMemberRepository } from "@/domain/ports/IScaleAttendanceMemberRepository";
+import type { IScaleAttendanceRepository } from "@/domain/ports/IScaleAttendanceRepository";
 import type { IScaleMemberRepository } from "@/domain/ports/IScaleMemberRepository";
 import type { Result } from "@/shared/types/Result";
 import { ScaleErrors } from "../../errors/ScaleErrors";
@@ -12,6 +14,8 @@ export class DeleteScale extends BaseUseCase<DeleteScaleInput, void> {
   constructor(
     private readonly scaleRepository: IScaleRepository,
     private readonly scaleMemberRepository: IScaleMemberRepository,
+    private readonly scaleAttendanceRepository: IScaleAttendanceRepository,
+    private readonly scaleAttendanceMemberRepository: IScaleAttendanceMemberRepository,
   ) {
     super();
   }
@@ -28,6 +32,14 @@ export class DeleteScale extends BaseUseCase<DeleteScaleInput, void> {
       }
 
       await this.scaleMemberRepository.deleteByScaleId(input.scaleId);
+      await this.scaleAttendanceMemberRepository.deleteByScaleId(input.scaleId);
+
+      const attendance = await this.scaleAttendanceRepository.findByScaleId(
+        input.scaleId,
+      );
+      if (attendance) {
+        await this.scaleAttendanceRepository.delete(attendance.id);
+      }
 
       await this.scaleRepository.delete(input.scaleId);
 

@@ -46,11 +46,7 @@ export async function GET(
   const scale = getResult.value.scale;
 
   if (!user.isSuperAdmin) {
-    const hasAccess = user.churches.some((c) => {
-      const churchResult =
-        c.churchId === scale.ministryId || c.churchId === scale.serviceId;
-      return churchResult;
-    });
+    const hasAccess = user.churches.some((c) => c.churchId === scale.churchId);
     if (!hasAccess) {
       return NextResponse.json(
         {
@@ -106,7 +102,7 @@ export async function PUT(
 
   if (!user.isSuperAdmin) {
     const hasAccess = user.churches.some(
-      (c) => c.churchId === existingScale.ministryId,
+      (c) => c.churchId === existingScale.churchId,
     );
     if (!hasAccess) {
       return NextResponse.json(
@@ -147,7 +143,7 @@ export async function PUT(
 
   const result = await scaleContainer.updateScale.execute({
     scaleId,
-    churchId: existingScale.ministryId,
+    churchId: existingScale.churchId,
     serviceId: parsed.data.serviceId,
     ministryId: parsed.data.ministryId,
     status: parsed.data.status,
@@ -205,9 +201,7 @@ export async function DELETE(
   const scale = getResult.value.scale;
 
   if (!user.isSuperAdmin) {
-    const hasAccess = user.churches.some(
-      (c) => c.churchId === scale.ministryId,
-    );
+    const hasAccess = user.churches.some((c) => c.churchId === scale.churchId);
     if (!hasAccess) {
       return NextResponse.json(
         {

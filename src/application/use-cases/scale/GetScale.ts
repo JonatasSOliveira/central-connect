@@ -39,6 +39,7 @@ export class GetScale extends BaseUseCase<GetScaleInput, GetScaleOutput> {
         value: {
           scale: {
             id: scale.id,
+            churchId: scale.churchId,
             serviceId: scale.serviceId,
             ministryId: scale.ministryId,
             status: scale.status,

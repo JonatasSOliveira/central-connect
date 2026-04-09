@@ -13,6 +13,8 @@ export { MinistryRole } from "./MinistryRole";
 export { Notification } from "./Notification";
 export { Permission } from "./Permission";
 export { Scale } from "./Scale";
+export { ScaleAttendance } from "./ScaleAttendance";
+export { ScaleAttendanceMember } from "./ScaleAttendanceMember";
 export { ScaleMember } from "./ScaleMember";
 export { RolePermission } from "./RolePermission";
 export { Schedule } from "./Schedule";

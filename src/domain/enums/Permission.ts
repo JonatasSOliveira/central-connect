@@ -13,6 +13,10 @@ export enum Permission {
   SCALE_READ = "scale:read",
   SCALE_WRITE = "scale:write",
   SCALE_DELETE = "scale:delete",
+  SCALE_ATTENDANCE_READ = "scale_attendance:read",
+  SCALE_ATTENDANCE_WRITE_DRAFT = "scale_attendance:write_draft",
+  SCALE_ATTENDANCE_PUBLISH = "scale_attendance:publish",
+  SCALE_ATTENDANCE_WRITE_ANYTIME = "scale_attendance:write_anytime",
 
   ROLE_READ = "role:read",
   ROLE_WRITE = "role:write",
@@ -49,6 +53,12 @@ export const PermissionGroups = {
     Permission.SCALE_READ,
     Permission.SCALE_WRITE,
     Permission.SCALE_DELETE,
+  ],
+  SCALE_ATTENDANCE: [
+    Permission.SCALE_ATTENDANCE_READ,
+    Permission.SCALE_ATTENDANCE_WRITE_DRAFT,
+    Permission.SCALE_ATTENDANCE_PUBLISH,
+    Permission.SCALE_ATTENDANCE_WRITE_ANYTIME,
   ],
   ROLE: [Permission.ROLE_READ, Permission.ROLE_WRITE, Permission.ROLE_DELETE],
   MINISTRY: [

@@ -38,6 +38,7 @@ export type ScaleMemberDTO = z.infer<typeof ScaleMemberListItemSchema>;
 
 export const ScaleListItemSchema = z.object({
   id: z.string(),
+  churchId: z.string(),
   serviceId: z.string(),
   ministryId: z.string(),
   status: ScaleStatusSchema,
