@@ -9,6 +9,7 @@ import type { IScaleAttendanceRepository } from "@/domain/ports/IScaleAttendance
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IScaleMemberRepository } from "@/domain/ports/IScaleMemberRepository";
 import type { IScaleRepository } from "@/domain/ports/IScaleRepository";
+import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
 import type { Result } from "@/shared/types/Result";
 import { BaseUseCase } from "../BaseUseCase";
 
@@ -31,6 +32,7 @@ export class PublishScaleAttendance extends BaseUseCase<
     private readonly scaleAttendanceRepository: IScaleAttendanceRepository,
     private readonly scaleAttendanceMemberRepository: IScaleAttendanceMemberRepository,
     private readonly memberRepository: IMemberRepository,
+    private readonly serviceRepository: IServiceRepository,
   ) {
     super();
   }
@@ -44,6 +46,8 @@ export class PublishScaleAttendance extends BaseUseCase<
       if (!scale) {
         return { ok: false, error: ScaleAttendanceErrors.SCALE_NOT_FOUND };
       }
+
+      const service = await this.serviceRepository.findById(scale.serviceId);
 
       let attendance = await this.scaleAttendanceRepository.findByScaleId(
         scale.id,
@@ -112,6 +116,7 @@ export class PublishScaleAttendance extends BaseUseCase<
             id: attendance.id,
             scaleId: scale.id,
             churchId: scale.churchId,
+            serviceDate: service?.date ?? new Date(),
             status: attendance.status,
             publishedAt: attendance.publishedAt,
             publishedByUserId: attendance.publishedByUserId,

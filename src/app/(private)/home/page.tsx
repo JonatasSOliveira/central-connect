@@ -13,6 +13,7 @@ import {
   Settings2,
   ClipboardList,
   ClipboardCheck,
+  BarChart3,
 } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { GreetingSection } from "@/features/home/components/greeting-section";
@@ -71,6 +72,10 @@ export default function HomePage() {
     requiredPermissions: [Permission.SCALE_ATTENDANCE_READ],
   });
 
+  const { hasPermission: canReadScaleAttendanceReport } = usePermissions({
+    requiredPermissions: [Permission.SCALE_ATTENDANCE_REPORT_READ],
+  });
+
   const canShowAdminSection =
     canManageMembers ||
     canManageRoles ||
@@ -80,7 +85,8 @@ export default function HomePage() {
     canManageServiceTemplates ||
     canManageScales;
 
-  const canShowQuickActions = canManageScales || canReadScaleAttendance;
+  const canShowQuickActions =
+    canReadScaleAttendance || canReadScaleAttendanceReport;
 
   return (
     <div className="p-6 app-background">
@@ -205,12 +211,12 @@ export default function HomePage() {
                   onClick={() => router.push("/scale-attendances")}
                 />
               )}
-              {canManageScales && (
+              {canReadScaleAttendanceReport && (
                 <CardItem
-                  title="Minhas Escalas"
-                  description="Veja suas próximas atividades"
-                  icon={ClipboardList}
-                  onClick={() => router.push("/scales")}
+                  title="Relatório de Escalas"
+                  description="Consulte indicadores por período"
+                  icon={BarChart3}
+                  onClick={() => router.push("/scale-attendance-reports")}
                 />
               )}
             </div>

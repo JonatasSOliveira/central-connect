@@ -35,6 +35,7 @@ export async function GET(
   const canReadAttendance =
     user.isSuperAdmin ||
     user.permissions.includes(Permission.SCALE_ATTENDANCE_READ) ||
+    user.permissions.includes(Permission.SCALE_ATTENDANCE_REPORT_READ) ||
     user.permissions.includes(Permission.SCALE_READ);
 
   if (!canReadAttendance) {

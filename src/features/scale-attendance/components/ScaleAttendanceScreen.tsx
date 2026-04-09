@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Clock3, Save } from "lucide-react";
+import { CalendarX, CheckCircle2, Clock3, Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   AlertDialog,
@@ -18,9 +18,13 @@ import { useScaleAttendanceScreen } from "../hooks/useScaleAttendanceScreen";
 
 interface ScaleAttendanceScreenProps {
   scaleId: string;
+  readOnly?: boolean;
 }
 
-export function ScaleAttendanceScreen({ scaleId }: ScaleAttendanceScreenProps) {
+export function ScaleAttendanceScreen({
+  scaleId,
+  readOnly = false,
+}: ScaleAttendanceScreenProps) {
   const {
     attendance,
     entries,
@@ -33,11 +37,12 @@ export function ScaleAttendanceScreen({ scaleId }: ScaleAttendanceScreenProps) {
     missingJustificationIds,
     canEdit,
     canPublish,
+    isServiceDateFuture,
     markStatus,
     updateJustification,
     save,
     publish,
-  } = useScaleAttendanceScreen({ scaleId });
+  } = useScaleAttendanceScreen({ scaleId, readOnly });
 
   const sortedEntries = useMemo(
     () =>
@@ -81,6 +86,19 @@ export function ScaleAttendanceScreen({ scaleId }: ScaleAttendanceScreenProps) {
 
   return (
     <div className="space-y-4">
+      {isServiceDateFuture && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 flex items-start gap-3">
+          <CalendarX className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Data futura</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Esta escala é de uma data futura. A chamada não pode ser editada
+              até o dia do culto.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-xl border border-primary/20 bg-card p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="font-heading text-base font-semibold">
@@ -121,60 +139,66 @@ export function ScaleAttendanceScreen({ scaleId }: ScaleAttendanceScreenProps) {
         ))}
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-xs font-medium text-muted-foreground">
-            {hasPendingChanges ? "Alterações não salvas" : "Tudo salvo"}
-          </p>
-          {hasPendingChanges && (
-            <span
-              className="h-2 w-2 rounded-full bg-primary"
-              aria-hidden="true"
-            />
-          )}
+      {readOnly ? (
+        <div className="rounded-xl border border-border bg-card p-3 text-xs text-muted-foreground">
+          Esta chamada está em modo somente leitura.
         </div>
-
-        {hasMissingJustifications && (
-          <p className="mb-2 text-xs text-destructive">
-            Preencha todas as justificativas para salvar ou publicar.
-          </p>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Button
-            onClick={save}
-            disabled={
-              !canEdit ||
-              !hasPendingChanges ||
-              isSaving ||
-              hasMissingJustifications
-            }
-            className="h-11"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {isSaving ? "Salvando..." : "Salvar alterações"}
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => setIsPublishDialogOpen(true)}
-            disabled={isPublishDisabled}
-            className="h-11"
-          >
-            {attendance.status === "published" ? (
-              <>
-                <CheckCircle2 className="w-4 h-4 mr-2" />
-                Chamada publicada
-              </>
-            ) : (
-              <>
-                <Clock3 className="w-4 h-4 mr-2" />
-                {isPublishing ? "Publicando..." : "Publicar chamada"}
-              </>
+      ) : (
+        <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-medium text-muted-foreground">
+              {hasPendingChanges ? "Alterações não salvas" : "Tudo salvo"}
+            </p>
+            {hasPendingChanges && (
+              <span
+                className="h-2 w-2 rounded-full bg-primary"
+                aria-hidden="true"
+              />
             )}
-          </Button>
+          </div>
+
+          {hasMissingJustifications && (
+            <p className="mb-2 text-xs text-destructive">
+              Preencha todas as justificativas para salvar ou publicar.
+            </p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Button
+              onClick={save}
+              disabled={
+                !canEdit ||
+                !hasPendingChanges ||
+                isSaving ||
+                hasMissingJustifications
+              }
+              className="h-11"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSaving ? "Salvando..." : "Salvar alterações"}
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => setIsPublishDialogOpen(true)}
+              disabled={isPublishDisabled}
+              className="h-11"
+            >
+              {attendance.status === "published" ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  Chamada publicada
+                </>
+              ) : (
+                <>
+                  <Clock3 className="w-4 h-4 mr-2" />
+                  {isPublishing ? "Publicando..." : "Publicar chamada"}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       <AlertDialog
         open={isPublishDialogOpen}

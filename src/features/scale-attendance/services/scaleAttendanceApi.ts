@@ -2,6 +2,9 @@ import type {
   AttendanceTimelineFilter,
   ScaleAttendanceDetail,
   ScaleAttendanceHomeItem,
+  ScaleAttendanceReportItem,
+  ScaleAttendanceReportMinistryOption,
+  ScaleAttendanceReportSummary,
 } from "../types";
 
 interface ApiErrorPayload {
@@ -89,4 +92,55 @@ export async function publishScaleAttendance(
   }
 
   return data.value.attendance;
+}
+
+export interface GetScaleAttendanceReportInput {
+  churchId: string;
+  startDate: string;
+  endDate: string;
+  ministryId?: string;
+}
+
+export interface GetScaleAttendanceReportOutput {
+  summary: ScaleAttendanceReportSummary;
+  items: ScaleAttendanceReportItem[];
+  ministries: ScaleAttendanceReportMinistryOption[];
+}
+
+export async function getScaleAttendanceReport(
+  input: GetScaleAttendanceReportInput,
+): Promise<GetScaleAttendanceReportOutput> {
+  const params = new URLSearchParams({
+    churchId: input.churchId,
+    startDate: input.startDate,
+    endDate: input.endDate,
+  });
+
+  if (input.ministryId) {
+    params.append("ministryId", input.ministryId);
+  }
+
+  const response = await fetch(`/api/scale-attendance-reports?${params}`);
+  const data = await response.json();
+
+  if (!response.ok || !data.ok) {
+    throw new Error(
+      getErrorMessage(data, "Falha ao carregar relatório de escalas"),
+    );
+  }
+
+  return {
+    summary: data.value.summary,
+    items: data.value.items.map(
+      (
+        item: Omit<ScaleAttendanceReportItem, "serviceDate"> & {
+          serviceDate: string;
+        },
+      ) => ({
+        ...item,
+        serviceDate: item.serviceDate,
+      }),
+    ),
+    ministries: data.value.ministries,
+  };
 }

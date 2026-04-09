@@ -46,6 +46,7 @@ export const ScaleAttendanceDetailSchema = z.object({
   id: z.string().nullable(),
   scaleId: z.string(),
   churchId: z.string(),
+  serviceDate: z.date(),
   status: ScaleAttendanceStatusSchema,
   publishedAt: z.date().nullable(),
   publishedByUserId: z.string().nullable(),

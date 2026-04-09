@@ -82,6 +82,8 @@ export class ListScaleAttendances extends BaseUseCase<
       const filtered = items
         .filter((item): item is ScaleAttendanceListItemDTO => item !== null)
         .filter((item) => {
+          if (item.attendanceStatus !== "published") return false;
+
           const serviceDate = item.serviceDate;
 
           if (input.filter === "today") {
@@ -92,9 +94,7 @@ export class ListScaleAttendances extends BaseUseCase<
             return serviceDate > todayEnd;
           }
 
-          return (
-            serviceDate < todayStart && item.attendanceStatus !== "published"
-          );
+          return serviceDate < todayStart;
         })
         .sort((a, b) => a.serviceDate.getTime() - b.serviceDate.getTime());
 

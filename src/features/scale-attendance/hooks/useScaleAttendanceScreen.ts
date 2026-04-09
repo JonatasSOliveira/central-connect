@@ -17,9 +17,14 @@ import type {
 
 interface UseScaleAttendanceScreenInput {
   scaleId: string;
+  readOnly?: boolean;
 }
 
 type EditableEntry = ScaleAttendanceEntry & { justificationDraft: string };
+
+type ParsedAttendance = Omit<ScaleAttendanceDetail, "serviceDate"> & {
+  serviceDate: Date;
+};
 
 function toEditableEntries(entries: ScaleAttendanceEntry[]): EditableEntry[] {
   return entries.map((entry) => ({
@@ -64,11 +69,10 @@ function canEditNow(
 
 export function useScaleAttendanceScreen({
   scaleId,
+  readOnly = false,
 }: UseScaleAttendanceScreenInput) {
   const { user } = useAuth();
-  const [attendance, setAttendance] = useState<ScaleAttendanceDetail | null>(
-    null,
-  );
+  const [attendance, setAttendance] = useState<ParsedAttendance | null>(null);
   const [entries, setEntries] = useState<EditableEntry[]>([]);
   const [savedEntriesSignature, setSavedEntriesSignature] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -95,7 +99,13 @@ export function useScaleAttendanceScreen({
     try {
       const result = await getScaleAttendance(scaleId);
       const mappedEntries = toEditableEntries(result.entries);
-      setAttendance(result);
+      const parsedAttendance = {
+        ...result,
+        serviceDate: result.serviceDate
+          ? new Date(result.serviceDate)
+          : new Date(),
+      };
+      setAttendance(parsedAttendance);
       setEntries(mappedEntries);
       setSavedEntriesSignature(getEntriesSignature(mappedEntries));
     } catch (error) {
@@ -111,11 +121,30 @@ export function useScaleAttendanceScreen({
     loadAttendance();
   }, [loadAttendance]);
 
+  const isServiceDateFuture = useMemo(() => {
+    if (!attendance) return false;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const endOfToday = new Date(now);
+    endOfToday.setHours(23, 59, 59, 999);
+    return attendance.serviceDate > endOfToday;
+  }, [attendance]);
+
   const canEdit = useMemo(() => {
+    if (readOnly) return false;
     if (!attendance) return false;
     if (attendance.status === "published") return false;
+    if (isServiceDateFuture) return false;
     return canEditNow(attendance.status, canWriteDraft, canWriteAnytime);
-  }, [attendance, canWriteDraft, canWriteAnytime]);
+  }, [
+    attendance,
+    canWriteDraft,
+    canWriteAnytime,
+    readOnly,
+    isServiceDateFuture,
+  ]);
+
+  const canPublishNow = canPublish && !readOnly;
 
   const hasPendingChanges = useMemo(() => {
     return getEntriesSignature(entries) !== savedEntriesSignature;
@@ -187,7 +216,12 @@ export function useScaleAttendanceScreen({
 
       const result = await saveScaleAttendance(scaleId, payload);
       const mappedEntries = toEditableEntries(result.entries);
-      setAttendance(result);
+      setAttendance({
+        ...result,
+        serviceDate: result.serviceDate
+          ? new Date(result.serviceDate)
+          : new Date(),
+      });
       setEntries(mappedEntries);
       setSavedEntriesSignature(getEntriesSignature(mappedEntries));
       toast.success("Chamada salva com sucesso");
@@ -201,13 +235,18 @@ export function useScaleAttendanceScreen({
   }, [canEdit, entries, hasMissingJustifications, scaleId]);
 
   const publish = useCallback(async () => {
-    if (!canPublish) return;
+    if (!canPublishNow) return;
 
     setIsPublishing(true);
     try {
       const result = await publishScaleAttendance(scaleId);
       const mappedEntries = toEditableEntries(result.entries);
-      setAttendance(result);
+      setAttendance({
+        ...result,
+        serviceDate: result.serviceDate
+          ? new Date(result.serviceDate)
+          : new Date(),
+      });
       setEntries(mappedEntries);
       setSavedEntriesSignature(getEntriesSignature(mappedEntries));
       toast.success("Chamada publicada com sucesso");
@@ -218,7 +257,7 @@ export function useScaleAttendanceScreen({
     } finally {
       setIsPublishing(false);
     }
-  }, [canPublish, scaleId]);
+  }, [canPublishNow, scaleId]);
 
   const summary = useMemo(() => {
     const present = entries.filter(
@@ -248,7 +287,8 @@ export function useScaleAttendanceScreen({
     hasMissingJustifications,
     missingJustificationIds,
     canEdit,
-    canPublish,
+    canPublish: canPublishNow,
+    isServiceDateFuture,
     markStatus,
     updateJustification,
     save,

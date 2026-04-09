@@ -37,8 +37,43 @@ export interface ScaleAttendanceDetail {
   id: string | null;
   scaleId: string;
   churchId: string;
+  serviceDate: string | null;
   status: AttendanceStatus;
   publishedAt: string | null;
   publishedByUserId: string | null;
   entries: ScaleAttendanceEntry[];
+}
+
+export interface ScaleAttendanceReportSummary {
+  scaleCount: number;
+  memberCount: number;
+  checkedCount: number;
+  pendingCount: number;
+  presentCount: number;
+  absentUnexcusedCount: number;
+  absentExcusedCount: number;
+  publishedCount: number;
+  draftCount: number;
+  completionRate: number;
+}
+
+export interface ScaleAttendanceReportItem {
+  scaleId: string;
+  serviceTitle: string;
+  serviceDate: string;
+  serviceTime: string;
+  ministryId: string;
+  ministryName: string;
+  attendanceStatus: AttendanceStatus;
+  memberCount: number;
+  checkedCount: number;
+  pendingCount: number;
+  presentCount: number;
+  absentUnexcusedCount: number;
+  absentExcusedCount: number;
+}
+
+export interface ScaleAttendanceReportMinistryOption {
+  id: string;
+  name: string;
 }

@@ -1,6 +1,7 @@
 import { AddMemberToScale } from "@/application/use-cases/scale/AddMemberToScale";
 import { CreateScale } from "@/application/use-cases/scale/CreateScale";
 import { DeleteScale } from "@/application/use-cases/scale/DeleteScale";
+import { GetScaleAttendanceReport } from "@/application/use-cases/scale/GetScaleAttendanceReport";
 import { GetScaleAttendance } from "@/application/use-cases/scale/GetScaleAttendance";
 import { GetScale } from "@/application/use-cases/scale/GetScale";
 import { ListScaleAttendances } from "@/application/use-cases/scale/ListScaleAttendances";
@@ -29,6 +30,8 @@ class ScaleContainer {
   private static _createScale: CreateScale | null = null;
   private static _deleteScale: DeleteScale | null = null;
   private static _getScaleAttendance: GetScaleAttendance | null = null;
+  private static _getScaleAttendanceReport: GetScaleAttendanceReport | null =
+    null;
   private static _getScale: GetScale | null = null;
   private static _listScaleAttendances: ListScaleAttendances | null = null;
   private static _listScales: ListScales | null = null;
@@ -88,9 +91,24 @@ class ScaleContainer {
         ScaleContainer.scaleAttendanceRepository,
         ScaleContainer.scaleAttendanceMemberRepository,
         ScaleContainer.memberRepository,
+        ScaleContainer.serviceRepository,
       );
     }
     return ScaleContainer._getScaleAttendance;
+  }
+
+  static get getScaleAttendanceReport(): GetScaleAttendanceReport {
+    if (!ScaleContainer._getScaleAttendanceReport) {
+      ScaleContainer._getScaleAttendanceReport = new GetScaleAttendanceReport(
+        ScaleContainer.scaleRepository,
+        ScaleContainer.scaleMemberRepository,
+        ScaleContainer.scaleAttendanceRepository,
+        ScaleContainer.scaleAttendanceMemberRepository,
+        ScaleContainer.serviceRepository,
+        ScaleContainer.ministryRepository,
+      );
+    }
+    return ScaleContainer._getScaleAttendanceReport;
   }
 
   static get getScale(): GetScale {
@@ -206,6 +224,7 @@ class ScaleContainer {
         ScaleContainer.scaleAttendanceRepository,
         ScaleContainer.scaleAttendanceMemberRepository,
         ScaleContainer.memberRepository,
+        ScaleContainer.serviceRepository,
       );
     }
     return ScaleContainer._saveScaleAttendance;
@@ -219,6 +238,7 @@ class ScaleContainer {
         ScaleContainer.scaleAttendanceRepository,
         ScaleContainer.scaleAttendanceMemberRepository,
         ScaleContainer.memberRepository,
+        ScaleContainer.serviceRepository,
       );
     }
     return ScaleContainer._publishScaleAttendance;

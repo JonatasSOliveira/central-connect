@@ -34,6 +34,7 @@ const permissionLabels: Record<Permission, string> = {
   [Permission.SCALE_ATTENDANCE_PUBLISH]: "Chamada: Publicar",
   [Permission.SCALE_ATTENDANCE_WRITE_ANYTIME]:
     "Chamada: Editar a qualquer momento",
+  [Permission.SCALE_ATTENDANCE_REPORT_READ]: "Relatório de escala: Leitura",
   [Permission.ROLE_READ]: "Cargos do sistema: Leitura",
   [Permission.ROLE_WRITE]: "Cargos do sistema: Escrita",
   [Permission.ROLE_DELETE]: "Cargos do sistema: Excluir",
@@ -54,6 +55,7 @@ const groupLabels: Record<string, string> = {
   MEMBER: "Membros",
   SCALE: "Escalas",
   SCALE_ATTENDANCE: "Chamada",
+  SCALE_ATTENDANCE_REPORT: "Relatório de escala",
   ROLE: "Cargos do sistema",
   MINISTRY: "Ministérios",
   SERVICE: "Cultos",
