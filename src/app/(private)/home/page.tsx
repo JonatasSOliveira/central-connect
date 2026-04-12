@@ -12,6 +12,8 @@ import {
   CalendarDays,
   Settings2,
   ClipboardList,
+  ClipboardCheck,
+  BarChart3,
 } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { GreetingSection } from "@/features/home/components/greeting-section";
@@ -66,6 +68,14 @@ export default function HomePage() {
     requiredPermissions: [Permission.SCALE_READ],
   });
 
+  const { hasPermission: canReadScaleAttendance } = usePermissions({
+    requiredPermissions: [Permission.SCALE_ATTENDANCE_READ],
+  });
+
+  const { hasPermission: canReadScaleAttendanceReport } = usePermissions({
+    requiredPermissions: [Permission.SCALE_ATTENDANCE_REPORT_READ],
+  });
+
   const canShowAdminSection =
     canManageMembers ||
     canManageRoles ||
@@ -74,6 +84,9 @@ export default function HomePage() {
     canManageServices ||
     canManageServiceTemplates ||
     canManageScales;
+
+  const canShowQuickActions =
+    canReadScaleAttendance || canReadScaleAttendanceReport;
 
   return (
     <div className="p-6 app-background">
@@ -180,21 +193,35 @@ export default function HomePage() {
           </>
         )}
 
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Ações Rápidas
-          </span>
-          <div className="flex-1 h-px bg-border" />
-        </div>
+        {canShowQuickActions && (
+          <>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Ações Rápidas
+              </span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
 
-        <div className="grid grid-cols-1 gap-3 mb-6">
-          <CardItem
-            title="Minhas Escalas"
-            description="Veja suas próximas atividades"
-            icon={ClipboardList}
-            onClick={() => router.push("/scales")}
-          />
-        </div>
+            <div className="grid grid-cols-1 gap-3 mb-6">
+              {canReadScaleAttendance && (
+                <CardItem
+                  title="Chamadas"
+                  description="Acesse as chamadas por período"
+                  icon={ClipboardCheck}
+                  onClick={() => router.push("/scale-attendances")}
+                />
+              )}
+              {canReadScaleAttendanceReport && (
+                <CardItem
+                  title="Relatório de Escalas"
+                  description="Consulte indicadores por período"
+                  icon={BarChart3}
+                  onClick={() => router.push("/scale-attendance-reports")}
+                />
+              )}
+            </div>
+          </>
+        )}
 
         <CardItem
           title="Sair"

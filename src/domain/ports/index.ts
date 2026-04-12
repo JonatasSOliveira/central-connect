@@ -9,5 +9,7 @@ export type { IMemberRepository } from "./IMemberRepository";
 export type { IMinistryRepository } from "./IMinistryRepository";
 export type { IMinistryRoleRepository } from "./IMinistryRoleRepository";
 export type { IScaleRepository } from "./IScaleRepository";
+export type { IScaleAttendanceRepository } from "./IScaleAttendanceRepository";
+export type { IScaleAttendanceMemberRepository } from "./IScaleAttendanceMemberRepository";
 export type { IScaleMemberRepository } from "./IScaleMemberRepository";
 export type { IUserRepository } from "./IUserRepository";

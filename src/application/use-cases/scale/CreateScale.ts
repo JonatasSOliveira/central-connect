@@ -91,6 +91,7 @@ export class CreateScale extends BaseUseCase<
         value: {
           scale: {
             id: createdScale.id,
+            churchId: createdScale.churchId,
             serviceId: createdScale.serviceId,
             ministryId: createdScale.ministryId,
             status: createdScale.status,

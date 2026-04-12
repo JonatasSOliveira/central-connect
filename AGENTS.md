@@ -565,6 +565,13 @@ Para verificar se está funcionando, execute `pnpm build` e acesso `http://local
     - Verificar lint: `pnpm lint`
     - Verificar format: `pnpm format`
 
+### Artefatos Temporários (Playwright / Evidências)
+
+- Todo screenshot, log de teste visual e arquivo auxiliar de validação deve ser salvo em `.temp/`.
+- Não salvar artefatos temporários na raiz do projeto.
+- Para testes com Playwright, usar caminhos como `.temp/playwright/<arquivo>.png`.
+- Esses artefatos não devem ser commitados.
+
 ### Exemplo de Fluxo Completo
 
 ```typescript

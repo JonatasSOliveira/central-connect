@@ -70,7 +70,21 @@ export function useScales(): UseScalesReturn {
     if (!searchQuery.trim()) {
       return allScales;
     }
-    return allScales;
+
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    return allScales.filter((scale) => {
+      const searchValues = [
+        scale.serviceId,
+        scale.ministryId,
+        scale.notes ?? "",
+        scale.status,
+      ];
+
+      return searchValues.some((value) =>
+        value.toLowerCase().includes(normalizedQuery),
+      );
+    });
   }, [allScales, searchQuery]);
 
   const handleSearch = useCallback((value: string) => {

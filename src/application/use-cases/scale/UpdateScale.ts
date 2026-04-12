@@ -150,6 +150,7 @@ export class UpdateScale extends BaseUseCase<
         value: {
           scale: {
             id: updatedScale.id,
+            churchId: updatedScale.churchId,
             serviceId: updatedScale.serviceId,
             ministryId: updatedScale.ministryId,
             status: updatedScale.status,

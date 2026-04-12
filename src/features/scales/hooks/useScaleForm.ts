@@ -10,28 +10,13 @@ import type {
   ScaleFormInput,
 } from "@/application/dtos/scale/ScaleDTO";
 import { ScaleFormSchema } from "@/application/dtos/scale/ScaleDTO";
+import type {
+  MemberOption,
+  MinistryOption,
+  MinistryRoleOption,
+  ServiceOption,
+} from "../types";
 import { useAuthStore } from "@/stores/authStore";
-
-interface ServiceOption {
-  id: string;
-  title: string;
-  date: string;
-}
-
-interface MinistryOption {
-  id: string;
-  name: string;
-}
-
-interface MemberOption {
-  id: string;
-  fullName: string;
-}
-
-interface MinistryRoleOption {
-  id: string;
-  name: string;
-}
 
 interface UseScaleFormProps {
   mode: "create" | "edit";
