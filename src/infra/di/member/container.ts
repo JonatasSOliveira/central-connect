@@ -72,6 +72,7 @@ class MemberContainer {
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
         MemberContainer.churchRepository,
+        MemberContainer.memberMinistryRepository,
       );
     }
     return MemberContainer._listMembers;
@@ -82,6 +83,7 @@ class MemberContainer {
       MemberContainer._createMember = new CreateMember(
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
+        MemberContainer.memberMinistryRepository,
       );
     }
     return MemberContainer._createMember;
@@ -105,6 +107,7 @@ class MemberContainer {
       MemberContainer._updateMember = new UpdateMember(
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
+        MemberContainer.memberMinistryRepository,
       );
     }
     return MemberContainer._updateMember;

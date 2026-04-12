@@ -3,6 +3,7 @@ export { churchContainer } from "./church/container";
 export { memberContainer } from "./member/container";
 export { ministryContainer } from "./ministry/container";
 export { roleContainer } from "./role/container";
+export { scaleContainer } from "./scale/container";
 export { serviceContainer } from "./service/container";
 
 class ContainerProxy {
@@ -24,6 +25,10 @@ class ContainerProxy {
 
   get role() {
     return require("./role/container").roleContainer;
+  }
+
+  get scale() {
+    return require("./scale/container").scaleContainer;
   }
 
   get service() {

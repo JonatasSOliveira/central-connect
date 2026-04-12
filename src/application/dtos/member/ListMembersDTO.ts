@@ -21,4 +21,5 @@ export type ListMembersInput = {
     hasMemberRead: boolean;
   }[];
   churchId: string;
+  ministryId?: string;
 };

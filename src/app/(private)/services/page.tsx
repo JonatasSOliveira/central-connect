@@ -1,6 +1,14 @@
 "use client";
 
-import { Cross, Plus, Inbox, Search, Filter, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Cross,
+  Plus,
+  Inbox,
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
@@ -140,7 +148,9 @@ export default function ServicesPage() {
             description={`${formatDate(service.date)} às ${service.time}${service.location ? ` • ${service.location}` : ""}${service.shift ? ` • ${service.shift}` : ""}`}
             onClick={canWrite ? () => handleEditService(service.id) : undefined}
             actions={{
-              onEdit: canWrite ? () => handleEditService(service.id) : undefined,
+              onEdit: canWrite
+                ? () => handleEditService(service.id)
+                : undefined,
               onDelete: () => handleDeleteService(service.id),
             }}
           />
@@ -165,7 +175,7 @@ export default function ServicesPage() {
           onClear={() => setSearch("")}
           placeholder="Buscar por título..."
         />
-        
+
         <button
           type="button"
           onClick={() => setShowFilters(!showFilters)}
@@ -206,9 +216,9 @@ export default function ServicesPage() {
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-2">
-              <Button 
+              <Button
                 type="button"
                 onClick={handleApplyFilters}
                 size="sm"
@@ -217,7 +227,7 @@ export default function ServicesPage() {
                 <Filter className="w-4 h-4 mr-1" />
                 Aplicar
               </Button>
-              
+
               {(localStartDate || localEndDate || hasActiveFilters) && (
                 <Button
                   type="button"

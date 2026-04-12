@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
   const { user } = auth;
   const { searchParams } = new URL(request.url);
   const queryChurchId = searchParams.get("churchId");
+  const queryServiceId = searchParams.get("serviceId");
   const churchId = getChurchIdFromSession(user, queryChurchId);
 
   const hasReadAccess =
@@ -64,6 +65,7 @@ export async function GET(request: NextRequest) {
 
   const result = await ministryContainer.listMinistries.execute({
     churchId: churchId || undefined,
+    excludeServiceId: queryServiceId || undefined,
   });
 
   if (!result.ok) {
@@ -124,26 +126,23 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  if (!user.isSuperAdmin) {
-    const hasAccess = user.churches.some(
-      (c) => c.churchId === parsed.data.churchId,
-    );
-    if (!hasAccess) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: {
-            code: "NOT_AUTHORIZED",
-            message: "Sem permissão para criar ministérios nesta igreja",
-          },
+  const churchId = getChurchIdFromSession(user, null);
+
+  if (!churchId) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NO_CHURCH_SELECTED",
+          message: "Nenhuma igreja selecionada",
         },
-        { status: 403 },
-      );
-    }
+      },
+      { status: 400 },
+    );
   }
 
   const result = await ministryContainer.createMinistry.execute({
-    churchId: parsed.data.churchId,
+    churchId,
     name: parsed.data.name,
     leaderId: parsed.data.leaderId,
     minMembersPerService: parsed.data.minMembersPerService,

@@ -11,6 +11,7 @@ import {
   ArrowRightLeft,
   CalendarDays,
   Settings2,
+  ClipboardList,
 } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { GreetingSection } from "@/features/home/components/greeting-section";
@@ -61,13 +62,18 @@ export default function HomePage() {
     requiredPermissions: [Permission.SERVICE_TEMPLATE_READ],
   });
 
+  const { hasPermission: canManageScales } = usePermissions({
+    requiredPermissions: [Permission.SCALE_READ],
+  });
+
   const canShowAdminSection =
     canManageMembers ||
     canManageRoles ||
     canManageChurches ||
     canManageMinistries ||
     canManageServices ||
-    canManageServiceTemplates;
+    canManageServiceTemplates ||
+    canManageScales;
 
   return (
     <div className="p-6 app-background">
@@ -162,6 +168,14 @@ export default function HomePage() {
                   href="/service-templates"
                 />
               )}
+              {canManageScales && (
+                <CardAdmin
+                  title="Escalas"
+                  description="Gerencie as escalas ministeriais"
+                  icon={ClipboardList}
+                  href="/scales"
+                />
+              )}
             </div>
           </>
         )}
@@ -177,7 +191,8 @@ export default function HomePage() {
           <CardItem
             title="Minhas Escalas"
             description="Veja suas próximas atividades"
-            icon={Church}
+            icon={ClipboardList}
+            onClick={() => router.push("/scales")}
           />
         </div>
 

@@ -3,7 +3,12 @@ import {
   MemberChurch,
   type MemberChurchParams,
 } from "@/domain/entities/MemberChurch";
+import {
+  MemberMinistry,
+  type MemberMinistryParams,
+} from "@/domain/entities/MemberMinistry";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { Result } from "@/shared/types/Result";
 import type { UpdateMemberInput } from "../../dtos/member/CreateMemberDTO";
@@ -16,6 +21,7 @@ export class UpdateMember extends BaseUseCase<
   constructor(
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
+    private readonly memberMinistryRepository: IMemberMinistryRepository,
   ) {
     super();
   }
@@ -59,6 +65,12 @@ export class UpdateMember extends BaseUseCase<
           await this.memberChurchRepository.delete(existingMc.id);
         }
 
+        const existingMemberMinistries =
+          await this.memberMinistryRepository.findByMemberId(memberId);
+        for (const existingMm of existingMemberMinistries) {
+          await this.memberMinistryRepository.delete(existingMm.id);
+        }
+
         for (const churchInfo of input.churches) {
           const memberChurchParams: MemberChurchParams = {
             memberId: memberId,
@@ -69,6 +81,18 @@ export class UpdateMember extends BaseUseCase<
           };
           const memberChurch = new MemberChurch(memberChurchParams);
           await this.memberChurchRepository.create(memberChurch);
+
+          for (const ministryId of churchInfo.ministryIds || []) {
+            const memberMinistryParams: MemberMinistryParams = {
+              memberId,
+              churchId: churchInfo.churchId,
+              ministryId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+            const memberMinistry = new MemberMinistry(memberMinistryParams);
+            await this.memberMinistryRepository.create(memberMinistry);
+          }
         }
       }
 

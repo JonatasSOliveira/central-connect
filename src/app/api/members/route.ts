@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
   const { user } = auth;
   const { searchParams } = new URL(request.url);
   const queryChurchId = searchParams.get("churchId");
+  const queryMinistryId = searchParams.get("ministryId");
   const churchId = getChurchIdFromSession(user, queryChurchId);
 
   if (!churchId) {
@@ -82,6 +83,7 @@ export async function GET(request: NextRequest) {
     isSuperAdmin: user.isSuperAdmin,
     userChurches,
     churchId,
+    ministryId: queryMinistryId || undefined,
   });
 
   if (!result.ok) {

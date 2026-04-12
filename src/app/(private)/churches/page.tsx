@@ -95,7 +95,9 @@ export default function ChurchesPage() {
             actions={
               canWrite || canDelete
                 ? {
-                    onEdit: canWrite ? () => handleEditChurch(church.id) : undefined,
+                    onEdit: canWrite
+                      ? () => handleEditChurch(church.id)
+                      : undefined,
                     onDelete: canDelete
                       ? () => handleDeleteChurch(church.id)
                       : undefined,
