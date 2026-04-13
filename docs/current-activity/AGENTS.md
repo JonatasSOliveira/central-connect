@@ -1,682 +1,371 @@
-# AGENTS.md - Atividade 11: Gerenciamento de Escalas (Scales)
+# AGENTS.md - Atividade 15: Auto Cadastro de Membros
 
 ## Contexto da Atividade
 
-Implementar o gerenciamento de escalas ministeriais onde cada escala é vinculada a um culto (Service) e um ministério (Ministry), permitindo atribuir múltiplos membros com suas respectivas funções.
+Implementar um fluxo publico de auto cadastro para membros, com vinculacao obrigatoria a uma igreja especifica via link, finalizacao com Google e atribuicao automatica de cargo do sistema com base na configuracao da igreja.
 
 ---
 
-## Domínio: Entidades a Criar
+## Decisoes Tecnicas Obrigatorias
 
-### 1. Scale (Nova Entidade)
-
-**Localização:** `src/domain/entities/Scale.ts`
-
-**Herança:** `AuditableEntity` (possui `churchId`)
-
-**Campos:**
-```typescript
-export type ScaleStatus = "draft" | "published";
-
-export class Scale extends AuditableEntity {
-  protected readonly _churchId: string;
-  protected readonly _serviceId: string;
-  protected readonly _ministryId: string;
-  protected readonly _status: ScaleStatus;
-  protected readonly _notes: string | null;
-}
-```
-
-**Params:**
-```typescript
-export interface ScaleParams extends AuditableEntityParams {
-  churchId: string;
-  serviceId: string;
-  ministryId: string;
-  status?: ScaleStatus;
-  notes?: string | null;
-}
-```
-
-### 2. ScaleMember (Nova Entidade)
-
-**Localização:** `src/domain/entities/ScaleMember.ts`
-
-**Herança:** `BaseEntity` (não precisa de `churchId`, pertence a Scale)
-
-**Campos:**
-```typescript
-export class ScaleMember extends BaseEntity {
-  protected readonly _scaleId: string;
-  protected readonly _memberId: string;
-  protected readonly _ministryRoleId: string;
-  protected readonly _notes: string | null;
-}
-```
-
-**Params:**
-```typescript
-export interface ScaleMemberParams extends BaseEntityParams {
-  scaleId: string;
-  memberId: string;
-  ministryRoleId: string;
-  notes?: string | null;
-}
-```
+1. A URL de auto cadastro deve usar **route param**, nao query param.
+   - Formato recomendado: `/signup/[churchId]`
+2. O cargo padrao da igreja deve referenciar a entidade **UserRole** (`src/domain/entities/UserRole.ts`), nao enum.
+3. O backend decide o cargo final. O frontend nao pode escolher `roleId` no fluxo publico.
+4. A busca por telefone deve ser global (independente de igreja).
 
 ---
 
-## Ports: Interfaces de Repository
+## Escopo Funcional
 
-### IScaleRepository
+### 1) Pagina publica de auto cadastro
 
-**Localização:** `src/domain/ports/IScaleRepository.ts`
+- Criar pagina publica de auto cadastro sem exigir sessao previa.
+- Receber `churchId` obrigatoriamente pelo path.
+- Carregar contexto minimo da igreja (nome e status de auto cadastro).
+- Se igreja nao existir ou estiver indisponivel para auto cadastro, bloquear finalizacao com mensagem amigavel.
 
-```typescript
-import type { BaseRepository } from "./BaseRepository";
-import type { Scale } from "@/domain/entities/Scale";
+### 2) Fluxo em duas etapas no formulario
 
-export interface IScaleRepository extends BaseRepository<Scale> {
-  findAll(): Promise<Scale[]>;
-  findByChurchId(churchId: string): Promise<Scale[]>;
-  findById(id: string): Promise<Scale | null>;
-  findByServiceAndMinistry(
-    churchId: string,
-    serviceId: string,
-    ministryId: string,
-    excludeId?: string
-  ): Promise<Scale | null>;
-  findByFilters(
-    churchId: string,
-    filters: { serviceId?: string; ministryId?: string }
-  ): Promise<Scale[]>;
-}
-```
+- Etapa 1: telefone (obrigatorio).
+- Ao confirmar telefone, consultar membro existente globalmente.
+- Etapa 2: exibir demais campos (email opcional).
+- Se membro existir, preencher automaticamente os campos conhecidos para confirmacao/edicao.
 
-### IScaleMemberRepository
+### 3) Finalizacao com Google
 
-**Localização:** `src/domain/ports/IScaleMemberRepository.ts`
+- CTA final deve ser amigavel (ex: "Continuar com Google para finalizar").
+- Ao clicar, executar login Google (fluxo atual de client).
+- Enviar token Google + dados do formulario + `churchId` para endpoint de finalizacao.
+- Regras de persistencia:
+  - Membro novo: criar membro, criar usuario (se necessario), vincular em `MemberChurch`.
+  - Membro existente: atualizar dados permitidos e vincular em `MemberChurch` se ainda nao vinculado.
+- Garantir idempotencia: nao duplicar `MemberChurch` para o mesmo `memberId + churchId`.
 
-```typescript
-import type { BaseRepository } from "./BaseRepository";
-import type { ScaleMember } from "@/domain/entities/ScaleMember";
+### 4) Cargo padrao da igreja para auto cadastro
 
-export interface IScaleMemberRepository extends BaseRepository<ScaleMember> {
-  findAll(): Promise<ScaleMember[]>;
-  findByScaleId(scaleId: string): Promise<ScaleMember[]>;
-  findById(id: string): Promise<ScaleMember | null>;
-  deleteByScaleId(scaleId: string): Promise<void>;
-}
-```
+- Adicionar campo em Igreja: `defaultSelfSignupUserRoleId` (nome sugerido).
+- Campo referencia `roles.id` (UserRole).
+- Campo editavel no formulario de igreja (create/edit).
+- Campo obrigatorio para permitir auto cadastro.
+- Fallback para igrejas legadas sem valor: usar role de menor privilegio (regra definida pelo produto) ate configuracao explicita.
+- Mudanca desse campo afeta apenas novos auto cadastros.
 
----
+### 5) Geracao de link e QRCode
 
-## Infraestrutura: Repositories Firebase
-
-### Estrutura de Pastas
-
-```
-src/infra/firebase-admin/
-├── repositories/
-│   ├── ScaleFirebaseRepository.ts
-│   └── ScaleMemberFirebaseRepository.ts
-└── mappers/
-    ├── scaleMapper.ts
-    └── scaleMemberMapper.ts
-```
-
-### ScaleFirebaseRepository
-
-- Coleção Firestore: `"scales"`
-- Implementar `IScaleRepository`
-- Implementar `toEntity` e `toFirestoreData`
-- Métodos customizados: `findByServiceAndMinistry`, `findByFilters`
-
-### ScaleMemberFirebaseRepository
-
-- Coleção Firestore: `"scale_members"`
-- Implementar `IScaleMemberRepository`
-- Implementar `toEntity` e `toFirestoreData`
-- Métodos customizados: `findByScaleId`, `deleteByScaleId`
-
-### Mappers
-
-```typescript
-// scaleMapper.ts
-export function scaleToPersistence(scale: Scale): DocumentData;
-export function scaleFromPersistence(data: DocumentData, id: string): Scale;
-
-// scaleMemberMapper.ts
-export function scaleMemberToPersistence(member: ScaleMember): DocumentData;
-export function scaleMemberFromPersistence(data: DocumentData, id: string): ScaleMember;
-```
+- Disponibilizar no modulo de igrejas uma acao para:
+  - copiar link de auto cadastro da igreja
+  - visualizar/baixar QRCode correspondente
+- Link deve apontar para a rota publica com `churchId`.
 
 ---
 
-## Aplicação: DTOs com Zod
+## Dominio: Entidades a Atualizar
 
-### Localização
+### Church (`src/domain/entities/Church.ts`)
 
-```
-src/application/dtos/scale/
-├── ScaleDTO.ts
-└── errors/
-    └── ScaleErrors.ts
-```
-
-### ScaleDTO.ts - Schemas
+Adicionar campo:
 
 ```typescript
-import { z } from "zod";
-
-// Input/Output types
-export const ScaleStatusSchema = z.enum(["draft", "published"]);
-
-export const ScaleMemberFormSchema = z.object({
-  id: z.string().nullable().optional(),
-  memberId: z.string().min(1, "Membro é obrigatório"),
-  ministryRoleId: z.string().min(1, "Função é obrigatória"),
-  notes: z.string().optional(),
-});
-
-export const ScaleFormSchema = z.object({
-  serviceId: z.string().min(1, "Culto é obrigatório"),
-  ministryId: z.string().min(1, "Ministério é obrigatório"),
-  status: ScaleStatusSchema.default("draft"),
-  notes: z.string().max(500).optional(),
-  members: z.array(ScaleMemberFormSchema).default([]),
-});
-
-export const ListScalesQuerySchema = z.object({
-  serviceId: z.string().optional(),
-  ministryId: z.string().optional(),
-});
-
-// Response schemas
-export const ScaleMemberListItemSchema = z.object({
-  id: z.string(),
-  memberId: z.string(),
-  ministryRoleId: z.string(),
-  notes: z.string().nullable(),
-});
-
-export const ScaleListItemSchema = z.object({
-  id: z.string(),
-  serviceId: z.string(),
-  ministryId: z.string(),
-  status: ScaleStatusSchema,
-  notes: z.string().nullable(),
-});
-
-export const ScaleDetailSchema = ScaleListItemSchema.extend({
-  members: z.array(ScaleMemberListItemSchema),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
-
-// Types
-export type ScaleFormData = z.infer<typeof ScaleFormSchema>;
-export type ScaleFormInput = z.input<typeof ScaleFormSchema>;
-export type ScaleListItemDTO = z.infer<typeof ScaleListItemSchema>;
-export type ScaleDetailDTO = z.infer<typeof ScaleDetailSchema>;
-export type ScaleMemberDTO = z.infer<typeof ScaleMemberListItemSchema>;
+protected readonly _defaultSelfSignupUserRoleId: string | null;
 ```
 
-### ScaleErrors.ts
+Atualizar `ChurchParams`:
 
 ```typescript
-export const ScaleErrors = {
-  SCALE_NOT_FOUND: { code: "SCALE_NOT_FOUND", message: "Escala não encontrada" },
-  SCALE_ALREADY_EXISTS: {
-    code: "SCALE_ALREADY_EXISTS",
-    message: "Já existe uma escala para este culto e ministério"
-  },
-  SCALE_CREATION_FAILED: { code: "SCALE_CREATION_FAILED", message: "Falha ao criar escala" },
-  SCALE_UPDATE_FAILED: { code: "SCALE_UPDATE_FAILED", message: "Falha ao atualizar escala" },
-  SCALE_DELETE_FAILED: { code: "SCALE_DELETE_FAILED", message: "Falha ao excluir escala" },
-  MEMBER_NOT_FOUND: { code: "MEMBER_NOT_FOUND", message: "Membro não encontrado" },
-  MINISTRY_ROLE_NOT_FOUND: { code: "MINISTRY_ROLE_NOT_FOUND", message: "Função não encontrada" },
-} as const;
+defaultSelfSignupUserRoleId?: string | null;
 ```
+
+Adicionar getter publico:
+
+```typescript
+get defaultSelfSignupUserRoleId(): string | null;
+```
+
+### Member (`src/domain/entities/Member.ts`) - recomendacao para busca por telefone
+
+Se necessario para performance/consistencia da busca:
+
+- Adicionar campo persistido normalizado (ex: `phoneNormalized`) ou garantir normalizacao consistente no campo `phone`.
+- A consulta global deve usar valor normalizado (somente digitos ou E.164, padrao unico no projeto).
 
 ---
 
-## Aplicação: Use Cases
+## Ports e Repositories
 
-### Localização
+### IChurchRepository
 
-```
-src/application/use-cases/scale/
-├── CreateScale.ts
-├── GetScale.ts
-├── UpdateScale.ts
-├── DeleteScale.ts
-├── ListScales.ts
-├── AddMemberToScale.ts
-└── RemoveMemberFromScale.ts
-```
+- Sem mudanca obrigatoria de assinatura base, mas deve persistir/retornar `defaultSelfSignupUserRoleId`.
 
-### CreateScale
+### IMemberRepository
+
+Adicionar metodo para consulta global por telefone:
 
 ```typescript
-interface CreateScaleInput {
-  churchId: string;
-  serviceId: string;
-  ministryId: string;
-  status?: "draft" | "published";
-  notes?: string | null;
-  members?: { memberId: string; ministryRoleId: string; notes?: string | null }[];
-  createdByUserId: string;
-}
-
-interface CreateScaleOutput {
-  scale: ScaleDetailDTO;
-}
-
-class CreateScale extends BaseUseCase<CreateScaleInput, CreateScaleOutput> {
-  async execute(input: CreateScaleInput): Promise<Result<CreateScaleOutput>> {
-    // 1. Verificar duplicata (serviceId + ministryId únicos por churchId)
-    const existing = await this.scaleRepository.findByServiceAndMinistry(
-      input.churchId,
-      input.serviceId,
-      input.ministryId
-    );
-    if (existing) {
-      return { ok: false, error: ScaleErrors.SCALE_ALREADY_EXISTS };
-    }
-
-    // 2. Criar Scale
-    const scaleParams: ScaleParams = { ... };
-    const scale = new Scale(scaleParams);
-    const createdScale = await this.scaleRepository.create(scale);
-
-    // 3. Criar ScaleMembers (se houver)
-    for (const member of input.members ?? []) {
-      const memberParams: ScaleMemberParams = {
-        scaleId: createdScale.id,
-        memberId: member.memberId,
-        ministryRoleId: member.ministryRoleId,
-        notes: member.notes ?? null,
-      };
-      const scaleMember = new ScaleMember(memberParams);
-      await this.scaleMemberRepository.create(scaleMember);
-    }
-
-    // 4. Retornar com members
-    const members = await this.scaleMemberRepository.findByScaleId(createdScale.id);
-    return { ok: true, value: { scale: { ... } } };
-  }
-}
+findByPhone(phone: string): Promise<Member | null>;
 ```
 
-### ListScales
+ou (preferivel para evitar ambiguidades):
 
 ```typescript
-interface ListScalesInput {
-  churchId: string;
-  serviceId?: string;
-  ministryId?: string;
-}
+findByNormalizedPhone(phoneNormalized: string): Promise<Member | null>;
+```
 
-interface ListScalesOutput {
-  scales: ScaleListItemDTO[];
-}
+### IRoleRepository
 
-class ListScales extends BaseUseCase<ListScalesInput, ListScalesOutput> {
-  async execute(input: ListScalesInput): Promise<Result<ListScalesOutput>> {
-    const scales = await this.scaleRepository.findByFilters(input);
-    return { ok: true, value: { scales } };
-  }
+- Reusar `findById` para validar se o `defaultSelfSignupUserRoleId` existe.
+
+### Implementacoes Firebase Admin
+
+Atualizar:
+
+- `ChurchFirebaseRepository` + mapper de church
+- `MemberFirebaseRepository` + mapper de member (caso incluir normalizacao de telefone)
+
+---
+
+## DTOs e Validacao (Zod)
+
+### Church DTOs
+
+Atualizar DTO de igreja para aceitar novo campo:
+
+- `defaultSelfSignupUserRoleId: z.string().min(1)` (com estrategia de fallback para legado no use case)
+
+### Novo DTO de lookup publico por telefone
+
+Local sugerido:
+
+`src/application/dtos/self-signup/SelfSignupLookupDTO.ts`
+
+```typescript
+phone: string;
+churchId: string;
+```
+
+Resposta sugerida:
+
+```typescript
+memberExists: boolean;
+prefill?: {
+  fullName: string;
+  email: string | null;
+  phone: string | null;
 }
 ```
 
-### AddMemberToScale / RemoveMemberFromScale
+### Novo DTO de finalizacao publica
 
-- Similar ao padrão de MinistryRole em Ministry
+Local sugerido:
 
-### UpdateScale
+`src/application/dtos/self-signup/FinalizeSelfSignupDTO.ts`
 
-- Atualizar dados da Scale e gerenciar sync de members (adicionar/remover/editar)
+```typescript
+churchId: string;
+googleToken: string;
+fullName: string;
+phone: string;
+email?: string;
+```
 
-### DeleteScale
+Regras:
 
-- Deletar Scale e cascade deletar todos ScaleMembers
+- `email` opcional no formulario, mas email vindo do Google deve ser fonte confiavel de autenticacao.
+- Ignorar `roleId` no payload do cliente.
+
+---
+
+## Use Cases (Application Layer)
+
+Criar pasta:
+
+`src/application/use-cases/self-signup/`
+
+### 1. GetSelfSignupChurchContext
+
+- Entrada: `churchId`
+- Saida: dados publicos da igreja necessarios para tela
+- Nao expor dados sensiveis
+
+### 2. LookupMemberByPhone
+
+- Entrada: `churchId`, `phone`
+- Normalizar telefone
+- Buscar membro globalmente por telefone
+- Retornar somente dados de prefill permitidos
+
+### 3. FinalizeSelfSignupWithGoogle
+
+Fluxo esperado:
+
+1. Validar igreja e `defaultSelfSignupUserRoleId`
+2. Validar role em `IRoleRepository`
+3. Validar token Google com servico atual
+4. Identificar membro alvo por telefone (ou por email Google com regra definida)
+5. Criar/atualizar Member
+6. Criar User quando nao existir (por `memberId`)
+7. Garantir vinculacao `MemberChurch` com `roleId = church.defaultSelfSignupUserRoleId`
+8. Retornar sucesso + informacoes de sessao (ou orientar login imediato com endpoint atual)
+
+Observacao:
+
+- Se houver divergencia entre email digitado e email do Google, priorizar email autenticado do Google para identidade.
 
 ---
 
 ## Dependency Injection
 
-### Localização
+Criar container de self-signup:
 
-```
-src/infra/di/scale/
-└── container.ts
-```
+`src/infra/di/self-signup/container.ts`
 
-```typescript
-class ScaleContainer {
-  private static _scaleRepository: IScaleRepository | null = null;
-  private static _scaleMemberRepository: IScaleMemberRepository | null = null;
-  private static _createScale: CreateScale | null = null;
-  // ... outros use cases
+Dependencias minimas:
 
-  static get scaleRepository(): IScaleRepository {
-    if (!ScaleContainer._scaleRepository) {
-      ScaleContainer._scaleRepository = new ScaleFirebaseRepository();
-    }
-    return ScaleContainer._scaleRepository;
-  }
+- `IChurchRepository`
+- `IMemberRepository`
+- `IMemberChurchRepository`
+- `IUserRepository`
+- `IRoleRepository`
+- `IGoogleAuthService`
+- `ITokenService` (se o fluxo tambem criar sessao imediatamente)
 
-  static get scaleMemberRepository(): IScaleMemberRepository {
-    if (!ScaleContainer._scaleMemberRepository) {
-      ScaleContainer._scaleMemberRepository = new ScaleMemberFirebaseRepository();
-    }
-    return ScaleContainer._scaleMemberRepository;
-  }
+Atualizar:
 
-  // ... getters para use cases
-}
-
-export const scaleContainer = ScaleContainer;
-```
-
-**Atualizar:** `src/infra/di/index.ts` - exportar `scaleContainer`
+- `src/infra/di/index.ts` para exportar `selfSignupContainer`
 
 ---
 
 ## API: Route Handlers
 
-### Endpoints REST
+Criar rotas publicas em:
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/scales` | Listar escalas (com filtros) |
-| POST | `/api/scales` | Criar escala |
-| GET | `/api/scales/[scaleId]` | Obter escala por ID |
-| PUT | `/api/scales/[scaleId]` | Atualizar escala |
-| DELETE | `/api/scales/[scaleId]` | Excluir escala |
+`src/app/api/public/self-signup/`
 
-### Localização
+### Endpoints sugeridos
 
-```
-src/app/api/scales/
-├── route.ts
-└── [scaleId]/
-    └── route.ts
-```
+1. `GET /api/public/self-signup/[churchId]`
+   - Obter contexto publico da igreja para auto cadastro
 
-### Validações de Permissão
+2. `POST /api/public/self-signup/lookup-member`
+   - Body: `churchId`, `phone`
+   - Retorna prefill basico sem vazar dados sensiveis
 
-```typescript
-// Verificar permissões
-const hasReadAccess = user.isSuperAdmin || user.permissions.includes(Permission.SCHEDULE_READ);
-const hasWriteAccess = user.isSuperAdmin || user.permissions.includes(Permission.SCHEDULE_WRITE);
-const hasDeleteAccess = user.isSuperAdmin || user.permissions.includes(Permission.SCHEDULE_DELETE);
-```
+3. `POST /api/public/self-signup/finalize`
+   - Body: `churchId`, `googleToken`, dados de cadastro
+   - Executa criar/atualizar + vincular + atribuir role
+
+### Seguranca
+
+- Essas rotas sao publicas (sem cookie de sessao), mas devem:
+  - validar schema estritamente
+  - limitar superficie de dados retornados
+  - aplicar rate-limit (se ja existir infra de rate-limit)
+  - nunca aceitar `roleId` do cliente
 
 ---
 
-## Camada de Feature: Hooks
+## Frontend: Paginas, Hooks e Componentes
 
-### Localização
+### Pagina publica
 
-```
-src/features/scales/
-├── hooks/
-│   ├── useScales.ts
-│   └── useScaleForm.ts
-└── types/
-    └── index.ts
-```
+Local sugerido:
 
-### useScales.ts
+`src/app/(public)/signup/[churchId]/page.tsx`
 
-```typescript
-interface UseScalesReturn {
-  scales: ScaleListItemDTO[];
-  allScalesCount: number;
-  isLoading: boolean;
-  searchQuery: string;
-  setSearch: (query: string) => void;
-  filters: { serviceId?: string; ministryId?: string };
-  setFilters: (filters: { serviceId?: string; ministryId?: string }) => void;
-  deleteScale: (id: string) => Promise<boolean>;
-  refresh: () => Promise<void>;
-}
+### Feature sugerida
 
-export function useScales(): UseScalesReturn {
-  // Implementação com filtros por serviceId e ministryId
-}
-```
+`src/features/self-signup/`
 
-### useScaleForm.ts
+Arquivos sugeridos:
 
-```typescript
-interface UseScaleFormProps {
-  mode: "create" | "edit";
-  scaleId?: string;
-}
+- `hooks/useSelfSignup.ts`
+- `components/SelfSignupPhoneStep.tsx`
+- `components/SelfSignupFormStep.tsx`
+- `components/SelfSignupGoogleButton.tsx`
 
-interface UseScaleFormReturn {
-  form: UseFormReturn<ScaleFormInput>;
-  availableMembers: MemberListItemDTO[];  // Filtrados por ministryId
-  availableRoles: MinistryRoleListItemSchema[];  // Roles do ministério selecionado
-  members: ScaleMemberDTO[];
-  isLoading: boolean;
-  isFetching: boolean;
-  onSubmit: (data: ScaleFormInput) => Promise<void>;
-}
+### Ajustes em Igreja
 
-// Lógica:
-// - Quando ministryId muda, buscar members do ministério e roles
-// - Ao selecionar membro, mostrar apenas roles daquele ministry
-```
+- Atualizar `src/features/churches/components/ChurchForm.tsx`
+- Atualizar `src/features/churches/hooks/useChurchForm.ts`
+- Exibir seletor de role padrao de auto cadastro no formulario da igreja
+
+### QRCode na area privada
+
+Adicionar na experiencia de igrejas (lista ou edicao):
+
+- acao "Link de auto cadastro"
+- modal/cartao com link e QRCode
 
 ---
 
-## Camada de Feature: Componentes
+## Regras de Negocio e Validacoes
 
-### Localização
+1. **Igreja obrigatoria por path**
+   - Sem `churchId` valido, nao existe auto cadastro.
 
-```
-src/features/scales/
-├── components/
-│   ├── ScaleList.tsx
-│   ├── ScaleForm.tsx
-│   ├── ScaleMemberList.tsx
-│   └── ScaleFilter.tsx
-└── types/
-    └── index.ts
-```
+2. **Role obrigatoria por igreja**
+   - Se igreja nao tiver `defaultSelfSignupUserRoleId`, bloquear finalizacao e orientar configuracao no admin.
 
-### ScaleForm.tsx
+3. **Role valida**
+   - `defaultSelfSignupUserRoleId` deve existir em `roles`.
 
-```typescript
-export function ScaleForm({ mode, scaleId }: ScaleFormProps) {
-  const { form, availableMembers, availableRoles, members, onSubmit } = useScaleForm({ mode, scaleId });
-  const { watch, setValue } = form;
-  const selectedMinistryId = watch("ministryId");
+4. **Vinculacao idempotente**
+   - Nao criar duplicata em `member_churches` para mesma combinacao `memberId + churchId`.
 
-  return (
-    <FormTemplate>
-      <FormSelect
-        label="Culto"
-        options={services.map(s => ({ value: s.id, label: s.title }))}
-        onChange={(v) => setValue("serviceId", v)}
-      />
-      <FormSelect
-        label="Ministério"
-        options={ministries.map(m => ({ value: m.id, label: m.name }))}
-        onChange={(v) => setValue("ministryId", v)}
-      />
-      
-      {/* Lista de membros com roles filtrados pelo ministério */}
-      {selectedMinistryId && (
-        <ScaleMemberList
-          members={members}
-          availableMembers={availableMembers}
-          availableRoles={availableRoles}
-          onAddMember={handleAddMember}
-          onRemoveMember={handleRemoveMember}
-        />
-      )}
+5. **Privacidade na busca de telefone**
+   - Retornar apenas campos necessarios para prefill.
+   - Nao retornar listas de igrejas/permissoes/roles.
 
-      <FormSelect
-        label="Status"
-        options={[{ value: "draft", label: "Rascunho" }, { value: "published", label: "Publicada" }]}
-      />
+6. **Integridade com Google**
+   - Token Google obrigatorio na finalizacao.
+   - Identidade autenticada vem do provedor Google.
 
-      <Button onClick={form.handleSubmit(onSubmit)}>
-        {mode === "create" ? "Criar Escala" : "Salvar Alterações"}
-      </Button>
-    </FormTemplate>
-  );
-}
-```
+7. **Multitenancy preservado**
+   - Mesmo com busca global de membro, vinculacao sempre direcionada para igreja do link.
 
 ---
 
-## Páginas
+## Checklist de Implementacao
 
-### Localização
+### Fase 1: Dominio e Persistencia
+- [ ] Atualizar entidade `Church` com `defaultSelfSignupUserRoleId`
+- [ ] Atualizar mapper e repository de church
+- [ ] Adicionar busca por telefone global no member repository
 
-```
-src/app/(pages)/
-├── scales/
-│   ├── page.tsx           # Listagem
-│   ├── new/
-│   │   └── page.tsx       # Criar
-│   └── [scaleId]/
-│       └── edit/
-│           └── page.tsx   # Editar
-```
+### Fase 2: DTOs
+- [ ] Atualizar DTOs de church para novo campo
+- [ ] Criar DTO de lookup por telefone
+- [ ] Criar DTO de finalizacao de auto cadastro
 
-### scales/page.tsx
+### Fase 3: Use Cases
+- [ ] Criar `GetSelfSignupChurchContext`
+- [ ] Criar `LookupMemberByPhone`
+- [ ] Criar `FinalizeSelfSignupWithGoogle`
 
-- Usar `ListTemplate` com filtros
-- `<ScaleFilter>` para serviceId e ministryId
-- `<ScaleList>` com ações (editar, excluir)
+### Fase 4: DI e API
+- [ ] Criar `self-signup/container.ts`
+- [ ] Exportar no `infra/di/index.ts`
+- [ ] Criar rotas `/api/public/self-signup/*`
 
-### scales/new/page.tsx
+### Fase 5: Frontend
+- [ ] Criar pagina publica `/signup/[churchId]`
+- [ ] Implementar formulario em duas etapas
+- [ ] Integrar com login Google
+- [ ] Atualizar formulario de igreja com role padrao
+- [ ] Implementar visualizacao de link + QRCode
 
-- `<ScaleForm mode="create" />`
-
-### scales/[scaleId]/edit/page.tsx
-
-- `<ScaleForm mode="edit" scaleId={params.scaleId} />`
-
----
-
-## Validações de Negócio
-
-### 1. Duplicata de Escala
-
-```
-Uma escala é única pela combinação: churchId + serviceId + ministryId
-Não permitir criar outra escala se já existir para mesmo service + ministry
-```
-
-### 2. Filtragem de Membros
-
-```
-Ao selecionar ministryId, buscar apenas membros associados a esse ministério
-(MemberMinistry onde ministryId = selectedMinistryId)
-```
-
-### 3. Filtragem de Roles
-
-```
-Ao selecionar membro, mostrar apenas MinistryRole onde ministryId = selectedMinistryId
-```
-
-### 4. Status da Escala
-
-```
-"draft" = rascunho (não visível aos membros)
-"published" = publicada (visível aos membros)
-```
+### Fase 6: Validacao Final
+- [ ] Fluxo de novo membro validado
+- [ ] Fluxo de membro existente validado
+- [ ] Fluxo de igreja invalida validado
+- [ ] `pnpm lint` passando
+- [ ] `pnpm build` passando
 
 ---
 
-## Permissões
+## Fora de Escopo
 
-Já existem no enum `Permission`:
-
-```typescript
-export enum Permission {
-  // ...
-  SCHEDULE_READ = "schedule:read",
-  SCHEDULE_WRITE = "schedule:write",
-  SCHEDULE_DELETE = "schedule:delete",
-  // ...
-}
-```
-
-**Não é necessário adicionar novas permissões** - usar as existentes para Scales.
-
----
-
-## Checklist de Implementação
-
-### Fase 1: Domínio
-- [ ] Criar `src/domain/entities/Scale.ts`
-- [ ] Criar `src/domain/entities/ScaleMember.ts`
-- [ ] Criar `src/domain/ports/IScaleRepository.ts`
-- [ ] Criar `src/domain/ports/IScaleMemberRepository.ts`
-
-### Fase 2: Infraestrutura
-- [ ] Criar `src/infra/firebase-admin/mappers/scaleMapper.ts`
-- [ ] Criar `src/infra/firebase-admin/mappers/scaleMemberMapper.ts`
-- [ ] Criar `src/infra/firebase-admin/repositories/ScaleFirebaseRepository.ts`
-- [ ] Criar `src/infra/firebase-admin/repositories/ScaleMemberFirebaseRepository.ts`
-
-### Fase 3: Aplicação
-- [ ] Criar `src/application/dtos/scale/ScaleDTO.ts`
-- [ ] Criar `src/application/errors/ScaleErrors.ts`
-- [ ] Criar `src/application/use-cases/scale/CreateScale.ts`
-- [ ] Criar `src/application/use-cases/scale/GetScale.ts`
-- [ ] Criar `src/application/use-cases/scale/UpdateScale.ts`
-- [ ] Criar `src/application/use-cases/scale/DeleteScale.ts`
-- [ ] Criar `src/application/use-cases/scale/ListScales.ts`
-- [ ] Criar `src/application/use-cases/scale/AddMemberToScale.ts`
-- [ ] Criar `src/application/use-cases/scale/RemoveMemberFromScale.ts`
-
-### Fase 4: DI
-- [ ] Criar `src/infra/di/scale/container.ts`
-- [ ] Atualizar `src/infra/di/index.ts`
-
-### Fase 5: API
-- [ ] Criar `src/app/api/scales/route.ts`
-- [ ] Criar `src/app/api/scales/[scaleId]/route.ts`
-
-### Fase 6: Features (Client)
-- [ ] Criar `src/features/scales/hooks/useScales.ts`
-- [ ] Criar `src/features/scales/hooks/useScaleForm.ts`
-- [ ] Criar `src/features/scales/components/ScaleList.tsx`
-- [ ] Criar `src/features/scales/components/ScaleForm.tsx`
-- [ ] Criar `src/features/scales/components/ScaleMemberList.tsx`
-- [ ] Criar `src/features/scales/components/ScaleFilter.tsx`
-
-### Fase 7: Páginas
-- [ ] Criar `src/app/(pages)/scales/page.tsx`
-- [ ] Criar `src/app/(pages)/scales/new/page.tsx`
-- [ ] Criar `src/app/(pages)/scales/[scaleId]/edit/page.tsx`
-
-### Fase 8: Validação
-- [ ] `pnpm build` passa
-- [ ] `pnpm lint` passa
-- [ ] `pnpm format` passa
-- [ ] Testado manualmente
-
----
-
-## Dependências Externas a Consultar
-
-Ao implementar, será necessário usar repositórios existentes:
-
-- `IServiceRepository` - para buscar Services
-- `IMinistryRepository` - para buscar Ministries
-- `IMinistryRoleRepository` - para buscar MinistryRoles
-- `IMemberRepository` ou `IMemberMinistryRepository` - para buscar membros do ministério
-
-Verificar em `src/domain/ports/` e `src/infra/di/` para interfaces e containers existentes.
+- Auto cadastro para multiplas igrejas no mesmo link
+- Definicao manual de role no fluxo publico
+- Migracao retroativa de role para membros ja vinculados
+- Alteracao do modelo de permissao fora do uso de `UserRole`

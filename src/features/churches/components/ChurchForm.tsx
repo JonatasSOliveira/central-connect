@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { ChurchFormData } from "@/application/dtos/church/ChurchDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
+import { FormSelect } from "@/components/ui/form-select";
 import { useChurchForm } from "@/features/churches/hooks/useChurchForm";
 
 interface ChurchFormProps {
@@ -13,7 +14,7 @@ interface ChurchFormProps {
 
 export function ChurchForm({ mode, churchId }: ChurchFormProps) {
   const router = useRouter();
-  const { form, isLoading, isFetching, onSubmit } = useChurchForm({
+  const { form, roles, isLoading, isFetching, onSubmit } = useChurchForm({
     mode,
     churchId,
   });
@@ -41,6 +42,28 @@ export function ChurchForm({ mode, churchId }: ChurchFormProps) {
             placeholder="Nome da igreja"
             required
           />
+
+          <div className="space-y-2">
+            <FormSelect
+              label="Cargo padrão para auto cadastro"
+              value={form.watch("selfSignupDefaultRoleId") || ""}
+              onChange={(value) => {
+                form.setValue("selfSignupDefaultRoleId", value, {
+                  shouldValidate: true,
+                });
+              }}
+              options={roles.map((role) => ({
+                value: role.id,
+                label: role.name,
+              }))}
+              placeholder="Selecione um cargo (opcional)"
+              error={form.formState.errors.selfSignupDefaultRoleId?.message}
+            />
+            <p className="text-xs text-muted-foreground">
+              Esse cargo será aplicado automaticamente em novos membros que se
+              cadastrarem pelo link ou QR Code da igreja.
+            </p>
+          </div>
         </FormTemplate.Content>
 
         <FormTemplate.Footer

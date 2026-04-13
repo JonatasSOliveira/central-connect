@@ -4,10 +4,13 @@ import { GetChurch } from "@/application/use-cases/church/GetChurch";
 import { ListChurches } from "@/application/use-cases/church/ListChurches";
 import { UpdateChurch } from "@/application/use-cases/church/UpdateChurch";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import { ChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/ChurchFirebaseRepository";
+import { RoleFirebaseRepository } from "@/infra/firebase-admin/repositories/RoleFirebaseRepository";
 
 class ChurchContainer {
   private static _churchRepository: IChurchRepository | null = null;
+  private static _roleRepository: IRoleRepository | null = null;
   private static _createChurch: CreateChurch | null = null;
   private static _getChurch: GetChurch | null = null;
   private static _listChurches: ListChurches | null = null;
@@ -23,10 +26,18 @@ class ChurchContainer {
     return ChurchContainer._churchRepository;
   }
 
+  static get roleRepository(): IRoleRepository {
+    if (!ChurchContainer._roleRepository) {
+      ChurchContainer._roleRepository = new RoleFirebaseRepository();
+    }
+    return ChurchContainer._roleRepository;
+  }
+
   static get createChurch(): CreateChurch {
     if (!ChurchContainer._createChurch) {
       ChurchContainer._createChurch = new CreateChurch(
         ChurchContainer.churchRepository,
+        ChurchContainer.roleRepository,
       );
     }
     return ChurchContainer._createChurch;
@@ -54,6 +65,7 @@ class ChurchContainer {
     if (!ChurchContainer._updateChurch) {
       ChurchContainer._updateChurch = new UpdateChurch(
         ChurchContainer.churchRepository,
+        ChurchContainer.roleRepository,
       );
     }
     return ChurchContainer._updateChurch;

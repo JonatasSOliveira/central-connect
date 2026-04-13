@@ -1,11 +1,13 @@
 import { Church, type ChurchParams } from "@/domain/entities/Church";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { Result } from "@/shared/types/Result";
 import { ChurchErrors } from "../../errors/ChurchErrors";
 import { BaseUseCase } from "../BaseUseCase";
 
 export interface CreateChurchInput {
   name: string;
+  selfSignupDefaultRoleId?: string;
   createdByUserId: string;
 }
 
@@ -17,14 +19,33 @@ export class CreateChurch extends BaseUseCase<
   CreateChurchInput,
   CreateChurchOutput
 > {
-  constructor(private readonly churchRepository: IChurchRepository) {
+  constructor(
+    private readonly churchRepository: IChurchRepository,
+    private readonly roleRepository: IRoleRepository,
+  ) {
     super();
   }
 
   async execute(input: CreateChurchInput): Promise<Result<CreateChurchOutput>> {
     try {
+      const selfSignupDefaultRoleId =
+        input.selfSignupDefaultRoleId?.trim() || null;
+
+      if (selfSignupDefaultRoleId) {
+        const role = await this.roleRepository.findById(
+          selfSignupDefaultRoleId,
+        );
+        if (!role) {
+          return {
+            ok: false,
+            error: ChurchErrors.INVALID_SELF_SIGNUP_ROLE,
+          };
+        }
+      }
+
       const churchParams: ChurchParams = {
         name: input.name,
+        selfSignupDefaultRoleId,
         createdByUserId: input.createdByUserId,
         createdAt: new Date(),
         updatedAt: new Date(),

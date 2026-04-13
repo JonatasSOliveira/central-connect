@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import {
   type ChurchFormData,
   ChurchFormSchema,
@@ -18,6 +19,7 @@ interface UseChurchFormProps {
 
 interface UseChurchFormReturn {
   form: ReturnType<typeof useForm<ChurchFormData>>;
+  roles: RoleListItem[];
   isLoading: boolean;
   isFetching: boolean;
   initialDataLoaded: boolean;
@@ -32,12 +34,33 @@ export function useChurchForm({
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [roles, setRoles] = useState<RoleListItem[]>([]);
 
   const form = useForm<ChurchFormData>({
     resolver: zodResolver(ChurchFormSchema),
     defaultValues: churchFormDefaultValues,
     mode: "onBlur",
   });
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch("/api/roles");
+        const data = await response.json();
+
+        if (data.ok) {
+          setRoles(data.value.roles);
+          return;
+        }
+
+        toast.error("Não foi possível carregar os cargos do sistema");
+      } catch {
+        toast.error("Não foi possível carregar os cargos do sistema");
+      }
+    };
+
+    fetchRoles();
+  }, []);
 
   useEffect(() => {
     if (mode === "edit" && churchId) {
@@ -50,6 +73,8 @@ export function useChurchForm({
           if (data.ok && data.value?.church) {
             form.reset({
               name: data.value.church.name,
+              selfSignupDefaultRoleId:
+                data.value.church.selfSignupDefaultRoleId ?? "",
             });
             setInitialDataLoaded(true);
           } else {
@@ -113,6 +138,7 @@ export function useChurchForm({
 
   return {
     form,
+    roles,
     isLoading,
     isFetching,
     initialDataLoaded,
