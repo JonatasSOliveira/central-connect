@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import {
   type ChurchFormData,
   ChurchFormSchema,
   churchFormDefaultValues,
 } from "@/application/dtos/church/ChurchDTO";
+import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 
 interface UseChurchFormProps {
   mode: "create" | "edit";
@@ -32,7 +32,9 @@ export function useChurchForm({
 }: UseChurchFormProps): UseChurchFormReturn {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(mode === "edit");
+  const [isFetching, setIsFetching] = useState(
+    mode === "edit" && Boolean(churchId),
+  );
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [roles, setRoles] = useState<RoleListItem[]>([]);
 
@@ -63,6 +65,11 @@ export function useChurchForm({
   }, []);
 
   useEffect(() => {
+    if (mode === "edit" && !churchId) {
+      setIsFetching(false);
+      return;
+    }
+
     if (mode === "edit" && churchId) {
       const fetchChurch = async () => {
         setIsFetching(true);

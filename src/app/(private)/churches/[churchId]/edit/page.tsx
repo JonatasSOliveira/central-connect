@@ -1,15 +1,12 @@
 "use client";
 
-import { use } from "react";
-import { ChurchForm } from "@/features/churches/components/ChurchForm";
+import { useParams } from "next/navigation";
 import { PrivateHeader } from "@/components/modules/private-header";
+import { ChurchForm } from "@/features/churches/components/ChurchForm";
 
-interface EditChurchPageProps {
-  params: Promise<{ churchId: string }>;
-}
-
-export default function EditChurchPage({ params }: EditChurchPageProps) {
-  const { churchId } = use(params);
+export default function EditChurchPage() {
+  const params = useParams<{ churchId: string }>();
+  const churchId = params?.churchId;
 
   return (
     <>

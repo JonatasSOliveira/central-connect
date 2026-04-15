@@ -5,6 +5,7 @@ import type { ChurchFormData } from "@/application/dtos/church/ChurchDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
 import { FormSelect } from "@/components/ui/form-select";
+import { SelfSignupShareDialog } from "@/features/churches/components/SelfSignupShareDialog";
 import { useChurchForm } from "@/features/churches/hooks/useChurchForm";
 
 interface ChurchFormProps {
@@ -63,6 +64,15 @@ export function ChurchForm({ mode, churchId }: ChurchFormProps) {
               Esse cargo será aplicado automaticamente em novos membros que se
               cadastrarem pelo link ou QR Code da igreja.
             </p>
+
+            {mode === "edit" && churchId ? (
+              <div className="pt-1">
+                <SelfSignupShareDialog
+                  churchId={churchId}
+                  churchName={form.watch("name")}
+                />
+              </div>
+            ) : null}
           </div>
         </FormTemplate.Content>
 
