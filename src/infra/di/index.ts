@@ -4,6 +4,7 @@ export { memberContainer } from "./member/container";
 export { ministryContainer } from "./ministry/container";
 export { roleContainer } from "./role/container";
 export { scaleContainer } from "./scale/container";
+export { selfSignupContainer } from "./self-signup/container";
 export { serviceContainer } from "./service/container";
 
 class ContainerProxy {
@@ -33,6 +34,10 @@ class ContainerProxy {
 
   get service() {
     return require("./service/container").serviceContainer;
+  }
+
+  get selfSignup() {
+    return require("./self-signup/container").selfSignupContainer;
   }
 }
 

@@ -14,6 +14,7 @@ import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDT
 import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { normalizePhone } from "@/shared/utils/phone";
 
 interface UseMemberFormProps {
   mode: "create" | "edit";
@@ -274,14 +275,14 @@ export function useMemberForm({
               form.reset({
                 email: memberData.email,
                 fullName: memberData.fullName,
-                phone: memberData.phone ?? "",
+                phone: normalizePhone(memberData.phone),
                 churches: editable,
               });
             } else if (hasSingleWritableChurch) {
               form.reset({
                 email: memberData.email,
                 fullName: memberData.fullName,
-                phone: memberData.phone ?? "",
+                phone: normalizePhone(memberData.phone),
                 churches: [
                   {
                     churchId: defaultEditableChurchId,
@@ -295,7 +296,7 @@ export function useMemberForm({
               form.reset({
                 email: memberData.email,
                 fullName: memberData.fullName,
-                phone: memberData.phone ?? "",
+                phone: normalizePhone(memberData.phone),
                 churches: [{ churchId: "", roleId: "", ministryIds: [] }],
               });
             }
@@ -325,12 +326,18 @@ export function useMemberForm({
   const onSubmit = async (formData: CreateMemberInput) => {
     setIsLoading(true);
 
+    const normalizedPhone = normalizePhone(formData.phone);
+    const normalizedCreatePayload: CreateMemberInput = {
+      ...formData,
+      phone: normalizedPhone || undefined,
+    };
+
     try {
       if (mode === "create") {
         const response = await fetch("/api/members", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(normalizedCreatePayload),
         });
 
         const data = await response.json();
@@ -346,7 +353,7 @@ export function useMemberForm({
 
         const payload: Record<string, unknown> = {
           fullName: formData.fullName,
-          phone: formData.phone ?? undefined,
+          phone: normalizedPhone || undefined,
         };
 
         if (formData.email !== undefined) {

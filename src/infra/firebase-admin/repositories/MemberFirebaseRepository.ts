@@ -34,6 +34,20 @@ export class MemberFirebaseRepository
     return this.toEntity(doc.data() as DocumentData, doc.id);
   }
 
+  async findByNormalizedPhone(phoneNormalized: string): Promise<Member | null> {
+    if (!phoneNormalized) return null;
+
+    const snapshot = await this.buildActiveQuery()
+      .where("phoneNormalized", "==", phoneNormalized)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    return this.toEntity(doc.data() as DocumentData, doc.id);
+  }
+
   async findBySearch(search: string): Promise<Member[]> {
     if (!search?.trim()) {
       return this.findAll();

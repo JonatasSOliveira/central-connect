@@ -3,6 +3,7 @@
 import type { UseFormReturn } from "react-hook-form";
 import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDTO";
 import { FormField } from "@/components/ui/form-field";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 interface BasicInfoSectionProps {
   form: UseFormReturn<CreateMemberInput>;
@@ -28,12 +29,19 @@ export function BasicInfoSection({ form }: BasicInfoSectionProps) {
         required
       />
 
-      <FormField<CreateMemberInput>
-        form={form}
-        name="phone"
-        label="Telefone"
-        placeholder="(00) 00000-0000"
-      />
+      <FormField<CreateMemberInput> form={form} name="phone" label="Telefone">
+        <PhoneInput
+          id="phone"
+          value={form.watch("phone") ?? ""}
+          onChangeValue={(value) => {
+            form.setValue("phone", value, { shouldValidate: true });
+          }}
+          onBlur={() => {
+            form.trigger("phone");
+          }}
+          placeholder="(11) 99999-9999"
+        />
+      </FormField>
     </>
   );
 }
