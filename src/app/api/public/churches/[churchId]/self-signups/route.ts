@@ -7,6 +7,14 @@ interface RouteParams {
   params: Promise<{ churchId: string }>;
 }
 
+function getClientIpAddress(request: NextRequest): string | null {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (!forwardedFor) return null;
+
+  const firstIp = forwardedFor.split(",")[0]?.trim();
+  return firstIp || null;
+}
+
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const contentType = request.headers.get("content-type");
   if (!contentType?.includes("application/json")) {
@@ -32,6 +40,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   }
 
   const { churchId } = await params;
+  const ipAddress = getClientIpAddress(request);
+  const userAgent = request.headers.get("user-agent");
 
   const result = await selfSignupContainer.finalizeSelfSignup.execute({
     churchId,
@@ -39,6 +49,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     fullName: parsed.data.fullName,
     phone: parsed.data.phone,
     acceptedTerms: parsed.data.acceptedTerms,
+    ipAddress,
+    userAgent,
   });
 
   if (!result.ok) {

@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { TERMS_OF_USE_VERSION } from "@/shared/constants/legal";
 
-const TERMS_VERSION = "v1.0";
 const EFFECTIVE_DATE = "16/04/2026";
 const UPDATED_AT = "16/04/2026";
 
@@ -84,7 +84,9 @@ export function TermsOfUseDocument() {
         <h1 className="font-heading text-2xl font-semibold text-foreground md:text-3xl">
           Termos de Uso - Central Connect
         </h1>
-        <p className="text-sm text-muted-foreground">Versão: {TERMS_VERSION}</p>
+        <p className="text-sm text-muted-foreground">
+          Versão: {TERMS_OF_USE_VERSION}
+        </p>
         <p className="text-sm text-muted-foreground">
           Data de vigência: {EFFECTIVE_DATE}
         </p>

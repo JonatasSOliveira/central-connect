@@ -4,17 +4,26 @@ import type {
 } from "@/application/dtos/self-signup/FinalizeSelfSignupDTO";
 import { SelfSignupErrors } from "@/application/errors/SelfSignupErrors";
 import {
+  LegalConsent,
+  type LegalConsentParams,
+} from "@/domain/entities/LegalConsent";
+import {
   MemberChurch,
   type MemberChurchParams,
 } from "@/domain/entities/MemberChurch";
 import { User, type UserParams } from "@/domain/entities/User";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
+import type { ILegalConsentRepository } from "@/domain/ports/ILegalConsentRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
+import {
+  PRIVACY_POLICY_VERSION,
+  TERMS_OF_USE_VERSION,
+} from "@/shared/constants/legal";
 import { normalizePhone } from "@/shared/utils/phone";
 import type { Result } from "@/shared/types/Result";
 import { BaseUseCase } from "../BaseUseCase";
@@ -23,6 +32,8 @@ import { upsertSelfSignupMember } from "./helpers/upsertSelfSignupMember";
 
 export interface FinalizeSelfSignupInput extends FinalizeSelfSignupInputDTO {
   churchId: string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
 }
 
 export class FinalizeSelfSignup extends BaseUseCase<
@@ -36,6 +47,7 @@ export class FinalizeSelfSignup extends BaseUseCase<
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly userRepository: IUserRepository,
+    private readonly legalConsentRepository: ILegalConsentRepository,
     private readonly googleAuthService: IGoogleAuthService,
   ) {
     super();
@@ -104,6 +116,7 @@ export class FinalizeSelfSignup extends BaseUseCase<
 
       const user = await this.ensureUser(member.id);
       await this.ensureMemberChurch(member.id, church.id, roleId);
+      await this.registerLegalConsent(member.id, user.id, church.id, input);
 
       return {
         ok: true,
@@ -173,5 +186,30 @@ export class FinalizeSelfSignup extends BaseUseCase<
     };
 
     await this.memberChurchRepository.create(new MemberChurch(params));
+  }
+
+  private async registerLegalConsent(
+    memberId: string,
+    userId: string,
+    churchId: string,
+    input: FinalizeSelfSignupInput,
+  ): Promise<void> {
+    const now = new Date();
+
+    const params: LegalConsentParams = {
+      memberId,
+      userId,
+      churchId,
+      termsVersion: TERMS_OF_USE_VERSION,
+      privacyPolicyVersion: PRIVACY_POLICY_VERSION,
+      acceptedAt: now,
+      ipAddress: input.ipAddress ?? null,
+      userAgent: input.userAgent ?? null,
+      source: "self-signup",
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    await this.legalConsentRepository.create(new LegalConsent(params));
   }
 }

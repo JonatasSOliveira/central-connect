@@ -3,12 +3,14 @@ import { GetSelfSignupChurchContext } from "@/application/use-cases/self-signup/
 import { LookupMemberByPhone } from "@/application/use-cases/self-signup/LookupMemberByPhone";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
+import type { ILegalConsentRepository } from "@/domain/ports/ILegalConsentRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
 import { ChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/ChurchFirebaseRepository";
+import { LegalConsentFirebaseRepository } from "@/infra/firebase-admin/repositories/LegalConsentFirebaseRepository";
 import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
 import { RolePermissionFirebaseRepository } from "@/infra/firebase-admin/repositories/RolePermissionFirebaseRepository";
@@ -22,6 +24,7 @@ class SelfSignupContainer {
   private static _rolePermissionRepository: IRolePermissionRepository | null =
     null;
   private static _memberRepository: IMemberRepository | null = null;
+  private static _legalConsentRepository: ILegalConsentRepository | null = null;
   private static _memberChurchRepository: IMemberChurchRepository | null = null;
   private static _userRepository: IUserRepository | null = null;
   private static _googleAuthService: IGoogleAuthService | null = null;
@@ -60,6 +63,14 @@ class SelfSignupContainer {
         new RolePermissionFirebaseRepository();
     }
     return SelfSignupContainer._rolePermissionRepository;
+  }
+
+  static get legalConsentRepository(): ILegalConsentRepository {
+    if (!SelfSignupContainer._legalConsentRepository) {
+      SelfSignupContainer._legalConsentRepository =
+        new LegalConsentFirebaseRepository();
+    }
+    return SelfSignupContainer._legalConsentRepository;
   }
 
   static get memberChurchRepository(): IMemberChurchRepository {
@@ -115,6 +126,7 @@ class SelfSignupContainer {
         SelfSignupContainer.memberRepository,
         SelfSignupContainer.memberChurchRepository,
         SelfSignupContainer.userRepository,
+        SelfSignupContainer.legalConsentRepository,
         SelfSignupContainer.googleAuthService,
       );
     }

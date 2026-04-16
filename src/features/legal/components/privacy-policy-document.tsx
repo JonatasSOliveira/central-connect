@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { PRIVACY_POLICY_VERSION } from "@/shared/constants/legal";
 
-const PRIVACY_VERSION = "v1.0";
 const EFFECTIVE_DATE = "16/04/2026";
 const UPDATED_AT = "16/04/2026";
 
@@ -85,7 +85,7 @@ export function PrivacyPolicyDocument() {
           Política de Privacidade - Central Connect
         </h1>
         <p className="text-sm text-muted-foreground">
-          Versão: {PRIVACY_VERSION}
+          Versão: {PRIVACY_POLICY_VERSION}
         </p>
         <p className="text-sm text-muted-foreground">
           Data de vigência: {EFFECTIVE_DATE}

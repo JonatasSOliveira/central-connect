@@ -3,6 +3,7 @@ export type { TokenPayload } from "@/application/dtos/auth/TokenPayload";
 
 export type { BaseRepository } from "./BaseRepository";
 export type { IChurchRepository } from "./IChurchRepository";
+export type { ILegalConsentRepository } from "./ILegalConsentRepository";
 export type { IMemberMinistryRepository } from "./IMemberMinistryRepository";
 export type { IMemberMinistryRoleRepository } from "./IMemberMinistryRoleRepository";
 export type { IMemberRepository } from "./IMemberRepository";
