@@ -18,6 +18,26 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  rewrites: async () => {
+    const firebaseProjectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+
+    if (!firebaseProjectId) {
+      return [];
+    }
+
+    const firebaseAppDomain = `https://${firebaseProjectId}.firebaseapp.com`;
+
+    return [
+      {
+        source: "/__/auth/:path*",
+        destination: `${firebaseAppDomain}/__/auth/:path*`,
+      },
+      {
+        source: "/__/firebase/init.json",
+        destination: `${firebaseAppDomain}/__/firebase/init.json`,
+      },
+    ];
+  },
   experimental: {
     serverSourceMaps: true,
   },
