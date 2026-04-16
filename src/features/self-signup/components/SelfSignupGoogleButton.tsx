@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 
 interface SelfSignupGoogleButtonProps {
   isLoading: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 
 export function SelfSignupGoogleButton({
   isLoading,
+  disabled,
   onClick,
 }: SelfSignupGoogleButtonProps) {
   return (
@@ -17,7 +19,7 @@ export function SelfSignupGoogleButton({
       className="w-full gap-2"
       size="lg"
       onClick={onClick}
-      disabled={isLoading}
+      disabled={disabled || isLoading}
     >
       <svg className="size-4" viewBox="0 0 24 24" aria-hidden="true">
         <path

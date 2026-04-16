@@ -1,7 +1,10 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SelfSignupFormStep } from "@/features/self-signup/components/SelfSignupFormStep";
 import { SelfSignupGoogleButton } from "@/features/self-signup/components/SelfSignupGoogleButton";
 import { SelfSignupPhoneStep } from "@/features/self-signup/components/SelfSignupPhoneStep";
@@ -12,6 +15,9 @@ interface SelfSignupScreenProps {
 }
 
 export function SelfSignupScreen({ churchId }: SelfSignupScreenProps) {
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [consentError, setConsentError] = useState<string | null>(null);
+
   const {
     context,
     form,
@@ -24,6 +30,18 @@ export function SelfSignupScreen({ churchId }: SelfSignupScreenProps) {
     lookupByPhone,
     finalizeWithGoogle,
   } = useSelfSignup(churchId);
+
+  const handleFinalize = async () => {
+    if (!acceptedTerms) {
+      setConsentError(
+        "Para continuar, é obrigatório aceitar os Termos de Uso e a Política de Privacidade.",
+      );
+      return;
+    }
+
+    setConsentError(null);
+    await finalizeWithGoogle();
+  };
 
   if (isFetchingContext) {
     return (
@@ -78,9 +96,50 @@ export function SelfSignupScreen({ churchId }: SelfSignupScreenProps) {
                     onFullNameChange={(value) => updateField("fullName", value)}
                   />
 
+                  <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-3">
+                    <label className="flex items-start gap-2">
+                      <Checkbox
+                        checked={acceptedTerms}
+                        onCheckedChange={(checked) => {
+                          const accepted = checked === true;
+                          setAcceptedTerms(accepted);
+                          if (accepted) {
+                            setConsentError(null);
+                          }
+                        }}
+                      />
+                      <span className="text-sm leading-5 text-foreground">
+                        Declaro que li e aceito os{" "}
+                        <Link
+                          href="/legal/terms-of-use"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline"
+                        >
+                          Termos de Uso
+                        </Link>{" "}
+                        e a{" "}
+                        <Link
+                          href="/legal/privacy-policy"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline"
+                        >
+                          Política de Privacidade
+                        </Link>
+                        .
+                      </span>
+                    </label>
+
+                    {consentError ? (
+                      <p className="text-xs text-destructive">{consentError}</p>
+                    ) : null}
+                  </div>
+
                   <SelfSignupGoogleButton
                     isLoading={isSubmitting}
-                    onClick={finalizeWithGoogle}
+                    disabled={!acceptedTerms}
+                    onClick={handleFinalize}
                   />
                 </>
               )}

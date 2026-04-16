@@ -160,6 +160,7 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
             googleToken: firebaseUser.idToken,
             fullName: form.fullName,
             phone,
+            acceptedTerms: true,
           }),
         },
       );

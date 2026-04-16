@@ -4,6 +4,9 @@ export const FinalizeSelfSignupInputSchema = z.object({
   googleToken: z.string().min(1, "Token do Google é obrigatório"),
   fullName: z.string().min(1, "Nome é obrigatório"),
   phone: z.string().min(8, "Telefone é obrigatório"),
+  acceptedTerms: z.literal(true, {
+    message: "Aceite dos termos é obrigatório",
+  }),
 });
 
 export type FinalizeSelfSignupInputDTO = z.infer<

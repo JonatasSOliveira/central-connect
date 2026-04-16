@@ -38,6 +38,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     googleToken: parsed.data.googleToken,
     fullName: parsed.data.fullName,
     phone: parsed.data.phone,
+    acceptedTerms: parsed.data.acceptedTerms,
   });
 
   if (!result.ok) {
