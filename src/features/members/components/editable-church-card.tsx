@@ -24,6 +24,7 @@ interface EditableChurchCardProps {
   onAddMinistry: (ministryId: string) => void;
   onRemoveMinistry: (index: number) => void;
   onRemove: () => void;
+  disabled?: boolean;
 }
 
 export function EditableChurchCard({
@@ -43,6 +44,7 @@ export function EditableChurchCard({
   onAddMinistry,
   onRemoveMinistry,
   onRemove,
+  disabled = false,
 }: EditableChurchCardProps) {
   const handleChurchChange = (value: string) => {
     onChurchChange(value);
@@ -58,7 +60,7 @@ export function EditableChurchCard({
         <span className="text-xs font-medium text-muted-foreground">
           #{index + 1}
         </span>
-        {canRemove && (
+        {canRemove && !disabled && (
           <Button
             type="button"
             variant="ghost"
@@ -81,6 +83,7 @@ export function EditableChurchCard({
         }))}
         placeholder="Selecione"
         required
+        disabled={disabled}
       />
 
       <FormSelect
@@ -93,6 +96,7 @@ export function EditableChurchCard({
         }))}
         placeholder="Selecione"
         required
+        disabled={disabled}
       />
 
       {churchId && (
@@ -103,6 +107,7 @@ export function EditableChurchCard({
           isLoading={isLoadingMinistries}
           onAddMinistry={onAddMinistry}
           onRemoveMinistry={onRemoveMinistry}
+          disabled={disabled}
         />
       )}
     </div>

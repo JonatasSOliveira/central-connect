@@ -14,6 +14,7 @@ import {
   ClipboardList,
   ClipboardCheck,
   BarChart3,
+  Building2,
 } from "lucide-react";
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { GreetingSection } from "@/features/home/components/greeting-section";
@@ -23,6 +24,7 @@ import { CardItem } from "@/components/ui/card-item";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useChurchStore } from "@/stores/churchStore";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,11 +35,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { APP_VERSION } from "@/shared/constants/app";
 
 export default function HomePage() {
   const router = useRouter();
   const { userName, avatarUrl, churchName } = useHomeScreen();
   const { user, logout } = useAuth();
+  const { selectedChurch } = useChurchStore();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const { hasPermission: canManageMembers } = usePermissions({
@@ -50,6 +54,18 @@ export default function HomePage() {
 
   const { hasPermission: canManageChurches } = usePermissions({
     requiredPermissions: [Permission.CHURCH_READ],
+  });
+
+  const { hasPermission: canReadChurchSelf } = usePermissions({
+    requiredPermissions: [Permission.CHURCH_SELF_READ],
+  });
+
+  const { hasPermission: canWriteChurchSelf } = usePermissions({
+    requiredPermissions: [Permission.CHURCH_SELF_WRITE],
+  });
+
+  const { hasPermission: canReadMemberSelf } = usePermissions({
+    requiredPermissions: [Permission.MEMBER_SELF_WRITE],
   });
 
   const { hasPermission: canManageMinistries } = usePermissions({
@@ -85,8 +101,26 @@ export default function HomePage() {
     canManageServiceTemplates ||
     canManageScales;
 
+  const showChurchSelfItem = canReadChurchSelf && !canManageChurches;
   const canShowQuickActions =
-    canReadScaleAttendance || canReadScaleAttendanceReport;
+    canReadScaleAttendance ||
+    canReadScaleAttendanceReport ||
+    showChurchSelfItem;
+
+  const handleChurchSelfClick = () => {
+    const churchId = selectedChurch?.id || user?.churches?.[0]?.churchId;
+    if (churchId) {
+      const readOnly = !canWriteChurchSelf;
+      router.push(`/churches/${churchId}/edit?readOnly=${readOnly}`);
+    }
+  };
+
+  const showMemberSelfItem = canReadMemberSelf && user?.memberId;
+  const handleMemberSelfClick = () => {
+    if (user?.memberId) {
+      router.push(`/members/${user.memberId}/edit?readOnly=false`);
+    }
+  };
 
   return (
     <div className="p-6 app-background">
@@ -219,6 +253,28 @@ export default function HomePage() {
                   onClick={() => router.push("/scale-attendance-reports")}
                 />
               )}
+
+              {showChurchSelfItem && (
+                <CardItem
+                  title="Dados da igreja"
+                  description={
+                    canWriteChurchSelf
+                      ? "Edite os dados da igreja"
+                      : "Visualize os dados da igreja"
+                  }
+                  icon={Building2}
+                  onClick={handleChurchSelfClick}
+                />
+              )}
+
+              {showMemberSelfItem && (
+                <CardItem
+                  title="Meu Perfil"
+                  description="Edite seus dados pessoais"
+                  icon={Users}
+                  onClick={handleMemberSelfClick}
+                />
+              )}
             </div>
           </>
         )}
@@ -246,6 +302,10 @@ export default function HomePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <p className="text-[10px] text-muted-foreground/60 text-center mt-6 pb-4">
+        v{APP_VERSION}
+      </p>
     </div>
   );
 }

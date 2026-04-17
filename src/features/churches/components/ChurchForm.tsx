@@ -11,9 +11,14 @@ import { useChurchForm } from "@/features/churches/hooks/useChurchForm";
 interface ChurchFormProps {
   mode: "create" | "edit";
   churchId?: string;
+  readOnly?: boolean;
 }
 
-export function ChurchForm({ mode, churchId }: ChurchFormProps) {
+export function ChurchForm({
+  mode,
+  churchId,
+  readOnly = false,
+}: ChurchFormProps) {
   const router = useRouter();
   const { form, roles, isLoading, isFetching, onSubmit } = useChurchForm({
     mode,
@@ -42,6 +47,7 @@ export function ChurchForm({ mode, churchId }: ChurchFormProps) {
             label="Nome"
             placeholder="Nome da igreja"
             required
+            disabled={readOnly}
           />
 
           <div className="space-y-2">
@@ -59,6 +65,7 @@ export function ChurchForm({ mode, churchId }: ChurchFormProps) {
               }))}
               placeholder="Selecione um cargo (opcional)"
               error={form.formState.errors.selfSignupDefaultRoleId?.message}
+              disabled={readOnly}
             />
             <p className="text-xs text-muted-foreground">
               Esse cargo será aplicado automaticamente em novos membros que se
@@ -76,11 +83,13 @@ export function ChurchForm({ mode, churchId }: ChurchFormProps) {
           </div>
         </FormTemplate.Content>
 
-        <FormTemplate.Footer
-          onCancel={handleCancel}
-          isLoading={isLoading}
-          submitLabel={mode === "edit" ? "Salvar" : "Criar"}
-        />
+        {!readOnly && (
+          <FormTemplate.Footer
+            onCancel={handleCancel}
+            isLoading={isLoading}
+            submitLabel={mode === "edit" ? "Salvar" : "Criar"}
+          />
+        )}
       </FormTemplate.Form>
     </FormTemplate>
   );

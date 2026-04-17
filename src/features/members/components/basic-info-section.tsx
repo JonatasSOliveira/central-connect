@@ -7,9 +7,13 @@ import { PhoneInput } from "@/components/ui/phone-input";
 
 interface BasicInfoSectionProps {
   form: UseFormReturn<CreateMemberInput>;
+  disabled?: boolean;
 }
 
-export function BasicInfoSection({ form }: BasicInfoSectionProps) {
+export function BasicInfoSection({
+  form,
+  disabled = false,
+}: BasicInfoSectionProps) {
   return (
     <>
       <FormField<CreateMemberInput> form={form} name="email" label="Email">
@@ -18,6 +22,7 @@ export function BasicInfoSection({ form }: BasicInfoSectionProps) {
           placeholder="email@exemplo.com (opcional)"
           className="flex h-12 w-full rounded-lg border border-border bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
           {...form.register("email")}
+          disabled={disabled}
         />
       </FormField>
 
@@ -27,6 +32,7 @@ export function BasicInfoSection({ form }: BasicInfoSectionProps) {
         label="Nome completo"
         placeholder="Nome do membro"
         required
+        disabled={disabled}
       />
 
       <FormField<CreateMemberInput> form={form} name="phone" label="Telefone">
@@ -40,6 +46,7 @@ export function BasicInfoSection({ form }: BasicInfoSectionProps) {
             form.trigger("phone");
           }}
           placeholder="(11) 99999-9999"
+          disabled={disabled}
         />
       </FormField>
     </>

@@ -33,6 +33,7 @@ interface ChurchSectionProps {
     ministryIds: string[];
   }) => void;
   editableRemove: (index: number) => void;
+  disabled?: boolean;
 }
 
 export function ChurchSection({
@@ -49,8 +50,9 @@ export function ChurchSection({
   editableRemoveMinistry,
   editableAppend,
   editableRemove,
+  disabled = false,
 }: ChurchSectionProps) {
-  if (!canChangeChurch) {
+  if (!canChangeChurch || disabled) {
     if (readonlyChurches.length > 0) {
       return <ReadonlyChurchList churches={readonlyChurches} />;
     }
@@ -70,6 +72,7 @@ export function ChurchSection({
         }))}
         placeholder="Selecione um cargo do sistema"
         required
+        disabled={disabled}
       />
     );
   }
@@ -98,6 +101,7 @@ export function ChurchSection({
           size="sm"
           className="h-9"
           onClick={handleAppend}
+          disabled={disabled}
         >
           <Plus className="w-4 h-4 mr-1" />
           Adicionar

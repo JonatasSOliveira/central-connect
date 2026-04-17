@@ -9,6 +9,7 @@ import { SelfSignupFormStep } from "@/features/self-signup/components/SelfSignup
 import { SelfSignupGoogleButton } from "@/features/self-signup/components/SelfSignupGoogleButton";
 import { SelfSignupPhoneStep } from "@/features/self-signup/components/SelfSignupPhoneStep";
 import { useSelfSignup } from "@/features/self-signup/hooks/useSelfSignup";
+import { APP_VERSION } from "@/shared/constants/app";
 
 interface SelfSignupScreenProps {
   churchId: string;
@@ -146,6 +147,10 @@ export function SelfSignupScreen({ churchId }: SelfSignupScreenProps) {
             </div>
           ) : null}
         </Card>
+
+        <p className="text-[10px] text-muted-foreground/60 text-center mt-4">
+          v{APP_VERSION}
+        </p>
       </div>
     </div>
   );

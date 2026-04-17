@@ -15,6 +15,7 @@ interface MinistrySelectorProps {
   isLoading: boolean;
   onAddMinistry: (ministryId: string) => void;
   onRemoveMinistry: (index: number) => void;
+  disabled?: boolean;
 }
 
 export function MinistrySelector({
@@ -23,6 +24,7 @@ export function MinistrySelector({
   isLoading,
   onAddMinistry,
   onRemoveMinistry,
+  disabled = false,
 }: MinistrySelectorProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [selectedMinistryId, setSelectedMinistryId] = useState("");
@@ -71,7 +73,7 @@ export function MinistrySelector({
         {selectedMinistryIds.map((id, index) => (
           <Chip
             key={id}
-            onRemove={() => onRemoveMinistry(index)}
+            onRemove={disabled ? undefined : () => onRemoveMinistry(index)}
             variant="primary"
           >
             {selectedMinistryNames[index]}
@@ -91,7 +93,7 @@ export function MinistrySelector({
             }))}
             placeholder="Selecione"
             required
-            disabled={isLoading}
+            disabled={isLoading || disabled}
           />
 
           <div className="flex gap-2">
@@ -108,7 +110,7 @@ export function MinistrySelector({
               type="button"
               size="sm"
               onClick={handleAdd}
-              disabled={!selectedMinistryId}
+              disabled={!selectedMinistryId || disabled}
               className="flex-1"
             >
               Adicionar
@@ -122,6 +124,8 @@ export function MinistrySelector({
           size="sm"
           onClick={handleStartAdding}
           disabled={
+            disabled ||
+            isLoading ||
             availableMinistries.length === 0 ||
             selectedMinistryIds.length >= availableMinistries.length
           }
