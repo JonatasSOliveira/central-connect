@@ -1,5 +1,14 @@
 # AGENTS.md - Instruções para Agentes de Código
 
+## Atividade Atual
+
+**Atividade 15** - Autocadastro de Membros e Selbst-Services
+- Versão do app exibida em login, home e self-signup
+- Usuários com CHURCH_SELF_READ/WRITE podem editar dados da igreja
+- Usuários com MEMBER_SELF_WRITE podem editar seu próprio perfil
+
+---
+
 ## 1. Visão Geral do Projeto
 
 **Central Connect** é um sistema de gestão de escalas para igrejas. Permite criar, gerenciar e publicar escalas de membros para diferentes funções liturgical/missas.
