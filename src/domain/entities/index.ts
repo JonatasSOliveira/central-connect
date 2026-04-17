@@ -6,6 +6,7 @@ export type { DayOfWeek } from "./DayOfWeek";
 export { Member } from "./Member";
 export { MemberAvailability } from "./MemberAvailability";
 export { MemberChurch } from "./MemberChurch";
+export { LegalConsent } from "./LegalConsent";
 export { MemberMinistry } from "./MemberMinistry";
 export { MemberMinistryRole } from "./MemberMinistryRole";
 export { Ministry } from "./Ministry";

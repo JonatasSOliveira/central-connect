@@ -11,9 +11,14 @@ import { ChurchSection } from "./church-section";
 interface MemberFormProps {
   mode: "create" | "edit";
   memberId?: string;
+  readOnly?: boolean;
 }
 
-export function MemberForm({ mode, memberId }: MemberFormProps) {
+export function MemberForm({
+  mode,
+  memberId,
+  readOnly = false,
+}: MemberFormProps) {
   const router = useRouter();
   const {
     form,
@@ -69,7 +74,7 @@ export function MemberForm({ mode, memberId }: MemberFormProps) {
   };
 
   const handleCancel = () => {
-    router.push("/members");
+    router.push("/home");
   };
 
   if (isFetching) {
@@ -84,7 +89,7 @@ export function MemberForm({ mode, memberId }: MemberFormProps) {
     <FormTemplate>
       <FormTemplate.Form<CreateMemberInput> form={form} onSubmit={onSubmit}>
         <FormTemplate.Content>
-          <BasicInfoSection form={form} />
+          <BasicInfoSection form={form} disabled={readOnly} />
 
           <ChurchSection
             form={form}
@@ -100,14 +105,17 @@ export function MemberForm({ mode, memberId }: MemberFormProps) {
             editableRemoveMinistry={editableRemoveMinistry}
             editableAppend={editableAppend}
             editableRemove={editableRemove}
+            disabled={readOnly}
           />
         </FormTemplate.Content>
 
-        <FormTemplate.Footer
-          onCancel={handleCancel}
-          isLoading={isLoading}
-          submitLabel={isEdit ? "Salvar" : "Criar"}
-        />
+        {!readOnly && (
+          <FormTemplate.Footer
+            onCancel={handleCancel}
+            isLoading={isLoading}
+            submitLabel={isEdit ? "Salvar" : "Criar"}
+          />
+        )}
       </FormTemplate.Form>
     </FormTemplate>
   );

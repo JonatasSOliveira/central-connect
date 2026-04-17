@@ -4,12 +4,16 @@ import {
   convertDatesToTimestamps,
   convertTimestampsToDates,
 } from "../helpers/firebaseHelpers";
+import { normalizePhone } from "@/shared/utils/phone";
 
 export function memberToPersistence(member: Member): DocumentData {
+  const phoneNormalized = normalizePhone(member.phone);
+
   return convertDatesToTimestamps({
     email: member.email ?? null,
     fullName: member.fullName,
     phone: member.phone,
+    phoneNormalized: phoneNormalized || null,
     maxServicesPerMonth: member.maxServicesPerMonth,
     status: member.status,
     avatarUrl: member.avatarUrl,

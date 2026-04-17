@@ -1,4 +1,3 @@
-import type { Church } from "@/domain/entities/Church";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { Result } from "@/shared/types/Result";
 import { ChurchErrors } from "../../errors/ChurchErrors";
@@ -9,7 +8,11 @@ export interface GetChurchInput {
 }
 
 export interface GetChurchOutput {
-  church: Church;
+  church: {
+    id: string;
+    name: string;
+    selfSignupDefaultRoleId: string | null;
+  };
 }
 
 export class GetChurch extends BaseUseCase<GetChurchInput, GetChurchOutput> {
@@ -31,7 +34,11 @@ export class GetChurch extends BaseUseCase<GetChurchInput, GetChurchOutput> {
       return {
         ok: true,
         value: {
-          church,
+          church: {
+            id: church.id,
+            name: church.name,
+            selfSignupDefaultRoleId: church.selfSignupDefaultRoleId,
+          },
         },
       };
     } catch {

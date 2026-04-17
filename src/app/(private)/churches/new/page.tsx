@@ -9,7 +9,7 @@ export default function NewChurchPage() {
       <PrivateHeader
         title="Nova Igreja"
         subtitle="Preencha os dados da igreja"
-        backHref="/home"
+        backHref="/churches"
       />
       <div className="px-4 pb-4">
         <ChurchForm mode="create" />

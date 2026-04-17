@@ -8,6 +8,7 @@ import {
 export function churchToPersistence(church: Church): DocumentData {
   return convertDatesToTimestamps({
     name: church.name,
+    selfSignupDefaultRoleId: church.selfSignupDefaultRoleId,
     createdAt: church.createdAt,
     updatedAt: church.updatedAt,
     deletedAt: church.deletedAt,
@@ -19,6 +20,7 @@ export function churchFromPersistence(data: DocumentData, id: string): Church {
   const params: ChurchParams = {
     id,
     name: convertedData.name ?? "",
+    selfSignupDefaultRoleId: convertedData.selfSignupDefaultRoleId ?? null,
     createdAt: convertedData.createdAt,
     updatedAt: convertedData.updatedAt,
   };

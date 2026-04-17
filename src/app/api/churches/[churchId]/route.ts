@@ -79,6 +79,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   const result = await churchContainer.updateChurch.execute({
     churchId,
     name: parsed.data.name,
+    selfSignupDefaultRoleId: parsed.data.selfSignupDefaultRoleId,
     updatedByUserId: auth.user.userId,
   });
 

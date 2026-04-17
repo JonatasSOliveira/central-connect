@@ -1,5 +1,6 @@
 import { Church, type ChurchParams } from "@/domain/entities/Church";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { Result } from "@/shared/types/Result";
 import { ChurchErrors } from "../../errors/ChurchErrors";
 import { BaseUseCase } from "../BaseUseCase";
@@ -7,6 +8,7 @@ import { BaseUseCase } from "../BaseUseCase";
 export interface UpdateChurchInput {
   churchId: string;
   name: string;
+  selfSignupDefaultRoleId?: string;
   updatedByUserId: string;
 }
 
@@ -18,7 +20,10 @@ export class UpdateChurch extends BaseUseCase<
   UpdateChurchInput,
   UpdateChurchOutput
 > {
-  constructor(private readonly churchRepository: IChurchRepository) {
+  constructor(
+    private readonly churchRepository: IChurchRepository,
+    private readonly roleRepository: IRoleRepository,
+  ) {
     super();
   }
 
@@ -35,9 +40,27 @@ export class UpdateChurch extends BaseUseCase<
         };
       }
 
+      const selfSignupDefaultRoleId =
+        input.selfSignupDefaultRoleId === undefined
+          ? existingChurch.selfSignupDefaultRoleId
+          : input.selfSignupDefaultRoleId.trim() || null;
+
+      if (selfSignupDefaultRoleId) {
+        const role = await this.roleRepository.findById(
+          selfSignupDefaultRoleId,
+        );
+        if (!role) {
+          return {
+            ok: false,
+            error: ChurchErrors.INVALID_SELF_SIGNUP_ROLE,
+          };
+        }
+      }
+
       const churchParams: ChurchParams = {
         id: existingChurch.id,
         name: input.name,
+        selfSignupDefaultRoleId,
         createdByUserId: existingChurch.createdByUserId ?? null,
         createdAt: existingChurch.createdAt,
         updatedAt: new Date(),

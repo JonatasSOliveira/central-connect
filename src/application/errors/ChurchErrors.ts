@@ -19,6 +19,10 @@ export const ChurchErrors = {
     code: "CHURCH_DELETION_FAILED",
     message: "Falha ao excluir igreja",
   },
+  INVALID_SELF_SIGNUP_ROLE: {
+    code: "INVALID_SELF_SIGNUP_ROLE",
+    message: "Cargo padrão de auto cadastro inválido",
+  },
   NOT_AUTHORIZED: {
     code: "NOT_AUTHORIZED",
     message: "Você não tem permissão para realizar esta ação",

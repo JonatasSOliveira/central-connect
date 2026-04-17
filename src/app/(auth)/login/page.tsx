@@ -3,6 +3,7 @@
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLoginScreen } from "@/features/auth/hooks/useLoginScreen";
+import { APP_VERSION } from "@/shared/constants/app";
 
 export default function LoginPage() {
   const { isLoading, error, handleGoogleLogin } = useLoginScreen();
@@ -72,6 +73,9 @@ export default function LoginPage() {
 
         <p className="text-xs text-muted-foreground mt-8 text-center">
           Made for Ministries
+        </p>
+        <p className="text-[10px] text-muted-foreground/60 mt-1 text-center">
+          v{APP_VERSION}
         </p>
       </div>
     </div>
