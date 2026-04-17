@@ -1,13 +1,18 @@
 "use client";
 
+import { use } from "react";
 import { useSearchParams } from "next/navigation";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { ChurchForm } from "@/features/churches/components/ChurchForm";
 
-export default function EditChurchPage() {
+interface EditChurchPageProps {
+  params: Promise<{ churchId: string }>;
+}
+
+export default function EditChurchPage({ params }: EditChurchPageProps) {
+  const resolvedParams = use(params);
   const searchParams = useSearchParams();
-  const params = searchParams.get("churchId") as string | null;
-  const churchId = params ?? undefined;
+  const churchId = resolvedParams.churchId;
   const readOnly = searchParams.get("readOnly") === "true";
 
   return (
