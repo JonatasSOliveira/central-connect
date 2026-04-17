@@ -59,10 +59,49 @@ export function getChurchIdFromSession(
   user: SessionPayload,
   queryChurchId: string | null,
 ): string | null {
+  if (user.isSuperAdmin) {
+    return queryChurchId ?? user.churchId;
+  }
+
   if (queryChurchId) {
+    if (queryChurchId !== user.churchId) {
+      return null;
+    }
     return queryChurchId;
   }
+
   return user.churchId;
+}
+
+export function hasPermission(
+  user: SessionPayload,
+  permission: string,
+): boolean {
+  return user.isSuperAdmin || user.permissions.includes(permission);
+}
+
+export function hasAnyPermission(
+  user: SessionPayload,
+  permissions: string[],
+): boolean {
+  if (user.isSuperAdmin) {
+    return true;
+  }
+
+  return permissions.some((permission) =>
+    user.permissions.includes(permission),
+  );
+}
+
+export function canAccessChurch(
+  user: SessionPayload,
+  churchId: string,
+): boolean {
+  if (user.isSuperAdmin) {
+    return true;
+  }
+
+  return user.churchId === churchId;
 }
 
 export function requireSuperAdmin(user: SessionPayload): AuthError | null {

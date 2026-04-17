@@ -56,7 +56,10 @@ export class AuthLoginUseCase extends BaseUseCase<
             existingMember.id,
             existingUser.isSuperAdmin,
           );
-          const permissions = await this.getPermissionsForChurches(
+          const selectedChurchId =
+            churches.length === 1 ? churches[0].churchId : null;
+          const permissions = await this.getPermissionsForChurch(
+            selectedChurchId,
             churches,
             existingUser.isSuperAdmin,
           );
@@ -65,6 +68,7 @@ export class AuthLoginUseCase extends BaseUseCase<
             existingMember,
             churches,
             permissions,
+            selectedChurchId,
           );
         }
 
@@ -73,7 +77,10 @@ export class AuthLoginUseCase extends BaseUseCase<
           existingMember.id,
           newUser.isSuperAdmin,
         );
-        const permissions = await this.getPermissionsForChurches(
+        const selectedChurchId =
+          churches.length === 1 ? churches[0].churchId : null;
+        const permissions = await this.getPermissionsForChurch(
+          selectedChurchId,
           churches,
           newUser.isSuperAdmin,
         );
@@ -82,6 +89,7 @@ export class AuthLoginUseCase extends BaseUseCase<
           existingMember,
           churches,
           permissions,
+          selectedChurchId,
         );
       }
 
@@ -98,6 +106,7 @@ export class AuthLoginUseCase extends BaseUseCase<
           newMember,
           churches,
           this.getAllPermissions(),
+          churches.length === 1 ? churches[0].churchId : null,
         );
       }
 
@@ -163,7 +172,8 @@ export class AuthLoginUseCase extends BaseUseCase<
     }));
   }
 
-  private async getPermissionsForChurches(
+  private async getPermissionsForChurch(
+    selectedChurchId: string | null,
     churches: ChurchInfo[],
     isSuperAdmin: boolean,
   ): Promise<string[]> {
@@ -171,17 +181,26 @@ export class AuthLoginUseCase extends BaseUseCase<
       return this.getAllPermissions();
     }
 
+    if (!selectedChurchId) {
+      return [];
+    }
+
+    const selectedChurch = churches.find(
+      (church) => church.churchId === selectedChurchId,
+    );
+
+    if (!selectedChurch?.roleId) {
+      return [];
+    }
+
     const permissionsSet = new Set<string>();
 
-    for (const church of churches) {
-      if (church.roleId) {
-        const rolePermissions =
-          await this.rolePermissionRepository.findByRoleId(church.roleId);
-        rolePermissions.forEach((rp) => {
-          permissionsSet.add(rp.permission);
-        });
-      }
-    }
+    const rolePermissions = await this.rolePermissionRepository.findByRoleId(
+      selectedChurch.roleId,
+    );
+    rolePermissions.forEach((rp) => {
+      permissionsSet.add(rp.permission);
+    });
 
     return Array.from(permissionsSet);
   }
@@ -195,9 +214,8 @@ export class AuthLoginUseCase extends BaseUseCase<
     member: Member,
     churches: ChurchInfo[],
     permissions: string[],
+    selectedChurchId: string | null,
   ): Promise<Result<AuthLoginOutputDTO>> {
-    const defaultChurchId = churches.length === 1 ? churches[0].churchId : null;
-
     const sessionPayload = {
       userId: user.id,
       memberId: member.id,
@@ -205,7 +223,7 @@ export class AuthLoginUseCase extends BaseUseCase<
       fullName: member.fullName,
       avatarUrl: member.avatarUrl,
       isSuperAdmin: user.isSuperAdmin,
-      churchId: defaultChurchId,
+      churchId: selectedChurchId,
       churches,
       permissions,
     };
@@ -221,7 +239,7 @@ export class AuthLoginUseCase extends BaseUseCase<
         fullName: member.fullName,
         avatarUrl: member.avatarUrl,
         isSuperAdmin: user.isSuperAdmin,
-        churchId: defaultChurchId,
+        churchId: selectedChurchId,
         churchName: null,
         churches,
         permissions,

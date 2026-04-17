@@ -1,14 +1,32 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { CreateRoleInputSchema } from "@/application/dtos/role/CreateRoleDTO";
+import { Permission } from "@/domain/enums/Permission";
 import { roleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { requireSuperAdmin, validateSession } from "../_lib/auth";
+import {
+  hasPermission,
+  requireSuperAdmin,
+  validateSession,
+} from "../_lib/auth";
 
 export async function GET() {
   const auth = await validateSession();
 
   if (!auth.ok) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
+  }
+
+  if (!hasPermission(auth.user, Permission.ROLE_READ)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para visualizar cargos",
+        },
+      },
+      { status: 403 },
+    );
   }
 
   const result = await roleContainer.listRoles.execute();

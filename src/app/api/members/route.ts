@@ -8,6 +8,7 @@ function buildUserChurches(
   isSuperAdmin: boolean,
   userChurches: { churchId: string; roleId: string | null }[],
   permissions: string[],
+  selectedChurchId: string | null,
 ): {
   churchId: string;
   roleId: string | null;
@@ -25,8 +26,12 @@ function buildUserChurches(
   return userChurches.map((c) => ({
     churchId: c.churchId,
     roleId: c.roleId,
-    hasMemberRead: permissions.includes(Permission.MEMBER_READ),
-    hasMemberWrite: permissions.includes(Permission.MEMBER_WRITE),
+    hasMemberRead:
+      c.churchId === selectedChurchId &&
+      permissions.includes(Permission.MEMBER_READ),
+    hasMemberWrite:
+      c.churchId === selectedChurchId &&
+      permissions.includes(Permission.MEMBER_WRITE),
   }));
 }
 
@@ -60,6 +65,7 @@ export async function GET(request: NextRequest) {
     user.isSuperAdmin,
     user.churches,
     user.permissions,
+    user.churchId,
   );
 
   const canAccessChurch =
@@ -149,6 +155,7 @@ export async function POST(request: NextRequest) {
 
   if (!user.isSuperAdmin) {
     const userWritableChurchIds = user.churches
+      .filter((church) => church.churchId === user.churchId)
       .filter(() => user.permissions.includes(Permission.MEMBER_WRITE))
       .map((c) => c.churchId);
 
