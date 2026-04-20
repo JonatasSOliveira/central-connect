@@ -41,7 +41,7 @@ export function SelfSignupScreen({ churchId }: SelfSignupScreenProps) {
     }
 
     setConsentError(null);
-    await finalizeWithGoogle();
+    await finalizeWithGoogle(acceptedTerms);
   };
 
   if (isFetchingContext) {

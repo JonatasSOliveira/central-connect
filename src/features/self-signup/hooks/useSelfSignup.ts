@@ -2,37 +2,28 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { signInWithGoogle } from "@/infra/firebase-client/services/googleAuth";
+import {
+  signInWithGoogle,
+  signInWithGoogleRedirect,
+} from "@/infra/firebase-client/services/googleAuth";
 import { normalizePhone } from "@/shared/utils/phone";
 import { useAuthStore } from "@/stores/authStore";
-
-interface SelfSignupContext {
-  churchId: string;
-  churchName: string;
-  canProceed: boolean;
-  selfSignupEnabled: boolean;
-  hasDefaultRoleConfigured: boolean;
-  defaultRoleId: string | null;
-  message: string | null;
-}
-
-interface SignupFormState {
-  fullName: string;
-  phone: string;
-}
-
-interface UseSelfSignupReturn {
-  context: SelfSignupContext | null;
-  form: SignupFormState;
-  isFetchingContext: boolean;
-  isLookingUpPhone: boolean;
-  isSubmitting: boolean;
-  phoneConfirmed: boolean;
-  error: string | null;
-  updateField: (field: keyof SignupFormState, value: string) => void;
-  lookupByPhone: () => Promise<void>;
-  finalizeWithGoogle: () => Promise<void>;
-}
+import {
+  fetchSelfSignupContext,
+  lookupSelfSignupPhone,
+  type SelfSignupContext,
+} from "./selfSignupApi";
+import { finalizeSelfSignupAndLogin } from "./selfSignupFinalize";
+import {
+  clearSelfSignupRedirectPayload,
+  setSelfSignupRedirectPayload,
+  type SelfSignupRedirectPayload,
+} from "./selfSignupRedirectStorage";
+import type { SignupFormState, UseSelfSignupReturn } from "./selfSignupTypes";
+import {
+  isLocalhostRuntime,
+  useSelfSignupRedirectFlow,
+} from "./useSelfSignupRedirectFlow";
 
 export function useSelfSignup(churchId: string): UseSelfSignupReturn {
   const router = useRouter();
@@ -49,25 +40,44 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
   const [phoneConfirmed, setPhoneConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const finalizeSignupWithToken = useCallback(
+    async (googleToken: string, payload: SelfSignupRedirectPayload) => {
+      await finalizeSelfSignupAndLogin({
+        googleToken,
+        payload,
+        login,
+        onSuccess: () => {
+          router.push("/select-church");
+        },
+      });
+    },
+    [login, router],
+  );
+
+  const onRedirectError = useCallback((message: string) => {
+    setError(message);
+  }, []);
+
+  const { isProcessingRedirect } = useSelfSignupRedirectFlow({
+    churchId,
+    finalizeSignupWithToken,
+    onError: onRedirectError,
+  });
+
   useEffect(() => {
     const fetchContext = async () => {
       setIsFetchingContext(true);
       setError(null);
 
       try {
-        const response = await fetch(
-          `/api/public/churches/${churchId}/self-signup-context`,
-        );
-        const data = await response.json();
-
-        if (!response.ok || !data.ok) {
-          setError(data.error?.message ?? "Não foi possível carregar a igreja");
-          return;
-        }
-
-        setContext(data.value);
-      } catch {
-        setError("Não foi possível carregar a igreja");
+        const loadedContext = await fetchSelfSignupContext(churchId);
+        setContext(loadedContext);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Não foi possível carregar a igreja";
+        setError(message);
       } finally {
         setIsFetchingContext(false);
       }
@@ -95,105 +105,92 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
     setError(null);
 
     try {
-      const response = await fetch(
-        `/api/public/churches/${churchId}/self-signup/member-lookups`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone }),
-        },
-      );
-      const data = await response.json();
+      const lookup = await lookupSelfSignupPhone(churchId, phone);
 
-      if (!response.ok || !data.ok) {
-        setError(
-          data.error?.message ?? "Não foi possível consultar o telefone",
-        );
-        return;
-      }
-
-      if (data.value.memberExists && data.value.prefill) {
+      if (lookup.memberExists && lookup.prefill) {
+        const prefill = lookup.prefill;
         setForm((state) => ({
           ...state,
-          fullName: data.value.prefill.fullName || state.fullName,
-          phone: normalizePhone(data.value.prefill.phone) || state.phone,
+          fullName: prefill.fullName || state.fullName,
+          phone: normalizePhone(prefill.phone) || state.phone,
         }));
       }
 
       setPhoneConfirmed(true);
-    } catch {
-      setError("Não foi possível consultar o telefone");
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Não foi possível consultar o telefone";
+      setError(message);
     } finally {
       setIsLookingUpPhone(false);
     }
   }, [churchId, form.phone]);
 
-  const finalizeWithGoogle = useCallback(async () => {
-    if (!context?.canProceed) {
-      setError(context?.message ?? "Auto cadastro indisponível");
-      return;
-    }
-
-    if (!form.fullName.trim()) {
-      setError("Informe o nome completo");
-      return;
-    }
-
-    const phone = normalizePhone(form.phone);
-    if (!phone) {
-      setError("Informe o telefone para continuar");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const firebaseUser = await signInWithGoogle();
-
-      const finalizeResponse = await fetch(
-        `/api/public/churches/${churchId}/self-signups`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            googleToken: firebaseUser.idToken,
-            fullName: form.fullName,
-            phone,
-            acceptedTerms: true,
-          }),
-        },
-      );
-
-      const finalizeData = await finalizeResponse.json();
-
-      if (!finalizeResponse.ok || !finalizeData.ok) {
-        setError(finalizeData.error?.message ?? "Não foi possível finalizar");
+  const finalizeWithGoogle = useCallback(
+    async (acceptedTerms: boolean) => {
+      if (!context?.canProceed) {
+        setError(context?.message ?? "Auto cadastro indisponível");
         return;
       }
 
-      const loginResult = await login(firebaseUser.idToken);
-      if (loginResult.errorMessage) {
-        setError(loginResult.errorMessage);
+      if (!acceptedTerms) {
+        setError("Aceite os termos para continuar");
         return;
       }
 
-      router.push("/select-church");
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Não foi possível finalizar";
-      setError(message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [churchId, context, form.fullName, form.phone, login, router]);
+      if (!form.fullName.trim()) {
+        setError("Informe o nome completo");
+        return;
+      }
+
+      const phone = normalizePhone(form.phone);
+      if (!phone) {
+        setError("Informe o telefone para continuar");
+        return;
+      }
+
+      setIsSubmitting(true);
+      setError(null);
+
+      try {
+        const payload: Omit<SelfSignupRedirectPayload, "createdAt"> = {
+          churchId,
+          fullName: form.fullName,
+          phone,
+          acceptedTerms,
+        };
+
+        if (isLocalhostRuntime()) {
+          const firebaseUser = await signInWithGoogle();
+          await finalizeSignupWithToken(firebaseUser.idToken, {
+            ...payload,
+            createdAt: Date.now(),
+          });
+          return;
+        }
+
+        setSelfSignupRedirectPayload(payload);
+        await signInWithGoogleRedirect();
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Não foi possível finalizar";
+        setError(message);
+        clearSelfSignupRedirectPayload();
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [churchId, context, finalizeSignupWithToken, form.fullName, form.phone],
+  );
 
   return {
     context,
     form,
     isFetchingContext,
     isLookingUpPhone,
-    isSubmitting,
+    isSubmitting: isSubmitting || isProcessingRedirect,
     phoneConfirmed,
     error,
     updateField,
