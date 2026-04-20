@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { AllPermissions } from "@/domain/enums/Permission";
 import { authContainer } from "@/infra/di";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
+import { isTrustedOrigin } from "../../_lib/csrf";
 
 interface SessionPayload {
   userId: string;
@@ -12,11 +13,19 @@ interface SessionPayload {
   avatarUrl: string | null;
   isSuperAdmin: boolean;
   churchId: string | null;
+  churchName: string | null;
   churches: { churchId: string; roleId: string | null }[];
   permissions: string[];
 }
 
 export async function POST(request: NextRequest) {
+  if (!isTrustedOrigin(request)) {
+    return NextResponse.json(
+      { ok: false, error: { code: "UNTRUSTED_ORIGIN" } },
+      { status: 403 },
+    );
+  }
+
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
 
@@ -32,6 +41,14 @@ export async function POST(request: NextRequest) {
     const rawSession = await tokenService.verifyToken(token);
     const session = rawSession as unknown as SessionPayload;
 
+    const contentType = request.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      return NextResponse.json(
+        { ok: false, error: { code: "INVALID_CONTENT_TYPE" } },
+        { status: 400 },
+      );
+    }
+
     const body = await request.json();
     const { churchId } = body;
 
@@ -42,8 +59,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (
+      !session.isSuperAdmin &&
+      !session.churches.some((church) => church.churchId === churchId)
+    ) {
+      return NextResponse.json(
+        { ok: false, error: { code: "NOT_AUTHORIZED" } },
+        { status: 403 },
+      );
+    }
+
     // Recalcular permissões baseadas na igreja selecionada
     let permissions: string[] = [];
+    let churchName: string | null = null;
 
     if (session.isSuperAdmin) {
       // SuperAdmin tem todas as permissões
@@ -56,7 +84,14 @@ export async function POST(request: NextRequest) {
           churchId,
         );
 
-      if (memberChurch?.roleId) {
+      if (!memberChurch) {
+        return NextResponse.json(
+          { ok: false, error: { code: "NOT_AUTHORIZED" } },
+          { status: 403 },
+        );
+      }
+
+      if (memberChurch.roleId) {
         // Buscar permissões apenas do role desta igreja
         const rolePermissions =
           await authContainer.rolePermissionRepository.findByRoleId(
@@ -68,9 +103,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const selectedChurch =
+      await authContainer.churchRepository.findById(churchId);
+    churchName = selectedChurch?.name ?? null;
+
     const newSessionPayload = {
       ...session,
       churchId,
+      churchName,
       permissions,
     };
 

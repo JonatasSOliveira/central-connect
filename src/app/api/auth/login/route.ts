@@ -3,8 +3,22 @@ import { type NextRequest, NextResponse } from "next/server";
 import { AuthLoginInputSchema } from "@/application/dtos/auth/AuthLoginInputDTO";
 import { authContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
+import { isTrustedOrigin } from "../../_lib/csrf";
 
 export async function POST(request: NextRequest) {
+  if (!isTrustedOrigin(request)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "UNTRUSTED_ORIGIN",
+          message: "Origem da requisição não confiável",
+        },
+      },
+      { status: 403 },
+    );
+  }
+
   const contentType = request.headers.get("content-type");
   if (!contentType?.includes("application/json")) {
     return NextResponse.json(apiError("INVALID_CONTENT_TYPE"), {

@@ -3,7 +3,7 @@ import { UpdateRoleInputSchema } from "@/application/dtos/role/UpdateRoleDTO";
 import { Permission } from "@/domain/enums/Permission";
 import { roleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { validateSession } from "../../_lib/auth";
+import { hasPermission, validateSession } from "../../_lib/auth";
 
 interface RouteParams {
   params: Promise<{ roleId: string }>;
@@ -14,6 +14,19 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 
   if (!auth.ok) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
+  }
+
+  if (!hasPermission(auth.user, Permission.ROLE_READ)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para visualizar este cargo",
+        },
+      },
+      { status: 403 },
+    );
   }
 
   const { roleId } = await params;
@@ -38,8 +51,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
   const { user } = auth;
 
-  if (user.isSuperAdmin || user.permissions.includes(Permission.ROLE_WRITE)) {
-  } else {
+  if (!hasPermission(user, Permission.ROLE_WRITE)) {
     return NextResponse.json(
       {
         ok: false,
@@ -98,8 +110,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   const { user } = auth;
   const { roleId } = await params;
 
-  const canDeleteRole =
-    user.isSuperAdmin || user.permissions.includes(Permission.ROLE_DELETE);
+  const canDeleteRole = hasPermission(user, Permission.ROLE_DELETE);
 
   if (!canDeleteRole) {
     return NextResponse.json(

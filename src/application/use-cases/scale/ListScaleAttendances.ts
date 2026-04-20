@@ -41,37 +41,69 @@ export class ListScaleAttendances extends BaseUseCase<
   ): Promise<Result<ListScaleAttendancesOutput>> {
     try {
       const scales = await this.scaleRepository.findByChurchId(input.churchId);
+      const scaleIds = scales.map((scale) => scale.id);
+      const [
+        services,
+        ministries,
+        allScaleMembers,
+        allAttendances,
+        checkedMembers,
+      ] = await Promise.all([
+        this.serviceRepository.findByChurchId(input.churchId),
+        this.ministryRepository.findByChurchId(input.churchId),
+        this.scaleMemberRepository.findByScaleIds(scaleIds),
+        this.scaleAttendanceRepository.findByScaleIds(scaleIds),
+        this.scaleAttendanceMemberRepository.findByScaleIds(scaleIds),
+      ]);
 
-      const items = await Promise.all(
-        scales.map(async (scale) => {
-          const [service, ministry, scaleMembers, attendance, checkedMembers] =
-            await Promise.all([
-              this.serviceRepository.findById(scale.serviceId),
-              this.ministryRepository.findById(scale.ministryId),
-              this.scaleMemberRepository.findByScaleId(scale.id),
-              this.scaleAttendanceRepository.findByScaleId(scale.id),
-              this.scaleAttendanceMemberRepository.findByScaleId(scale.id),
-            ]);
-
-          if (!service || !ministry) {
-            return null;
-          }
-
-          return {
-            scaleId: scale.id,
-            churchId: scale.churchId,
-            serviceId: service.id,
-            serviceTitle: service.title,
-            serviceDate: service.date,
-            serviceTime: service.time,
-            ministryId: ministry.id,
-            ministryName: ministry.name,
-            attendanceStatus: attendance?.status ?? "draft",
-            memberCount: scaleMembers.length,
-            checkedCount: checkedMembers.length,
-          } satisfies ScaleAttendanceListItemDTO;
-        }),
+      const serviceById = new Map(
+        services.map((service) => [service.id, service]),
       );
+      const ministryById = new Map(
+        ministries.map((ministry) => [ministry.id, ministry]),
+      );
+      const scaleMembersCountByScaleId = new Map<string, number>();
+
+      for (const scaleMember of allScaleMembers) {
+        const current =
+          scaleMembersCountByScaleId.get(scaleMember.scaleId) ?? 0;
+        scaleMembersCountByScaleId.set(scaleMember.scaleId, current + 1);
+      }
+
+      const attendanceByScaleId = new Map(
+        allAttendances.map((attendance) => [attendance.scaleId, attendance]),
+      );
+      const checkedMembersCountByScaleId = new Map<string, number>();
+
+      for (const checkedMember of checkedMembers) {
+        const current =
+          checkedMembersCountByScaleId.get(checkedMember.scaleId) ?? 0;
+        checkedMembersCountByScaleId.set(checkedMember.scaleId, current + 1);
+      }
+
+      const items = scales.map((scale) => {
+        const service = serviceById.get(scale.serviceId);
+        const ministry = ministryById.get(scale.ministryId);
+
+        if (!service || !ministry) {
+          return null;
+        }
+
+        return {
+          scaleId: scale.id,
+          churchId: scale.churchId,
+          serviceId: service.id,
+          serviceTitle: service.title,
+          serviceDate: service.date,
+          serviceTime: service.time,
+          ministryId: ministry.id,
+          ministryName: ministry.name,
+          attendanceStatus:
+            attendanceByScaleId.get(scale.id)?.status ?? "draft",
+          memberCount: scaleMembersCountByScaleId.get(scale.id) ?? 0,
+          checkedCount: checkedMembersCountByScaleId.get(scale.id) ?? 0,
+        } satisfies ScaleAttendanceListItemDTO;
+      });
 
       const now = new Date();
       const todayStart = new Date(now);

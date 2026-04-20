@@ -3,7 +3,11 @@ import { CreateChurchInputSchema } from "@/application/dtos/church/CreateChurchD
 import { Permission } from "@/domain/enums/Permission";
 import { churchContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { validateSession } from "../../_lib/auth";
+import {
+  canAccessChurch,
+  hasAnyPermission,
+  validateSession,
+} from "../../_lib/auth";
 
 interface RouteParams {
   params: Promise<{ churchId: string }>;
@@ -16,7 +20,29 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
+  const { user } = auth;
   const { churchId } = await params;
+
+  const canReadChurch =
+    canAccessChurch(user, churchId) &&
+    hasAnyPermission(user, [
+      Permission.CHURCH_READ,
+      Permission.CHURCH_SELF_READ,
+    ]);
+
+  if (!canReadChurch) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissão para visualizar esta igreja",
+        },
+      },
+      { status: 403 },
+    );
+  }
+
   const result = await churchContainer.getChurch.execute({ churchId });
 
   if (!result.ok) {
@@ -39,8 +65,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   const { user } = auth;
   const { churchId } = await params;
 
-  if (user.isSuperAdmin || user.permissions.includes(Permission.CHURCH_WRITE)) {
-  } else {
+  const canWriteChurch =
+    canAccessChurch(user, churchId) &&
+    hasAnyPermission(user, [
+      Permission.CHURCH_WRITE,
+      Permission.CHURCH_SELF_WRITE,
+    ]);
+
+  if (!canWriteChurch) {
     return NextResponse.json(
       {
         ok: false,
@@ -101,7 +133,8 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   const { churchId } = await params;
 
   const canDeleteChurch =
-    user.isSuperAdmin || user.permissions.includes(Permission.CHURCH_DELETE);
+    canAccessChurch(user, churchId) &&
+    hasAnyPermission(user, [Permission.CHURCH_DELETE]);
 
   if (!canDeleteChurch) {
     return NextResponse.json(

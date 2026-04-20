@@ -40,13 +40,11 @@ export class ServiceFirebaseRepository
     const snapshot = await this.collection
       .where("churchId", "==", churchId)
       .where("deletedAt", "==", null)
+      .where("date", ">=", startDate)
+      .where("date", "<=", endDate)
       .get();
 
-    return snapshot.docs
-      .map((doc) => this.toEntity(doc.data(), doc.id))
-      .filter(
-        (service) => service.date >= startDate && service.date <= endDate,
-      );
+    return snapshot.docs.map((doc) => this.toEntity(doc.data(), doc.id));
   }
 
   async findByDateAndLocation(
@@ -63,20 +61,18 @@ export class ServiceFirebaseRepository
     const snapshot = await this.collection
       .where("churchId", "==", churchId)
       .where("deletedAt", "==", null)
+      .where("date", ">=", startOfDay)
+      .where("date", "<=", endOfDay)
+      .where("time", "==", time)
+      .where("location", "==", location)
+      .limit(1)
       .get();
 
-    const results = snapshot.docs
-      .map((doc) => this.toEntity(doc.data(), doc.id))
-      .filter((service) => {
-        const serviceDate = service.date;
-        return (
-          serviceDate >= startOfDay &&
-          serviceDate <= endOfDay &&
-          service.time === time &&
-          service.location === location
-        );
-      });
+    if (snapshot.empty) {
+      return null;
+    }
 
-    return results[0] ?? null;
+    const doc = snapshot.docs[0];
+    return this.toEntity(doc.data(), doc.id);
   }
 }

@@ -1,34 +1,59 @@
-const CACHE_NAME = "central-connect-v1";
+const CACHE_NAME = "central-connect-v3";
 
 self.addEventListener("install", (_event) => {
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(clients.claim());
+  event.waitUntil(
+    (async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME)
+          .map((cacheName) => caches.delete(cacheName)),
+      );
+
+      await clients.claim();
+    })(),
+  );
 });
 
 self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  const requestUrl = new URL(request.url);
+
+  if (request.method !== "GET") {
+    return;
+  }
+
+  if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
   if (
-    event.request.url.includes("/api/") ||
-    event.request.url.includes("/auth/")
+    requestUrl.pathname.startsWith("/__/") ||
+    requestUrl.pathname.startsWith("/api/") ||
+    requestUrl.pathname.startsWith("/auth/") ||
+    requestUrl.pathname.startsWith("/login")
   ) {
     return;
   }
 
   event.respondWith(
-    fetch(event.request)
+    fetch(request)
       .then((response) => {
-        if (response && response.status === 200) {
+        if (response && response.status === 200 && response.type === "basic") {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
+            cache.put(request, responseToCache);
           });
         }
+
         return response;
       })
       .catch(() => {
-        return caches.match(event.request);
+        return caches.match(request);
       }),
   );
 });

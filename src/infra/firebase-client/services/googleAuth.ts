@@ -1,13 +1,16 @@
 import {
   signOut as firebaseSignOut,
   GoogleAuthProvider,
+  getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   type User,
 } from "firebase/auth";
 import { getFirebaseAuth } from "../firebaseConfig";
 
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
 
 export interface FirebaseUser {
   uid: string;
@@ -20,6 +23,30 @@ export interface FirebaseUser {
 export async function signInWithGoogle(): Promise<FirebaseUser> {
   const auth = getFirebaseAuth();
   const result = await signInWithPopup(auth, googleProvider);
+  const idToken = await result.user.getIdToken();
+
+  return {
+    uid: result.user.uid,
+    email: result.user.email,
+    displayName: result.user.displayName,
+    photoURL: result.user.photoURL,
+    idToken,
+  };
+}
+
+export async function signInWithGoogleRedirect(): Promise<void> {
+  const auth = getFirebaseAuth();
+  await signInWithRedirect(auth, googleProvider);
+}
+
+export async function getGoogleRedirectUser(): Promise<FirebaseUser | null> {
+  const auth = getFirebaseAuth();
+  const result = await getRedirectResult(auth);
+
+  if (!result) {
+    return null;
+  }
+
   const idToken = await result.user.getIdToken();
 
   return {

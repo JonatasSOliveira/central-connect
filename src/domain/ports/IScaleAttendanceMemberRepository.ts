@@ -10,5 +10,6 @@ export interface IScaleAttendanceMemberRepository
     scaleMemberId: string,
   ): Promise<ScaleAttendanceMember | null>;
   findByScaleId(scaleId: string): Promise<ScaleAttendanceMember[]>;
+  findByScaleIds(scaleIds: string[]): Promise<ScaleAttendanceMember[]>;
   deleteByScaleId(scaleId: string): Promise<void>;
 }
