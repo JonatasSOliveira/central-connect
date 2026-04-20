@@ -47,5 +47,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     });
   }
 
-  return NextResponse.json(result, { status: 200 });
+  return NextResponse.json(result, {
+    status: 200,
+    headers: {
+      "Cache-Control": "public, max-age=30, s-maxage=60",
+    },
+  });
 }

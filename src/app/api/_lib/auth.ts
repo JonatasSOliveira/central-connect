@@ -15,6 +15,7 @@ export interface SessionPayload {
   avatarUrl: string | null;
   isSuperAdmin: boolean;
   churchId: string | null;
+  churchName: string | null;
   churches: ChurchInfo[];
   permissions: string[];
 }

@@ -29,6 +29,16 @@ export class AuthService {
 
     const data = await response.json();
 
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[auth-debug] /api/auth/login response", {
+        status: response.status,
+        ok: response.ok,
+        dataOk: data?.ok,
+        errorCode: data?.error?.code,
+        errorMessage: data?.error?.message,
+      });
+    }
+
     if (!response.ok || !data.ok) {
       return {
         ok: false,
@@ -45,6 +55,13 @@ export class AuthService {
 
   async getCurrentUser(): Promise<CurrentUser | null> {
     const response = await fetch("/api/auth/me");
+
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[auth-debug] /api/auth/me status", {
+        status: response.status,
+        ok: response.ok,
+      });
+    }
 
     if (!response.ok) {
       return null;

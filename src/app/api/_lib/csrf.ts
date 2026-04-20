@@ -10,15 +10,35 @@ function getAllowedOrigins(): string[] {
 
 export function isTrustedOrigin(request: NextRequest): boolean {
   const origin = request.headers.get("origin");
+  const host = request.headers.get("host");
 
   if (!origin) {
     return true;
   }
 
+  if (origin === "null") {
+    const referer = request.headers.get("referer");
+
+    if (!referer || !host) {
+      return false;
+    }
+
+    try {
+      const refererHost = new URL(referer).host;
+      return refererHost === host;
+    } catch {
+      return false;
+    }
+  }
+
   const allowedOrigins = getAllowedOrigins();
+  const sameHostOrigin = host ? `${request.nextUrl.protocol}//${host}` : null;
+
+  if (sameHostOrigin && origin === sameHostOrigin) {
+    return true;
+  }
 
   if (allowedOrigins.length === 0) {
-    const host = request.headers.get("host");
     if (!host) {
       return false;
     }

@@ -13,6 +13,7 @@ interface SessionPayload {
   avatarUrl: string | null;
   isSuperAdmin: boolean;
   churchId: string | null;
+  churchName: string | null;
   churches: { churchId: string; roleId: string | null }[];
   permissions: string[];
 }
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
 
     // Recalcular permissões baseadas na igreja selecionada
     let permissions: string[] = [];
+    let churchName: string | null = null;
 
     if (session.isSuperAdmin) {
       // SuperAdmin tem todas as permissões
@@ -101,9 +103,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const selectedChurch =
+      await authContainer.churchRepository.findById(churchId);
+    churchName = selectedChurch?.name ?? null;
+
     const newSessionPayload = {
       ...session,
       churchId,
+      churchName,
       permissions,
     };
 

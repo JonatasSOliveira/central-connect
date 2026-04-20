@@ -216,6 +216,14 @@ export class AuthLoginUseCase extends BaseUseCase<
     permissions: string[],
     selectedChurchId: string | null,
   ): Promise<Result<AuthLoginOutputDTO>> {
+    let churchName: string | null = null;
+
+    if (selectedChurchId) {
+      const selectedChurch =
+        await this.churchRepository.findById(selectedChurchId);
+      churchName = selectedChurch?.name ?? null;
+    }
+
     const sessionPayload = {
       userId: user.id,
       memberId: member.id,
@@ -224,6 +232,7 @@ export class AuthLoginUseCase extends BaseUseCase<
       avatarUrl: member.avatarUrl,
       isSuperAdmin: user.isSuperAdmin,
       churchId: selectedChurchId,
+      churchName,
       churches,
       permissions,
     };
@@ -240,7 +249,7 @@ export class AuthLoginUseCase extends BaseUseCase<
         avatarUrl: member.avatarUrl,
         isSuperAdmin: user.isSuperAdmin,
         churchId: selectedChurchId,
-        churchName: null,
+        churchName,
         churches,
         permissions,
         sessionToken,

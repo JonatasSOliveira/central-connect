@@ -4,6 +4,7 @@ import type { BaseRepository } from "./BaseRepository";
 export interface IScaleMemberRepository extends BaseRepository<ScaleMember> {
   findAll(): Promise<ScaleMember[]>;
   findByScaleId(scaleId: string): Promise<ScaleMember[]>;
+  findByScaleIds(scaleIds: string[]): Promise<ScaleMember[]>;
   findById(id: string): Promise<ScaleMember | null>;
   deleteByScaleId(scaleId: string): Promise<void>;
 }

@@ -11,6 +11,8 @@ export class ScaleAttendanceMemberFirebaseRepository
   extends BaseFirebaseRepository<ScaleAttendanceMember>
   implements IScaleAttendanceMemberRepository
 {
+  private static readonly IN_QUERY_LIMIT = 10;
+
   constructor() {
     super("scale_attendance_members");
   }
@@ -58,6 +60,39 @@ export class ScaleAttendanceMemberFirebaseRepository
 
     return snapshot.docs.map((doc) =>
       this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
+  async findByScaleIds(scaleIds: string[]): Promise<ScaleAttendanceMember[]> {
+    if (scaleIds.length === 0) {
+      return [];
+    }
+
+    const chunks: string[][] = [];
+
+    for (
+      let i = 0;
+      i < scaleIds.length;
+      i += ScaleAttendanceMemberFirebaseRepository.IN_QUERY_LIMIT
+    ) {
+      chunks.push(
+        scaleIds.slice(
+          i,
+          i + ScaleAttendanceMemberFirebaseRepository.IN_QUERY_LIMIT,
+        ),
+      );
+    }
+
+    const snapshots = await Promise.all(
+      chunks.map((chunk) =>
+        this.buildActiveQuery().where("scaleId", "in", chunk).get(),
+      ),
+    );
+
+    return snapshots.flatMap((snapshot) =>
+      snapshot.docs.map((doc) =>
+        this.toEntity(doc.data() as DocumentData, doc.id),
+      ),
     );
   }
 
