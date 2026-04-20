@@ -1,4 +1,4 @@
-const CACHE_NAME = "central-connect-v2";
+const CACHE_NAME = "central-connect-v3";
 
 self.addEventListener("install", (_event) => {
   self.skipWaiting();
@@ -32,8 +32,10 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (
+    requestUrl.pathname.startsWith("/__/") ||
     requestUrl.pathname.startsWith("/api/") ||
-    requestUrl.pathname.startsWith("/auth/")
+    requestUrl.pathname.startsWith("/auth/") ||
+    requestUrl.pathname.startsWith("/login")
   ) {
     return;
   }

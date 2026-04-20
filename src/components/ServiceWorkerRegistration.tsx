@@ -4,6 +4,25 @@ import { useEffect } from "react";
 
 export default function ServiceWorkerRegistration() {
   useEffect(() => {
+    const pathname =
+      typeof window !== "undefined" ? window.location.pathname : "";
+    const shouldDisableForAuthFlow = pathname.startsWith("/login");
+
+    if (shouldDisableForAuthFlow && "serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => {
+          return Promise.all(
+            registrations.map((registration) => registration.unregister()),
+          );
+        })
+        .catch(() => {
+          // noop
+        });
+
+      return;
+    }
+
     if (process.env.NODE_ENV !== "production") {
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   getCurrentUserToken,
   getGoogleRedirectUser,
+  signInWithGoogle,
   signInWithGoogleRedirect,
 } from "@/infra/firebase-client/services/googleAuth";
 import { useAuthStore } from "@/stores/authStore";
@@ -34,6 +35,36 @@ function authDebug(message: string, payload?: unknown): void {
   }
 
   console.log(`[auth-debug] ${message}`);
+}
+
+function isLocalhostRuntime(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+  );
+}
+
+async function waitForCurrentUserToken(
+  tries = 8,
+  delayMs = 350,
+): Promise<string | null> {
+  for (let attempt = 1; attempt <= tries; attempt += 1) {
+    const token = await getCurrentUserToken();
+
+    if (token) {
+      authDebug("waitForCurrentUserToken resolved", { attempt });
+      return token;
+    }
+
+    authDebug("waitForCurrentUserToken retry", { attempt });
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+
+  return null;
 }
 
 export function useLoginScreen(): UseLoginScreenReturn {
@@ -107,9 +138,20 @@ export function useLoginScreen(): UseLoginScreenReturn {
 
   useEffect(() => {
     const processRedirectLogin = async () => {
+      if (isLocalhostRuntime()) {
+        authDebug("localhost runtime detected, skipping redirect processing");
+        clearPendingGoogleRedirect();
+        setIsProcessingRedirect(false);
+        return;
+      }
+
       try {
         const pendingRedirect = hasPendingGoogleRedirect();
         authDebug("processRedirectLogin start", { pendingRedirect });
+        authDebug("login runtime context", {
+          href: typeof window !== "undefined" ? window.location.href : null,
+          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+        });
         const redirectUser = await getGoogleRedirectUser();
         authDebug("getGoogleRedirectUser", {
           hasUser: Boolean(redirectUser),
@@ -117,7 +159,7 @@ export function useLoginScreen(): UseLoginScreenReturn {
         });
 
         if (!redirectUser && pendingRedirect) {
-          const idToken = await getCurrentUserToken();
+          const idToken = await waitForCurrentUserToken();
           authDebug("fallback getCurrentUserToken", {
             hasToken: Boolean(idToken),
           });
@@ -185,6 +227,24 @@ export function useLoginScreen(): UseLoginScreenReturn {
     });
 
     try {
+      if (isLocalhostRuntime()) {
+        authDebug("localhost runtime detected, using popup login flow");
+        const popupUser = await signInWithGoogle();
+        const popupResult = await login(popupUser.idToken);
+
+        authDebug("login with popup token", {
+          errorMessage: popupResult.errorMessage,
+        });
+
+        if (popupResult.errorMessage) {
+          setError(popupResult.errorMessage);
+          return;
+        }
+
+        router.replace("/select-church");
+        return;
+      }
+
       setPendingGoogleRedirect();
       authDebug("calling signInWithGoogleRedirect");
       await signInWithGoogleRedirect();
@@ -197,7 +257,7 @@ export function useLoginScreen(): UseLoginScreenReturn {
     } finally {
       setIsSubmitting(false);
     }
-  }, [clearPendingGoogleRedirect, setPendingGoogleRedirect]);
+  }, [clearPendingGoogleRedirect, login, router, setPendingGoogleRedirect]);
 
   return {
     isLoading: isSubmitting || isProcessingRedirect,
