@@ -48,6 +48,17 @@ function isLocalhostRuntime(): boolean {
   );
 }
 
+function shouldUsePopupFlowInCurrentRuntime(): boolean {
+  const forceRedirectByEnv =
+    process.env.NEXT_PUBLIC_AUTH_FORCE_REDIRECT === "true";
+
+  if (forceRedirectByEnv || process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  return isLocalhostRuntime();
+}
+
 async function waitForCurrentUserToken(
   tries = 8,
   delayMs = 350,
@@ -138,7 +149,7 @@ export function useLoginScreen(): UseLoginScreenReturn {
 
   useEffect(() => {
     const processRedirectLogin = async () => {
-      if (isLocalhostRuntime()) {
+      if (shouldUsePopupFlowInCurrentRuntime()) {
         authDebug("localhost runtime detected, skipping redirect processing");
         clearPendingGoogleRedirect();
         setIsProcessingRedirect(false);
@@ -227,7 +238,7 @@ export function useLoginScreen(): UseLoginScreenReturn {
     });
 
     try {
-      if (isLocalhostRuntime()) {
+      if (shouldUsePopupFlowInCurrentRuntime()) {
         authDebug("localhost runtime detected, using popup login flow");
         const popupUser = await signInWithGoogle();
         const popupResult = await login(popupUser.idToken);
