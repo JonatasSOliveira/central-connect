@@ -1,6 +1,7 @@
 import { Church, type ChurchParams } from "@/domain/entities/Church";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
+import { DEFAULT_MAX_CONSECUTIVE_SCALES_PER_MEMBER } from "@/shared/constants/scaleRules";
 import type { Result } from "@/shared/types/Result";
 import { ChurchErrors } from "../../errors/ChurchErrors";
 import { BaseUseCase } from "../BaseUseCase";
@@ -8,6 +9,7 @@ import { BaseUseCase } from "../BaseUseCase";
 export interface CreateChurchInput {
   name: string;
   selfSignupDefaultRoleId?: string;
+  maxConsecutiveScalesPerMember?: number;
   createdByUserId: string;
 }
 
@@ -46,6 +48,9 @@ export class CreateChurch extends BaseUseCase<
       const churchParams: ChurchParams = {
         name: input.name,
         selfSignupDefaultRoleId,
+        maxConsecutiveScalesPerMember:
+          input.maxConsecutiveScalesPerMember ??
+          DEFAULT_MAX_CONSECUTIVE_SCALES_PER_MEMBER,
         createdByUserId: input.createdByUserId,
         createdAt: new Date(),
         updatedAt: new Date(),

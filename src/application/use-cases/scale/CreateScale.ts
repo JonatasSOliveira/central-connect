@@ -3,11 +3,19 @@ import {
   ScaleMember,
   type ScaleMemberParams,
 } from "@/domain/entities/ScaleMember";
+import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IMemberAvailabilityRepository } from "@/domain/ports/IMemberAvailabilityRepository";
+import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
+import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
+import type { IMinistryRoleRepository } from "@/domain/ports/IMinistryRoleRepository";
 import type { IScaleRepository } from "@/domain/ports/IScaleRepository";
 import type { IScaleMemberRepository } from "@/domain/ports/IScaleMemberRepository";
+import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
 import type { Result } from "@/shared/types/Result";
 import type { ScaleDetailDTO } from "../../dtos/scale/ScaleDTO";
 import { ScaleErrors } from "../../errors/ScaleErrors";
+import { autoAssignScaleMembers } from "./autoAssignScaleMembers";
 import { BaseUseCase } from "../BaseUseCase";
 
 export interface CreateScaleInput {
@@ -16,6 +24,7 @@ export interface CreateScaleInput {
   ministryId: string;
   status?: "draft" | "published";
   notes?: string | null;
+  autoAssignMembers?: boolean;
   members?: {
     memberId: string;
     ministryRoleId: string;
@@ -35,6 +44,13 @@ export class CreateScale extends BaseUseCase<
   constructor(
     private readonly scaleRepository: IScaleRepository,
     private readonly scaleMemberRepository: IScaleMemberRepository,
+    private readonly churchRepository: IChurchRepository,
+    private readonly serviceRepository: IServiceRepository,
+    private readonly ministryRoleRepository: IMinistryRoleRepository,
+    private readonly memberRepository: IMemberRepository,
+    private readonly memberChurchRepository: IMemberChurchRepository,
+    private readonly memberMinistryRepository: IMemberMinistryRepository,
+    private readonly memberAvailabilityRepository: IMemberAvailabilityRepository,
   ) {
     super();
   }
@@ -68,9 +84,35 @@ export class CreateScale extends BaseUseCase<
       const scale = new Scale(scaleParams);
       const createdScale = await this.scaleRepository.create(scale);
 
+      const shouldAutoAssign = input.autoAssignMembers ?? false;
+      const membersToCreate =
+        input.members && input.members.length > 0
+          ? input.members
+          : shouldAutoAssign
+            ? await autoAssignScaleMembers(
+                {
+                  churchRepository: this.churchRepository,
+                  memberAvailabilityRepository:
+                    this.memberAvailabilityRepository,
+                  memberChurchRepository: this.memberChurchRepository,
+                  memberMinistryRepository: this.memberMinistryRepository,
+                  memberRepository: this.memberRepository,
+                  ministryRoleRepository: this.ministryRoleRepository,
+                  scaleMemberRepository: this.scaleMemberRepository,
+                  scaleRepository: this.scaleRepository,
+                  serviceRepository: this.serviceRepository,
+                },
+                {
+                  churchId: input.churchId,
+                  ministryId: input.ministryId,
+                  serviceId: input.serviceId,
+                },
+              )
+            : [];
+
       const createdMembers = [];
 
-      for (const member of input.members ?? []) {
+      for (const member of membersToCreate) {
         const memberParams: ScaleMemberParams = {
           scaleId: createdScale.id,
           memberId: member.memberId,

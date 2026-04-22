@@ -5,6 +5,7 @@ import type { ChurchFormData } from "@/application/dtos/church/ChurchDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
 import { FormSelect } from "@/components/ui/form-select";
+import { NumberStepper } from "@/components/ui/number-stepper";
 import { SelfSignupShareDialog } from "@/features/churches/components/SelfSignupShareDialog";
 import { useChurchForm } from "@/features/churches/hooks/useChurchForm";
 
@@ -51,6 +52,26 @@ export function ChurchForm({
           />
 
           <div className="space-y-2">
+            <NumberStepper
+              label="Máx. escalas seguidas por membro"
+              value={Number(form.watch("maxConsecutiveScalesPerMember")) || 2}
+              onChange={(value) => {
+                form.setValue("maxConsecutiveScalesPerMember", value, {
+                  shouldValidate: true,
+                });
+              }}
+              min={1}
+              max={10}
+              error={
+                form.formState.errors.maxConsecutiveScalesPerMember
+                  ?.message as string
+              }
+              disabled={readOnly}
+            />
+            <p className="text-xs text-muted-foreground">
+              Limita quantas escalas consecutivas o mesmo membro pode receber.
+            </p>
+
             <FormSelect
               label="Cargo padrão para auto cadastro"
               value={form.watch("selfSignupDefaultRoleId") || ""}

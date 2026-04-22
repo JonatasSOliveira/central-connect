@@ -9,6 +9,7 @@ export interface UpdateChurchInput {
   churchId: string;
   name: string;
   selfSignupDefaultRoleId?: string;
+  maxConsecutiveScalesPerMember?: number;
   updatedByUserId: string;
 }
 
@@ -61,6 +62,9 @@ export class UpdateChurch extends BaseUseCase<
         id: existingChurch.id,
         name: input.name,
         selfSignupDefaultRoleId,
+        maxConsecutiveScalesPerMember:
+          input.maxConsecutiveScalesPerMember ??
+          existingChurch.maxConsecutiveScalesPerMember,
         createdByUserId: existingChurch.createdByUserId ?? null,
         createdAt: existingChurch.createdAt,
         updatedAt: new Date(),

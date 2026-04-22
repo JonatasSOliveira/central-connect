@@ -7,6 +7,19 @@ export type GetMemberChurchOutput = {
   ministryIds: string[];
 };
 
+export type GetMemberAvailabilityOutput = {
+  mode: "ALLOW_LIST" | "BLOCK_LIST";
+  daysOfWeek: (
+    | "Sunday"
+    | "Monday"
+    | "Tuesday"
+    | "Wednesday"
+    | "Thursday"
+    | "Friday"
+    | "Saturday"
+  )[];
+};
+
 export type GetMemberOutput = {
   id: string;
   email: string | null;
@@ -14,6 +27,7 @@ export type GetMemberOutput = {
   phone: string | null;
   status: "Active" | "Inactive" | "Paused";
   avatarUrl: string | null;
+  availability: GetMemberAvailabilityOutput | null;
   churches: GetMemberChurchOutput[];
 };
 

@@ -37,6 +37,7 @@ export class GenerateWeekServices extends BaseUseCase<
   async execute(input: {
     churchId: string;
     weekStartDate: Date;
+    generatedByUserId?: string;
   }): Promise<Result<GenerateWeekOutput>> {
     try {
       const templates =

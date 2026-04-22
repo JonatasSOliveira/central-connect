@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { useMemberForm } from "@/features/members/hooks/useMemberForm";
+import { AvailabilitySection } from "./availability-section";
 import { BasicInfoSection } from "./basic-info-section";
 import { ChurchSection } from "./church-section";
 
@@ -90,6 +91,8 @@ export function MemberForm({
       <FormTemplate.Form<CreateMemberInput> form={form} onSubmit={onSubmit}>
         <FormTemplate.Content>
           <BasicInfoSection form={form} disabled={readOnly} />
+
+          <AvailabilitySection form={form} disabled={readOnly} />
 
           <ChurchSection
             form={form}

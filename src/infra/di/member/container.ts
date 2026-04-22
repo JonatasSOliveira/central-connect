@@ -96,6 +96,7 @@ class MemberContainer {
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
         MemberContainer.memberMinistryRepository,
+        MemberContainer.memberAvailabilityRepository,
       );
     }
     return MemberContainer._createMember;
@@ -107,6 +108,7 @@ class MemberContainer {
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
         MemberContainer.memberMinistryRepository,
+        MemberContainer.memberAvailabilityRepository,
         MemberContainer.churchRepository,
         MemberContainer.roleRepository,
       );
@@ -120,6 +122,7 @@ class MemberContainer {
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
         MemberContainer.memberMinistryRepository,
+        MemberContainer.memberAvailabilityRepository,
       );
     }
     return MemberContainer._updateMember;

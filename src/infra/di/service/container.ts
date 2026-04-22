@@ -9,15 +9,19 @@ import { GenerateWeekServices } from "@/application/use-cases/serviceTemplate/Ge
 import { GetServiceTemplate } from "@/application/use-cases/serviceTemplate/GetServiceTemplate";
 import { ListServiceTemplates } from "@/application/use-cases/serviceTemplate/ListServiceTemplates";
 import { UpdateServiceTemplate } from "@/application/use-cases/serviceTemplate/UpdateServiceTemplate";
+import type { IMinistryRepository } from "@/domain/ports/IMinistryRepository";
 import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
 import type { IServiceTemplateRepository } from "@/domain/ports/IServiceTemplateRepository";
+import { MinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MinistryFirebaseRepository";
 import { ServiceFirebaseRepository } from "@/infra/firebase-admin/repositories/ServiceFirebaseRepository";
 import { ServiceTemplateFirebaseRepository } from "@/infra/firebase-admin/repositories/ServiceTemplateFirebaseRepository";
+import { scaleContainer } from "@/infra/di/scale/container";
 
 class ServiceContainer {
   private static _serviceRepository: IServiceRepository | null = null;
   private static _serviceTemplateRepository: IServiceTemplateRepository | null =
     null;
+  private static _ministryRepository: IMinistryRepository | null = null;
   private static _listServices: ListServices | null = null;
   private static _createService: CreateService | null = null;
   private static _getService: GetService | null = null;
@@ -45,6 +49,13 @@ class ServiceContainer {
         new ServiceTemplateFirebaseRepository();
     }
     return ServiceContainer._serviceTemplateRepository;
+  }
+
+  static get ministryRepository(): IMinistryRepository {
+    if (!ServiceContainer._ministryRepository) {
+      ServiceContainer._ministryRepository = new MinistryFirebaseRepository();
+    }
+    return ServiceContainer._ministryRepository;
   }
 
   static get listServices(): ListServices {

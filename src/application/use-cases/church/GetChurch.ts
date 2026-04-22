@@ -12,6 +12,7 @@ export interface GetChurchOutput {
     id: string;
     name: string;
     selfSignupDefaultRoleId: string | null;
+    maxConsecutiveScalesPerMember: number;
   };
 }
 
@@ -38,6 +39,8 @@ export class GetChurch extends BaseUseCase<GetChurchInput, GetChurchOutput> {
             id: church.id,
             name: church.name,
             selfSignupDefaultRoleId: church.selfSignupDefaultRoleId,
+            maxConsecutiveScalesPerMember:
+              church.maxConsecutiveScalesPerMember,
           },
         },
       };

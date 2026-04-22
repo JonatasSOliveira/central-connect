@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
   const result = await churchContainer.createChurch.execute({
     name: parsed.data.name,
     selfSignupDefaultRoleId: parsed.data.selfSignupDefaultRoleId,
+    maxConsecutiveScalesPerMember: parsed.data.maxConsecutiveScalesPerMember,
     createdByUserId: auth.user.userId,
   });
 

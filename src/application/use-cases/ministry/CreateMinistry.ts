@@ -60,8 +60,6 @@ export class CreateMinistry extends BaseUseCase<
         idealMembersPerService: input.idealMembersPerService,
         notes: input.notes ?? null,
         createdByUserId: input.createdByUserId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
       const ministry = new Ministry(ministryParams);
@@ -97,13 +95,13 @@ export class CreateMinistry extends BaseUseCase<
             idealMembersPerService: createdMinistry.idealMembersPerService,
             notes: createdMinistry.notes,
             createdAt: createdMinistry.createdAt,
-              roles: createdRoles.map((r) => ({
-                id: r.id,
-                name: r.name,
-                requiredCount: r.requiredCount,
-              })),
-            },
+            roles: createdRoles.map((r) => ({
+              id: r.id,
+              name: r.name,
+              requiredCount: r.requiredCount,
+            })),
           },
+        },
       };
     } catch {
       return {

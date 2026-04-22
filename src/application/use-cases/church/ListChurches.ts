@@ -36,6 +36,8 @@ export class ListChurches extends BaseUseCase<
       const churchDTOs: ChurchListItemDTO[] = churches.map((church) => ({
         id: church.id,
         name: church.name,
+        selfSignupDefaultRoleId: church.selfSignupDefaultRoleId,
+        maxConsecutiveScalesPerMember: church.maxConsecutiveScalesPerMember,
       }));
 
       return {

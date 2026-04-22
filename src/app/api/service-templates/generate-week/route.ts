@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
   const result = await serviceContainer.generateWeekServices.execute({
     churchId,
     weekStartDate,
+    generatedByUserId: user.userId,
   });
 
   const errorCode = "error" in result ? result.error?.code : undefined;
