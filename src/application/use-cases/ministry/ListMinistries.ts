@@ -59,6 +59,7 @@ export class ListMinistries extends BaseUseCase<
             roles: roles.map((r) => ({
               id: r.id,
               name: r.name,
+              requiredCount: r.requiredCount,
             })),
           };
         }),

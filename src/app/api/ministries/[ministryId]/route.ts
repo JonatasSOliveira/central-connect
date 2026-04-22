@@ -134,6 +134,7 @@ export async function PUT(
     roles: parsed.data.roles.map((r) => ({
       id: r.id ?? null,
       name: r.name,
+      requiredCount: r.requiredCount,
     })),
     updatedByUserId: user.userId,
   });

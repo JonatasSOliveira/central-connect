@@ -1,5 +1,6 @@
 export { AuditableEntity } from "./AuditableEntity";
 export { AuditLog } from "./AuditLog";
+export type { AvailabilityMode } from "./AvailabilityMode";
 export { BaseEntity } from "./BaseEntity";
 export { Church } from "./Church";
 export type { DayOfWeek } from "./DayOfWeek";

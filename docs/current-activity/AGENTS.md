@@ -1,371 +1,265 @@
-# AGENTS.md - Atividade 15: Auto Cadastro de Membros
+# AGENTS.md - Atividade 16: Regras de Escala e Geracao Automatica
 
 ## Contexto da Atividade
 
-Implementar um fluxo publico de auto cadastro para membros, com vinculacao obrigatoria a uma igreja especifica via link, finalizacao com Google e atribuicao automatica de cargo do sistema com base na configuracao da igreja.
+Implementar regras de alocacao para escalas com base em:
+
+- disponibilidade semanal de membros
+- limite maximo de escalas seguidas por membro
+- quantidade obrigatoria por funcao (role) em cada ministerio
+- geracao automatica/manual de escalas para cultos
+
+Referencia funcional obrigatoria:
+
+- `docs/current-activity/16-regras-escala-automatica.md`
 
 ---
 
 ## Decisoes Tecnicas Obrigatorias
 
-1. A URL de auto cadastro deve usar **route param**, nao query param.
-   - Formato recomendado: `/signup/[churchId]`
-2. O cargo padrao da igreja deve referenciar a entidade **UserRole** (`src/domain/entities/UserRole.ts`), nao enum.
-3. O backend decide o cargo final. O frontend nao pode escolher `roleId` no fluxo publico.
-4. A busca por telefone deve ser global (independente de igreja).
+1. `maxConsecutiveScalesPerMember` e **global por igreja**.
+2. O backend decide elegibilidade e alocacao final. Frontend nao envia decisao de alocacao.
+3. Geracao automatica deve ser idempotente.
+4. Escalas `published` nao podem ser sobrescritas pela rotina automatica.
+5. Regra existente deve continuar valida: um membro nao pode estar em dois ministerios no mesmo culto.
+6. Quantidade por funcao vem de `requiredCount` em `MinistryRole`.
 
 ---
 
-## Escopo Funcional
+## Planejamento Passo a Passo (execucao recomendada)
 
-### 1) Pagina publica de auto cadastro
+### Passo 1 - Dominio e Persistencia
 
-- Criar pagina publica de auto cadastro sem exigir sessao previa.
-- Receber `churchId` obrigatoriamente pelo path.
-- Carregar contexto minimo da igreja (nome e status de auto cadastro).
-- Se igreja nao existir ou estiver indisponivel para auto cadastro, bloquear finalizacao com mensagem amigavel.
+Objetivo: criar os campos e contratos que sustentam as regras.
 
-### 2) Fluxo em duas etapas no formulario
+1. Atualizar `Church` com `maxConsecutiveScalesPerMember` (obrigatorio, inteiro > 0).
+2. Atualizar `MinistryRole` com `requiredCount` (obrigatorio, inteiro >= 1).
+3. Evoluir disponibilidade semanal:
+   - Reaproveitar `MemberAvailability` e adicionar `mode` (`ALLOW_LIST` | `BLOCK_LIST`) por membro+igreja,
+   - ou modelar estrutura equivalente mantendo semantica identica.
+4. Atualizar mappers/repositories Firebase Admin para novos campos.
+5. Garantir defaults seguros para dados legados:
+   - igreja sem valor: definir default de `maxConsecutiveScalesPerMember` no use case/API (ex.: 2)
+   - role sem valor: `requiredCount = 1`
 
-- Etapa 1: telefone (obrigatorio).
-- Ao confirmar telefone, consultar membro existente globalmente.
-- Etapa 2: exibir demais campos (email opcional).
-- Se membro existir, preencher automaticamente os campos conhecidos para confirmacao/edicao.
+Entregaveis minimos:
 
-### 3) Finalizacao com Google
+- entidades atualizadas
+- repositorios atualizados
+- sem quebra de leitura de dados antigos
 
-- CTA final deve ser amigavel (ex: "Continuar com Google para finalizar").
-- Ao clicar, executar login Google (fluxo atual de client).
-- Enviar token Google + dados do formulario + `churchId` para endpoint de finalizacao.
-- Regras de persistencia:
-  - Membro novo: criar membro, criar usuario (se necessario), vincular em `MemberChurch`.
-  - Membro existente: atualizar dados permitidos e vincular em `MemberChurch` se ainda nao vinculado.
-- Garantir idempotencia: nao duplicar `MemberChurch` para o mesmo `memberId + churchId`.
+### Passo 2 - DTOs e APIs de Cadastro
 
-### 4) Cargo padrao da igreja para auto cadastro
+Objetivo: permitir editar as novas regras no sistema.
 
-- Adicionar campo em Igreja: `defaultSelfSignupUserRoleId` (nome sugerido).
-- Campo referencia `roles.id` (UserRole).
-- Campo editavel no formulario de igreja (create/edit).
-- Campo obrigatorio para permitir auto cadastro.
-- Fallback para igrejas legadas sem valor: usar role de menor privilegio (regra definida pelo produto) ate configuracao explicita.
-- Mudanca desse campo afeta apenas novos auto cadastros.
+1. Church DTOs/API:
+   - incluir `maxConsecutiveScalesPerMember` em create/update/get
+2. Ministry DTOs/API:
+   - incluir `requiredCount` por role no create/update/get
+3. Member DTOs/API:
+   - incluir disponibilidade semanal (modo + dias)
+4. Validacao Zod obrigatoria para todos os campos novos.
 
-### 5) Geracao de link e QRCode
+Entregaveis minimos:
 
-- Disponibilizar no modulo de igrejas uma acao para:
-  - copiar link de auto cadastro da igreja
-  - visualizar/baixar QRCode correspondente
-- Link deve apontar para a rota publica com `churchId`.
+- payloads novos validados
+- dados persistidos e retornados corretamente
 
----
+### Passo 3 - Frontend de Configuracao
 
-## Dominio: Entidades a Atualizar
+Objetivo: expor regras no UI com boa UX mobile-first.
 
-### Church (`src/domain/entities/Church.ts`)
+1. Membro:
+   - secao "Disponibilidade semanal"
+   - seletor de modo (ALLOW/BLOCK)
+   - selecao dos dias da semana
+2. Igreja:
+   - secao "Regras de Escala"
+   - campo `maxConsecutiveScalesPerMember` com NumberStepper
+3. Ministerio:
+   - em cada role, incluir `requiredCount` com NumberStepper
+   - feedback de validacao por role
 
-Adicionar campo:
+Entregaveis minimos:
 
-```typescript
-protected readonly _defaultSelfSignupUserRoleId: string | null;
-```
+- formularios create/edit atualizados
+- estados de erro/sucesso consistentes
 
-Atualizar `ChurchParams`:
+### Passo 4 - Motor de Elegibilidade e Alocacao
 
-```typescript
-defaultSelfSignupUserRoleId?: string | null;
-```
+Objetivo: criar algoritmo deterministico para gerar escalas.
 
-Adicionar getter publico:
+Implementar use cases/helpers:
 
-```typescript
-get defaultSelfSignupUserRoleId(): string | null;
-```
+1. `ValidateMemberEligibilityForService`
+   - verifica disponibilidade no dia
+   - verifica limite de escalas seguidas na igreja
+   - verifica conflito no mesmo culto (membro ja usado)
+2. `GenerateScalesAutomatically`
+   - recebe janela de servicos alvo
+   - cria/atualiza escalas `draft` por `service + ministry`
+   - preenche vagas por role conforme `requiredCount`
+   - gera resumo com pendencias e motivos
 
-### Member (`src/domain/entities/Member.ts`) - recomendacao para busca por telefone
+Criterio de desempate (deterministico):
 
-Se necessario para performance/consistencia da busca:
+1. menor sequencia atual
+2. menor carga recente
+3. ordem alfabetica
 
-- Adicionar campo persistido normalizado (ex: `phoneNormalized`) ou garantir normalizacao consistente no campo `phone`.
-- A consulta global deve usar valor normalizado (somente digitos ou E.164, padrao unico no projeto).
+Entregaveis minimos:
 
----
+- geracao manual funcional
+- resumo de execucao
 
-## Ports e Repositories
+### Passo 5 - API de Geracao
 
-### IChurchRepository
+Objetivo: expor geracao com seguranca.
 
-- Sem mudanca obrigatoria de assinatura base, mas deve persistir/retornar `defaultSelfSignupUserRoleId`.
+1. Criar endpoint manual:
+   - `POST /api/scales/generate`
+2. Criar endpoint para scheduler interno:
+   - `POST /api/scales/generate/scheduled-run`
+3. Aplicar autorizacao por permissao (novo permission group de automacao de escala ou reutilizacao controlada).
+4. Garantir multi-tenant por `churchId`.
 
-### IMemberRepository
+Entregaveis minimos:
 
-Adicionar metodo para consulta global por telefone:
+- endpoints funcionando
+- erros padronizados
 
-```typescript
-findByPhone(phone: string): Promise<Member | null>;
-```
+### Passo 6 - Agendamento
 
-ou (preferivel para evitar ambiguidades):
+Objetivo: suportar execucao automatica por horario.
 
-```typescript
-findByNormalizedPhone(phoneNormalized: string): Promise<Member | null>;
-```
+1. Configuracao de agendamento no `ServiceTemplate` (ou modelo equivalente):
+   - habilitado
+   - dia/hora de execucao
+   - antecedencia em dias
+2. `RunScheduledScaleGeneration` para executar rotina agendada.
+3. Integrar com mecanismo de cron do ambiente (endpoint interno seguro).
 
-### IRoleRepository
+Entregaveis minimos:
 
-- Reusar `findById` para validar se o `defaultSelfSignupUserRoleId` existe.
+- configuracao salva
+- rotina executavel por cron
 
-### Implementacoes Firebase Admin
+### Passo 7 - UI de Acionamento em Escalas
 
-Atualizar:
+Objetivo: permitir operacao manual clara para usuarios autorizados.
 
-- `ChurchFirebaseRepository` + mapper de church
-- `MemberFirebaseRepository` + mapper de member (caso incluir normalizacao de telefone)
+1. Adicionar acao "Gerar escalas automaticamente" em `/scales`.
+2. Form simplificado para periodo alvo.
+3. Exibir resumo pos-geracao:
+   - criadas
+   - atualizadas
+   - pendentes
+   - principais motivos de bloqueio
 
----
+Entregaveis minimos:
 
-## DTOs e Validacao (Zod)
+- fluxo manual de geracao no frontend
 
-### Church DTOs
+### Passo 8 - Validacao Final
 
-Atualizar DTO de igreja para aceitar novo campo:
-
-- `defaultSelfSignupUserRoleId: z.string().min(1)` (com estrategia de fallback para legado no use case)
-
-### Novo DTO de lookup publico por telefone
-
-Local sugerido:
-
-`src/application/dtos/self-signup/SelfSignupLookupDTO.ts`
-
-```typescript
-phone: string;
-churchId: string;
-```
-
-Resposta sugerida:
-
-```typescript
-memberExists: boolean;
-prefill?: {
-  fullName: string;
-  email: string | null;
-  phone: string | null;
-}
-```
-
-### Novo DTO de finalizacao publica
-
-Local sugerido:
-
-`src/application/dtos/self-signup/FinalizeSelfSignupDTO.ts`
-
-```typescript
-churchId: string;
-googleToken: string;
-fullName: string;
-phone: string;
-email?: string;
-```
-
-Regras:
-
-- `email` opcional no formulario, mas email vindo do Google deve ser fonte confiavel de autenticacao.
-- Ignorar `roleId` no payload do cliente.
+1. Validar cenarios obrigatorios do arquivo da atividade.
+2. Rodar:
+   - `pnpm lint`
+   - `pnpm build`
+3. Registrar pendencias que ficarem fora de escopo.
 
 ---
 
-## Use Cases (Application Layer)
+## Regras de Negocio Obrigatorias
 
-Criar pasta:
-
-`src/application/use-cases/self-signup/`
-
-### 1. GetSelfSignupChurchContext
-
-- Entrada: `churchId`
-- Saida: dados publicos da igreja necessarios para tela
-- Nao expor dados sensiveis
-
-### 2. LookupMemberByPhone
-
-- Entrada: `churchId`, `phone`
-- Normalizar telefone
-- Buscar membro globalmente por telefone
-- Retornar somente dados de prefill permitidos
-
-### 3. FinalizeSelfSignupWithGoogle
-
-Fluxo esperado:
-
-1. Validar igreja e `defaultSelfSignupUserRoleId`
-2. Validar role em `IRoleRepository`
-3. Validar token Google com servico atual
-4. Identificar membro alvo por telefone (ou por email Google com regra definida)
-5. Criar/atualizar Member
-6. Criar User quando nao existir (por `memberId`)
-7. Garantir vinculacao `MemberChurch` com `roleId = church.defaultSelfSignupUserRoleId`
-8. Retornar sucesso + informacoes de sessao (ou orientar login imediato com endpoint atual)
-
-Observacao:
-
-- Se houver divergencia entre email digitado e email do Google, priorizar email autenticado do Google para identidade.
+1. Disponibilidade semanal e obrigatoria para o motor de elegibilidade.
+2. Limite de sequencia e aplicado por igreja, nao por ministerio.
+3. Nao duplicar escala para mesmo `serviceId + ministryId`.
+4. Nao duplicar membro na mesma escala.
+5. Nao escalar membro em ministerios diferentes no mesmo culto.
+6. Respeitar `requiredCount` por role; se faltar candidato, registrar pendencia.
+7. Nao editar automaticamente escala publicada.
 
 ---
 
-## Dependency Injection
+## Arquivos Alvo (guia)
 
-Criar container de self-signup:
+### Dominio
 
-`src/infra/di/self-signup/container.ts`
+- `src/domain/entities/Church.ts`
+- `src/domain/entities/MinistryRole.ts`
+- `src/domain/entities/MemberAvailability.ts`
 
-Dependencias minimas:
+### Ports
 
-- `IChurchRepository`
-- `IMemberRepository`
-- `IMemberChurchRepository`
-- `IUserRepository`
-- `IRoleRepository`
-- `IGoogleAuthService`
-- `ITokenService` (se o fluxo tambem criar sessao imediatamente)
+- `src/domain/ports/IChurchRepository.ts`
+- `src/domain/ports/IMinistryRoleRepository.ts`
+- `src/domain/ports/IMemberAvailabilityRepository.ts` (novo se necessario)
+- `src/domain/ports/IScaleRepository.ts`
+- `src/domain/ports/IScaleMemberRepository.ts`
 
-Atualizar:
+### Infra Firebase Admin
 
-- `src/infra/di/index.ts` para exportar `selfSignupContainer`
+- mappers/repositories de church, ministryRole, memberAvailability, scale e scaleMember
 
----
+### Application
 
-## API: Route Handlers
+- DTOs de member/church/ministry/scale-generate
+- use-cases de elegibilidade e geracao automatica
 
-Criar rotas publicas em:
+### API
 
-`src/app/api/public/self-signup/`
+- `src/app/api/churches/*`
+- `src/app/api/members/*`
+- `src/app/api/ministries/*`
+- `src/app/api/scales/generate/route.ts` (novo)
+- `src/app/api/scales/generate/scheduled-run/route.ts` (novo)
 
-### Endpoints sugeridos
+### Frontend
 
-1. `GET /api/public/self-signup/[churchId]`
-   - Obter contexto publico da igreja para auto cadastro
-
-2. `POST /api/public/self-signup/lookup-member`
-   - Body: `churchId`, `phone`
-   - Retorna prefill basico sem vazar dados sensiveis
-
-3. `POST /api/public/self-signup/finalize`
-   - Body: `churchId`, `googleToken`, dados de cadastro
-   - Executa criar/atualizar + vincular + atribuir role
-
-### Seguranca
-
-- Essas rotas sao publicas (sem cookie de sessao), mas devem:
-  - validar schema estritamente
-  - limitar superficie de dados retornados
-  - aplicar rate-limit (se ja existir infra de rate-limit)
-  - nunca aceitar `roleId` do cliente
-
----
-
-## Frontend: Paginas, Hooks e Componentes
-
-### Pagina publica
-
-Local sugerido:
-
-`src/app/(public)/signup/[churchId]/page.tsx`
-
-### Feature sugerida
-
-`src/features/self-signup/`
-
-Arquivos sugeridos:
-
-- `hooks/useSelfSignup.ts`
-- `components/SelfSignupPhoneStep.tsx`
-- `components/SelfSignupFormStep.tsx`
-- `components/SelfSignupGoogleButton.tsx`
-
-### Ajustes em Igreja
-
-- Atualizar `src/features/churches/components/ChurchForm.tsx`
-- Atualizar `src/features/churches/hooks/useChurchForm.ts`
-- Exibir seletor de role padrao de auto cadastro no formulario da igreja
-
-### QRCode na area privada
-
-Adicionar na experiencia de igrejas (lista ou edicao):
-
-- acao "Link de auto cadastro"
-- modal/cartao com link e QRCode
-
----
-
-## Regras de Negocio e Validacoes
-
-1. **Igreja obrigatoria por path**
-   - Sem `churchId` valido, nao existe auto cadastro.
-
-2. **Role obrigatoria por igreja**
-   - Se igreja nao tiver `defaultSelfSignupUserRoleId`, bloquear finalizacao e orientar configuracao no admin.
-
-3. **Role valida**
-   - `defaultSelfSignupUserRoleId` deve existir em `roles`.
-
-4. **Vinculacao idempotente**
-   - Nao criar duplicata em `member_churches` para mesma combinacao `memberId + churchId`.
-
-5. **Privacidade na busca de telefone**
-   - Retornar apenas campos necessarios para prefill.
-   - Nao retornar listas de igrejas/permissoes/roles.
-
-6. **Integridade com Google**
-   - Token Google obrigatorio na finalizacao.
-   - Identidade autenticada vem do provedor Google.
-
-7. **Multitenancy preservado**
-   - Mesmo com busca global de membro, vinculacao sempre direcionada para igreja do link.
+- `src/features/members/*`
+- `src/features/churches/*`
+- `src/features/ministries/*`
+- `src/features/scales/*`
+- `src/features/serviceTemplates/*` (config de agendamento)
 
 ---
 
 ## Checklist de Implementacao
 
 ### Fase 1: Dominio e Persistencia
-- [ ] Atualizar entidade `Church` com `defaultSelfSignupUserRoleId`
-- [ ] Atualizar mapper e repository de church
-- [ ] Adicionar busca por telefone global no member repository
+- [ ] Campo global de sequencia por igreja implementado
+- [ ] Campo `requiredCount` por role implementado
+- [ ] Disponibilidade semanal por membro implementada
+- [ ] Mappers/repositories atualizados
 
-### Fase 2: DTOs
-- [ ] Atualizar DTOs de church para novo campo
-- [ ] Criar DTO de lookup por telefone
-- [ ] Criar DTO de finalizacao de auto cadastro
+### Fase 2: Cadastro e Edicao
+- [ ] APIs de membro/igreja/ministerio atualizadas
+- [ ] Formularios atualizados
+- [ ] Validacoes Zod atualizadas
 
-### Fase 3: Use Cases
-- [ ] Criar `GetSelfSignupChurchContext`
-- [ ] Criar `LookupMemberByPhone`
-- [ ] Criar `FinalizeSelfSignupWithGoogle`
+### Fase 3: Geracao Automatica
+- [ ] Algoritmo de elegibilidade implementado
+- [ ] Geracao por role respeitando `requiredCount`
+- [ ] Respeito a regras de conflito no mesmo culto
+- [ ] Resumo de pendencias implementado
 
-### Fase 4: DI e API
-- [ ] Criar `self-signup/container.ts`
-- [ ] Exportar no `infra/di/index.ts`
-- [ ] Criar rotas `/api/public/self-signup/*`
+### Fase 4: Agendamento
+- [ ] Configuracao de agendamento no modelo de culto
+- [ ] Endpoint interno de execucao agendada
+- [ ] Idempotencia garantida
 
-### Fase 5: Frontend
-- [ ] Criar pagina publica `/signup/[churchId]`
-- [ ] Implementar formulario em duas etapas
-- [ ] Integrar com login Google
-- [ ] Atualizar formulario de igreja com role padrao
-- [ ] Implementar visualizacao de link + QRCode
-
-### Fase 6: Validacao Final
-- [ ] Fluxo de novo membro validado
-- [ ] Fluxo de membro existente validado
-- [ ] Fluxo de igreja invalida validado
+### Fase 5: Validacao
+- [ ] Cenarios manuais obrigatorios validados
 - [ ] `pnpm lint` passando
 - [ ] `pnpm build` passando
 
 ---
 
-## Fora de Escopo
+## O que nunca fazer nesta atividade
 
-- Auto cadastro para multiplas igrejas no mesmo link
-- Definicao manual de role no fluxo publico
-- Migracao retroativa de role para membros ja vinculados
-- Alteracao do modelo de permissao fora do uso de `UserRole`
+- Nao quebrar regras multi-tenant por `churchId`.
+- Nao sobrescrever escalas publicadas automaticamente.
+- Nao depender do frontend para decidir elegibilidade.
+- Nao introduzir aleatoriedade sem criterio deterministico de desempate.
+- Nao usar `any` em TypeScript.

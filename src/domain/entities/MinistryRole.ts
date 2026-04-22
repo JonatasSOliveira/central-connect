@@ -3,6 +3,7 @@ import { BaseEntity, type BaseEntityParams } from "./BaseEntity";
 export class MinistryRole extends BaseEntity {
   protected readonly _ministryId: string;
   protected readonly _name: string;
+  protected readonly _requiredCount: number;
   protected readonly _createdByUserId: string | null;
   protected readonly _updatedByUserId: string | null;
 
@@ -10,6 +11,7 @@ export class MinistryRole extends BaseEntity {
     super(params);
     this._ministryId = params.ministryId;
     this._name = params.name;
+    this._requiredCount = params.requiredCount ?? 1;
     this._createdByUserId = params.createdByUserId ?? null;
     this._updatedByUserId = params.updatedByUserId ?? null;
   }
@@ -20,6 +22,10 @@ export class MinistryRole extends BaseEntity {
 
   get name(): string {
     return this._name;
+  }
+
+  get requiredCount(): number {
+    return this._requiredCount;
   }
 
   get createdByUserId(): string | null {
@@ -34,6 +40,7 @@ export class MinistryRole extends BaseEntity {
 export interface MinistryRoleParams extends BaseEntityParams {
   ministryId: string;
   name: string;
+  requiredCount?: number;
   createdByUserId?: string | null;
   updatedByUserId?: string | null;
 }

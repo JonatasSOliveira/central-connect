@@ -35,7 +35,7 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
   };
 
   const handleAddRole = () => {
-    editableAppend({ name: "", id: null });
+    editableAppend({ name: "", id: null, requiredCount: 1 });
   };
 
   if (isFetching) {
@@ -135,10 +135,27 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
                 index={index}
                 onRemove={() => editableRemove(index)}
               >
-                <Input
-                  placeholder="Nome da função"
-                  {...form.register(`roles.${index}.name`)}
-                />
+                <div className="space-y-3">
+                  <Input
+                    placeholder="Nome da função"
+                    {...form.register(`roles.${index}.name`)}
+                  />
+                  <NumberStepper
+                    label="Qtd. obrigatória"
+                    value={Number(form.watch(`roles.${index}.requiredCount`)) || 1}
+                    onChange={(value) =>
+                      form.setValue(`roles.${index}.requiredCount`, value, {
+                        shouldValidate: true,
+                      })
+                    }
+                    min={1}
+                    max={20}
+                    error={
+                      form.formState.errors.roles?.[index]?.requiredCount
+                        ?.message as string
+                    }
+                  />
+                </div>
                 {form.formState.errors.roles?.[index]?.name && (
                   <p className="text-xs text-destructive">
                     {
