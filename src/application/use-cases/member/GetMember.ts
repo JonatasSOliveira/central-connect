@@ -92,16 +92,9 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
         visibleChurches = churchesWithPermission;
       }
 
-      const churchIdForAvailability =
-        visibleChurches.find((church) => church.userPermission === "write")
-          ?.churchId ?? visibleChurches[0]?.churchId;
-
-      const memberAvailability = churchIdForAvailability
-        ? await this.memberAvailabilityRepository.findByMemberAndChurch(
-            input.memberId,
-            churchIdForAvailability,
-          )
-        : null;
+      const memberAvailability = await this.memberAvailabilityRepository.findByMemberId(
+        input.memberId,
+      );
 
       return {
         ok: true,

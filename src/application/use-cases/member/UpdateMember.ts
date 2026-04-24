@@ -103,28 +103,17 @@ export class UpdateMember extends BaseUseCase<
       }
 
       if (input.availability) {
-        const churchesToApply =
-          input.churches?.map((churchInfo) => churchInfo.churchId) ??
-          (await this.memberChurchRepository.findByMemberId(memberId)).map(
-            (church) => church.churchId,
-          );
+        const memberAvailabilityParams: MemberAvailabilityParams = {
+          memberId,
+          mode: input.availability.mode,
+          daysOfWeek: input.availability.daysOfWeek,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
 
-        for (const churchId of churchesToApply) {
-          const memberAvailabilityParams: MemberAvailabilityParams = {
-            memberId,
-            churchId,
-            mode: input.availability.mode,
-            daysOfWeek: input.availability.daysOfWeek,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
+        const memberAvailability = new MemberAvailability(memberAvailabilityParams);
 
-          const memberAvailability = new MemberAvailability(
-            memberAvailabilityParams,
-          );
-
-          await this.memberAvailabilityRepository.upsert(memberAvailability);
-        }
+        await this.memberAvailabilityRepository.upsert(memberAvailability);
       }
 
       return {

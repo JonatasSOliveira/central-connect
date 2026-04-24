@@ -85,20 +85,18 @@ export class CreateMember extends BaseUseCase<
           await this.memberMinistryRepository.create(memberMinistry);
         }
 
-        if (input.availability) {
-          const memberAvailabilityParams: MemberAvailabilityParams = {
-            memberId: createdMember.id,
-            churchId: churchInfo.churchId,
-            mode: input.availability.mode,
-            daysOfWeek: input.availability.daysOfWeek,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-          const memberAvailability = new MemberAvailability(
-            memberAvailabilityParams,
-          );
-          await this.memberAvailabilityRepository.upsert(memberAvailability);
-        }
+      }
+
+      if (input.availability) {
+        const memberAvailabilityParams: MemberAvailabilityParams = {
+          memberId: createdMember.id,
+          mode: input.availability.mode,
+          daysOfWeek: input.availability.daysOfWeek,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        const memberAvailability = new MemberAvailability(memberAvailabilityParams);
+        await this.memberAvailabilityRepository.upsert(memberAvailability);
       }
 
       return {

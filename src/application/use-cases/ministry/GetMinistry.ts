@@ -47,8 +47,6 @@ export class GetMinistry extends BaseUseCase<
             churchId: ministry.churchId,
             name: ministry.name,
             leaderId: ministry.leaderId,
-            minMembersPerService: ministry.minMembersPerService,
-            idealMembersPerService: ministry.idealMembersPerService,
             notes: ministry.notes,
             createdAt: ministry.createdAt,
             roles: roles.map((r) => ({

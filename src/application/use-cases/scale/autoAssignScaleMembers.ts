@@ -65,15 +65,13 @@ export async function autoAssignScaleMembers(
   deps: AutoAssignDeps,
   input: AutoAssignInput,
 ): Promise<AutoAssignedScaleMember[]> {
-  const [church, service, roles, memberChurches, memberMinistries, availabilities] =
-    await Promise.all([
-      deps.churchRepository.findById(input.churchId),
-      deps.serviceRepository.findById(input.serviceId),
-      deps.ministryRoleRepository.findByMinistryId(input.ministryId),
-      deps.memberChurchRepository.findByChurchId(input.churchId),
-      deps.memberMinistryRepository.findByMinistryId(input.ministryId),
-      deps.memberAvailabilityRepository.findByChurchId(input.churchId),
-    ]);
+  const [church, service, roles, memberChurches, memberMinistries] = await Promise.all([
+    deps.churchRepository.findById(input.churchId),
+    deps.serviceRepository.findById(input.serviceId),
+    deps.ministryRoleRepository.findByMinistryId(input.ministryId),
+    deps.memberChurchRepository.findByChurchId(input.churchId),
+    deps.memberMinistryRepository.findByMinistryId(input.ministryId),
+  ]);
 
   if (!service || service.churchId !== input.churchId || roles.length === 0) {
     return [];
@@ -95,6 +93,9 @@ export async function autoAssignScaleMembers(
   if (candidateIds.length === 0) {
     return [];
   }
+
+  const availabilities =
+    await deps.memberAvailabilityRepository.findByMemberIds(candidateIds);
 
   const [candidates, churchServices, scales] = await Promise.all([
     deps.memberRepository.findByIds(candidateIds),

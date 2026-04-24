@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
+import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { GenerateScaleDialog } from "./generate-scale-dialog";
 import { ScaleFilter } from "./ScaleFilter";
 import { ScaleItem } from "./ScaleItem";
 import { useScales } from "../hooks/useScales";
@@ -37,6 +39,7 @@ export function ScaleList() {
     filters,
     setFilters,
     deleteScale,
+    refresh,
   } = useScales();
 
   const [services, setServices] = useState<ServiceOption[]>([]);
@@ -247,11 +250,13 @@ export function ScaleList() {
         )}
       </div>
 
-      <ListTemplate.Action
-        label="Nova escala"
-        icon={Plus}
-        onClick={handleCreateScale}
-      />
+      <div className="flex justify-end gap-2">
+        <GenerateScaleDialog onSuccess={refresh} />
+        <Button onClick={handleCreateScale}>
+          <Plus className="w-4 h-4 mr-2" />
+          Nova escala
+        </Button>
+      </div>
 
       {renderContent()}
     </ListTemplate>

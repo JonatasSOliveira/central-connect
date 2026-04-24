@@ -145,8 +145,6 @@ export async function POST(request: NextRequest) {
     churchId,
     name: parsed.data.name,
     leaderId: parsed.data.leaderId,
-    minMembersPerService: parsed.data.minMembersPerService,
-    idealMembersPerService: parsed.data.idealMembersPerService,
     notes: parsed.data.notes,
     roles: parsed.data.roles,
     createdByUserId: user.userId,

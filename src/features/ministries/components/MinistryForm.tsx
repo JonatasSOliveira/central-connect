@@ -69,38 +69,6 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
             placeholder="Selecione"
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            <NumberStepper
-              label="Mín. membros"
-              value={Number(form.watch("minMembersPerService")) || 1}
-              onChange={(value) =>
-                form.setValue("minMembersPerService", value, {
-                  shouldValidate: true,
-                })
-              }
-              min={0}
-              max={20}
-              error={
-                form.formState.errors.minMembersPerService?.message as string
-              }
-            />
-
-            <NumberStepper
-              label="Mín. ideal"
-              value={Number(form.watch("idealMembersPerService")) || 2}
-              onChange={(value) =>
-                form.setValue("idealMembersPerService", value, {
-                  shouldValidate: true,
-                })
-              }
-              min={0}
-              max={50}
-              error={
-                form.formState.errors.idealMembersPerService?.message as string
-              }
-            />
-          </div>
-
           <FormField<MinistryFormInput>
             form={form}
             name="notes"

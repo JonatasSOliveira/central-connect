@@ -46,7 +46,6 @@ export function memberAvailabilityToPersistence(
   memberAvailability: MemberAvailability,
 ): DocumentData {
   return convertDatesToTimestamps({
-    churchId: memberAvailability.churchId,
     memberId: memberAvailability.memberId,
     mode: memberAvailability.mode,
     daysOfWeek: memberAvailability.daysOfWeek,
@@ -64,8 +63,7 @@ export function memberAvailabilityFromPersistence(
 
   const params: MemberAvailabilityParams = {
     id,
-    churchId: convertedData.churchId ?? "",
-    memberId: convertedData.memberId ?? "",
+    memberId: convertedData.memberId ?? id,
     mode: normalizeMode(convertedData.mode),
     daysOfWeek: normalizeDaysOfWeek(convertedData.daysOfWeek),
     createdAt: convertedData.createdAt,

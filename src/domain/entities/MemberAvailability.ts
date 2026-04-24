@@ -3,21 +3,15 @@ import type { AvailabilityMode } from "./AvailabilityMode";
 import type { DayOfWeek } from "./DayOfWeek";
 
 export class MemberAvailability extends AuditableEntity {
-  protected readonly _churchId: string;
   protected readonly _memberId: string;
   protected readonly _mode: AvailabilityMode;
   protected readonly _daysOfWeek: DayOfWeek[];
 
   constructor(params: MemberAvailabilityParams) {
     super(params);
-    this._churchId = params.churchId;
     this._memberId = params.memberId;
     this._mode = params.mode;
     this._daysOfWeek = params.daysOfWeek;
-  }
-
-  get churchId(): string {
-    return this._churchId;
   }
 
   get memberId(): string {
@@ -34,7 +28,6 @@ export class MemberAvailability extends AuditableEntity {
 }
 
 export interface MemberAvailabilityParams extends AuditableEntityParams {
-  churchId: string;
   memberId: string;
   mode: AvailabilityMode;
   daysOfWeek: DayOfWeek[];

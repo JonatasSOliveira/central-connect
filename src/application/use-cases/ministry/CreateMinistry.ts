@@ -14,8 +14,6 @@ export interface CreateMinistryInput {
   churchId: string;
   name: string;
   leaderId?: string | null;
-  minMembersPerService: number;
-  idealMembersPerService: number;
   notes?: string | null;
   roles: { name: string; requiredCount: number }[];
   createdByUserId: string;
@@ -56,8 +54,6 @@ export class CreateMinistry extends BaseUseCase<
         churchId: input.churchId,
         name: input.name,
         leaderId: input.leaderId ?? null,
-        minMembersPerService: input.minMembersPerService,
-        idealMembersPerService: input.idealMembersPerService,
         notes: input.notes ?? null,
         createdByUserId: input.createdByUserId,
       };
@@ -91,8 +87,6 @@ export class CreateMinistry extends BaseUseCase<
             churchId: createdMinistry.churchId,
             name: createdMinistry.name,
             leaderId: createdMinistry.leaderId,
-            minMembersPerService: createdMinistry.minMembersPerService,
-            idealMembersPerService: createdMinistry.idealMembersPerService,
             notes: createdMinistry.notes,
             createdAt: createdMinistry.createdAt,
             roles: createdRoles.map((r) => ({

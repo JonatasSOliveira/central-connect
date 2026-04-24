@@ -24,8 +24,6 @@ export interface UpdateMinistryInput {
   churchId: string;
   name: string;
   leaderId?: string | null;
-  minMembersPerService: number;
-  idealMembersPerService: number;
   notes?: string | null;
   roles: UpdateMinistryRoleInput[];
   updatedByUserId: string;
@@ -81,8 +79,6 @@ export class UpdateMinistry extends BaseUseCase<
         churchId: existingMinistry.churchId,
         name: input.name,
         leaderId: input.leaderId ?? null,
-        minMembersPerService: input.minMembersPerService,
-        idealMembersPerService: input.idealMembersPerService,
         notes: input.notes ?? null,
         createdByUserId: existingMinistry.createdByUserId ?? null,
         createdAt: existingMinistry.createdAt,
@@ -171,8 +167,6 @@ export class UpdateMinistry extends BaseUseCase<
             churchId: updatedMinistry.churchId,
             name: updatedMinistry.name,
             leaderId: updatedMinistry.leaderId,
-            minMembersPerService: updatedMinistry.minMembersPerService,
-            idealMembersPerService: updatedMinistry.idealMembersPerService,
             notes: updatedMinistry.notes,
             createdAt: updatedMinistry.createdAt,
             roles: finalRoles,

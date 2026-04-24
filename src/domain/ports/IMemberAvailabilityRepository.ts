@@ -3,11 +3,8 @@ import type { BaseRepository } from "./BaseRepository";
 
 export interface IMemberAvailabilityRepository
   extends BaseRepository<MemberAvailability> {
-  findByMemberAndChurch(
-    memberId: string,
-    churchId: string,
-  ): Promise<MemberAvailability | null>;
-  findByChurchId(churchId: string): Promise<MemberAvailability[]>;
+  findByMemberId(memberId: string): Promise<MemberAvailability | null>;
+  findByMemberIds(memberIds: string[]): Promise<MemberAvailability[]>;
   upsert(entity: MemberAvailability): Promise<MemberAvailability>;
-  deleteByMemberAndChurch(memberId: string, churchId: string): Promise<void>;
+  deleteByMemberId(memberId: string): Promise<void>;
 }

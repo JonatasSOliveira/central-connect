@@ -15,8 +15,6 @@ export type MinistryRoleFormData = z.infer<typeof MinistryRoleFormSchema>;
 export const MinistryFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(100),
   leaderId: z.string().nullable().optional(),
-  minMembersPerService: z.coerce.number().int().min(0).default(1),
-  idealMembersPerService: z.coerce.number().int().min(0).default(2),
   notes: z.string().max(500).optional(),
   roles: z.array(MinistryRoleFormSchema).default([]),
 });
@@ -45,8 +43,6 @@ export const MinistryListItemSchema = z.object({
 export type MinistryListItemDTO = z.infer<typeof MinistryListItemSchema>;
 
 export const MinistryDetailSchema = MinistryListItemSchema.extend({
-  minMembersPerService: z.number(),
-  idealMembersPerService: z.number(),
   notes: z.string().nullable(),
   createdAt: z.date(),
 });
