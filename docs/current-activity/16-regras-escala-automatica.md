@@ -1,9 +1,9 @@
-# Atividade 16: Regras de Escala de Membros e Geracao Automatica
+# Atividade 16: Regras de Escala de Membros e Geracao Manual Assistida
 
 ## 📋 User Story
 
 **Como** administrador/lider de ministerio,  
-**quero** configurar regras de disponibilidade e limite de sequencia dos membros, alem de gerar escalas automaticamente,  
+**quero** configurar regras de disponibilidade e limite de sequencia dos membros, alem de gerar escalas pelo botao de geracao assistida,  
 **para** reduzir trabalho manual e garantir escalas consistentes com as regras da igreja.
 
 ---
@@ -12,8 +12,8 @@
 
 1. Permitir definir dias da semana em que o membro pode/nao pode servir.
 2. Configurar limite de escalas seguidas por membro (obrigatorio) **global por igreja**.
-3. Permitir geracao automatica de escalas para cultos, incluindo agendamento.
-4. Garantir que a geracao automatica respeite regras de negocio existentes e novas.
+3. Permitir geracao assistida de escalas para cultos via acao manual em `/scales`.
+4. Garantir que a geracao assistida respeite regras de negocio existentes e novas.
 5. Definir, no ministerio, a quantidade obrigatoria por funcao (role) por culto.
 
 ---
@@ -35,22 +35,22 @@
 - Essa regra deve ser considerada na geracao automatica.
 - Local da configuracao: **Igreja** (global por igreja).
 
-### 3) Geracao automatica de escalas
+### 3) Geracao assistida de escalas (acao manual)
 
-- Permitir gerar escalas automaticamente para os cultos.
-- Permitir agendamento da geracao (ex.: segunda 19:00 gerar escalas dos cultos de quinta).
-- A automacao deve respeitar:
+- Permitir gerar escalas automaticamente via botao manual em `/scales`.
+- A execucao manual deve respeitar:
   - Disponibilidade semanal do membro.
   - Limite de escalas seguidas.
   - Regra existente: nao escalar a mesma pessoa no mesmo culto em ministerios diferentes.
   - Quantidade obrigatoria por funcao de cada ministerio.
 - Se nao houver membros suficientes, a escala e criada parcialmente com sinalizacao de pendencia.
+- Nao deve criar escala duplicada para o mesmo par `serviceId + ministryId`.
 
 ### 4) Ministerio: quantidade obrigatoria por funcao
 
 - No formulario de ministerio, cada funcao (`MinistryRole`) deve possuir campo obrigatorio:
   - `requiredCount` (inteiro >= 1)
-- A geracao automatica deve preencher vagas por funcao com base nesse valor.
+- A geracao assistida deve preencher vagas por funcao com base nesse valor.
 
 ---
 
@@ -93,29 +93,22 @@
 ### Escalas (`/scales`)
 
 - Nova acao: **Gerar escalas automaticamente**
-  - Manual: gerar agora para intervalo informado
+  - Manual: gerar agora por culto + ministerio
   - Exibir resumo pos-geracao:
     - Quantas escalas criadas/atualizadas
     - Quantas vagas ficaram pendentes
     - Motivos principais de bloqueio (sem disponibilidade, limite consecutivo etc.)
-
-### Modelo de Culto (`/service-templates/new`, `/service-templates/[id]/edit`)
-
-- Nova secao: **Automacao de Escalas**
-  - Habilitar automacao
-  - Dia/horario da execucao
-  - Quantos dias de antecedencia gerar
 
 ---
 
 ## 🔒 Regras de Seguranca e Integridade
 
 - Toda geracao e multi-tenant por `churchId`.
-- Endpoints de automacao exigem autenticacao e permissao.
-- Operacao de geracao deve ser idempotente:
+- Endpoint manual de geracao exige autenticacao e permissao.
+- Operacao de geracao manual deve ser idempotente:
   - Evitar duplicar escalas por `serviceId + ministryId`.
   - Evitar duplicar membros na mesma escala.
-- Escalas `published` nao devem ser sobrescritas automaticamente.
+- Escalas `published` nao devem ser sobrescritas pela rotina de geracao.
 
 ---
 
@@ -125,13 +118,14 @@
 - [ ] Disponibilidade e persistida e retornada corretamente na API de membro.
 - [ ] Existe configuracao obrigatoria de `maxConsecutiveScalesPerMember` global por igreja.
 - [ ] Formulario de ministerio permite informar `requiredCount` por funcao.
-- [ ] Geracao automatica cria escalas para cultos com base nas regras.
+- [ ] Geracao assistida via botao cria escalas para cultos com base nas regras.
 - [ ] Geracao respeita regra de membro unico por culto (sem duplicidade em ministerios distintos).
 - [ ] Geracao respeita limite de escalas seguidas por membro.
 - [ ] Geracao respeita disponibilidade semanal do membro.
 - [ ] Geracao respeita `requiredCount` por funcao.
 - [ ] Quando faltar membro elegivel, vagas pendentes sao sinalizadas.
-- [ ] Existe execucao manual de geracao e suporte a execucao agendada.
+- [ ] Existe execucao manual de geracao em `/scales`.
+- [ ] Quando ja existir escala para `serviceId + ministryId`, a UI informa o conflito e oferece abrir a escala existente.
 - [ ] Build passando.
 - [ ] Lint passando.
 
@@ -163,22 +157,19 @@
 - Atualizar DTOs de membro para disponibilidade semanal
 - Atualizar DTOs de igreja para `maxConsecutiveScalesPerMember`
 - Atualizar DTOs de ministerio (roles com `requiredCount`)
-- Criar DTOs de geracao automatica:
+- Criar DTOs de geracao assistida/manual:
   - execucao manual
-  - execucao agendada
   - resumo de resultado da geracao
 
 ### Use Cases (Application Layer)
 
 - `GenerateScalesAutomatically`
-- `RunScheduledScaleGeneration`
 - `GetScaleGenerationPreview` (opcional recomendado para UX)
 - `ValidateMemberEligibilityForService` (helper/reuse)
 
 ### APIs
 
 - `POST /api/scales/generate` (manual)
-- `POST /api/scales/generate/scheduled-run` (interno/cron)
 - Atualizar:
   - `/api/members` e `/api/members/[memberId]`
   - `/api/churches` e `/api/churches/[churchId]`
@@ -189,7 +180,7 @@
 - `features/members/*` (disponibilidade)
 - `features/churches/*` (regra de sequencia)
 - `features/ministries/*` (required por funcao)
-- `features/scales/*` (geracao automatica + resumo)
+- `features/scales/*` (geracao assistida/manual + resumo)
 
 ---
 
@@ -204,17 +195,12 @@
 - [ ] Ajustar DTOs e APIs de membro/igreja/ministerio
 - [ ] Ajustar formularios e validacoes de UI
 
-### Fase 3: Motor de geracao automatica
+### Fase 3: Motor de geracao assistida/manual
 - [ ] Implementar algoritmo de elegibilidade e alocacao
 - [ ] Implementar geracao por culto/ministerio/funcao
 - [ ] Implementar resumo de geracao e pendencias
 
-### Fase 4: Agendamento
-- [ ] Definir estrategia de execucao agendada (cron + endpoint interno)
-- [ ] Configurar seguranca da execucao agendada
-- [ ] Garantir idempotencia da rotina
-
-### Fase 5: Validacao final
+### Fase 4: Validacao final
 - [ ] Testes de cenarios criticos
 - [ ] `pnpm lint` passando
 - [ ] `pnpm build` passando
@@ -229,12 +215,14 @@
 - [ ] Geracao preenche por funcao conforme `requiredCount`
 - [ ] Geracao parcial informa pendencias corretamente
 - [ ] Reexecucao da geracao nao cria duplicatas
-- [ ] Escalas publicadas nao sao sobrescritas automaticamente
+- [ ] Escalas publicadas nao sao sobrescritas pela geracao
 
 ---
 
 ## Fora de Escopo (nesta atividade)
 
+- Agendamento por cron/scheduler (`/api/scales/generate/scheduled-run`).
+- Configuracao de automacao em modelo de culto (`service-templates`).
 - Otimizacao avancada de distribuicao com IA/solver matematico.
 - Rebalanceamento retroativo de escalas ja publicadas.
 - Notificacoes automaticas aos membros apos geracao (pode virar atividade separada).

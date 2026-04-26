@@ -1,4 +1,4 @@
-# AGENTS.md - Atividade 16: Regras de Escala e Geracao Automatica
+# AGENTS.md - Atividade 16: Regras de Escala e Geracao Manual Assistida
 
 ## Contexto da Atividade
 
@@ -7,7 +7,7 @@ Implementar regras de alocacao para escalas com base em:
 - disponibilidade semanal de membros
 - limite maximo de escalas seguidas por membro
 - quantidade obrigatoria por funcao (role) em cada ministerio
-- geracao automatica/manual de escalas para cultos
+- geracao assistida/manual de escalas para cultos
 
 Referencia funcional obrigatoria:
 
@@ -19,7 +19,7 @@ Referencia funcional obrigatoria:
 
 1. `maxConsecutiveScalesPerMember` e **global por igreja**.
 2. O backend decide elegibilidade e alocacao final. Frontend nao envia decisao de alocacao.
-3. Geracao automatica deve ser idempotente.
+3. Geracao assistida/manual deve ser idempotente.
 4. Escalas `published` nao podem ser sobrescritas pela rotina automatica.
 5. Regra existente deve continuar valida: um membro nao pode estar em dois ministerios no mesmo culto.
 6. Quantidade por funcao vem de `requiredCount` em `MinistryRole`.
@@ -109,7 +109,7 @@ Criterio de desempate (deterministico):
 
 Entregaveis minimos:
 
-- geracao manual funcional
+- geracao manual funcional via botao em `/scales`
 - resumo de execucao
 
 ### Passo 5 - API de Geracao
@@ -118,38 +118,30 @@ Objetivo: expor geracao com seguranca.
 
 1. Criar endpoint manual:
    - `POST /api/scales/generate`
-2. Criar endpoint para scheduler interno:
-   - `POST /api/scales/generate/scheduled-run`
-3. Aplicar autorizacao por permissao (novo permission group de automacao de escala ou reutilizacao controlada).
-4. Garantir multi-tenant por `churchId`.
+2. Aplicar autorizacao por permissao (novo permission group de automacao de escala ou reutilizacao controlada).
+3. Garantir multi-tenant por `churchId`.
 
 Entregaveis minimos:
 
 - endpoints funcionando
 - erros padronizados
 
-### Passo 6 - Agendamento
+### Passo 6 - Fora de escopo nesta rodada
 
-Objetivo: suportar execucao automatica por horario.
+Objetivo: registrar backlog de agendamento sem implementar agora.
 
-1. Configuracao de agendamento no `ServiceTemplate` (ou modelo equivalente):
-   - habilitado
-   - dia/hora de execucao
-   - antecedencia em dias
-2. `RunScheduledScaleGeneration` para executar rotina agendada.
-3. Integrar com mecanismo de cron do ambiente (endpoint interno seguro).
+Itens fora de escopo:
 
-Entregaveis minimos:
-
-- configuracao salva
-- rotina executavel por cron
+1. Configuracao de agendamento no `ServiceTemplate`.
+2. Endpoint interno `POST /api/scales/generate/scheduled-run`.
+3. Integracao com cron/scheduler.
 
 ### Passo 7 - UI de Acionamento em Escalas
 
 Objetivo: permitir operacao manual clara para usuarios autorizados.
 
 1. Adicionar acao "Gerar escalas automaticamente" em `/scales`.
-2. Form simplificado para periodo alvo.
+2. Form simplificado por culto + ministerio.
 3. Exibir resumo pos-geracao:
    - criadas
    - atualizadas
@@ -179,6 +171,7 @@ Entregaveis minimos:
 5. Nao escalar membro em ministerios diferentes no mesmo culto.
 6. Respeitar `requiredCount` por role; se faltar candidato, registrar pendencia.
 7. Nao editar automaticamente escala publicada.
+8. Quando ja existir escala para `serviceId + ministryId`, a UI deve indicar conflito e sugerir abrir a escala existente.
 
 ---
 
@@ -213,7 +206,6 @@ Entregaveis minimos:
 - `src/app/api/members/*`
 - `src/app/api/ministries/*`
 - `src/app/api/scales/generate/route.ts` (novo)
-- `src/app/api/scales/generate/scheduled-run/route.ts` (novo)
 
 ### Frontend
 
@@ -221,7 +213,6 @@ Entregaveis minimos:
 - `src/features/churches/*`
 - `src/features/ministries/*`
 - `src/features/scales/*`
-- `src/features/serviceTemplates/*` (config de agendamento)
 
 ---
 
@@ -244,10 +235,9 @@ Entregaveis minimos:
 - [ ] Respeito a regras de conflito no mesmo culto
 - [ ] Resumo de pendencias implementado
 
-### Fase 4: Agendamento
-- [ ] Configuracao de agendamento no modelo de culto
-- [ ] Endpoint interno de execucao agendada
-- [ ] Idempotencia garantida
+### Fase 4: UI Manual
+- [ ] Botao de geracao manual em `/scales`
+- [ ] Tratativa de conflito de escala existente (`serviceId + ministryId`)
 
 ### Fase 5: Validacao
 - [ ] Cenarios manuais obrigatorios validados
