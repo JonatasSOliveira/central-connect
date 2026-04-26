@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import type { ChurchFormData } from "@/application/dtos/church/ChurchDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
-import { FormSelect } from "@/components/ui/form-select";
 import { NumberStepper } from "@/components/ui/number-stepper";
+import { RoleSelect } from "@/components/ui/role-select";
 import { SelfSignupShareDialog } from "@/features/churches/components/SelfSignupShareDialog";
 import { useChurchForm } from "@/features/churches/hooks/useChurchForm";
 
@@ -72,7 +72,7 @@ export function ChurchForm({
               Limita quantas escalas consecutivas o mesmo membro pode receber.
             </p>
 
-            <FormSelect
+            <RoleSelect
               label="Cargo padrão para auto cadastro"
               value={form.watch("selfSignupDefaultRoleId") || ""}
               onChange={(value) => {
@@ -80,14 +80,18 @@ export function ChurchForm({
                   shouldValidate: true,
                 });
               }}
-              options={roles.map((role) => ({
-                value: role.id,
-                label: role.name,
-              }))}
+              roles={roles}
+              allOptionLabel="Selecione um cargo (opcional)"
               placeholder="Selecione um cargo (opcional)"
-              error={form.formState.errors.selfSignupDefaultRoleId?.message}
+              searchPlaceholder="Pesquisar cargo..."
+              emptyText="Nenhum cargo encontrado"
               disabled={readOnly}
             />
+            {form.formState.errors.selfSignupDefaultRoleId?.message && (
+              <p className="text-xs text-destructive">
+                {form.formState.errors.selfSignupDefaultRoleId.message}
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               Esse cargo será aplicado automaticamente em novos membros que se
               cadastrarem pelo link ou QR Code da igreja.

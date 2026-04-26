@@ -96,7 +96,6 @@ export class GenerateWeekServices extends BaseUseCase<
           serviceTemplateId: template.id,
           title,
           dayOfWeek: template.dayOfWeek,
-          shift: template.shift,
           time: template.time,
           date: matchingDate,
           location: template.location,

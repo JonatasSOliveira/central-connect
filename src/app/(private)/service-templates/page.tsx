@@ -107,7 +107,7 @@ export default function ServiceTemplatesPage() {
             key={template.id}
             icon={Settings2}
             title={template.title}
-            description={`${dayOfWeekLabels[template.dayOfWeek] || template.dayOfWeek} • ${template.shift} • ${template.time}${template.location ? ` • ${template.location}` : ""}${template.isActive ? "" : " • Inativo"}`}
+            description={`${dayOfWeekLabels[template.dayOfWeek] || template.dayOfWeek} • ${template.time}${template.location ? ` • ${template.location}` : ""}${template.isActive ? "" : " • Inativo"}`}
             onClick={
               canWrite ? () => handleEditTemplate(template.id) : undefined
             }

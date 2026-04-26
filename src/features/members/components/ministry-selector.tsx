@@ -6,7 +6,7 @@ import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDT
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { ChipGroup } from "@/components/ui/chip-group";
-import { FormSelect } from "@/components/ui/form-select";
+import { MinistrySelect } from "@/components/ui/ministry-select";
 
 interface MinistrySelectorProps {
   churchId: string;
@@ -83,13 +83,13 @@ export function MinistrySelector({
 
       {isAdding ? (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg">
-          <FormSelect
+          <MinistrySelect
             label="Adicionar ministério"
             value={selectedMinistryId}
-            onChange={(value) => setSelectedMinistryId(value)}
-            options={availableToSelect.map((m) => ({
-              value: m.id,
-              label: m.name,
+            onChange={setSelectedMinistryId}
+            ministries={availableToSelect.map((ministry) => ({
+              id: ministry.id,
+              name: ministry.name,
             }))}
             placeholder="Selecione"
             required

@@ -2,7 +2,6 @@
 
 import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
-import { FormSelect } from "@/components/ui/form-select";
 import { useServiceForm } from "../hooks/useServiceForm";
 
 interface ServiceFormProps {
@@ -27,12 +26,6 @@ export function ServiceForm({
     onSuccess,
     onError,
   });
-
-  const shiftOptions = [
-    { value: "Manhã", label: "Manhã" },
-    { value: "Tarde", label: "Tarde" },
-    { value: "Noite", label: "Noite" },
-  ];
 
   if (isFetching) {
     return (
@@ -96,19 +89,6 @@ export function ServiceForm({
               {...form.register("time")}
             />
           </FormField>
-
-          <FormSelect
-            label="Turno"
-            value={form.watch("shift") || ""}
-            onChange={(value) =>
-              form.setValue(
-                "shift",
-                value as "Manhã" | "Tarde" | "Noite" | undefined,
-              )
-            }
-            options={shiftOptions}
-            placeholder="Selecione"
-          />
 
           <FormField
             form={form}

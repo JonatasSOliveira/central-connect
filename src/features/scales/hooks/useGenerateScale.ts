@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
@@ -16,9 +16,11 @@ type MinistryOption = {
   name: string;
 };
 
-type GenerateScaleInput = {
-  serviceId: string;
-  ministryId: string;
+type GenerateScaleInput = { serviceId: string; ministryId: string };
+
+type ExistingScale = {
+  id: string;
+  status: "draft" | "published";
 };
 
 export function useGenerateScale() {
@@ -29,45 +31,20 @@ export function useGenerateScale() {
   const [ministries, setMinistries] = useState<MinistryOption[]>([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCheckingExisting, setIsCheckingExisting] = useState(false);
+  const [existingScale, setExistingScale] = useState<ExistingScale | null>(null);
+  const [checkError, setCheckError] = useState<string | null>(null);
+  const checkRequestIdRef = useRef(0);
 
-  const serviceOptions = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return services
-      .filter((service) => {
-        const serviceDate = new Date(service.date);
-        serviceDate.setHours(0, 0, 0, 0);
-        return serviceDate >= today;
-      })
-      .sort((a, b) => {
-        const aDateTime = `${new Date(a.date).toISOString().slice(0, 10)}T${a.time || "00:00"}`;
-        const bDateTime = `${new Date(b.date).toISOString().slice(0, 10)}T${b.time || "00:00"}`;
-        return aDateTime.localeCompare(bDateTime);
-      })
-      .map((service) => {
-        const date = new Date(service.date);
-        const formattedDate = date.toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-        return {
-          value: service.id,
-          label: `${service.title} - ${formattedDate} ${service.time}`,
-        };
-      });
-  }, [services]);
-
-  const ministryOptions = useMemo(
+  const sortedMinistries = useMemo(
     () =>
-      ministries
-        .map((ministry) => ({ value: ministry.id, label: ministry.name }))
-        .sort((a, b) => a.label.localeCompare(b.label, "pt-BR", { sensitivity: "base" })),
+      [...ministries].sort((a, b) =>
+        a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" }),
+      ),
     [ministries],
   );
 
-  const loadOptions = async () => {
+  const loadOptions = useCallback(async () => {
     if (!churchId) {
       toast.error("Nenhuma igreja selecionada");
       return;
@@ -97,48 +74,126 @@ export function useGenerateScale() {
     } finally {
       setIsLoadingOptions(false);
     }
-  };
+  }, [churchId]);
 
-  const generateScale = async ({
-    serviceId,
-    ministryId,
-  }: GenerateScaleInput): Promise<boolean> => {
-    setIsGenerating(true);
-    try {
-      const response = await fetch("/api/scales/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ serviceId, ministryId }),
-      });
+  const resetExistingScaleCheck = useCallback(() => {
+    checkRequestIdRef.current += 1;
+    setIsCheckingExisting(false);
+    setExistingScale(null);
+    setCheckError(null);
+  }, []);
 
-      const data = await response.json();
-
-      if (data.ok) {
-        toast.success("Escala gerada automaticamente com sucesso");
-        return true;
+  const checkExistingScale = useCallback(
+    async ({
+      serviceId,
+      ministryId,
+    }: GenerateScaleInput): Promise<ExistingScale | null> => {
+      if (!churchId || !serviceId || !ministryId) {
+        resetExistingScaleCheck();
+        return null;
       }
 
-      if (data.error?.code === "SCALE_ALREADY_EXISTS") {
-        toast.error("Já existe uma escala para esse culto e ministério");
-        return false;
-      }
+      const requestId = ++checkRequestIdRef.current;
+      setIsCheckingExisting(true);
+      setCheckError(null);
 
-      toast.error(data.error?.message || "Não foi possível gerar a escala");
-      return false;
-    } catch {
-      toast.error("Ocorreu um erro. Tente novamente.");
-      return false;
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+      try {
+        const params = new URLSearchParams({
+          churchId,
+          serviceId,
+          ministryId,
+        });
+
+        const response = await fetch(`/api/scales?${params.toString()}`);
+        const data = await response.json();
+
+        if (requestId !== checkRequestIdRef.current) {
+          return null;
+        }
+
+        if (!data.ok) {
+          setExistingScale(null);
+          setCheckError("Nao foi possivel verificar escala existente");
+          return null;
+        }
+
+        const found = data.value?.scales?.[0];
+        if (!found?.id) {
+          setExistingScale(null);
+          return null;
+        }
+
+        const scale: ExistingScale = {
+          id: found.id,
+          status: found.status === "published" ? "published" : "draft",
+        };
+
+        setExistingScale(scale);
+        return scale;
+      } catch {
+        if (requestId !== checkRequestIdRef.current) return null;
+
+        setExistingScale(null);
+        setCheckError("Nao foi possivel verificar escala existente");
+        return null;
+      } finally {
+        if (requestId === checkRequestIdRef.current) {
+          setIsCheckingExisting(false);
+        }
+      }
+    },
+    [churchId, resetExistingScaleCheck],
+  );
+
+  const generateScale = useCallback(
+    async ({
+      serviceId,
+      ministryId,
+    }: GenerateScaleInput): Promise<{ ok: boolean; scaleId?: string }> => {
+      setIsGenerating(true);
+      try {
+        const response = await fetch("/api/scales/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ serviceId, ministryId }),
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+          toast.success("Escala gerada automaticamente com sucesso");
+          return { ok: true, scaleId: data.value?.scale?.id };
+        }
+
+        if (data.error?.code === "SCALE_ALREADY_EXISTS") {
+          await checkExistingScale({ serviceId, ministryId });
+          toast.error("Já existe uma escala para esse culto e ministério");
+          return { ok: false };
+        }
+
+        toast.error(data.error?.message || "Não foi possível gerar a escala");
+        return { ok: false };
+      } catch {
+        toast.error("Ocorreu um erro. Tente novamente.");
+        return { ok: false };
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    [checkExistingScale],
+  );
 
   return {
-    serviceOptions,
-    ministryOptions,
+    services,
+    ministries: sortedMinistries,
     isLoadingOptions,
     isGenerating,
+    isCheckingExisting,
+    existingScale,
+    checkError,
     loadOptions,
+    checkExistingScale,
+    resetExistingScaleCheck,
     generateScale,
   };
 }

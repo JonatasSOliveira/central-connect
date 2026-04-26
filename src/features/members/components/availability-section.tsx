@@ -2,8 +2,8 @@
 
 import type { UseFormReturn } from "react-hook-form";
 import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDTO";
-import { FormSelect } from "@/components/ui/form-select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 interface AvailabilitySectionProps {
   form: UseFormReturn<CreateMemberInput>;
@@ -46,7 +46,7 @@ export function AvailabilitySection({
 
   return (
     <div className="space-y-3 rounded-lg border border-border p-4">
-      <FormSelect
+      <SearchableSelect
         label="Regra de disponibilidade"
         value={mode}
         onChange={(value) => {
@@ -64,6 +64,8 @@ export function AvailabilitySection({
             label: "Permitir somente dias selecionados",
           },
         ]}
+        searchPlaceholder="Pesquisar regra..."
+        emptyText="Nenhuma regra encontrada"
         disabled={disabled}
       />
 

@@ -43,16 +43,26 @@ export class GetScaleAttendance extends BaseUseCase<
       }
 
       const [scaleMembers, attendance, service] = await Promise.all([
-        this.scaleMemberRepository.findByScaleId(scale.id),
-        this.scaleAttendanceRepository.findByScaleId(scale.id),
-        this.serviceRepository.findById(scale.serviceId),
+        this.scaleMemberRepository.findByScaleId(scale.id).catch(() => []),
+        this.scaleAttendanceRepository.findByScaleId(scale.id).catch(() => null),
+        this.serviceRepository.findById(scale.serviceId).catch(() => null),
       ]);
 
-      const members = await Promise.all(
-        scaleMembers.map((scaleMember) =>
-          this.memberRepository.findById(scaleMember.memberId),
-        ),
+      const memberResults = await Promise.allSettled(
+        scaleMembers
+          .map((scaleMember) => scaleMember.memberId)
+          .filter((memberId) => Boolean(memberId))
+          .map((memberId) => this.memberRepository.findById(memberId)),
       );
+      const members = memberResults
+        .filter(
+          (
+            result,
+          ): result is PromiseFulfilledResult<
+            Awaited<ReturnType<typeof this.memberRepository.findById>>
+          > => result.status === "fulfilled",
+        )
+        .map((result) => result.value);
       const memberNameById = new Map(
         members
           .filter((member): member is NonNullable<typeof member> =>
@@ -99,7 +109,11 @@ export class GetScaleAttendance extends BaseUseCase<
           },
         },
       };
-    } catch {
+    } catch (error) {
+      console.error("[GetScaleAttendance] failed", {
+        scaleId: input.scaleId,
+        error,
+      });
       return {
         ok: false,
         error: ScaleAttendanceErrors.ATTENDANCE_FETCH_FAILED,

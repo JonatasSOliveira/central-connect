@@ -8,6 +8,7 @@ import { BaseUseCase } from "../BaseUseCase";
 export interface ListMinistriesInput {
   churchId?: string;
   excludeServiceId?: string;
+  excludeScaleId?: string;
 }
 
 export interface ListMinistriesOutput {
@@ -41,7 +42,13 @@ export class ListMinistries extends BaseUseCase<
             serviceId: input.excludeServiceId,
           },
         );
-        const existingMinistryIds = new Set(scales.map((s) => s.ministryId));
+
+        const existingMinistryIds = new Set(
+          scales
+            .filter((scale) => scale.id !== input.excludeScaleId)
+            .map((scale) => scale.ministryId),
+        );
+
         ministries = ministries.filter((m) => !existingMinistryIds.has(m.id));
       }
 

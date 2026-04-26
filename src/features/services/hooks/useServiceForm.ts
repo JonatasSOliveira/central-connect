@@ -13,7 +13,6 @@ const ServiceFormSchema = z.object({
   time: z
     .string()
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"),
-  shift: z.enum(["Manhã", "Tarde", "Noite"]).optional(),
   location: z.string().optional(),
   description: z.string().optional(),
 });
@@ -47,7 +46,6 @@ export function useServiceForm({
       title: "",
       date: "",
       time: "19:00",
-      shift: undefined,
       location: "",
       description: "",
     },
@@ -71,11 +69,6 @@ export function useServiceForm({
               title: serviceData.title,
               date: dateStr,
               time: serviceData.time,
-              shift: serviceData.shift as
-                | "Manhã"
-                | "Tarde"
-                | "Noite"
-                | undefined,
               location: serviceData.location ?? "",
               description: serviceData.description ?? "",
             });
@@ -129,7 +122,6 @@ export function useServiceForm({
           title: formData.title,
           date: formData.date,
           time: formData.time,
-          shift: formData.shift,
           location: formData.location,
           description: formData.description,
         };

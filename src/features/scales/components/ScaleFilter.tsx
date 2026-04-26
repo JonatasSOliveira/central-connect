@@ -3,10 +3,12 @@
 import { ChevronDown, ChevronUp, Filter } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { MinistrySelect, type MinistrySelectItem } from "@/components/ui/ministry-select";
+import { ServiceSelect, type ServiceSelectItem } from "@/components/ui/service-select";
 
 interface ScaleFilterProps {
-  services: { id: string; title: string }[];
-  ministries: { id: string; name: string }[];
+  services: ServiceSelectItem[];
+  ministries: MinistrySelectItem[];
   filters: { serviceId?: string; ministryId?: string };
   onApplyFilters: (filters: {
     serviceId?: string;
@@ -67,37 +69,29 @@ export function ScaleFilter({
         <div className="space-y-3 pt-2 pb-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">Culto</label>
-              <select
+              <ServiceSelect
+                label="Culto"
                 value={localServiceId}
-                onChange={(e) => setLocalServiceId(e.target.value)}
-                className="flex h-11 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                <option value="">Todos os cultos</option>
-                {services.map((service) => (
-                  <option key={service.id} value={service.id}>
-                    {service.title}
-                  </option>
-                ))}
-              </select>
+                onChange={setLocalServiceId}
+                services={services}
+                allOptionLabel="Todos os cultos"
+                placeholder="Todos os cultos"
+                searchPlaceholder="Pesquisar culto..."
+                emptyText="Nenhum culto encontrado"
+              />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs text-muted-foreground">
-                Ministério
-              </label>
-              <select
+              <MinistrySelect
+                label="Ministério"
                 value={localMinistryId}
-                onChange={(e) => setLocalMinistryId(e.target.value)}
-                className="flex h-11 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                <option value="">Todos os ministérios</option>
-                {ministries.map((ministry) => (
-                  <option key={ministry.id} value={ministry.id}>
-                    {ministry.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setLocalMinistryId}
+                ministries={ministries}
+                allOptionLabel="Todos os ministérios"
+                placeholder="Todos os ministérios"
+                searchPlaceholder="Pesquisar ministério..."
+                emptyText="Nenhum ministério encontrado"
+              />
             </div>
           </div>
 

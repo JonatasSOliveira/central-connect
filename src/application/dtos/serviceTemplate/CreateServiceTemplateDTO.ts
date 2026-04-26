@@ -11,7 +11,6 @@ export const CreateServiceTemplateInputSchema = z.object({
     "Friday",
     "Saturday",
   ]),
-  shift: z.enum(["Manhã", "Tarde", "Noite"]),
   time: z
     .string()
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"),
@@ -28,7 +27,6 @@ export const CreateServiceTemplateOutputSchema = z.object({
   churchId: z.string(),
   title: z.string(),
   dayOfWeek: z.string(),
-  shift: z.string(),
   time: z.string(),
   location: z.string().nullable(),
   isActive: z.boolean(),

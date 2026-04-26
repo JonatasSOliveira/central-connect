@@ -6,7 +6,6 @@ export const CreateServiceInputSchema = z.object({
   time: z
     .string()
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"),
-  shift: z.enum(["Manhã", "Tarde", "Noite"]).optional(),
   location: z.string().optional(),
   description: z.string().optional(),
 });
@@ -20,7 +19,6 @@ export const CreateServiceOutputSchema = z.object({
   title: z.string(),
   date: z.date(),
   time: z.string(),
-  shift: z.string().nullable(),
   location: z.string().nullable(),
   description: z.string().nullable(),
   createdAt: z.date(),

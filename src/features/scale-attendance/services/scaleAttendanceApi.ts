@@ -104,7 +104,6 @@ export interface GetScaleAttendanceReportInput {
 export interface GetScaleAttendanceReportOutput {
   summary: ScaleAttendanceReportSummary;
   items: ScaleAttendanceReportItem[];
-  ministries: ScaleAttendanceReportMinistryOption[];
 }
 
 export async function getScaleAttendanceReport(
@@ -141,6 +140,22 @@ export async function getScaleAttendanceReport(
         serviceDate: item.serviceDate,
       }),
     ),
-    ministries: data.value.ministries,
   };
+}
+
+export async function getScaleAttendanceReportMinistries(
+  churchId: string,
+): Promise<ScaleAttendanceReportMinistryOption[]> {
+  const response = await fetch(
+    `/api/scale-attendance-reports/ministries?churchId=${churchId}`,
+  );
+  const data = await response.json();
+
+  if (!response.ok || !data.ok) {
+    throw new Error(
+      getErrorMessage(data, "Falha ao carregar ministérios do relatório"),
+    );
+  }
+
+  return data.value.ministries;
 }

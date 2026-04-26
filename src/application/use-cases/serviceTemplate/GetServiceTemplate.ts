@@ -49,7 +49,6 @@ export class GetServiceTemplate extends BaseUseCase<
           churchId: template.churchId,
           title: template.title,
           dayOfWeek: template.dayOfWeek,
-          shift: template.shift,
           time: template.time,
           location: template.location,
           isActive: template.isActive,

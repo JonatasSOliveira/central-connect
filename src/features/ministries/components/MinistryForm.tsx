@@ -6,9 +6,9 @@ import type { MinistryFormInput } from "@/application/dtos/ministry/MinistryDTO"
 import { FormTemplate } from "@/components/templates/form-template";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
-import { FormSelect } from "@/components/ui/form-select";
 import { Input } from "@/components/ui/input";
 import { ListItemCard } from "@/components/ui/list-item-card";
+import { MemberSelect } from "@/components/ui/member-select";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { useMinistryForm } from "@/features/ministries/hooks/useMinistryForm";
 
@@ -58,14 +58,12 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
             required
           />
 
-          <FormSelect
+          <MemberSelect
             label="Líder Responsável"
             value={form.watch("leaderId") || ""}
             onChange={(value) => form.setValue("leaderId", value || null)}
-            options={memberOptions.map((member) => ({
-              value: member.id,
-              label: member.fullName,
-            }))}
+            members={memberOptions}
+            allOptionLabel="Selecione"
             placeholder="Selecione"
           />
 

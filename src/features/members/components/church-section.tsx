@@ -7,7 +7,7 @@ import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDT
 import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
 import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { Button } from "@/components/ui/button";
-import { FormSelect } from "@/components/ui/form-select";
+import { RoleSelect } from "@/components/ui/role-select";
 import type {
   ReadonlyChurch,
   UseMemberFormReturn,
@@ -58,7 +58,7 @@ export function ChurchSection({
     }
 
     return (
-      <FormSelect
+      <RoleSelect
         label="Cargo do sistema"
         value={form.watch("churches.0.roleId") || ""}
         onChange={(value) =>
@@ -66,10 +66,7 @@ export function ChurchSection({
             shouldValidate: true,
           })
         }
-        options={roles.map((role) => ({
-          value: role.id,
-          label: role.name,
-        }))}
+        roles={roles}
         placeholder="Selecione um cargo do sistema"
         required
         disabled={disabled}

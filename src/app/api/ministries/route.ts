@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const queryChurchId = searchParams.get("churchId");
   const queryServiceId = searchParams.get("serviceId");
+  const queryExcludeScaleId = searchParams.get("excludeScaleId");
   const churchId = getChurchIdFromSession(user, queryChurchId);
 
   const hasReadAccess =
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
   const result = await ministryContainer.listMinistries.execute({
     churchId: churchId || undefined,
     excludeServiceId: queryServiceId || undefined,
+    excludeScaleId: queryExcludeScaleId || undefined,
   });
 
   if (!result.ok) {

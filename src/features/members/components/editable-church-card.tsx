@@ -4,7 +4,8 @@ import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
 import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
 import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { Button } from "@/components/ui/button";
-import { FormSelect } from "@/components/ui/form-select";
+import { ChurchSelect } from "@/components/ui/church-select";
+import { RoleSelect } from "@/components/ui/role-select";
 import { MinistrySelector } from "./ministry-selector";
 
 interface EditableChurchCardProps {
@@ -73,27 +74,21 @@ export function EditableChurchCard({
         )}
       </div>
 
-      <FormSelect
+      <ChurchSelect
         label="Igreja"
         value={churchId || ""}
         onChange={handleChurchChange}
-        options={editableChurches.map((church) => ({
-          value: church.id,
-          label: church.name,
-        }))}
+        churches={editableChurches}
         placeholder="Selecione"
         required
         disabled={disabled}
       />
 
-      <FormSelect
+      <RoleSelect
         label="Cargo do sistema"
         value={roleId || ""}
         onChange={onRoleChange}
-        options={roles.map((role) => ({
-          value: role.id,
-          label: role.name,
-        }))}
+        roles={roles}
         placeholder="Selecione"
         required
         disabled={disabled}

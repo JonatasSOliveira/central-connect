@@ -18,7 +18,6 @@ const ServiceTemplateFormSchema = z.object({
     "Friday",
     "Saturday",
   ]),
-  shift: z.enum(["Manhã", "Tarde", "Noite"]),
   time: z
     .string()
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"),
@@ -56,7 +55,6 @@ export function useServiceTemplateForm({
     defaultValues: {
       title: "",
       dayOfWeek: "Sunday",
-      shift: "Noite",
       time: "19:00",
       location: "",
       isActive: true,
@@ -77,7 +75,6 @@ export function useServiceTemplateForm({
             form.reset({
               title: templateData.title,
               dayOfWeek: templateData.dayOfWeek,
-              shift: templateData.shift,
               time: templateData.time,
               location: templateData.location ?? "",
               isActive: templateData.isActive,
@@ -132,7 +129,6 @@ export function useServiceTemplateForm({
         const payload = {
           title: formData.title,
           dayOfWeek: formData.dayOfWeek,
-          shift: formData.shift,
           time: formData.time,
           location: formData.location,
           isActive: formData.isActive,

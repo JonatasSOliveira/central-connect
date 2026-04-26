@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { getScaleAttendanceReport } from "../services/scaleAttendanceApi";
+import {
+  getScaleAttendanceReport,
+  getScaleAttendanceReportMinistries,
+} from "../services/scaleAttendanceApi";
 import type {
   ScaleAttendanceReportItem,
   ScaleAttendanceReportMinistryOption,
@@ -56,6 +59,20 @@ export function useScaleAttendanceReport(churchId: string | null) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchMinistries = useCallback(async () => {
+    if (!churchId) {
+      setMinistries([]);
+      return;
+    }
+
+    try {
+      const options = await getScaleAttendanceReportMinistries(churchId);
+      setMinistries(options);
+    } catch {
+      setMinistries([]);
+    }
+  }, [churchId]);
+
   const fetchReport = useCallback(async () => {
     if (!churchId) {
       setSummary(EMPTY_SUMMARY);
@@ -77,7 +94,6 @@ export function useScaleAttendanceReport(churchId: string | null) {
 
       setSummary(response.summary);
       setItems(response.items);
-      setMinistries(response.ministries);
     } catch (fetchError) {
       const message =
         fetchError instanceof Error
@@ -86,11 +102,14 @@ export function useScaleAttendanceReport(churchId: string | null) {
       setError(message);
       setSummary(EMPTY_SUMMARY);
       setItems([]);
-      setMinistries([]);
     } finally {
       setIsLoading(false);
     }
   }, [churchId, filters.endDate, filters.ministryId, filters.startDate]);
+
+  useEffect(() => {
+    fetchMinistries();
+  }, [fetchMinistries]);
 
   useEffect(() => {
     fetchReport();

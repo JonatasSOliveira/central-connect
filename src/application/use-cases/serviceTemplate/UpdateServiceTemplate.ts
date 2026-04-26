@@ -54,7 +54,6 @@ export class UpdateServiceTemplate extends BaseUseCase<
         churchId: existingTemplate.churchId,
         title: input.title ?? existingTemplate.title,
         dayOfWeek: input.dayOfWeek ?? existingTemplate.dayOfWeek,
-        shift: input.shift ?? existingTemplate.shift,
         time: input.time ?? existingTemplate.time,
         location:
           input.location !== undefined
@@ -76,7 +75,6 @@ export class UpdateServiceTemplate extends BaseUseCase<
           churchId: updatedTemplate.churchId,
           title: updatedTemplate.title,
           dayOfWeek: updatedTemplate.dayOfWeek,
-          shift: updatedTemplate.shift,
           time: updatedTemplate.time,
           location: updatedTemplate.location,
           isActive: updatedTemplate.isActive,

@@ -90,6 +90,7 @@ export default function ServicesPage() {
       weekday: "short",
       day: "2-digit",
       month: "short",
+      timeZone: "UTC",
     });
   };
 
@@ -145,7 +146,7 @@ export default function ServicesPage() {
             key={service.id}
             icon={Cross}
             title={service.title}
-            description={`${formatDate(service.date)} às ${service.time}${service.location ? ` • ${service.location}` : ""}${service.shift ? ` • ${service.shift}` : ""}`}
+            description={`${formatDate(service.date)} às ${service.time}${service.location ? ` • ${service.location}` : ""}`}
             onClick={canWrite ? () => handleEditService(service.id) : undefined}
             actions={{
               onEdit: canWrite

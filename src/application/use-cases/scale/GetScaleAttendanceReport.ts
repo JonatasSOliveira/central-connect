@@ -1,6 +1,5 @@
 import type {
   ScaleAttendanceReportItemDTO,
-  ScaleAttendanceReportMinistryOptionDTO,
   ScaleAttendanceReportSummaryDTO,
 } from "@/application/dtos/scale/ScaleAttendanceReportDTO";
 import { ScaleAttendanceErrors } from "@/application/errors/ScaleAttendanceErrors";
@@ -23,7 +22,6 @@ export interface GetScaleAttendanceReportInput {
 export interface GetScaleAttendanceReportOutput {
   summary: ScaleAttendanceReportSummaryDTO;
   items: ScaleAttendanceReportItemDTO[];
-  ministries: ScaleAttendanceReportMinistryOptionDTO[];
 }
 
 export class GetScaleAttendanceReport extends BaseUseCase<
@@ -46,10 +44,7 @@ export class GetScaleAttendanceReport extends BaseUseCase<
   ): Promise<Result<GetScaleAttendanceReportOutput>> {
     try {
       const startDate = new Date(input.startDate);
-      startDate.setHours(0, 0, 0, 0);
-
       const endDate = new Date(input.endDate);
-      endDate.setHours(23, 59, 59, 999);
 
       const [allScales, services, ministries] = await Promise.all([
         this.scaleRepository.findByChurchId(input.churchId),
@@ -114,7 +109,7 @@ export class GetScaleAttendanceReport extends BaseUseCase<
         const attendanceMembers =
           attendanceMembersByScaleId.get(scale.id) ?? [];
 
-        if (!service || !ministryName || attendance?.status !== "published") {
+        if (!service || !ministryName) {
           return null;
         }
 
@@ -131,6 +126,8 @@ export class GetScaleAttendanceReport extends BaseUseCase<
         const checkedCount = attendanceMembers.length;
         const memberCount = scaleMembersCountByScaleId.get(scale.id) ?? 0;
 
+        const attendanceStatus = attendance?.status ?? "draft";
+
         return {
           scaleId: scale.id,
           serviceTitle: service.title,
@@ -138,7 +135,7 @@ export class GetScaleAttendanceReport extends BaseUseCase<
           serviceTime: service.time,
           ministryId: scale.ministryId,
           ministryName,
-          attendanceStatus: "published",
+          attendanceStatus,
           memberCount,
           checkedCount,
           pendingCount: Math.max(memberCount - checkedCount, 0),
@@ -152,18 +149,6 @@ export class GetScaleAttendanceReport extends BaseUseCase<
         .filter((item): item is ScaleAttendanceReportItemDTO => item !== null)
         .sort((a, b) => b.serviceDate.getTime() - a.serviceDate.getTime());
 
-      const ministryOptions = Array.from(
-        filteredItems.reduce((map, item) => {
-          map.set(item.ministryId, {
-            id: item.ministryId,
-            name: item.ministryName,
-          });
-          return map;
-        }, new Map<string, ScaleAttendanceReportMinistryOptionDTO>()),
-      )
-        .map(([, ministry]) => ministry)
-        .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
-
       const summary = filteredItems.reduce<ScaleAttendanceReportSummaryDTO>(
         (acc, item) => {
           acc.scaleCount += 1;
@@ -173,7 +158,11 @@ export class GetScaleAttendanceReport extends BaseUseCase<
           acc.presentCount += item.presentCount;
           acc.absentUnexcusedCount += item.absentUnexcusedCount;
           acc.absentExcusedCount += item.absentExcusedCount;
-          acc.publishedCount += 1;
+          if (item.attendanceStatus === "published") {
+            acc.publishedCount += 1;
+          } else {
+            acc.draftCount += 1;
+          }
           return acc;
         },
         {
@@ -200,10 +189,16 @@ export class GetScaleAttendanceReport extends BaseUseCase<
         value: {
           summary,
           items: filteredItems,
-          ministries: ministryOptions,
         },
       };
-    } catch {
+    } catch (error) {
+      console.error("[GetScaleAttendanceReport] failed", {
+        churchId: input.churchId,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        ministryId: input.ministryId,
+        error,
+      });
       return {
         ok: false,
         error: ScaleAttendanceErrors.ATTENDANCE_FETCH_FAILED,

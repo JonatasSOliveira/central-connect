@@ -2,6 +2,7 @@ export interface ServiceOption {
   id: string;
   title: string;
   date: string;
+  time: string;
 }
 
 export interface MinistryOption {

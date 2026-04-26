@@ -10,7 +10,6 @@ export interface ServiceListItem {
   title: string;
   date: string;
   time: string;
-  shift: string | null;
   location: string | null;
   description: string | null;
 }
@@ -83,8 +82,7 @@ export function useServices() {
       result = result.filter(
         (service) =>
           service.title.toLowerCase().includes(query) ||
-          service.location?.toLowerCase().includes(query) ||
-          service.shift?.toLowerCase().includes(query),
+          service.location?.toLowerCase().includes(query),
       );
     }
 
