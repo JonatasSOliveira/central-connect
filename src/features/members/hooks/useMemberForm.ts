@@ -107,6 +107,10 @@ export function useMemberForm({
       email: "",
       fullName: "",
       phone: "",
+      availability: {
+        mode: "BLOCK_LIST",
+        daysOfWeek: [],
+      },
       churches: [
         {
           churchId: defaultEditableChurchId,
@@ -276,6 +280,10 @@ export function useMemberForm({
                 email: memberData.email,
                 fullName: memberData.fullName,
                 phone: normalizePhone(memberData.phone),
+                availability: memberData.availability ?? {
+                  mode: "BLOCK_LIST",
+                  daysOfWeek: [],
+                },
                 churches: editable,
               });
             } else if (hasSingleWritableChurch) {
@@ -283,6 +291,10 @@ export function useMemberForm({
                 email: memberData.email,
                 fullName: memberData.fullName,
                 phone: normalizePhone(memberData.phone),
+                availability: memberData.availability ?? {
+                  mode: "BLOCK_LIST",
+                  daysOfWeek: [],
+                },
                 churches: [
                   {
                     churchId: defaultEditableChurchId,
@@ -297,6 +309,10 @@ export function useMemberForm({
                 email: memberData.email,
                 fullName: memberData.fullName,
                 phone: normalizePhone(memberData.phone),
+                availability: memberData.availability ?? {
+                  mode: "BLOCK_LIST",
+                  daysOfWeek: [],
+                },
                 churches: [{ churchId: "", roleId: "", ministryIds: [] }],
               });
             }
@@ -330,6 +346,7 @@ export function useMemberForm({
     const normalizedCreatePayload: CreateMemberInput = {
       ...formData,
       phone: normalizedPhone || undefined,
+      availability: formData.availability,
     };
 
     try {
@@ -354,6 +371,7 @@ export function useMemberForm({
         const payload: Record<string, unknown> = {
           fullName: formData.fullName,
           phone: normalizedPhone || undefined,
+          availability: formData.availability,
         };
 
         if (formData.email !== undefined) {

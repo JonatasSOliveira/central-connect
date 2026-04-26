@@ -37,14 +37,32 @@ export class ServiceFirebaseRepository
     startDate: Date,
     endDate: Date,
   ): Promise<Service[]> {
-    const snapshot = await this.collection
-      .where("churchId", "==", churchId)
-      .where("deletedAt", "==", null)
-      .where("date", ">=", startDate)
-      .where("date", "<=", endDate)
-      .get();
+    const snapshot = await this.collection.where("churchId", "==", churchId).get();
 
-    return snapshot.docs.map((doc) => this.toEntity(doc.data(), doc.id));
+    const normalizedStart = new Date(startDate);
+    const normalizedEnd = new Date(endDate);
+
+    return snapshot.docs
+      .filter((doc) => {
+        const data = doc.data();
+
+        if (data.deletedAt) {
+          return false;
+        }
+
+        const dateField = data.date;
+        const serviceDate =
+          dateField && typeof dateField.toDate === "function"
+            ? dateField.toDate()
+            : new Date(dateField);
+
+        if (Number.isNaN(serviceDate.getTime())) {
+          return false;
+        }
+
+        return serviceDate >= normalizedStart && serviceDate <= normalizedEnd;
+      })
+      .map((doc) => this.toEntity(doc.data(), doc.id));
   }
 
   async findByDateAndLocation(
@@ -53,26 +71,38 @@ export class ServiceFirebaseRepository
     time: string,
     location: string | null,
   ): Promise<Service | null> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const targetDateKey = date.toISOString().slice(0, 10);
 
-    const snapshot = await this.collection
-      .where("churchId", "==", churchId)
-      .where("deletedAt", "==", null)
-      .where("date", ">=", startOfDay)
-      .where("date", "<=", endOfDay)
-      .where("time", "==", time)
-      .where("location", "==", location)
-      .limit(1)
-      .get();
+    const snapshot = await this.collection.where("churchId", "==", churchId).get();
 
-    if (snapshot.empty) {
+    const matchingDoc = snapshot.docs.find((doc) => {
+      const data = doc.data();
+
+      if (data.deletedAt) {
+        return false;
+      }
+
+      const dateField = data.date;
+      const serviceDate =
+        dateField && typeof dateField.toDate === "function"
+          ? dateField.toDate()
+          : new Date(dateField);
+
+      if (Number.isNaN(serviceDate.getTime())) {
+        return false;
+      }
+
+      const sameDate = serviceDate.toISOString().slice(0, 10) === targetDateKey;
+      const sameTime = (data.time ?? "") === time;
+      const sameLocation = (data.location ?? null) === location;
+
+      return sameDate && sameTime && sameLocation;
+    });
+
+    if (!matchingDoc) {
       return null;
     }
 
-    const doc = snapshot.docs[0];
-    return this.toEntity(doc.data(), doc.id);
+    return this.toEntity(matchingDoc.data(), matchingDoc.id);
   }
 }

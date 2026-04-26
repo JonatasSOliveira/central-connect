@@ -112,6 +112,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     churchId,
     name: parsed.data.name,
     selfSignupDefaultRoleId: parsed.data.selfSignupDefaultRoleId,
+    maxConsecutiveScalesPerMember: parsed.data.maxConsecutiveScalesPerMember,
     updatedByUserId: auth.user.userId,
   });
 

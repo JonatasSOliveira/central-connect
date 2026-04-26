@@ -7,17 +7,28 @@ import { GetScale } from "@/application/use-cases/scale/GetScale";
 import { ListScaleAttendances } from "@/application/use-cases/scale/ListScaleAttendances";
 import { ListScales } from "@/application/use-cases/scale/ListScales";
 import { PublishScaleAttendance } from "@/application/use-cases/scale/PublishScaleAttendance";
+import { RunScheduledScaleGeneration } from "@/application/use-cases/scale/RunScheduledScaleGeneration";
 import { RemoveMemberFromScale } from "@/application/use-cases/scale/RemoveMemberFromScale";
 import { SaveScaleAttendance } from "@/application/use-cases/scale/SaveScaleAttendance";
 import { UpdateScale } from "@/application/use-cases/scale/UpdateScale";
+import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IMemberAvailabilityRepository } from "@/domain/ports/IMemberAvailabilityRepository";
+import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IMinistryRepository } from "@/domain/ports/IMinistryRepository";
+import type { IMinistryRoleRepository } from "@/domain/ports/IMinistryRoleRepository";
 import type { IScaleAttendanceMemberRepository } from "@/domain/ports/IScaleAttendanceMemberRepository";
 import type { IScaleAttendanceRepository } from "@/domain/ports/IScaleAttendanceRepository";
 import type { IScaleRepository } from "@/domain/ports/IScaleRepository";
 import type { IScaleMemberRepository } from "@/domain/ports/IScaleMemberRepository";
 import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
+import { ChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/ChurchFirebaseRepository";
+import { MemberAvailabilityFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberAvailabilityFirebaseRepository";
+import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
+import { MemberMinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberMinistryFirebaseRepository";
 import { MinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MinistryFirebaseRepository";
+import { MinistryRoleFirebaseRepository } from "@/infra/firebase-admin/repositories/MinistryRoleFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
 import { ScaleAttendanceMemberFirebaseRepository } from "@/infra/firebase-admin/repositories/ScaleAttendanceMemberFirebaseRepository";
 import { ScaleAttendanceFirebaseRepository } from "@/infra/firebase-admin/repositories/ScaleAttendanceFirebaseRepository";
@@ -35,9 +46,19 @@ class ScaleContainer {
   private static _getScale: GetScale | null = null;
   private static _listScaleAttendances: ListScaleAttendances | null = null;
   private static _listScales: ListScales | null = null;
+  private static _churchRepository: IChurchRepository | null = null;
+  private static _memberAvailabilityRepository: IMemberAvailabilityRepository | null =
+    null;
+  private static _memberChurchRepository: IMemberChurchRepository | null = null;
+  private static _memberMinistryRepository: IMemberMinistryRepository | null =
+    null;
   private static _ministryRepository: IMinistryRepository | null = null;
+  private static _ministryRoleRepository: IMinistryRoleRepository | null = null;
   private static _memberRepository: IMemberRepository | null = null;
-  private static _publishScaleAttendance: PublishScaleAttendance | null = null;
+private static _publishScaleAttendance: PublishScaleAttendance | null =
+    null;
+  private static _runScheduledScaleGeneration: RunScheduledScaleGeneration | null =
+    null;
   private static _removeMemberFromScale: RemoveMemberFromScale | null = null;
   private static _saveScaleAttendance: SaveScaleAttendance | null = null;
   private static _scaleAttendanceMemberRepository: IScaleAttendanceMemberRepository | null =
@@ -66,6 +87,13 @@ class ScaleContainer {
       ScaleContainer._createScale = new CreateScale(
         ScaleContainer.scaleRepository,
         ScaleContainer.scaleMemberRepository,
+        ScaleContainer.churchRepository,
+        ScaleContainer.serviceRepository,
+        ScaleContainer.ministryRoleRepository,
+        ScaleContainer.memberRepository,
+        ScaleContainer.memberChurchRepository,
+        ScaleContainer.memberMinistryRepository,
+        ScaleContainer.memberAvailabilityRepository,
       );
     }
     return ScaleContainer._createScale;
@@ -199,11 +227,48 @@ class ScaleContainer {
     return ScaleContainer._ministryRepository;
   }
 
+  static get ministryRoleRepository(): IMinistryRoleRepository {
+    if (!ScaleContainer._ministryRoleRepository) {
+      ScaleContainer._ministryRoleRepository = new MinistryRoleFirebaseRepository();
+    }
+    return ScaleContainer._ministryRoleRepository;
+  }
+
   static get memberRepository(): IMemberRepository {
     if (!ScaleContainer._memberRepository) {
       ScaleContainer._memberRepository = new MemberFirebaseRepository();
     }
     return ScaleContainer._memberRepository;
+  }
+
+  static get churchRepository(): IChurchRepository {
+    if (!ScaleContainer._churchRepository) {
+      ScaleContainer._churchRepository = new ChurchFirebaseRepository();
+    }
+    return ScaleContainer._churchRepository;
+  }
+
+  static get memberChurchRepository(): IMemberChurchRepository {
+    if (!ScaleContainer._memberChurchRepository) {
+      ScaleContainer._memberChurchRepository = new MemberChurchFirebaseRepository();
+    }
+    return ScaleContainer._memberChurchRepository;
+  }
+
+  static get memberMinistryRepository(): IMemberMinistryRepository {
+    if (!ScaleContainer._memberMinistryRepository) {
+      ScaleContainer._memberMinistryRepository =
+        new MemberMinistryFirebaseRepository();
+    }
+    return ScaleContainer._memberMinistryRepository;
+  }
+
+  static get memberAvailabilityRepository(): IMemberAvailabilityRepository {
+    if (!ScaleContainer._memberAvailabilityRepository) {
+      ScaleContainer._memberAvailabilityRepository =
+        new MemberAvailabilityFirebaseRepository();
+    }
+    return ScaleContainer._memberAvailabilityRepository;
   }
 
   static get removeMemberFromScale(): RemoveMemberFromScale {
@@ -242,6 +307,14 @@ class ScaleContainer {
       );
     }
     return ScaleContainer._publishScaleAttendance;
+  }
+
+  static get runScheduledScaleGeneration(): RunScheduledScaleGeneration {
+    if (!ScaleContainer._runScheduledScaleGeneration) {
+      ScaleContainer._runScheduledScaleGeneration =
+        new RunScheduledScaleGeneration();
+    }
+    return ScaleContainer._runScheduledScaleGeneration;
   }
 }
 

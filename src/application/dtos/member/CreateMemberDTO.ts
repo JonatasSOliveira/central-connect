@@ -1,9 +1,27 @@
 import { z } from "zod";
 
+const DayOfWeekSchema = z.enum([
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+]);
+
+const AvailabilityModeSchema = z.enum(["ALLOW_LIST", "BLOCK_LIST"]);
+
+const MemberAvailabilitySchema = z.object({
+  mode: AvailabilityModeSchema,
+  daysOfWeek: z.array(DayOfWeekSchema),
+});
+
 export const CreateMemberInputSchema = z.object({
   email: z.string().optional().or(z.literal("")),
   fullName: z.string().min(1, "Nome é obrigatório"),
   phone: z.string().optional(),
+  availability: MemberAvailabilitySchema.optional(),
   churches: z
     .array(
       z.object({
@@ -21,6 +39,7 @@ export const UpdateMemberInputSchema = z.object({
   email: z.string().optional().or(z.literal("")),
   fullName: z.string().min(1, "Nome é obrigatório").optional(),
   phone: z.string().optional(),
+  availability: MemberAvailabilitySchema.optional(),
   churches: z
     .array(
       z.object({

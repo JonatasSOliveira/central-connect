@@ -4,11 +4,13 @@ import { GetMember } from "@/application/use-cases/member/GetMember";
 import { ListMembers } from "@/application/use-cases/member/ListMembers";
 import { UpdateMember } from "@/application/use-cases/member/UpdateMember";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IMemberAvailabilityRepository } from "@/domain/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import { ChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/ChurchFirebaseRepository";
+import { MemberAvailabilityFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberAvailabilityFirebaseRepository";
 import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
 import { MemberMinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberMinistryFirebaseRepository";
@@ -16,6 +18,8 @@ import { RoleFirebaseRepository } from "@/infra/firebase-admin/repositories/Role
 
 class MemberContainer {
   private static _memberRepository: IMemberRepository | null = null;
+  private static _memberAvailabilityRepository: IMemberAvailabilityRepository | null =
+    null;
   private static _memberChurchRepository: IMemberChurchRepository | null = null;
   private static _memberMinistryRepository: IMemberMinistryRepository | null =
     null;
@@ -34,6 +38,14 @@ class MemberContainer {
       MemberContainer._memberRepository = new MemberFirebaseRepository();
     }
     return MemberContainer._memberRepository;
+  }
+
+  static get memberAvailabilityRepository(): IMemberAvailabilityRepository {
+    if (!MemberContainer._memberAvailabilityRepository) {
+      MemberContainer._memberAvailabilityRepository =
+        new MemberAvailabilityFirebaseRepository();
+    }
+    return MemberContainer._memberAvailabilityRepository;
   }
 
   static get memberChurchRepository(): IMemberChurchRepository {
@@ -84,6 +96,7 @@ class MemberContainer {
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
         MemberContainer.memberMinistryRepository,
+        MemberContainer.memberAvailabilityRepository,
       );
     }
     return MemberContainer._createMember;
@@ -95,6 +108,7 @@ class MemberContainer {
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
         MemberContainer.memberMinistryRepository,
+        MemberContainer.memberAvailabilityRepository,
         MemberContainer.churchRepository,
         MemberContainer.roleRepository,
       );
@@ -108,6 +122,7 @@ class MemberContainer {
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
         MemberContainer.memberMinistryRepository,
+        MemberContainer.memberAvailabilityRepository,
       );
     }
     return MemberContainer._updateMember;

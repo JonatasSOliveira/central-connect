@@ -10,7 +10,6 @@ export const UpdateServiceInputSchema = z.object({
     .string()
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/)
     .optional(),
-  shift: z.enum(["Manhã", "Tarde", "Noite"]).optional(),
   location: z.string().optional(),
   description: z.string().optional(),
 });

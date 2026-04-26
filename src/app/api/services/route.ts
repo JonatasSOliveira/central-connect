@@ -148,13 +148,12 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const { title, date, time, shift, location, description } = parsed.data;
+  const { title, date, time, location, description } = parsed.data;
 
   const result = await serviceContainer.createService.execute({
     title,
     date,
     time,
-    shift,
     location,
     description,
     churchId,

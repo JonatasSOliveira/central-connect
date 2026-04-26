@@ -16,6 +16,7 @@ import { BaseUseCase } from "../BaseUseCase";
 export interface UpdateMinistryRoleInput {
   id: string | null;
   name: string;
+  requiredCount: number;
 }
 
 export interface UpdateMinistryInput {
@@ -23,8 +24,6 @@ export interface UpdateMinistryInput {
   churchId: string;
   name: string;
   leaderId?: string | null;
-  minMembersPerService: number;
-  idealMembersPerService: number;
   notes?: string | null;
   roles: UpdateMinistryRoleInput[];
   updatedByUserId: string;
@@ -80,8 +79,6 @@ export class UpdateMinistry extends BaseUseCase<
         churchId: existingMinistry.churchId,
         name: input.name,
         leaderId: input.leaderId ?? null,
-        minMembersPerService: input.minMembersPerService,
-        idealMembersPerService: input.idealMembersPerService,
         notes: input.notes ?? null,
         createdByUserId: existingMinistry.createdByUserId ?? null,
         createdAt: existingMinistry.createdAt,
@@ -113,11 +110,15 @@ export class UpdateMinistry extends BaseUseCase<
         if (roleInput.id) {
           const existingRole = existingRoles.find((r) => r.id === roleInput.id);
           if (existingRole) {
-            if (existingRole.name !== roleInput.name) {
+            if (
+              existingRole.name !== roleInput.name ||
+              existingRole.requiredCount !== roleInput.requiredCount
+            ) {
               const roleParams: MinistryRoleParams = {
                 id: existingRole.id,
                 ministryId: existingRole.ministryId,
                 name: roleInput.name,
+                requiredCount: roleInput.requiredCount,
                 createdByUserId: existingRole.createdByUserId ?? null,
                 createdAt: existingRole.createdAt,
                 updatedAt: new Date(),
@@ -126,22 +127,35 @@ export class UpdateMinistry extends BaseUseCase<
               const role = new MinistryRole(roleParams);
               const updatedRole =
                 await this.ministryRoleRepository.update(role);
-              finalRoles.push({ id: updatedRole.id, name: updatedRole.name });
+              finalRoles.push({
+                id: updatedRole.id,
+                name: updatedRole.name,
+                requiredCount: updatedRole.requiredCount,
+              });
             } else {
-              finalRoles.push({ id: existingRole.id, name: existingRole.name });
+              finalRoles.push({
+                id: existingRole.id,
+                name: existingRole.name,
+                requiredCount: existingRole.requiredCount,
+              });
             }
           }
         } else {
           const roleParams: MinistryRoleParams = {
             ministryId: updatedMinistry.id,
             name: roleInput.name,
+            requiredCount: roleInput.requiredCount,
             createdByUserId: input.updatedByUserId,
             createdAt: new Date(),
             updatedAt: new Date(),
           };
           const role = new MinistryRole(roleParams);
           const createdRole = await this.ministryRoleRepository.create(role);
-          finalRoles.push({ id: createdRole.id, name: createdRole.name });
+          finalRoles.push({
+            id: createdRole.id,
+            name: createdRole.name,
+            requiredCount: createdRole.requiredCount,
+          });
         }
       }
 
@@ -153,8 +167,6 @@ export class UpdateMinistry extends BaseUseCase<
             churchId: updatedMinistry.churchId,
             name: updatedMinistry.name,
             leaderId: updatedMinistry.leaderId,
-            minMembersPerService: updatedMinistry.minMembersPerService,
-            idealMembersPerService: updatedMinistry.idealMembersPerService,
             notes: updatedMinistry.notes,
             createdAt: updatedMinistry.createdAt,
             roles: finalRoles,

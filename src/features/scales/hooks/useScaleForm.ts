@@ -76,12 +76,6 @@ export function useScaleForm({
   const watchServiceId = form.watch("serviceId");
   const watchMinistryId = form.watch("ministryId");
 
-  useEffect(() => {
-    if (watchServiceId) {
-      form.setValue("ministryId", "");
-    }
-  }, [watchServiceId, form]);
-
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "members",
@@ -96,10 +90,11 @@ export function useScaleForm({
         const data = await response.json();
         if (data.ok) {
           const servicesData = data.value.services.map(
-            (s: { id: string; title: string; date: string }) => ({
+            (s: { id: string; title: string; date: string; time: string }) => ({
               id: s.id,
               title: s.title,
               date: s.date,
+              time: s.time,
             }),
           );
           setServices(servicesData);
@@ -120,6 +115,9 @@ export function useScaleForm({
         let url = `/api/ministries?churchId=${user.churchId}`;
         if (watchServiceId) {
           url += `&serviceId=${watchServiceId}`;
+          if (mode === "edit" && scaleId) {
+            url += `&excludeScaleId=${scaleId}`;
+          }
         }
         const response = await fetch(url);
         const data = await response.json();
@@ -138,7 +136,7 @@ export function useScaleForm({
     };
 
     fetchMinistries();
-  }, [user?.churchId, watchServiceId]);
+  }, [mode, scaleId, user?.churchId, watchServiceId]);
 
   useEffect(() => {
     const fetchMembersAndRoles = async () => {

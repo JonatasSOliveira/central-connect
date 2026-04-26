@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const queryChurchId = searchParams.get("churchId");
   const queryServiceId = searchParams.get("serviceId");
+  const queryExcludeScaleId = searchParams.get("excludeScaleId");
   const churchId = getChurchIdFromSession(user, queryChurchId);
 
   const hasReadAccess =
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
   const result = await ministryContainer.listMinistries.execute({
     churchId: churchId || undefined,
     excludeServiceId: queryServiceId || undefined,
+    excludeScaleId: queryExcludeScaleId || undefined,
   });
 
   if (!result.ok) {
@@ -145,8 +147,6 @@ export async function POST(request: NextRequest) {
     churchId,
     name: parsed.data.name,
     leaderId: parsed.data.leaderId,
-    minMembersPerService: parsed.data.minMembersPerService,
-    idealMembersPerService: parsed.data.idealMembersPerService,
     notes: parsed.data.notes,
     roles: parsed.data.roles,
     createdByUserId: user.userId,

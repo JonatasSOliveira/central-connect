@@ -1,5 +1,9 @@
 import { Member, type MemberParams } from "@/domain/entities/Member";
 import {
+  MemberAvailability,
+  type MemberAvailabilityParams,
+} from "@/domain/entities/MemberAvailability";
+import {
   MemberChurch,
   type MemberChurchParams,
 } from "@/domain/entities/MemberChurch";
@@ -7,6 +11,7 @@ import {
   MemberMinistry,
   type MemberMinistryParams,
 } from "@/domain/entities/MemberMinistry";
+import type { IMemberAvailabilityRepository } from "@/domain/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
@@ -22,6 +27,7 @@ export class UpdateMember extends BaseUseCase<
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly memberMinistryRepository: IMemberMinistryRepository,
+    private readonly memberAvailabilityRepository: IMemberAvailabilityRepository,
   ) {
     super();
   }
@@ -94,6 +100,20 @@ export class UpdateMember extends BaseUseCase<
             await this.memberMinistryRepository.create(memberMinistry);
           }
         }
+      }
+
+      if (input.availability) {
+        const memberAvailabilityParams: MemberAvailabilityParams = {
+          memberId,
+          mode: input.availability.mode,
+          daysOfWeek: input.availability.daysOfWeek,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        const memberAvailability = new MemberAvailability(memberAvailabilityParams);
+
+        await this.memberAvailabilityRepository.upsert(memberAvailability);
       }
 
       return {

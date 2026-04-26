@@ -1,5 +1,6 @@
 import type { DocumentData } from "firebase-admin/firestore";
 import { Church, type ChurchParams } from "@/domain/entities/Church";
+import { DEFAULT_MAX_CONSECUTIVE_SCALES_PER_MEMBER } from "@/shared/constants/scaleRules";
 import {
   convertDatesToTimestamps,
   convertTimestampsToDates,
@@ -9,6 +10,7 @@ export function churchToPersistence(church: Church): DocumentData {
   return convertDatesToTimestamps({
     name: church.name,
     selfSignupDefaultRoleId: church.selfSignupDefaultRoleId,
+    maxConsecutiveScalesPerMember: church.maxConsecutiveScalesPerMember,
     createdAt: church.createdAt,
     updatedAt: church.updatedAt,
     deletedAt: church.deletedAt,
@@ -21,6 +23,9 @@ export function churchFromPersistence(data: DocumentData, id: string): Church {
     id,
     name: convertedData.name ?? "",
     selfSignupDefaultRoleId: convertedData.selfSignupDefaultRoleId ?? null,
+    maxConsecutiveScalesPerMember:
+      convertedData.maxConsecutiveScalesPerMember ??
+      DEFAULT_MAX_CONSECUTIVE_SCALES_PER_MEMBER,
     createdAt: convertedData.createdAt,
     updatedAt: convertedData.updatedAt,
   };

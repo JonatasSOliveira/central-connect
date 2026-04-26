@@ -21,7 +21,6 @@ export type ServiceListItem = {
   title: string;
   date: Date;
   time: string;
-  shift: string | null;
   location: string | null;
   description: string | null;
 };

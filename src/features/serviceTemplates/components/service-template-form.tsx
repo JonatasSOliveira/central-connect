@@ -3,7 +3,7 @@
 import { FormTemplate } from "@/components/templates/form-template";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/components/ui/form-field";
-import { FormSelect } from "@/components/ui/form-select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { useServiceTemplateForm } from "../hooks/useServiceTemplateForm";
 
 interface ServiceTemplateFormProps {
@@ -38,12 +38,6 @@ export function ServiceTemplateForm({
     { value: "Thursday", label: "Quinta-feira" },
     { value: "Friday", label: "Sexta-feira" },
     { value: "Saturday", label: "Sábado" },
-  ];
-
-  const shiftOptions = [
-    { value: "Manhã", label: "Manhã" },
-    { value: "Tarde", label: "Tarde" },
-    { value: "Noite", label: "Noite" },
   ];
 
   if (isFetching) {
@@ -85,7 +79,7 @@ export function ServiceTemplateForm({
             required
           />
 
-          <FormSelect
+          <SearchableSelect
             label="Dia da Semana"
             value={form.watch("dayOfWeek") || "Sunday"}
             onChange={(value) =>
@@ -103,16 +97,8 @@ export function ServiceTemplateForm({
             }
             options={dayOfWeekOptions}
             placeholder="Selecione"
-          />
-
-          <FormSelect
-            label="Turno"
-            value={form.watch("shift") || "Noite"}
-            onChange={(value) =>
-              form.setValue("shift", value as "Manhã" | "Tarde" | "Noite")
-            }
-            options={shiftOptions}
-            placeholder="Selecione"
+            searchPlaceholder="Pesquisar dia..."
+            emptyText="Nenhum dia encontrado"
           />
 
           <FormField

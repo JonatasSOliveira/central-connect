@@ -1,11 +1,25 @@
 import { z } from "zod";
 import { ScaleAttendanceStatusSchema } from "./ScaleAttendanceDTO";
 
+function parseDateInputAsUtc(value: string, endOfDay = false): Date {
+  const normalized = value.trim();
+  const date = endOfDay
+    ? new Date(`${normalized}T23:59:59.999Z`)
+    : new Date(`${normalized}T00:00:00.000Z`);
+  return date;
+}
+
 export const ScaleAttendanceReportQuerySchema = z
   .object({
     churchId: z.string().min(1),
-    startDate: z.string().transform((value) => new Date(value)),
-    endDate: z.string().transform((value) => new Date(value)),
+    startDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Data inicial inválida")
+      .transform((value) => parseDateInputAsUtc(value)),
+    endDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Data final inválida")
+      .transform((value) => parseDateInputAsUtc(value, true)),
     ministryId: z.string().min(1).optional(),
   })
   .refine((data) => !Number.isNaN(data.startDate.getTime()), {

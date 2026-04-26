@@ -58,8 +58,6 @@ export function useMinistryForm({
     defaultValues: {
       name: "",
       leaderId: null,
-      minMembersPerService: 1,
-      idealMembersPerService: 2,
       notes: "",
       roles: [],
     },
@@ -121,12 +119,11 @@ export function useMinistryForm({
             form.reset({
               name: ministryData.name,
               leaderId: ministryData.leaderId,
-              minMembersPerService: ministryData.minMembersPerService,
-              idealMembersPerService: ministryData.idealMembersPerService,
               notes: ministryData.notes ?? "",
               roles: ministryData.roles.map((r) => ({
                 id: r.id,
                 name: r.name,
+                requiredCount: r.requiredCount,
               })),
             });
           } else {

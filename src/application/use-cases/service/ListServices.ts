@@ -38,7 +38,6 @@ export class ListServices extends BaseUseCase<
           title: service.title,
           date: service.date,
           time: service.time,
-          shift: service.shift,
           location: service.location,
           description: service.description,
         }),

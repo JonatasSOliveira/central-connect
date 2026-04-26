@@ -1,5 +1,6 @@
 export { AuditableEntity } from "./AuditableEntity";
 export { AuditLog } from "./AuditLog";
+export type { AvailabilityMode } from "./AvailabilityMode";
 export { BaseEntity } from "./BaseEntity";
 export { Church } from "./Church";
 export type { DayOfWeek } from "./DayOfWeek";
@@ -16,6 +17,7 @@ export { Permission } from "./Permission";
 export { Scale } from "./Scale";
 export { ScaleAttendance } from "./ScaleAttendance";
 export { ScaleAttendanceMember } from "./ScaleAttendanceMember";
+export { ScaleGenerationJob, type ScaleGenerationJobStatus } from "./ScaleGenerationJob";
 export { ScaleMember } from "./ScaleMember";
 export { RolePermission } from "./RolePermission";
 export { Schedule } from "./Schedule";

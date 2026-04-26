@@ -3,6 +3,11 @@ import { z } from "zod";
 export const MinistryRoleFormSchema = z.object({
   id: z.string().nullable().optional(),
   name: z.string().min(1, "Nome é obrigatório").max(100),
+  requiredCount: z.coerce
+    .number()
+    .int("Quantidade deve ser um número inteiro")
+    .min(1, "Quantidade obrigatória deve ser no mínimo 1")
+    .default(1),
 });
 
 export type MinistryRoleFormData = z.infer<typeof MinistryRoleFormSchema>;
@@ -10,8 +15,6 @@ export type MinistryRoleFormData = z.infer<typeof MinistryRoleFormSchema>;
 export const MinistryFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório").max(100),
   leaderId: z.string().nullable().optional(),
-  minMembersPerService: z.coerce.number().int().min(0).default(1),
-  idealMembersPerService: z.coerce.number().int().min(0).default(2),
   notes: z.string().max(500).optional(),
   roles: z.array(MinistryRoleFormSchema).default([]),
 });
@@ -22,6 +25,7 @@ export type MinistryFormInput = z.input<typeof MinistryFormSchema>;
 export const MinistryRoleListItemSchema = z.object({
   id: z.string(),
   name: z.string(),
+  requiredCount: z.number().int().min(1),
 });
 
 export type MinistryRoleListItemDTO = z.infer<
@@ -39,8 +43,6 @@ export const MinistryListItemSchema = z.object({
 export type MinistryListItemDTO = z.infer<typeof MinistryListItemSchema>;
 
 export const MinistryDetailSchema = MinistryListItemSchema.extend({
-  minMembersPerService: z.number(),
-  idealMembersPerService: z.number(),
   notes: z.string().nullable(),
   createdAt: z.date(),
 });

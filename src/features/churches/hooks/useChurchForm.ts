@@ -82,6 +82,8 @@ export function useChurchForm({
               name: data.value.church.name,
               selfSignupDefaultRoleId:
                 data.value.church.selfSignupDefaultRoleId ?? "",
+              maxConsecutiveScalesPerMember:
+                data.value.church.maxConsecutiveScalesPerMember ?? 2,
             });
             setInitialDataLoaded(true);
           } else {

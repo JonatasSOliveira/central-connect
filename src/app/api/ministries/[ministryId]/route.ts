@@ -128,12 +128,11 @@ export async function PUT(
     churchId: ministry.churchId,
     name: parsed.data.name,
     leaderId: parsed.data.leaderId,
-    minMembersPerService: parsed.data.minMembersPerService,
-    idealMembersPerService: parsed.data.idealMembersPerService,
     notes: parsed.data.notes,
     roles: parsed.data.roles.map((r) => ({
       id: r.id ?? null,
       name: r.name,
+      requiredCount: r.requiredCount,
     })),
     updatedByUserId: user.userId,
   });

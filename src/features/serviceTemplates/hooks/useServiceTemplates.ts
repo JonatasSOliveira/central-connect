@@ -8,7 +8,6 @@ export interface ServiceTemplateListItem {
   churchId: string;
   title: string;
   dayOfWeek: string;
-  shift: string;
   time: string;
   location: string | null;
   isActive: boolean;
@@ -60,7 +59,6 @@ export function useServiceTemplates() {
       (template) =>
         template.title.toLowerCase().includes(query) ||
         template.dayOfWeek.toLowerCase().includes(query) ||
-        template.shift.toLowerCase().includes(query) ||
         template.location?.toLowerCase().includes(query),
     );
   }, [templates, searchQuery]);

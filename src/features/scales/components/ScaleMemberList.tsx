@@ -3,6 +3,8 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ListItemCard } from "@/components/ui/list-item-card";
+import { MemberSelect } from "@/components/ui/member-select";
+import { MinistryRoleSelect } from "@/components/ui/ministry-role-select";
 import type { UseScaleFormReturn } from "../hooks/useScaleForm";
 
 interface ScaleMemberListProps {
@@ -59,17 +61,19 @@ export function ScaleMemberList({
             onRemove={() => editableRemove(index)}
           >
             <div className="space-y-3">
-              <select
-                {...form.register(`members.${index}.memberId`)}
-                className="flex h-10 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring"
-              >
-                <option value="">Selecione um membro</option>
-                {availableMembers.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.fullName}
-                  </option>
-                ))}
-              </select>
+              <MemberSelect
+                label="Membro"
+                value={form.watch(`members.${index}.memberId`) || ""}
+                onChange={(value) =>
+                  form.setValue(`members.${index}.memberId`, value, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
+                }
+                members={availableMembers}
+                placeholder="Selecione um membro"
+                required
+              />
               {form.formState.errors.members?.[index]?.memberId && (
                 <p className="text-xs text-destructive">
                   {
@@ -79,17 +83,19 @@ export function ScaleMemberList({
                 </p>
               )}
 
-              <select
-                {...form.register(`members.${index}.ministryRoleId`)}
-                className="flex h-10 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm transition-colors outline-none focus-visible:border-ring"
-              >
-                <option value="">Selecione uma função</option>
-                {availableRoles.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {role.name}
-                  </option>
-                ))}
-              </select>
+              <MinistryRoleSelect
+                label="Função"
+                value={form.watch(`members.${index}.ministryRoleId`) || ""}
+                onChange={(value) =>
+                  form.setValue(`members.${index}.ministryRoleId`, value, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  })
+                }
+                roles={availableRoles}
+                placeholder="Selecione uma função"
+                required
+              />
               {form.formState.errors.members?.[index]?.ministryRoleId && (
                 <p className="text-xs text-destructive">
                   {

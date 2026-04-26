@@ -6,9 +6,9 @@ import type { MinistryFormInput } from "@/application/dtos/ministry/MinistryDTO"
 import { FormTemplate } from "@/components/templates/form-template";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
-import { FormSelect } from "@/components/ui/form-select";
 import { Input } from "@/components/ui/input";
 import { ListItemCard } from "@/components/ui/list-item-card";
+import { MemberSelect } from "@/components/ui/member-select";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { useMinistryForm } from "@/features/ministries/hooks/useMinistryForm";
 
@@ -35,7 +35,7 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
   };
 
   const handleAddRole = () => {
-    editableAppend({ name: "", id: null });
+    editableAppend({ name: "", id: null, requiredCount: 1 });
   };
 
   if (isFetching) {
@@ -58,48 +58,14 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
             required
           />
 
-          <FormSelect
+          <MemberSelect
             label="Líder Responsável"
             value={form.watch("leaderId") || ""}
             onChange={(value) => form.setValue("leaderId", value || null)}
-            options={memberOptions.map((member) => ({
-              value: member.id,
-              label: member.fullName,
-            }))}
+            members={memberOptions}
+            allOptionLabel="Selecione"
             placeholder="Selecione"
           />
-
-          <div className="grid grid-cols-2 gap-4">
-            <NumberStepper
-              label="Mín. membros"
-              value={Number(form.watch("minMembersPerService")) || 1}
-              onChange={(value) =>
-                form.setValue("minMembersPerService", value, {
-                  shouldValidate: true,
-                })
-              }
-              min={0}
-              max={20}
-              error={
-                form.formState.errors.minMembersPerService?.message as string
-              }
-            />
-
-            <NumberStepper
-              label="Mín. ideal"
-              value={Number(form.watch("idealMembersPerService")) || 2}
-              onChange={(value) =>
-                form.setValue("idealMembersPerService", value, {
-                  shouldValidate: true,
-                })
-              }
-              min={0}
-              max={50}
-              error={
-                form.formState.errors.idealMembersPerService?.message as string
-              }
-            />
-          </div>
 
           <FormField<MinistryFormInput>
             form={form}
@@ -135,10 +101,27 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
                 index={index}
                 onRemove={() => editableRemove(index)}
               >
-                <Input
-                  placeholder="Nome da função"
-                  {...form.register(`roles.${index}.name`)}
-                />
+                <div className="space-y-3">
+                  <Input
+                    placeholder="Nome da função"
+                    {...form.register(`roles.${index}.name`)}
+                  />
+                  <NumberStepper
+                    label="Qtd. obrigatória"
+                    value={Number(form.watch(`roles.${index}.requiredCount`)) || 1}
+                    onChange={(value) =>
+                      form.setValue(`roles.${index}.requiredCount`, value, {
+                        shouldValidate: true,
+                      })
+                    }
+                    min={1}
+                    max={20}
+                    error={
+                      form.formState.errors.roles?.[index]?.requiredCount
+                        ?.message as string
+                    }
+                  />
+                </div>
                 {form.formState.errors.roles?.[index]?.name && (
                   <p className="text-xs text-destructive">
                     {

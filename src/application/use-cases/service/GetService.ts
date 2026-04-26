@@ -47,7 +47,6 @@ export class GetService extends BaseUseCase<
           title: service.title,
           date: service.date,
           time: service.time,
-          shift: service.shift,
           location: service.location,
           description: service.description,
           createdAt: service.createdAt,

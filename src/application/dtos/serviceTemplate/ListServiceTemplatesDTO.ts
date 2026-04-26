@@ -3,7 +3,6 @@ export type ServiceTemplateListItem = {
   churchId: string;
   title: string;
   dayOfWeek: string;
-  shift: string;
   time: string;
   location: string | null;
   isActive: boolean;

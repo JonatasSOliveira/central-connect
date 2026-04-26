@@ -1,4 +1,5 @@
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IMemberAvailabilityRepository } from "@/domain/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
@@ -15,6 +16,7 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly memberMinistryRepository: IMemberMinistryRepository,
+    private readonly memberAvailabilityRepository: IMemberAvailabilityRepository,
     private readonly churchRepository: IChurchRepository,
     private readonly roleRepository: IRoleRepository,
   ) {
@@ -90,6 +92,10 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
         visibleChurches = churchesWithPermission;
       }
 
+      const memberAvailability = await this.memberAvailabilityRepository.findByMemberId(
+        input.memberId,
+      );
+
       return {
         ok: true,
         value: {
@@ -99,6 +105,12 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
           phone: member.phone,
           status: member.status,
           avatarUrl: member.avatarUrl,
+          availability: memberAvailability
+            ? {
+                mode: memberAvailability.mode,
+                daysOfWeek: memberAvailability.daysOfWeek,
+              }
+            : null,
           churches: visibleChurches,
         },
       };
