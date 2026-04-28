@@ -57,3 +57,62 @@ self.addEventListener("fetch", (event) => {
       }),
   );
 });
+
+self.addEventListener("push", (event) => {
+  if (!event.data) {
+    return;
+  }
+
+  let payload = {};
+
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = { notification: { title: "Central Connect" } };
+  }
+
+  const notification = payload.notification || {};
+  const data = payload.data || {};
+  const title = notification.title || "Central Connect";
+  const body = notification.body || "Você tem uma nova notificação";
+  const link =
+    data.link ||
+    payload.fcmOptions?.link ||
+    payload.webpush?.fcmOptions?.link ||
+    "/home";
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: "/icon-192x192.png",
+      badge: "/icon-192x192.png",
+      data: {
+        ...data,
+        link,
+      },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const targetLink = event.notification.data?.link || "/home";
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
+          client.navigate(targetLink);
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow(targetLink);
+      }
+
+      return undefined;
+    }),
+  );
+});

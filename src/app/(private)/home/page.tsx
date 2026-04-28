@@ -13,6 +13,7 @@ import {
   Settings2,
   ClipboardList,
   ClipboardCheck,
+  BellRing,
   BarChart3,
   Building2,
 } from "lucide-react";
@@ -24,6 +25,7 @@ import { CardItem } from "@/components/ui/card-item";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { usePushNotifications } from "@/features/notifications/hooks/usePushNotifications";
 import { useChurchStore } from "@/stores/churchStore";
 import {
   AlertDialog,
@@ -42,6 +44,8 @@ export default function HomePage() {
   const { userName, avatarUrl, churchName } = useHomeScreen();
   const { user, logout } = useAuth();
   const { selectedChurch } = useChurchStore();
+  const { isSupported, permission, isRegistering, enableNotifications } =
+    usePushNotifications({ enableForegroundListener: false });
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const { hasPermission: canManageMembers } = usePermissions({
@@ -106,6 +110,9 @@ export default function HomePage() {
     canReadScaleAttendance ||
     canReadScaleAttendanceReport ||
     showChurchSelfItem;
+
+  const showEnableNotificationsItem =
+    isSupported && permission !== "granted" && !!user?.memberId;
 
   const handleChurchSelfClick = () => {
     const churchId = selectedChurch?.id || user?.churches?.[0]?.churchId;
@@ -273,6 +280,21 @@ export default function HomePage() {
                   description="Edite seus dados pessoais"
                   icon={Users}
                   onClick={handleMemberSelfClick}
+                />
+              )}
+
+              {showEnableNotificationsItem && (
+                <CardItem
+                  title="Ativar notificações"
+                  description={
+                    isRegistering
+                      ? "Ativando notificações..."
+                      : "Receba alertas quando for escalado"
+                  }
+                  icon={BellRing}
+                  onClick={() => {
+                    enableNotifications();
+                  }}
                 />
               )}
             </div>

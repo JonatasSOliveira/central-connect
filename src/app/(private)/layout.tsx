@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { usePushNotifications } from "@/features/notifications/hooks/usePushNotifications";
 import { Loader2 } from "lucide-react";
 
 export default function PrivateLayout({
@@ -12,12 +13,21 @@ export default function PrivateLayout({
 }) {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
+  const { permission, syncRegisteredToken } = usePushNotifications();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push("/login");
     }
   }, [isAuthenticated, isLoading, router]);
+
+  useEffect(() => {
+    if (!isAuthenticated || permission !== "granted") {
+      return;
+    }
+
+    syncRegisteredToken();
+  }, [isAuthenticated, permission, syncRegisteredToken]);
 
   if (isLoading) {
     return (

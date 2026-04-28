@@ -4,6 +4,10 @@ import {
   type CurrentUser,
 } from "@/application/services/AuthService";
 import { signOut as firebaseClientSignOut } from "@/infra/firebase-client/services/googleAuth";
+import {
+  clearStoredPushToken,
+  getStoredPushToken,
+} from "@/infra/firebase-client/services/pushMessaging";
 
 interface AuthState {
   user: CurrentUser | null;
@@ -94,12 +98,27 @@ export const useAuthStore = create<AuthStore>((set) => ({
   logout: async () => {
     set({ isLoading: true });
     try {
+      const pushToken = getStoredPushToken();
+
+      if (pushToken) {
+        try {
+          await fetch("/api/push-tokens", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: pushToken }),
+          });
+        } catch {
+          // noop
+        }
+      }
+
       await Promise.allSettled([authService.logout(), firebaseClientSignOut()]);
 
       if (typeof window !== "undefined") {
         window.sessionStorage.removeItem("google-login-pending");
         window.localStorage.removeItem("google-login-pending");
         window.localStorage.removeItem("google-login-pending-ts");
+        clearStoredPushToken();
       }
 
       set({ user: null });

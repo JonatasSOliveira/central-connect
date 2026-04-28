@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ScaleFormSchema } from "@/application/dtos/scale/ScaleDTO";
 import { Permission } from "@/domain/enums/Permission";
-import { scaleContainer } from "@/infra/di";
+import { notificationContainer, scaleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 import { validateSession } from "../../_lib/auth";
 
@@ -156,6 +156,47 @@ export async function PUT(
     })),
     updatedByUserId: user.userId,
   });
+
+  if (result.ok) {
+    const previousStatus = existingScale.status;
+    const nextStatus = result.value.scale.status;
+
+    const previousMemberIds = new Set(
+      existingScale.members.map((member) => member.memberId),
+    );
+
+    const nextMemberIds = Array.from(
+      new Set(result.value.scale.members.map((member) => member.memberId)),
+    );
+
+    let targetMemberIds: string[] = [];
+    let trigger: "scale_published" | "member_added_in_published_scale" | null =
+      null;
+
+    if (previousStatus === "draft" && nextStatus === "published") {
+      targetMemberIds = nextMemberIds;
+      trigger = "scale_published";
+    } else if (previousStatus === "published" && nextStatus === "published") {
+      targetMemberIds = nextMemberIds.filter(
+        (memberId) => !previousMemberIds.has(memberId),
+      );
+      trigger = "member_added_in_published_scale";
+    }
+
+    if (trigger && targetMemberIds.length > 0) {
+      try {
+        await notificationContainer.notifyScaleMembers.execute({
+          churchId: existingScale.churchId,
+          scaleId: result.value.scale.id,
+          serviceId: result.value.scale.serviceId,
+          memberIds: targetMemberIds,
+          trigger,
+        });
+      } catch {
+        // noop: não bloqueia atualização da escala por falha de push
+      }
+    }
+  }
 
   const errorCode = "error" in result ? result.error?.code : undefined;
 

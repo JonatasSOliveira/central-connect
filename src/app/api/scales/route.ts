@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ScaleFormSchema } from "@/application/dtos/scale/ScaleDTO";
 import { Permission } from "@/domain/enums/Permission";
-import { scaleContainer } from "@/infra/di";
+import { notificationContainer, scaleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 import { getChurchIdFromSession, validateSession } from "../_lib/auth";
 
@@ -175,6 +175,26 @@ export async function POST(request: NextRequest) {
     })),
     createdByUserId: user.userId,
   });
+
+  if (result.ok && result.value.scale.status === "published") {
+    const targetMemberIds = Array.from(
+      new Set(result.value.scale.members.map((member) => member.memberId)),
+    );
+
+    if (targetMemberIds.length > 0) {
+      try {
+        await notificationContainer.notifyScaleMembers.execute({
+          churchId,
+          scaleId: result.value.scale.id,
+          serviceId: result.value.scale.serviceId,
+          memberIds: targetMemberIds,
+          trigger: "scale_published",
+        });
+      } catch {
+        // noop: não bloqueia criação da escala por falha de push
+      }
+    }
+  }
 
   const errorCode = "error" in result ? result.error?.code : undefined;
 
