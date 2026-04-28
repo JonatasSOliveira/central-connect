@@ -13,6 +13,7 @@ export interface PushMulticastInput {
 export interface PushMulticastOutput {
   successCount: number;
   failureCount: number;
+  failedTokens: string[];
   invalidTokens: string[];
 }
 

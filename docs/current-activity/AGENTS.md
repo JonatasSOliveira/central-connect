@@ -219,30 +219,30 @@ Entregaveis minimos:
 ## Checklist de Implementacao
 
 ### Fase 1: Dominio e Persistencia
-- [ ] Campo global de sequencia por igreja implementado
-- [ ] Campo `requiredCount` por role implementado
-- [ ] Disponibilidade semanal por membro implementada
-- [ ] Mappers/repositories atualizados
+- [x] Campo global de sequencia por igreja implementado
+- [x] Campo `requiredCount` por role implementado
+- [x] Disponibilidade semanal por membro implementada
+- [x] Mappers/repositories atualizados
 
 ### Fase 2: Cadastro e Edicao
-- [ ] APIs de membro/igreja/ministerio atualizadas
-- [ ] Formularios atualizados
-- [ ] Validacoes Zod atualizadas
+- [x] APIs de membro/igreja/ministerio atualizadas
+- [x] Formularios atualizados
+- [x] Validacoes Zod atualizadas
 
 ### Fase 3: Geracao Automatica
-- [ ] Algoritmo de elegibilidade implementado
-- [ ] Geracao por role respeitando `requiredCount`
-- [ ] Respeito a regras de conflito no mesmo culto
+- [x] Algoritmo de elegibilidade implementado
+- [x] Geracao por role respeitando `requiredCount`
+- [x] Respeito a regras de conflito no mesmo culto
 - [ ] Resumo de pendencias implementado
 
 ### Fase 4: UI Manual
-- [ ] Botao de geracao manual em `/scales`
-- [ ] Tratativa de conflito de escala existente (`serviceId + ministryId`)
+- [x] Botao de geracao manual em `/scales`
+- [x] Tratativa de conflito de escala existente (`serviceId + ministryId`)
 
 ### Fase 5: Validacao
 - [ ] Cenarios manuais obrigatorios validados
 - [ ] `pnpm lint` passando
-- [ ] `pnpm build` passando
+- [x] `pnpm build` passando
 
 ---
 

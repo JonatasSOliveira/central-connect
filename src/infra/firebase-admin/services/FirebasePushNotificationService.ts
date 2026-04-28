@@ -12,6 +12,7 @@ export class FirebasePushNotificationService implements IPushNotificationService
       return {
         successCount: 0,
         failureCount: 0,
+        failedTokens: [],
         invalidTokens: [],
       };
     }
@@ -35,6 +36,7 @@ export class FirebasePushNotificationService implements IPushNotificationService
     });
 
     const invalidTokens: string[] = [];
+    const failedTokens: string[] = [];
 
     response.responses.forEach((result, index) => {
       if (result.success) {
@@ -42,6 +44,8 @@ export class FirebasePushNotificationService implements IPushNotificationService
       }
 
       const code = result.error?.code;
+      failedTokens.push(input.tokens[index]);
+
       if (
         code === "messaging/registration-token-not-registered" ||
         code === "messaging/invalid-registration-token"
@@ -53,6 +57,7 @@ export class FirebasePushNotificationService implements IPushNotificationService
     return {
       successCount: response.successCount,
       failureCount: response.failureCount,
+      failedTokens,
       invalidTokens,
     };
   }

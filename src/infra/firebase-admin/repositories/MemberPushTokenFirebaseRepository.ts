@@ -111,6 +111,39 @@ export class MemberPushTokenFirebaseRepository
     await batch.commit();
   }
 
+  async deactivateByTokenForMember(
+    churchId: string,
+    memberId: string,
+    token: string,
+  ): Promise<void> {
+    const snapshot = await this.buildActiveQuery()
+      .where("churchId", "==", churchId)
+      .where("memberId", "==", memberId)
+      .where("token", "==", token)
+      .where("isActive", "==", true)
+      .get();
+
+    if (snapshot.empty) {
+      return;
+    }
+
+    const batch = this.collection.firestore.batch();
+
+    for (const doc of snapshot.docs) {
+      batch.set(
+        doc.ref,
+        {
+          isActive: false,
+          updatedAt: new Date(),
+          lastFailureAt: new Date(),
+        },
+        { merge: true },
+      );
+    }
+
+    await batch.commit();
+  }
+
   async incrementFailureByToken(token: string): Promise<void> {
     const snapshot = await this.buildActiveQuery().where("token", "==", token).get();
 

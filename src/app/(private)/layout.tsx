@@ -13,7 +13,8 @@ export default function PrivateLayout({
 }) {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
-  const { permission, syncRegisteredToken } = usePushNotifications();
+  const { permission, syncRegisteredToken, autoEnableNotificationsAfterLogin } =
+    usePushNotifications();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -28,6 +29,14 @@ export default function PrivateLayout({
 
     syncRegisteredToken();
   }, [isAuthenticated, permission, syncRegisteredToken]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
+    autoEnableNotificationsAfterLogin();
+  }, [autoEnableNotificationsAfterLogin, isAuthenticated]);
 
   if (isLoading) {
     return (

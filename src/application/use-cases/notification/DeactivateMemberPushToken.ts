@@ -4,6 +4,8 @@ import { NotificationErrors } from "@/application/errors/NotificationErrors";
 import { BaseUseCase } from "../BaseUseCase";
 
 export interface DeactivateMemberPushTokenInput {
+  churchId: string;
+  memberId: string;
   token: string;
 }
 
@@ -25,7 +27,11 @@ export class DeactivateMemberPushToken extends BaseUseCase<
     input: DeactivateMemberPushTokenInput,
   ): Promise<Result<DeactivateMemberPushTokenOutput>> {
     try {
-      await this.memberPushTokenRepository.deactivateByToken(input.token);
+      await this.memberPushTokenRepository.deactivateByTokenForMember(
+        input.churchId,
+        input.memberId,
+        input.token,
+      );
 
       return {
         ok: true,

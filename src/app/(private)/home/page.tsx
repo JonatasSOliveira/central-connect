@@ -111,8 +111,10 @@ export default function HomePage() {
     canReadScaleAttendanceReport ||
     showChurchSelfItem;
 
+  const canShowNotificationSection = isSupported && !!user?.memberId;
   const showEnableNotificationsItem =
-    isSupported && permission !== "granted" && !!user?.memberId;
+    canShowNotificationSection && permission !== "granted";
+  const isNotificationPermissionDenied = permission === "denied";
 
   const handleChurchSelfClick = () => {
     const churchId = selectedChurch?.id || user?.churches?.[0]?.churchId;
@@ -283,18 +285,44 @@ export default function HomePage() {
                 />
               )}
 
-              {showEnableNotificationsItem && (
+            </div>
+          </>
+        )}
+
+        {canShowNotificationSection && (
+          <>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Notificações
+              </span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 mb-6">
+              {showEnableNotificationsItem ? (
                 <CardItem
                   title="Ativar notificações"
                   description={
                     isRegistering
                       ? "Ativando notificações..."
-                      : "Receba alertas quando for escalado"
+                      : isNotificationPermissionDenied
+                        ? "Notificações bloqueadas no navegador. Ative nas configurações do site."
+                        : "Receba alertas quando for escalado"
                   }
                   icon={BellRing}
-                  onClick={() => {
-                    enableNotifications();
-                  }}
+                  onClick={
+                    isNotificationPermissionDenied
+                      ? undefined
+                      : () => {
+                          enableNotifications();
+                        }
+                  }
+                />
+              ) : (
+                <CardItem
+                  title="Notificações ativas"
+                  description="Você receberá alertas quando for escalado"
+                  icon={BellRing}
                 />
               )}
             </div>

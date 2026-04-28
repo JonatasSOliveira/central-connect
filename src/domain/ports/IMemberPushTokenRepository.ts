@@ -13,5 +13,10 @@ export interface IMemberPushTokenRepository
     memberIds: string[],
   ): Promise<MemberPushToken[]>;
   deactivateByToken(token: string): Promise<void>;
+  deactivateByTokenForMember(
+    churchId: string,
+    memberId: string,
+    token: string,
+  ): Promise<void>;
   incrementFailureByToken(token: string): Promise<void>;
 }

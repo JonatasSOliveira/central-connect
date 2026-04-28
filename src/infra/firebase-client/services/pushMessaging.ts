@@ -10,6 +10,33 @@ import { getFirebaseClientApp } from "@/infra/firebase-client/firebaseConfig";
 
 const PUSH_TOKEN_STORAGE_KEY = "cc:push-token";
 const DEVICE_ID_STORAGE_KEY = "cc:push-device-id";
+const SERVICE_WORKER_READY_TIMEOUT_MS = 4000;
+
+function normalizeVapidKey(rawValue: string | undefined): string | null {
+  if (!rawValue) {
+    return null;
+  }
+
+  const trimmed = rawValue.trim();
+  const withoutQuotes = trimmed.replace(/^['"]|['"]$/g, "");
+
+  return withoutQuotes.length > 0 ? withoutQuotes : null;
+}
+
+async function waitForServiceWorkerReady(timeoutMs: number): Promise<ServiceWorkerRegistration> {
+  if (!("serviceWorker" in navigator)) {
+    throw new Error("Service Worker não suportado");
+  }
+
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<never>((_, reject) => {
+      window.setTimeout(() => {
+        reject(new Error("Timeout aguardando Service Worker ready"));
+      }, timeoutMs);
+    }),
+  ]);
+}
 
 function getOrCreateDeviceId(): string {
   if (typeof window === "undefined") {
@@ -81,18 +108,44 @@ export async function getPushToken(): Promise<{
     return { token: null, deviceId };
   }
 
-  const registration = await navigator.serviceWorker.ready;
-  const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+  let registration: ServiceWorkerRegistration;
+
+  try {
+    registration = await waitForServiceWorkerReady(
+      SERVICE_WORKER_READY_TIMEOUT_MS,
+    );
+  } catch {
+    return { token: null, deviceId };
+  }
+
+  const vapidKey = normalizeVapidKey(
+    process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+  );
 
   if (!vapidKey) {
     throw new Error("NEXT_PUBLIC_FIREBASE_VAPID_KEY não configurada");
   }
 
   const messaging = getMessaging(getFirebaseClientApp());
-  const token = await getToken(messaging, {
-    vapidKey,
-    serviceWorkerRegistration: registration,
-  });
+  let token: string;
+
+  try {
+    token = await getToken(messaging, {
+      vapidKey,
+      serviceWorkerRegistration: registration,
+    });
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Falha ao gerar token push";
+
+    if (errorMessage.includes("atob")) {
+      throw new Error(
+        "NEXT_PUBLIC_FIREBASE_VAPID_KEY inválida. Use a Public key do Firebase Cloud Messaging (Web Push).",
+      );
+    }
+
+    throw error;
+  }
 
   if (token) {
     window.localStorage.setItem(PUSH_TOKEN_STORAGE_KEY, token);

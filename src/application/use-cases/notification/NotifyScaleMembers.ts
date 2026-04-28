@@ -93,7 +93,7 @@ export class NotifyScaleMembers extends BaseUseCase<
         payload: {
           title,
           body: `${bodyBase}${bodyDate}`,
-          link: "/home",
+          link: `/home?scaleId=${input.scaleId}&serviceId=${input.serviceId}`,
           data: {
             type: "scale_notification",
             scaleId: input.scaleId,
@@ -105,6 +105,15 @@ export class NotifyScaleMembers extends BaseUseCase<
 
       for (const invalidToken of sendResult.invalidTokens) {
         await this.memberPushTokenRepository.deactivateByToken(invalidToken);
+      }
+
+      const invalidTokenSet = new Set(sendResult.invalidTokens);
+      const transientFailedTokens = sendResult.failedTokens.filter(
+        (token) => !invalidTokenSet.has(token),
+      );
+
+      for (const failedToken of transientFailedTokens) {
+        await this.memberPushTokenRepository.incrementFailureByToken(failedToken);
       }
 
       return {

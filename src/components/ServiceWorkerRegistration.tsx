@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 export default function ServiceWorkerRegistration() {
   useEffect(() => {
+    const enableDevServiceWorker =
+      process.env.NEXT_PUBLIC_ENABLE_SW_IN_DEV === "true";
     const pathname =
       typeof window !== "undefined" ? window.location.pathname : "";
     const shouldDisableForAuthFlow = pathname.startsWith("/login");
@@ -23,7 +25,7 @@ export default function ServiceWorkerRegistration() {
       return;
     }
 
-    if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== "production" && !enableDevServiceWorker) {
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker
           .getRegistrations()

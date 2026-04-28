@@ -114,19 +114,19 @@
 
 ## ✅ Criterios de Aceitacao
 
-- [ ] Formulario de membro permite configurar disponibilidade semanal em modo pode/nao pode.
-- [ ] Disponibilidade e persistida e retornada corretamente na API de membro.
-- [ ] Existe configuracao obrigatoria de `maxConsecutiveScalesPerMember` global por igreja.
-- [ ] Formulario de ministerio permite informar `requiredCount` por funcao.
-- [ ] Geracao assistida via botao cria escalas para cultos com base nas regras.
-- [ ] Geracao respeita regra de membro unico por culto (sem duplicidade em ministerios distintos).
-- [ ] Geracao respeita limite de escalas seguidas por membro.
-- [ ] Geracao respeita disponibilidade semanal do membro.
-- [ ] Geracao respeita `requiredCount` por funcao.
+- [x] Formulario de membro permite configurar disponibilidade semanal em modo pode/nao pode.
+- [x] Disponibilidade e persistida e retornada corretamente na API de membro.
+- [x] Existe configuracao obrigatoria de `maxConsecutiveScalesPerMember` global por igreja.
+- [x] Formulario de ministerio permite informar `requiredCount` por funcao.
+- [x] Geracao assistida via botao cria escalas para cultos com base nas regras.
+- [x] Geracao respeita regra de membro unico por culto (sem duplicidade em ministerios distintos).
+- [x] Geracao respeita limite de escalas seguidas por membro.
+- [x] Geracao respeita disponibilidade semanal do membro.
+- [x] Geracao respeita `requiredCount` por funcao.
 - [ ] Quando faltar membro elegivel, vagas pendentes sao sinalizadas.
-- [ ] Existe execucao manual de geracao em `/scales`.
-- [ ] Quando ja existir escala para `serviceId + ministryId`, a UI informa o conflito e oferece abrir a escala existente.
-- [ ] Build passando.
+- [x] Existe execucao manual de geracao em `/scales`.
+- [x] Quando ja existir escala para `serviceId + ministryId`, a UI informa o conflito e oferece abrir a escala existente.
+- [x] Build passando.
 - [ ] Lint passando.
 
 ---
@@ -187,23 +187,23 @@
 ## 🚀 Fases de Implementacao
 
 ### Fase 1: Base de dados e dominio
-- [ ] Modelar campos novos (`Church`, `MinistryRole`, disponibilidade do membro)
-- [ ] Atualizar mappers e repositories Firebase
-- [ ] Backfill/migracao de dados legados com defaults seguros
+- [x] Modelar campos novos (`Church`, `MinistryRole`, disponibilidade do membro)
+- [x] Atualizar mappers e repositories Firebase
+- [x] Backfill/migracao de dados legados com defaults seguros
 
 ### Fase 2: Cadastro e edicao
-- [ ] Ajustar DTOs e APIs de membro/igreja/ministerio
-- [ ] Ajustar formularios e validacoes de UI
+- [x] Ajustar DTOs e APIs de membro/igreja/ministerio
+- [x] Ajustar formularios e validacoes de UI
 
 ### Fase 3: Motor de geracao assistida/manual
-- [ ] Implementar algoritmo de elegibilidade e alocacao
-- [ ] Implementar geracao por culto/ministerio/funcao
+- [x] Implementar algoritmo de elegibilidade e alocacao
+- [x] Implementar geracao por culto/ministerio/funcao
 - [ ] Implementar resumo de geracao e pendencias
 
 ### Fase 4: Validacao final
 - [ ] Testes de cenarios criticos
 - [ ] `pnpm lint` passando
-- [ ] `pnpm build` passando
+- [x] `pnpm build` passando
 
 ---
 
