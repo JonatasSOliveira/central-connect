@@ -6,9 +6,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { getPushToken } from "@/infra/firebase-client/services/pushMessaging";
 import type { Result } from "@/shared/types/Result";
 
-const PUSH_DEBUG_ENABLED =
-  process.env.NODE_ENV !== "production" ||
-  process.env.NEXT_PUBLIC_PUSH_DEBUG === "true";
+const PUSH_DEBUG_ENABLED = process.env.NEXT_PUBLIC_PUSH_DEBUG === "true";
 
 function tokenPreview(token: string): string {
   if (token.length <= 12) {
@@ -61,7 +59,20 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
 
   const handleSelectChurch = async (church: ChurchListItemDTO) => {
     pushDebug("select church start", { churchId: church.id });
-    await authService.selectChurch(church.id);
+    const selectChurchResult = await authService.selectChurch(church.id);
+    pushDebug("select church response", {
+      churchId: church.id,
+      ok: selectChurchResult.ok,
+      errorCode: selectChurchResult.ok ? null : selectChurchResult.error.code,
+      errorMessage: selectChurchResult.ok
+        ? null
+        : selectChurchResult.error.message,
+    });
+
+    if (!selectChurchResult.ok) {
+      return;
+    }
+
     pushDebug("select church session updated", { churchId: church.id });
 
     try {
@@ -79,13 +90,23 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
           body: JSON.stringify({ token, deviceId, platform: "web" }),
         });
 
+        let responseBody: unknown = null;
+        try {
+          responseBody = await response.json();
+        } catch {
+          responseBody = null;
+        }
+
         pushDebug("save token after select church", {
           status: response.status,
           ok: response.ok,
+          responseBody,
         });
       }
-    } catch {
-      pushDebug("save token after select church failed");
+    } catch (error) {
+      pushDebug("save token after select church failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
     await initialize();

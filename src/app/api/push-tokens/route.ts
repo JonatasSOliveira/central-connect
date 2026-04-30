@@ -32,13 +32,29 @@ function pushDebug(message: string, payload?: unknown): void {
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  const startedAt = Date.now();
+
+  pushDebug("post start", { requestId });
   const auth = await validateSession();
 
   if (!auth.ok) {
+    pushDebug("post unauthorized", {
+      requestId,
+      status: 401,
+      reason: auth.error.code,
+      durationMs: Date.now() - startedAt,
+    });
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
   if (!auth.user.memberId) {
+    pushDebug("post forbidden: user without member", {
+      requestId,
+      status: 403,
+      reason: "NOT_AUTHORIZED",
+      durationMs: Date.now() - startedAt,
+    });
     return NextResponse.json(
       {
         ok: false,
@@ -52,6 +68,12 @@ export async function POST(request: NextRequest) {
   }
 
   if (!auth.user.churchId) {
+    pushDebug("post invalid: no church selected", {
+      requestId,
+      status: 400,
+      reason: "NO_CHURCH_SELECTED",
+      durationMs: Date.now() - startedAt,
+    });
     return NextResponse.json(
       {
         ok: false,
@@ -88,6 +110,7 @@ export async function POST(request: NextRequest) {
   }
 
   pushDebug("upsert token request", {
+    requestId,
     userId: auth.user.userId,
     memberId: auth.user.memberId,
     churchId: auth.user.churchId,
@@ -108,9 +131,11 @@ export async function POST(request: NextRequest) {
   const errorCode = "error" in result ? result.error?.code : undefined;
 
   pushDebug("upsert token response", {
+    requestId,
     ok: result.ok,
     errorCode,
     tokenId: result.ok ? result.value.tokenId : null,
+    durationMs: Date.now() - startedAt,
   });
 
   return NextResponse.json(result, {
@@ -119,13 +144,29 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  const startedAt = Date.now();
+
+  pushDebug("delete start", { requestId });
   const auth = await validateSession();
 
   if (!auth.ok) {
+    pushDebug("delete unauthorized", {
+      requestId,
+      status: 401,
+      reason: auth.error.code,
+      durationMs: Date.now() - startedAt,
+    });
     return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
   }
 
   if (!auth.user.memberId) {
+    pushDebug("delete forbidden: user without member", {
+      requestId,
+      status: 403,
+      reason: "NOT_AUTHORIZED",
+      durationMs: Date.now() - startedAt,
+    });
     return NextResponse.json(
       {
         ok: false,
@@ -139,6 +180,12 @@ export async function DELETE(request: NextRequest) {
   }
 
   if (!auth.user.churchId) {
+    pushDebug("delete invalid: no church selected", {
+      requestId,
+      status: 400,
+      reason: "NO_CHURCH_SELECTED",
+      durationMs: Date.now() - startedAt,
+    });
     return NextResponse.json(
       {
         ok: false,
@@ -175,6 +222,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   pushDebug("deactivate token request", {
+    requestId,
     userId: auth.user.userId,
     memberId: auth.user.memberId,
     churchId: auth.user.churchId,
@@ -190,8 +238,10 @@ export async function DELETE(request: NextRequest) {
   const errorCode = "error" in result ? result.error?.code : undefined;
 
   pushDebug("deactivate token response", {
+    requestId,
     ok: result.ok,
     errorCode,
+    durationMs: Date.now() - startedAt,
   });
 
   return NextResponse.json(result, {

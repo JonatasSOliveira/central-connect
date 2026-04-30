@@ -161,26 +161,16 @@ export async function PUT(
     const previousStatus = existingScale.status;
     const nextStatus = result.value.scale.status;
 
-    const previousMemberIds = new Set(
-      existingScale.members.map((member) => member.memberId),
-    );
-
     const nextMemberIds = Array.from(
       new Set(result.value.scale.members.map((member) => member.memberId)),
     );
 
     let targetMemberIds: string[] = [];
-    let trigger: "scale_published" | "member_added_in_published_scale" | null =
-      null;
+    let trigger: "scale_published" | null = null;
 
     if (previousStatus === "draft" && nextStatus === "published") {
       targetMemberIds = nextMemberIds;
       trigger = "scale_published";
-    } else if (previousStatus === "published" && nextStatus === "published") {
-      targetMemberIds = nextMemberIds.filter(
-        (memberId) => !previousMemberIds.has(memberId),
-      );
-      trigger = "member_added_in_published_scale";
     }
 
     if (trigger && targetMemberIds.length > 0) {

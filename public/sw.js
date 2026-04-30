@@ -73,8 +73,10 @@ self.addEventListener("push", (event) => {
 
   const notification = payload.notification || {};
   const data = payload.data || {};
-  const title = notification.title || "Central Connect";
-  const body = notification.body || "Você tem uma nova notificação";
+  const title = notification.title || "Central Connect • Nova atualização";
+  const body =
+    notification.body ||
+    "Há uma atualização importante na sua escala. Toque para ver os detalhes.";
   const link =
     data.link ||
     payload.fcmOptions?.link ||

@@ -6,8 +6,7 @@ import type { Result } from "@/shared/types/Result";
 import { BaseUseCase } from "../BaseUseCase";
 
 export type ScaleNotificationTrigger =
-  | "scale_published"
-  | "member_added_in_published_scale";
+  | "scale_published";
 
 export interface NotifyScaleMembersInput {
   churchId: string;
@@ -60,15 +59,15 @@ export class NotifyScaleMembers extends BaseUseCase<
           }).format(service.date)
         : null;
 
-      const title =
-        input.trigger === "scale_published"
-          ? "Escala publicada"
-          : "Você foi escalado";
+      const title = "Sua escala está confirmada";
 
-      const bodyBase = service?.title ? `Culto ${service.title}` : "Nova escala";
+      const serviceLabel = service?.title ? `culto ${service.title}` : "próximo culto";
       const bodyDate = formattedDate && service?.time
-        ? ` em ${formattedDate} às ${service.time}`
-        : "";
+        ? ` em ${formattedDate}, às ${service.time}`
+        : formattedDate
+          ? ` em ${formattedDate}`
+          : "";
+      const body = `A escala do ${serviceLabel}${bodyDate} foi publicada. Toque para ver os detalhes.`;
 
       const tokens = await this.memberPushTokenRepository.findActiveByChurchAndMemberIds(
         input.churchId,
@@ -92,7 +91,7 @@ export class NotifyScaleMembers extends BaseUseCase<
         tokens: uniqueTokens,
         payload: {
           title,
-          body: `${bodyBase}${bodyDate}`,
+          body,
           link: `/home?scaleId=${input.scaleId}&serviceId=${input.serviceId}`,
           data: {
             type: "scale_notification",
