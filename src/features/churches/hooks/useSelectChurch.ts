@@ -3,7 +3,12 @@ import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
 import { authService } from "@/application/services/AuthService";
 import type { ListChurchesOutput } from "@/application/use-cases/church/ListChurches";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { getPushToken } from "@/infra/firebase-client/services/pushMessaging";
+import {
+  getPushToken,
+  markPushTokenSyncedForChurch,
+  shouldSyncPushTokenForChurch,
+} from "@/infra/firebase-client/services/pushMessaging";
+import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
 import type { Result } from "@/shared/types/Result";
 
 const PUSH_DEBUG_ENABLED = process.env.NEXT_PUBLIC_PUSH_DEBUG === "true";
@@ -35,6 +40,7 @@ interface SelectChurchScreenParams {
 
 export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
   const { isLoading, initialize } = useAuth();
+  const { fetchIfStale, churches: cachedChurches } = useChurchCatalogStore();
   const [churches, setChurches] = useState<ChurchListItemDTO[]>([]);
   const [loadingChurches, setLoadingChurches] = useState(true);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -42,6 +48,17 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
   useEffect(() => {
     const loadChurches = async () => {
       try {
+        if (cachedChurches.length > 0) {
+          setChurches(cachedChurches);
+          return;
+        }
+
+        const staleChurches = await fetchIfStale();
+        if (staleChurches.length > 0) {
+          setChurches(staleChurches);
+          return;
+        }
+
         const response = await fetch("/api/churches");
         const data: Result<ListChurchesOutput> = await response.json();
         if (!data.ok) {
@@ -55,7 +72,7 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
     };
 
     loadChurches();
-  }, []);
+  }, [cachedChurches, fetchIfStale]);
 
   const handleSelectChurch = async (church: ChurchListItemDTO) => {
     pushDebug("select church start", { churchId: church.id });
@@ -84,6 +101,11 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
       });
 
       if (token) {
+        if (!shouldSyncPushTokenForChurch(church.id, token)) {
+          pushDebug("save token after select church skipped: recently synced");
+          return;
+        }
+
         const response = await fetch("/api/push-tokens", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -102,6 +124,10 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
           ok: response.ok,
           responseBody,
         });
+
+        if (response.ok) {
+          markPushTokenSyncedForChurch(church.id, token);
+        }
       }
     } catch (error) {
       pushDebug("save token after select church failed", {

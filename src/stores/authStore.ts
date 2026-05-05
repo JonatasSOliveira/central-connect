@@ -5,6 +5,7 @@ import {
 } from "@/application/services/AuthService";
 import { signOut as firebaseClientSignOut } from "@/infra/firebase-client/services/googleAuth";
 import {
+  clearPushTokenSyncMarkers,
   clearStoredPushToken,
   getStoredPushToken,
 } from "@/infra/firebase-client/services/pushMessaging";
@@ -119,6 +120,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         window.localStorage.removeItem("google-login-pending");
         window.localStorage.removeItem("google-login-pending-ts");
         clearStoredPushToken();
+        clearPushTokenSyncMarkers();
       }
 
       set({ user: null });
