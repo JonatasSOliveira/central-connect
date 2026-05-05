@@ -25,6 +25,15 @@ export class ScaleMemberFirebaseRepository
     return scaleMemberToPersistence(entity);
   }
 
+  async findByMemberId(memberId: string): Promise<ScaleMember[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("memberId", "==", memberId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
   async findByScaleId(scaleId: string): Promise<ScaleMember[]> {
     const snapshot = await this.buildActiveQuery()
       .where("scaleId", "==", scaleId)

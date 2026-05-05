@@ -26,6 +26,7 @@ const permissionLabels: Record<Permission, string> = {
   [Permission.MEMBER_WRITE]: "Membros: Escrita",
   [Permission.MEMBER_DELETE]: "Membros: Excluir",
   [Permission.MEMBER_SELF_WRITE]: "Membros: Edição Própria",
+  [Permission.MY_SCALES_READ]: "Membros: Minhas escalas",
   [Permission.SCALE_READ]: "Escalas: Leitura",
   [Permission.SCALE_WRITE]: "Escalas: Escrita",
   [Permission.SCALE_DELETE]: "Escalas: Excluir",
@@ -85,6 +86,7 @@ export function PermissionSelect({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
+        type="button"
         className="h-12 w-full min-w-0 rounded-lg border border-input bg-transparent px-3 py-2 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 flex items-center justify-between font-normal md:h-8 md:px-2.5 md:py-1 md:text-sm"
         style={{ width: "100%", display: "flex" }}
       >

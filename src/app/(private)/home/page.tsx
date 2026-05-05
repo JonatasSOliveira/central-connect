@@ -10,6 +10,7 @@ import {
   HandHeart,
   ArrowRightLeft,
   CalendarDays,
+  CalendarCheck2,
   Settings2,
   ClipboardList,
   ClipboardCheck,
@@ -20,7 +21,6 @@ import {
 import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
 import { GreetingSection } from "@/features/home/components/greeting-section";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { CardAdmin } from "@/components/ui/card-admin";
 import { CardItem } from "@/components/ui/card-item";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { Permission } from "@/domain/enums/Permission";
@@ -96,6 +96,10 @@ export default function HomePage() {
     requiredPermissions: [Permission.SCALE_ATTENDANCE_REPORT_READ],
   });
 
+  const { hasPermission: canReadMyScales } = usePermissions({
+    requiredPermissions: [Permission.MY_SCALES_READ],
+  });
+
   const canShowAdminSection =
     canManageMembers ||
     canManageRoles ||
@@ -107,6 +111,7 @@ export default function HomePage() {
 
   const showChurchSelfItem = canReadChurchSelf && !canManageChurches;
   const canShowQuickActions =
+    canReadMyScales ||
     canReadScaleAttendance ||
     canReadScaleAttendanceReport ||
     showChurchSelfItem;
@@ -177,59 +182,59 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 gap-3 mb-6">
               {canManageChurches && (
-                <CardAdmin
+                <CardItem
                   title="Igrejas"
                   description="Gerencie as igrejas cadastradas"
                   icon={Church}
-                  href="/churches"
+                  onClick={() => router.push("/churches")}
                 />
               )}
               {canManageMembers && (
-                <CardAdmin
+                <CardItem
                   title="Membros"
                   description="Gerencie os membros da igreja"
                   icon={Users}
-                  href="/members"
+                  onClick={() => router.push("/members")}
                 />
               )}
               {canManageRoles && (
-                <CardAdmin
+                <CardItem
                   title="Cargos do Sistema"
                   description="Gerencie as permissões dos cargos do sistema"
                   icon={UserRoundKey}
-                  href="/roles"
+                  onClick={() => router.push("/roles")}
                 />
               )}
               {canManageMinistries && (
-                <CardAdmin
+                <CardItem
                   title="Ministérios"
                   description="Gerencie os ministérios da igreja"
                   icon={HandHeart}
-                  href="/ministries"
+                  onClick={() => router.push("/ministries")}
                 />
               )}
               {canManageServices && (
-                <CardAdmin
+                <CardItem
                   title="Cultos"
                   description="Gerencie os cultos da igreja"
                   icon={CalendarDays}
-                  href="/services"
+                  onClick={() => router.push("/services")}
                 />
               )}
               {canManageServiceTemplates && (
-                <CardAdmin
+                <CardItem
                   title="Modelos de Culto"
                   description="Configure modelos de cultos recorrentes"
                   icon={Settings2}
-                  href="/service-templates"
+                  onClick={() => router.push("/service-templates")}
                 />
               )}
               {canManageScales && (
-                <CardAdmin
+                <CardItem
                   title="Escalas"
                   description="Gerencie as escalas ministeriais"
                   icon={ClipboardList}
-                  href="/scales"
+                  onClick={() => router.push("/scales")}
                 />
               )}
             </div>
@@ -246,6 +251,14 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 gap-3 mb-6">
+              {canReadMyScales && (
+                <CardItem
+                  title="Minhas Escalas"
+                  description="Veja suas escalas atuais, futuras e já servidas"
+                  icon={CalendarCheck2}
+                  onClick={() => router.push("/my-scales")}
+                />
+              )}
               {canReadScaleAttendance && (
                 <CardItem
                   title="Chamadas"

@@ -30,6 +30,10 @@ interface UseRoleFormReturn {
 
 const _defaultPermissions = Object.values(Permission);
 
+function isPermission(value: string): value is Permission {
+  return _defaultPermissions.includes(value as Permission);
+}
+
 export function useRoleForm({
   mode,
   roleId,
@@ -59,10 +63,21 @@ export function useRoleForm({
           const data = await response.json();
 
           if (data.ok && data.value) {
+            const rawPermissions = Array.isArray(data.value.permissions)
+              ? data.value.permissions
+              : [];
+            const validPermissions = rawPermissions.filter(isPermission);
+
+            if (rawPermissions.length !== validPermissions.length) {
+              toast.warning(
+                "Este cargo possui permissões antigas inválidas e elas foram ignoradas.",
+              );
+            }
+
             form.reset({
               name: data.value.name,
               description: data.value.description ?? "",
-              permissions: data.value.permissions,
+              permissions: validPermissions,
             });
           } else {
             toast.error("Cargo do sistema não encontrado");
