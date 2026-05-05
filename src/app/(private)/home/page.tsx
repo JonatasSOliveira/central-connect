@@ -68,7 +68,7 @@ export default function HomePage() {
     requiredPermissions: [Permission.CHURCH_SELF_WRITE],
   });
 
-  const { hasPermission: canReadMemberSelf } = usePermissions({
+  const { hasPermission: canWriteMemberSelf } = usePermissions({
     requiredPermissions: [Permission.MEMBER_SELF_WRITE],
   });
 
@@ -105,11 +105,11 @@ export default function HomePage() {
     canManageServiceTemplates ||
     canManageScales;
 
-  const showChurchSelfItem = canReadChurchSelf && !canManageChurches;
+  const canShowChurchSelfItem = canReadChurchSelf && !canManageChurches;
   const canShowQuickActions =
     canReadScaleAttendance ||
     canReadScaleAttendanceReport ||
-    showChurchSelfItem;
+    canShowChurchSelfItem;
 
   const canShowNotificationSection = isSupported && !!user?.memberId;
   const showEnableNotificationsItem =
@@ -124,10 +124,10 @@ export default function HomePage() {
     }
   };
 
-  const showMemberSelfItem = canReadMemberSelf && user?.memberId;
+  const canShowMemberSelfItem = canWriteMemberSelf && !!user?.memberId;
   const handleMemberSelfClick = () => {
     if (user?.memberId) {
-      router.push(`/members/${user.memberId}/edit?readOnly=false`);
+      router.push(`/members/${user.memberId}/edit?selfEdit=true`);
     }
   };
 
@@ -263,7 +263,7 @@ export default function HomePage() {
                 />
               )}
 
-              {showChurchSelfItem && (
+              {canShowChurchSelfItem && (
                 <CardItem
                   title="Dados da igreja"
                   description={
@@ -276,7 +276,7 @@ export default function HomePage() {
                 />
               )}
 
-              {showMemberSelfItem && (
+              {canShowMemberSelfItem && (
                 <CardItem
                   title="Meu Perfil"
                   description="Edite seus dados pessoais"

@@ -3,6 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { AllPermissions } from "@/domain/enums/Permission";
 import { authContainer } from "@/infra/di";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
+import { getRequestId, logEvent } from "@/shared/utils/logger";
+import { canSelectChurch } from "../_lib/canSelectChurch";
 import { isTrustedOrigin } from "../../_lib/csrf";
 
 interface SessionPayload {
@@ -19,7 +21,16 @@ interface SessionPayload {
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = getRequestId(request);
+
   if (!isTrustedOrigin(request)) {
+    logEvent("warn", {
+      event: "select_church_untrusted_origin",
+      requestId,
+      route: "/api/auth/select-church",
+      status: 403,
+    });
+
     return NextResponse.json(
       { ok: false, error: { code: "UNTRUSTED_ORIGIN" } },
       { status: 403 },
@@ -59,10 +70,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (
-      !session.isSuperAdmin &&
-      !session.churches.some((church) => church.churchId === churchId)
-    ) {
+    if (!canSelectChurch(session, churchId)) {
       return NextResponse.json(
         { ok: false, error: { code: "NOT_AUTHORIZED" } },
         { status: 403 },
@@ -124,11 +132,28 @@ export async function POST(request: NextRequest) {
       path: "/",
     });
 
+    logEvent("info", {
+      event: "select_church_success",
+      requestId,
+      route: "/api/auth/select-church",
+      status: 200,
+      userId: session.userId,
+      memberId: session.memberId,
+      churchId,
+    });
+
     return NextResponse.json({
       ok: true,
       value: { churchId },
     });
   } catch {
+    logEvent("warn", {
+      event: "select_church_invalid_session",
+      requestId,
+      route: "/api/auth/select-church",
+      status: 401,
+    });
+
     return NextResponse.json(
       { ok: false, error: { code: "INVALID_SESSION" } },
       { status: 401 },
