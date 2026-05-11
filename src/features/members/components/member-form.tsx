@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { useMemberForm } from "@/features/members/hooks/useMemberForm";
+import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
 import { AvailabilitySection } from "./availability-section";
 import { BasicInfoSection } from "./basic-info-section";
 import { ChurchSection } from "./church-section";
@@ -13,12 +14,14 @@ interface MemberFormProps {
   mode: "create" | "edit";
   memberId?: string;
   readOnly?: boolean;
+  isSelfEdit?: boolean;
 }
 
 export function MemberForm({
   mode,
   memberId,
   readOnly = false,
+  isSelfEdit = false,
 }: MemberFormProps) {
   const router = useRouter();
   const {
@@ -42,6 +45,7 @@ export function MemberForm({
   } = useMemberForm({
     mode,
     memberId,
+    isSelfEdit,
   });
 
   const [_addingMinistryTo, setAddingMinistryTo] = useState<number | null>(
@@ -75,6 +79,14 @@ export function MemberForm({
   };
 
   const handleCancel = () => {
+    if (
+      typeof window !== "undefined" &&
+      shouldNavigateBack(isSelfEdit, window.history.length)
+    ) {
+      router.back();
+      return;
+    }
+
     router.push("/home");
   };
 

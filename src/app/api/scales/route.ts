@@ -3,6 +3,7 @@ import { ScaleFormSchema } from "@/application/dtos/scale/ScaleDTO";
 import { Permission } from "@/domain/enums/Permission";
 import { notificationContainer, scaleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
+import { getRequestId, logEvent } from "@/shared/utils/logger";
 import { getChurchIdFromSession, validateSession } from "../_lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -82,6 +83,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = getRequestId(request);
   const auth = await validateSession();
 
   if (!auth.ok) {
@@ -191,12 +193,36 @@ export async function POST(request: NextRequest) {
           trigger: "scale_published",
         });
       } catch {
+        logEvent("warn", {
+          event: "scale_publish_push_failed",
+          requestId,
+          route: "/api/scales",
+          status: 201,
+          userId: user.userId,
+          churchId,
+          details: {
+            scaleId: result.value.scale.id,
+            targetCount: targetMemberIds.length,
+          },
+        });
+
         // noop: não bloqueia criação da escala por falha de push
       }
     }
   }
 
   const errorCode = "error" in result ? result.error?.code : undefined;
+
+  logEvent(result.ok ? "info" : "warn", {
+    event: result.ok ? "scale_create_success" : "scale_create_failed",
+    requestId,
+    route: "/api/scales",
+    status: result.ok ? 201 : getHttpStatus(errorCode),
+    userId: user.userId,
+    churchId,
+    errorCode: result.ok ? null : errorCode ?? null,
+    details: result.ok ? { scaleId: result.value.scale.id } : undefined,
+  });
 
   return NextResponse.json(result, {
     status: result.ok ? 201 : getHttpStatus(errorCode),

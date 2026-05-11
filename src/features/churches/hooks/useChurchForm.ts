@@ -11,6 +11,7 @@ import {
   churchFormDefaultValues,
 } from "@/application/dtos/church/ChurchDTO";
 import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
+import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
 interface UseChurchFormProps {
   mode: "create" | "edit";
@@ -37,6 +38,7 @@ export function useChurchForm({
   );
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [roles, setRoles] = useState<RoleListItem[]>([]);
+  const { roles: cachedRoles, fetchIfStale, invalidate } = useRoleCatalogStore();
 
   const form = useForm<ChurchFormData>({
     resolver: zodResolver(ChurchFormSchema),
@@ -47,11 +49,13 @@ export function useChurchForm({
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await fetch("/api/roles");
-        const data = await response.json();
+        if (cachedRoles.length > 0) {
+          setRoles(cachedRoles);
+        }
 
-        if (data.ok) {
-          setRoles(data.value.roles);
+        const loadedRoles = await fetchIfStale();
+        if (loadedRoles.length > 0) {
+          setRoles(loadedRoles);
           return;
         }
 
@@ -62,7 +66,7 @@ export function useChurchForm({
     };
 
     fetchRoles();
-  }, []);
+  }, [cachedRoles, fetchIfStale]);
 
   useEffect(() => {
     if (mode === "edit" && !churchId) {
@@ -115,6 +119,7 @@ export function useChurchForm({
         const data = await response.json();
 
         if (data.ok) {
+          invalidate();
           toast.success("Igreja criada com sucesso!");
           router.push("/churches");
         } else {
@@ -132,6 +137,7 @@ export function useChurchForm({
         const data = await response.json();
 
         if (data.ok) {
+          invalidate();
           toast.success("Igreja atualizada com sucesso!");
           router.push("/churches");
         } else {

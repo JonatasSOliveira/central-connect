@@ -3,10 +3,20 @@ import { type NextRequest, NextResponse } from "next/server";
 import { AuthLoginInputSchema } from "@/application/dtos/auth/AuthLoginInputDTO";
 import { authContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
+import { getRequestId, logEvent } from "@/shared/utils/logger";
 import { isTrustedOrigin } from "../../_lib/csrf";
 
 export async function POST(request: NextRequest) {
+  const requestId = getRequestId(request);
+
   if (!isTrustedOrigin(request)) {
+    logEvent("warn", {
+      event: "auth_login_untrusted_origin",
+      requestId,
+      route: "/api/auth/login",
+      status: 403,
+    });
+
     return NextResponse.json(
       {
         ok: false,
@@ -37,6 +47,13 @@ export async function POST(request: NextRequest) {
 
   const parsed = AuthLoginInputSchema.safeParse(body);
   if (!parsed.success) {
+    logEvent("warn", {
+      event: "auth_login_validation_error",
+      requestId,
+      route: "/api/auth/login",
+      status: 400,
+    });
+
     return NextResponse.json(apiError("VALIDATION_ERROR", parsed.error), {
       status: 400,
     });
@@ -55,6 +72,17 @@ export async function POST(request: NextRequest) {
       path: "/",
     });
   }
+
+  logEvent(result.ok ? "info" : "warn", {
+    event: result.ok ? "auth_login_success" : "auth_login_failed",
+    requestId,
+    route: "/api/auth/login",
+    status: result.ok ? 200 : getHttpStatus(errorCode),
+    userId: result.ok ? result.value.userId : null,
+    memberId: result.ok ? result.value.memberId : null,
+    churchId: result.ok ? (result.value.churchId ?? null) : null,
+    errorCode: result.ok ? null : errorCode ?? null,
+  });
 
   return NextResponse.json(result, {
     status: result.ok ? 200 : getHttpStatus(errorCode),

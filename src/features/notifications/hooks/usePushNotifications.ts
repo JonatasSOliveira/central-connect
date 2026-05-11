@@ -6,9 +6,12 @@ import {
   getPushToken,
   getStoredPushToken,
   isPushSupported,
+  markPushTokenSyncedForChurch,
   onForegroundPush,
   requestNotificationPermission,
+  shouldSyncPushTokenForChurch,
 } from "@/infra/firebase-client/services/pushMessaging";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface UsePushNotificationsResult {
   isSupported: boolean;
@@ -49,6 +52,7 @@ function pushDebug(message: string, payload?: unknown): void {
 export function usePushNotifications(
   options?: UsePushNotificationsOptions,
 ): UsePushNotificationsResult {
+  const { user } = useAuth();
   const AUTO_PROMPT_COOLDOWN_MS = 1000 * 60 * 60 * 24;
   const AUTO_PROMPT_TS_KEY = "cc:push-auto-prompt-ts";
   const enableForegroundListener = options?.enableForegroundListener ?? true;
@@ -104,6 +108,14 @@ export function usePushNotifications(
             return false;
           }
 
+          const churchId = user?.churchId;
+          if (churchId && !shouldSyncPushTokenForChurch(churchId, token)) {
+            pushDebug("registerToken skipped: token recently synced", {
+              churchId,
+            });
+            return true;
+          }
+
           const response = await fetch("/api/push-tokens", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -127,6 +139,10 @@ export function usePushNotifications(
             lastRegisterFailureRef.current =
               "Não foi possível vincular este dispositivo à sua conta.";
             return false;
+          }
+
+          if (churchId) {
+            markPushTokenSyncedForChurch(churchId, token);
           }
 
           return true;
@@ -163,7 +179,7 @@ export function usePushNotifications(
     } finally {
       registerInFlightRef.current = null;
     }
-  }, []);
+  }, [user?.churchId]);
 
   const registerToken = useCallback(async (): Promise<boolean> => {
     return registerTokenWithRetry();

@@ -14,11 +14,15 @@ import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDT
 import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
+import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
+import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 import { normalizePhone } from "@/shared/utils/phone";
 
 interface UseMemberFormProps {
   mode: "create" | "edit";
   memberId?: string;
+  isSelfEdit?: boolean;
 }
 
 export interface EditableChurch {
@@ -64,6 +68,7 @@ export interface UseMemberFormReturn {
 export function useMemberForm({
   mode,
   memberId,
+  isSelfEdit = false,
 }: UseMemberFormProps): UseMemberFormReturn {
   const router = useRouter();
   const { user } = useAuth();
@@ -81,6 +86,10 @@ export function useMemberForm({
     Map<string, MinistryListItemDTO[]>
   >(new Map());
   const [isLoadingMinistries, setIsLoadingMinistries] = useState(false);
+  const { churches: cachedChurches, fetchIfStale: fetchChurchesCatalog } =
+    useChurchCatalogStore();
+  const { roles: cachedRoles, fetchIfStale: fetchRolesCatalog } =
+    useRoleCatalogStore();
 
   const isSuperAdmin = user?.isSuperAdmin ?? false;
   const hasMemberWrite =
@@ -193,15 +202,18 @@ export function useMemberForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchRoles = useCallback(async () => {
     try {
-      const response = await fetch("/api/roles");
-      const data = await response.json();
-      if (data.ok) {
-        setRoles(data.value.roles);
+      if (cachedRoles.length > 0) {
+        setRoles(cachedRoles);
+      }
+
+      const loadedRoles = await fetchRolesCatalog();
+      if (loadedRoles.length > 0) {
+        setRoles(loadedRoles);
       }
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
-  }, []);
+  }, [cachedRoles, fetchRolesCatalog]);
 
   const fetchEditableChurches = useCallback(async () => {
     if (!canChangeChurch) {
@@ -209,6 +221,24 @@ export function useMemberForm({
     }
 
     try {
+      if (cachedChurches.length > 0) {
+        const cachedFilteredChurches = cachedChurches.filter((church) =>
+          userWritableChurchIds.includes(church.id),
+        );
+        setEditableChurches(cachedFilteredChurches);
+      }
+
+      const loadedChurches = await fetchChurchesCatalog();
+      if (loadedChurches.length > 0) {
+        const filteredChurches = isSuperAdmin
+          ? loadedChurches
+          : loadedChurches.filter((church) =>
+              userWritableChurchIds.includes(church.id),
+            );
+        setEditableChurches(filteredChurches);
+        return;
+      }
+
       if (isSuperAdmin) {
         const response = await fetch("/api/churches");
         const data = await response.json();
@@ -229,7 +259,13 @@ export function useMemberForm({
     } catch (error) {
       console.error("Error fetching editable churches:", error);
     }
-  }, [canChangeChurch, isSuperAdmin, userWritableChurchIds]);
+  }, [
+    cachedChurches,
+    canChangeChurch,
+    fetchChurchesCatalog,
+    isSuperAdmin,
+    userWritableChurchIds,
+  ]);
 
   useEffect(() => {
     fetchRoles();
@@ -392,7 +428,16 @@ export function useMemberForm({
 
         if (data.ok) {
           toast.success("Membro atualizado com sucesso!");
-          router.push("/members");
+          if (
+            typeof window !== "undefined" &&
+            shouldNavigateBack(isSelfEdit, window.history.length)
+          ) {
+            router.back();
+          } else if (isSelfEdit) {
+            router.push("/home");
+          } else {
+            router.push("/members");
+          }
         } else {
           toast.error(data.error?.message || "Erro ao atualizar membro");
         }

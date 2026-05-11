@@ -1,4 +1,4 @@
-import type { DocumentData } from "firebase-admin/firestore";
+import { FieldPath, type DocumentData } from "firebase-admin/firestore";
 import type { Member } from "@/domain/entities/Member";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import {
@@ -78,8 +78,29 @@ export class MemberFirebaseRepository
   async findByIds(ids: string[]): Promise<Member[]> {
     if (ids.length === 0) return [];
 
-    const members = await Promise.all(ids.map((id) => this.findById(id)));
+    const uniqueIds = Array.from(new Set(ids));
+    const chunkSize = 10;
+    const idChunks: string[][] = [];
 
-    return members.filter((m): m is Member => m !== null);
+    for (let index = 0; index < uniqueIds.length; index += chunkSize) {
+      idChunks.push(uniqueIds.slice(index, index + chunkSize));
+    }
+
+    const snapshots = await Promise.all(
+      idChunks.map((chunk) =>
+        this.buildActiveQuery()
+          .where(FieldPath.documentId(), "in", chunk)
+          .get(),
+      ),
+    );
+
+    const mapped = snapshots.flatMap((snapshot) =>
+      snapshot.docs.map((doc) => this.toEntity(doc.data() as DocumentData, doc.id)),
+    );
+
+    const membersById = new Map(mapped.map((member) => [member.id, member]));
+    return uniqueIds
+      .map((id) => membersById.get(id) ?? null)
+      .filter((member): member is Member => member !== null);
   }
 }

@@ -14,6 +14,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
   const searchParams = useSearchParams();
   const memberId = resolvedParams.memberId;
   const readOnly = searchParams.get("readOnly") === "true";
+  const isSelfEdit = searchParams.get("selfEdit") === "true";
 
   return (
     <>
@@ -25,7 +26,12 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
         backHref="/home"
       />
       <div className="px-4 pb-4">
-        <MemberForm mode="edit" memberId={memberId} readOnly={readOnly} />
+        <MemberForm
+          mode="edit"
+          memberId={memberId}
+          readOnly={readOnly}
+          isSelfEdit={isSelfEdit}
+        />
       </div>
     </>
   );

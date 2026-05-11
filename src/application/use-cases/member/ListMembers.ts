@@ -1,4 +1,3 @@
-import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
@@ -16,7 +15,6 @@ export class ListMembers extends BaseUseCase<
   constructor(
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
-    private readonly churchRepository: IChurchRepository,
     private readonly memberMinistryRepository: IMemberMinistryRepository,
   ) {
     super();
@@ -24,14 +22,6 @@ export class ListMembers extends BaseUseCase<
 
   async execute(input: ListMembersInput): Promise<Result<ListMembersOutput>> {
     try {
-      const church = await this.churchRepository.findById(input.churchId);
-      if (!church) {
-        return {
-          ok: true,
-          value: { members: [] },
-        };
-      }
-
       let memberChurches = await this.memberChurchRepository.findByChurchId(
         input.churchId,
       );
@@ -66,7 +56,12 @@ export class ListMembers extends BaseUseCase<
       const memberListItems = sortedMembers.map((member) => ({
         id: member.id,
         fullName: member.fullName,
-        churches: [{ churchId: church.id, churchName: church.name }],
+        churches: [
+          {
+            churchId: input.churchId,
+            churchName: input.churchName ?? "Igreja",
+          },
+        ],
       }));
 
       return {

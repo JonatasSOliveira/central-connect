@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { Permission } from "@/domain/enums/Permission";
 import { memberContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
+import { canEditMember } from "../_lib/canEditMember";
 import { validateSession } from "../../_lib/auth";
 
 interface RouteParams {
@@ -80,13 +81,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   const { user } = auth;
   const { memberId } = await params;
 
-  const canEditMember =
-    user.isSuperAdmin ||
-    user.permissions.includes(Permission.MEMBER_WRITE) ||
-    (user.permissions.includes(Permission.MEMBER_SELF_WRITE) &&
-      memberId === user.memberId);
+  const canEdit = canEditMember(user, memberId);
 
-  if (!canEditMember) {
+  if (!canEdit) {
     return NextResponse.json(
       {
         ok: false,

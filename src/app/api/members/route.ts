@@ -89,6 +89,7 @@ export async function GET(request: NextRequest) {
     isSuperAdmin: user.isSuperAdmin,
     userChurches,
     churchId,
+    churchName: user.churchName ?? undefined,
     ministryId: queryMinistryId || undefined,
   });
 

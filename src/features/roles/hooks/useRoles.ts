@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
 interface UseRolesReturn {
   roles: RoleListItem[];
@@ -16,6 +17,7 @@ interface UseRolesReturn {
 
 export function useRoles(): UseRolesReturn {
   const { user } = useAuth();
+  const { roles: cachedRoles, fetchIfStale, setRoles } = useRoleCatalogStore();
   const [allRoles, setAllRoles] = useState<RoleListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,21 +27,20 @@ export function useRoles(): UseRolesReturn {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/roles");
-      const data = await response.json();
+      if (cachedRoles.length > 0) {
+        setAllRoles(cachedRoles);
+      }
 
-      if (data.ok) {
-        const sorted = [...data.value.roles].sort((a, b) =>
-          a.name.localeCompare(b.name, "pt-BR"),
-        );
-        setAllRoles(sorted);
+      const roles = await fetchIfStale();
+      if (roles.length > 0) {
+        setAllRoles(roles);
       }
     } catch (error) {
       console.error("Error fetching roles:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [cachedRoles, fetchIfStale, user]);
 
   useEffect(() => {
     fetchRoles();
@@ -64,14 +65,18 @@ export function useRoles(): UseRolesReturn {
       });
 
       if (response.status === 204) {
-        setAllRoles((prev) => prev.filter((r) => r.id !== roleId));
+        const updatedRoles = allRoles.filter((role) => role.id !== roleId);
+        setAllRoles(updatedRoles);
+        setRoles(updatedRoles);
         return true;
       }
 
       const data = await response.json();
 
       if (data.ok) {
-        setAllRoles((prev) => prev.filter((r) => r.id !== roleId));
+        const updatedRoles = allRoles.filter((role) => role.id !== roleId);
+        setAllRoles(updatedRoles);
+        setRoles(updatedRoles);
         return true;
       }
       return false;
@@ -79,7 +84,7 @@ export function useRoles(): UseRolesReturn {
       console.error("Error deleting role:", error);
       return false;
     }
-  }, []);
+  }, [allRoles, setRoles]);
 
   return {
     roles: filteredRoles,

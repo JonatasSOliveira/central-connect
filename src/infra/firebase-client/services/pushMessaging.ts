@@ -10,6 +10,8 @@ import { getFirebaseClientApp } from "@/infra/firebase-client/firebaseConfig";
 
 const PUSH_TOKEN_STORAGE_KEY = "cc:push-token";
 const DEVICE_ID_STORAGE_KEY = "cc:push-device-id";
+const PUSH_TOKEN_SYNC_MARKERS_KEY = "cc:push-token-sync-markers";
+const PUSH_TOKEN_SYNC_MARKER_TTL_MS = 24 * 60 * 60 * 1000;
 const SERVICE_WORKER_READY_TIMEOUT_MS = 4000;
 const PUSH_DEBUG_ENABLED = process.env.NEXT_PUBLIC_PUSH_DEBUG === "true";
 
@@ -118,6 +120,73 @@ export function clearStoredPushToken(): void {
   }
 
   window.localStorage.removeItem(PUSH_TOKEN_STORAGE_KEY);
+}
+
+interface PushTokenSyncMarkers {
+  [churchId: string]: {
+    token: string;
+    syncedAt: number;
+  };
+}
+
+function getPushTokenSyncMarkers(): PushTokenSyncMarkers {
+  if (typeof window === "undefined") {
+    return {};
+  }
+
+  const raw = window.localStorage.getItem(PUSH_TOKEN_SYNC_MARKERS_KEY);
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as PushTokenSyncMarkers;
+    return parsed ?? {};
+  } catch {
+    return {};
+  }
+}
+
+function setPushTokenSyncMarkers(markers: PushTokenSyncMarkers): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(PUSH_TOKEN_SYNC_MARKERS_KEY, JSON.stringify(markers));
+}
+
+export function shouldSyncPushTokenForChurch(
+  churchId: string,
+  token: string,
+): boolean {
+  const markers = getPushTokenSyncMarkers();
+  const marker = markers[churchId];
+
+  if (!marker) {
+    return true;
+  }
+
+  const isSameToken = marker.token === token;
+  const isMarkerFresh = Date.now() - marker.syncedAt < PUSH_TOKEN_SYNC_MARKER_TTL_MS;
+
+  return !(isSameToken && isMarkerFresh);
+}
+
+export function markPushTokenSyncedForChurch(churchId: string, token: string): void {
+  const markers = getPushTokenSyncMarkers();
+  markers[churchId] = {
+    token,
+    syncedAt: Date.now(),
+  };
+  setPushTokenSyncMarkers(markers);
+}
+
+export function clearPushTokenSyncMarkers(): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(PUSH_TOKEN_SYNC_MARKERS_KEY);
 }
 
 export async function isPushSupported(): Promise<boolean> {
