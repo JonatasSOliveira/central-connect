@@ -6,6 +6,7 @@ export interface SelfSignupContext {
   hasDefaultRoleConfigured: boolean;
   defaultRoleId: string | null;
   message: string | null;
+  ministries: { id: string; name: string }[];
 }
 
 interface LookupResult {
@@ -86,6 +87,8 @@ export async function finalizeSelfSignup(
     fullName: string;
     phone: string;
     acceptedTerms: boolean;
+    ministryIds: string[];
+    confirmNoMinistry: boolean;
   },
 ): Promise<void> {
   const response = await fetch(
@@ -93,7 +96,11 @@ export async function finalizeSelfSignup(
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        ministryIds: payload.ministryIds,
+        confirmNoMinistry: payload.confirmNoMinistry,
+      }),
     },
   );
 

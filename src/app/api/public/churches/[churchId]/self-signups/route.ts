@@ -87,6 +87,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     fullName: parsed.data.fullName,
     phone: parsed.data.phone,
     acceptedTerms: parsed.data.acceptedTerms,
+    ministryIds: parsed.data.ministryIds,
+    confirmNoMinistry: parsed.data.confirmNoMinistry,
     ipAddress,
     userAgent,
   });

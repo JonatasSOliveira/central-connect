@@ -31,4 +31,13 @@ export const SelfSignupErrors = {
     code: "SELF_SIGNUP_LOOKUP_FAILED",
     message: "Falha ao consultar membro",
   },
+  INVALID_MINISTRIES: {
+    code: "INVALID_MINISTRIES",
+    message: "Um ou mais ministérios selecionados são inválidos para esta igreja",
+  },
+  MINISTRIES_NOT_CONFIRMED: {
+    code: "MINISTRIES_NOT_CONFIRMED",
+    message:
+      "Selecione ao menos um ministério ou confirme que não serve em nenhum",
+  },
 } as const;

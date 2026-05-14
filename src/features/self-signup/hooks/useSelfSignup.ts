@@ -33,6 +33,8 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
   const [form, setForm] = useState<SignupFormState>({
     fullName: "",
     phone: "",
+    ministryIds: [],
+    confirmNoMinistry: false,
   });
   const [isFetchingContext, setIsFetchingContext] = useState(true);
   const [isLookingUpPhone, setIsLookingUpPhone] = useState(false);
@@ -151,6 +153,13 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
         return;
       }
 
+      if (form.ministryIds.length === 0 && !form.confirmNoMinistry) {
+        setError(
+          "Selecione ao menos um ministério ou confirme que não serve em nenhum",
+        );
+        return;
+      }
+
       setIsSubmitting(true);
       setError(null);
 
@@ -160,6 +169,8 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
           fullName: form.fullName,
           phone,
           acceptedTerms,
+          ministryIds: form.ministryIds,
+          confirmNoMinistry: form.confirmNoMinistry,
         };
 
         if (isLocalhostRuntime()) {
@@ -182,8 +193,35 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
         setIsSubmitting(false);
       }
     },
-    [churchId, context, finalizeSignupWithToken, form.fullName, form.phone],
+    [churchId, context, finalizeSignupWithToken, form.fullName, form.phone, form.ministryIds, form.confirmNoMinistry],
   );
+
+  const toggleMinistry = useCallback((ministryId: string) => {
+    setForm((state) => {
+      const exists = state.ministryIds.includes(ministryId);
+
+      if (exists) {
+        return {
+          ...state,
+          ministryIds: state.ministryIds.filter((id) => id !== ministryId),
+        };
+      }
+
+      return {
+        ...state,
+        ministryIds: [...state.ministryIds, ministryId],
+        confirmNoMinistry: false,
+      };
+    });
+  }, []);
+
+  const setConfirmNoMinistry = useCallback((value: boolean) => {
+    setForm((state) => ({
+      ...state,
+      confirmNoMinistry: value,
+      ...(value ? { ministryIds: [] } : {}),
+    }));
+  }, []);
 
   return {
     context,
@@ -196,5 +234,7 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
     updateField,
     lookupByPhone,
     finalizeWithGoogle,
+    toggleMinistry,
+    setConfirmNoMinistry,
   };
 }

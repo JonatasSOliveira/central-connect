@@ -14,7 +14,7 @@ export class MemberPushTokenFirebaseRepository
   private static readonly IN_QUERY_LIMIT = 10;
 
   constructor() {
-    super("member_push_tokens");
+    super("memberPushTokens");
   }
 
   protected toEntity(data: DocumentData, id: string): MemberPushToken {

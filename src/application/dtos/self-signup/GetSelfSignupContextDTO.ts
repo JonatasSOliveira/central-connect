@@ -8,6 +8,12 @@ export const GetSelfSignupContextOutputSchema = z.object({
   hasDefaultRoleConfigured: z.boolean(),
   defaultRoleId: z.string().nullable(),
   message: z.string().nullable(),
+  ministries: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
+  ),
 });
 
 export type GetSelfSignupContextOutputDTO = z.infer<

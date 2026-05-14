@@ -6,6 +6,8 @@ export interface SelfSignupRedirectPayload {
   fullName: string;
   phone: string;
   acceptedTerms: boolean;
+  ministryIds: string[];
+  confirmNoMinistry: boolean;
   createdAt: number;
 }
 
@@ -58,7 +60,9 @@ export function getSelfSignupRedirectPayload(): SelfSignupRedirectPayload | null
       typeof parsed.fullName !== "string" ||
       typeof parsed.phone !== "string" ||
       typeof parsed.acceptedTerms !== "boolean" ||
-      typeof parsed.createdAt !== "number"
+      typeof parsed.createdAt !== "number" ||
+      !Array.isArray(parsed.ministryIds) ||
+      typeof parsed.confirmNoMinistry !== "boolean"
     ) {
       clearSelfSignupRedirectPayload();
       return null;

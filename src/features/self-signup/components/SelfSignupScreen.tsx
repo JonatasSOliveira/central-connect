@@ -30,6 +30,8 @@ export function SelfSignupScreen({ churchId }: SelfSignupScreenProps) {
     updateField,
     lookupByPhone,
     finalizeWithGoogle,
+    toggleMinistry,
+    setConfirmNoMinistry,
   } = useSelfSignup(churchId);
 
   const handleFinalize = async () => {
@@ -95,6 +97,11 @@ export function SelfSignupScreen({ churchId }: SelfSignupScreenProps) {
                     fullName={form.fullName}
                     phone={form.phone}
                     onFullNameChange={(value) => updateField("fullName", value)}
+                    ministryIds={form.ministryIds}
+                    confirmNoMinistry={form.confirmNoMinistry}
+                    availableMinistries={context?.ministries ?? []}
+                    onToggleMinistry={toggleMinistry}
+                    onConfirmNoMinistry={setConfirmNoMinistry}
                   />
 
                   <div className="space-y-2 rounded-lg border border-border bg-muted/40 p-3">

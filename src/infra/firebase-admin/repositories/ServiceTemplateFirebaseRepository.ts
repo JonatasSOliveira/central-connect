@@ -12,7 +12,7 @@ export class ServiceTemplateFirebaseRepository
   implements IServiceTemplateRepository
 {
   constructor() {
-    super("service_templates");
+    super("serviceTemplates");
   }
 
   protected toEntity(data: DocumentData, id: string): ServiceTemplate {

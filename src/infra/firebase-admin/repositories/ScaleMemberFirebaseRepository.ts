@@ -14,7 +14,7 @@ export class ScaleMemberFirebaseRepository
   private static readonly IN_QUERY_LIMIT = 10;
 
   constructor() {
-    super("scale_members");
+    super("scaleMembers");
   }
 
   protected toEntity(data: DocumentData, id: string): ScaleMember {
