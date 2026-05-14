@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { GenerateScaleDialog } from "./generate-scale-dialog";
+import { ShareScaleImageDialog } from "./ShareScaleImageDialog";
 import { ScaleFilter } from "./ScaleFilter";
 import { ScaleItem } from "./ScaleItem";
 import { useScales } from "../hooks/useScales";
@@ -44,6 +45,7 @@ export function ScaleList() {
 
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [ministries, setMinistries] = useState<MinistryOption[]>([]);
+  const [shareScaleId, setShareScaleId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchServicesAndMinistries = async () => {
@@ -115,6 +117,10 @@ export function ScaleList() {
     },
     [deleteScale],
   );
+
+  const handleOpenShareDialog = useCallback((scaleId: string) => {
+    setShareScaleId(scaleId);
+  }, []);
 
   const getServiceTitle = (serviceId: string) => {
     const service = services.find((s) => s.id === serviceId);
@@ -213,6 +219,10 @@ export function ScaleList() {
             actions={{
               onEdit: () => handleEditScale(scale.id),
               onDelete: () => handleDeleteScale(scale.id),
+              onShareImage:
+                scale.status === "published"
+                  ? () => handleOpenShareDialog(scale.id)
+                  : undefined,
             }}
           />
         ))}
@@ -259,6 +269,20 @@ export function ScaleList() {
       </div>
 
       {renderContent()}
+
+      {shareScaleId && churchId ? (
+        <ShareScaleImageDialog
+          open={!!shareScaleId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setShareScaleId(null);
+            }
+          }}
+          scaleId={shareScaleId}
+          churchId={churchId}
+          churchName={user?.churchName ?? "Igreja"}
+        />
+      ) : null}
     </ListTemplate>
   );
 }

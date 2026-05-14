@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 interface ScaleItemActions {
   onEdit?: () => void;
   onDelete?: () => void;
+  onShareImage?: () => void;
 }
 
 interface ScaleItemProps {
@@ -167,6 +168,34 @@ export function ScaleItem({
               >
                 <Trash2 className="h-4 w-4" />
                 Excluir
+              </button>
+            )}
+            {actions.onShareImage && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  actions.onShareImage?.();
+                }}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7" />
+                  <path d="M12 16V4" />
+                  <path d="m7 9 5-5 5 5" />
+                </svg>
+                Compartilhar
               </button>
             )}
           </PopoverContent>
