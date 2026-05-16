@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
+import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { GenerateScaleDialog } from "./generate-scale-dialog";
 import { ScaleFilter } from "./ScaleFilter";
@@ -29,6 +30,10 @@ export function ScaleList() {
   const router = useRouter();
   const { user } = useAuth();
   const churchId = user?.churchId ?? null;
+  const canWriteScales =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_WRITE);
+  const canDeleteScales =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_DELETE);
 
   const {
     scales,
@@ -148,10 +153,14 @@ export function ScaleList() {
           icon={Inbox}
           title="Nenhuma escala cadastrada"
           description="Clique em Nova escala para cadastrar a primeira escala da igreja."
-          action={{
-            label: "Cadastrar escala",
-            onClick: handleCreateScale,
-          }}
+          action={
+            canWriteScales
+              ? {
+                  label: "Cadastrar escala",
+                  onClick: handleCreateScale,
+                }
+              : undefined
+          }
         />
       );
     }
@@ -209,11 +218,19 @@ export function ScaleList() {
             tertiary={getServiceTitle(scale.serviceId)}
             status={scale.status}
             description={scale.notes ?? undefined}
-            onClick={() => handleEditScale(scale.id)}
-            actions={{
-              onEdit: () => handleEditScale(scale.id),
-              onDelete: () => handleDeleteScale(scale.id),
-            }}
+            onClick={canWriteScales ? () => handleEditScale(scale.id) : undefined}
+            actions={
+              canWriteScales || canDeleteScales
+                ? {
+                    onEdit: canWriteScales
+                      ? () => handleEditScale(scale.id)
+                      : undefined,
+                    onDelete: canDeleteScales
+                      ? () => handleDeleteScale(scale.id)
+                      : undefined,
+                  }
+                : undefined
+            }
           />
         ))}
       </ListTemplate.List>
@@ -250,13 +267,15 @@ export function ScaleList() {
         )}
       </div>
 
-      <div className="flex justify-end gap-2">
-        <GenerateScaleDialog onSuccess={refresh} />
-        <Button onClick={handleCreateScale}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nova escala
-        </Button>
-      </div>
+      {canWriteScales && (
+        <div className="flex justify-end gap-2">
+          <GenerateScaleDialog onSuccess={refresh} />
+          <Button onClick={handleCreateScale}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nova escala
+          </Button>
+        </div>
+      )}
 
       {renderContent()}
     </ListTemplate>

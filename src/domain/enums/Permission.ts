@@ -11,6 +11,7 @@ export enum Permission {
   MEMBER_SELF_WRITE = "member:self:write",
 
   SCALE_READ = "scale:read",
+  SCALE_SELF_READ = "scale:self:read",
   SCALE_WRITE = "scale:write",
   SCALE_DELETE = "scale:delete",
   SCALE_ATTENDANCE_READ = "scale_attendance:read",
@@ -52,6 +53,7 @@ export const PermissionGroups = {
   ],
   SCALE: [
     Permission.SCALE_READ,
+    Permission.SCALE_SELF_READ,
     Permission.SCALE_WRITE,
     Permission.SCALE_DELETE,
   ],
