@@ -13,6 +13,7 @@ import {
   Settings2,
   ClipboardList,
   ClipboardCheck,
+  BellRing,
   BarChart3,
   Building2,
 } from "lucide-react";
@@ -24,6 +25,7 @@ import { CardItem } from "@/components/ui/card-item";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { usePushNotifications } from "@/features/notifications/hooks/usePushNotifications";
 import { useChurchStore } from "@/stores/churchStore";
 import {
   AlertDialog,
@@ -42,6 +44,8 @@ export default function HomePage() {
   const { userName, avatarUrl, churchName } = useHomeScreen();
   const { user, logout } = useAuth();
   const { selectedChurch } = useChurchStore();
+  const { isSupported, permission, isRegistering, enableNotifications } =
+    usePushNotifications({ enableForegroundListener: false });
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const { hasPermission: canManageMembers } = usePermissions({
@@ -64,7 +68,7 @@ export default function HomePage() {
     requiredPermissions: [Permission.CHURCH_SELF_WRITE],
   });
 
-  const { hasPermission: canReadMemberSelf } = usePermissions({
+  const { hasPermission: canWriteMemberSelf } = usePermissions({
     requiredPermissions: [Permission.MEMBER_SELF_WRITE],
   });
 
@@ -101,11 +105,16 @@ export default function HomePage() {
     canManageServiceTemplates ||
     canManageScales;
 
-  const showChurchSelfItem = canReadChurchSelf && !canManageChurches;
+  const canShowChurchSelfItem = canReadChurchSelf && !canManageChurches;
   const canShowQuickActions =
     canReadScaleAttendance ||
     canReadScaleAttendanceReport ||
-    showChurchSelfItem;
+    canShowChurchSelfItem;
+
+  const canShowNotificationSection = isSupported && !!user?.memberId;
+  const showEnableNotificationsItem =
+    canShowNotificationSection && permission !== "granted";
+  const isNotificationPermissionDenied = permission === "denied";
 
   const handleChurchSelfClick = () => {
     const churchId = selectedChurch?.id || user?.churches?.[0]?.churchId;
@@ -115,10 +124,10 @@ export default function HomePage() {
     }
   };
 
-  const showMemberSelfItem = canReadMemberSelf && user?.memberId;
+  const canShowMemberSelfItem = canWriteMemberSelf && !!user?.memberId;
   const handleMemberSelfClick = () => {
     if (user?.memberId) {
-      router.push(`/members/${user.memberId}/edit?readOnly=false`);
+      router.push(`/members/${user.memberId}/edit?selfEdit=true`);
     }
   };
 
@@ -254,7 +263,7 @@ export default function HomePage() {
                 />
               )}
 
-              {showChurchSelfItem && (
+              {canShowChurchSelfItem && (
                 <CardItem
                   title="Dados da igreja"
                   description={
@@ -267,12 +276,53 @@ export default function HomePage() {
                 />
               )}
 
-              {showMemberSelfItem && (
+              {canShowMemberSelfItem && (
                 <CardItem
                   title="Meu Perfil"
                   description="Edite seus dados pessoais"
                   icon={Users}
                   onClick={handleMemberSelfClick}
+                />
+              )}
+
+            </div>
+          </>
+        )}
+
+        {canShowNotificationSection && (
+          <>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Notificações
+              </span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 mb-6">
+              {showEnableNotificationsItem ? (
+                <CardItem
+                  title="Ativar notificações"
+                  description={
+                    isRegistering
+                      ? "Ativando notificações..."
+                      : isNotificationPermissionDenied
+                        ? "Notificações bloqueadas no navegador. Ative nas configurações do site."
+                        : "Receba alertas quando for escalado"
+                  }
+                  icon={BellRing}
+                  onClick={
+                    isNotificationPermissionDenied
+                      ? undefined
+                      : () => {
+                          enableNotifications();
+                        }
+                  }
+                />
+              ) : (
+                <CardItem
+                  title="Notificações ativas"
+                  description="Você receberá alertas quando for escalado"
+                  icon={BellRing}
                 />
               )}
             </div>

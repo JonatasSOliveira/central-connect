@@ -83,7 +83,6 @@ class MemberContainer {
       MemberContainer._listMembers = new ListMembers(
         MemberContainer.memberRepository,
         MemberContainer.memberChurchRepository,
-        MemberContainer.churchRepository,
         MemberContainer.memberMinistryRepository,
       );
     }

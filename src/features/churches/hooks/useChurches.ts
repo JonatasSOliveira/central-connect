@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
 
 interface UseChurchesReturn {
   churches: ChurchListItemDTO[];
@@ -16,6 +17,8 @@ interface UseChurchesReturn {
 
 export function useChurches(): UseChurchesReturn {
   const { user } = useAuth();
+  const { churches: cachedChurches, fetchIfStale, setChurches } =
+    useChurchCatalogStore();
   const [allChurches, setAllChurches] = useState<ChurchListItemDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,21 +28,20 @@ export function useChurches(): UseChurchesReturn {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/churches");
-      const data = await response.json();
+      if (cachedChurches.length > 0) {
+        setAllChurches(cachedChurches);
+      }
 
-      if (data.ok) {
-        const sorted = [...data.value.churches].sort((a, b) =>
-          a.name.localeCompare(b.name, "pt-BR"),
-        );
-        setAllChurches(sorted);
+      const churches = await fetchIfStale();
+      if (churches.length > 0) {
+        setAllChurches(churches);
       }
     } catch (error) {
       console.error("Error fetching churches:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [cachedChurches, fetchIfStale, user]);
 
   useEffect(() => {
     fetchChurches();
@@ -67,14 +69,18 @@ export function useChurches(): UseChurchesReturn {
         });
 
         if (response.status === 204) {
-          setAllChurches((prev) => prev.filter((c) => c.id !== churchId));
+          const updatedChurches = allChurches.filter((c) => c.id !== churchId);
+          setAllChurches(updatedChurches);
+          setChurches(updatedChurches);
           return true;
         }
 
         const data = await response.json();
 
         if (data.ok) {
-          setAllChurches((prev) => prev.filter((c) => c.id !== churchId));
+          const updatedChurches = allChurches.filter((c) => c.id !== churchId);
+          setAllChurches(updatedChurches);
+          setChurches(updatedChurches);
           return true;
         }
         return false;
@@ -83,7 +89,7 @@ export function useChurches(): UseChurchesReturn {
         return false;
       }
     },
-    [],
+    [allChurches, setChurches],
   );
 
   return {

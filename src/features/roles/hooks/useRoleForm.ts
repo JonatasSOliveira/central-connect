@@ -14,6 +14,7 @@ import {
   UpdateRoleInputSchema,
 } from "@/application/dtos/role/UpdateRoleDTO";
 import { Permission } from "@/domain/enums/Permission";
+import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
 interface UseRoleFormProps {
   mode: "create" | "edit";
@@ -34,6 +35,7 @@ export function useRoleForm({
   mode,
   roleId,
 }: UseRoleFormProps): UseRoleFormReturn {
+  const { invalidate } = useRoleCatalogStore();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(mode === "edit");
@@ -93,6 +95,7 @@ export function useRoleForm({
         const data = await response.json();
 
         if (data.ok) {
+          invalidate();
           toast.success("Cargo do sistema criado com sucesso!");
           router.push("/roles");
         } else {
@@ -110,6 +113,7 @@ export function useRoleForm({
         const data = await response.json();
 
         if (data.ok) {
+          invalidate();
           toast.success("Cargo do sistema atualizado com sucesso!");
           router.push("/roles");
         } else {
