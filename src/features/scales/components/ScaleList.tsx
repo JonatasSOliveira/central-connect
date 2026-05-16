@@ -26,7 +26,11 @@ interface MinistryOption {
   name: string;
 }
 
-export function ScaleList() {
+interface ScaleListProps {
+  viewMode?: "all" | "my";
+}
+
+export function ScaleList({ viewMode = "all" }: ScaleListProps) {
   const router = useRouter();
   const { user } = useAuth();
   const churchId = user?.churchId ?? null;
@@ -148,11 +152,20 @@ export function ScaleList() {
 
   const renderContent = () => {
     if (allScalesCount === 0 && !isLoading) {
+      const emptyTitle =
+        viewMode === "my"
+          ? "Você não está em nenhuma escala"
+          : "Nenhuma escala cadastrada";
+      const emptyDescription =
+        viewMode === "my"
+          ? "Quando você for escalado, suas escalas aparecerão aqui."
+          : "Clique em Nova escala para cadastrar a primeira escala da igreja.";
+
       return (
         <ListTemplate.EmptyState
           icon={Inbox}
-          title="Nenhuma escala cadastrada"
-          description="Clique em Nova escala para cadastrar a primeira escala da igreja."
+          title={emptyTitle}
+          description={emptyDescription}
           action={
             canWriteScales
               ? {
@@ -240,7 +253,7 @@ export function ScaleList() {
   return (
     <ListTemplate isLoading={isLoading}>
       <ListTemplate.Header
-        title="Escalas"
+        title={viewMode === "my" ? "Minhas Escalas" : "Escalas"}
         subtitle={`${allScalesCount} escala${allScalesCount !== 1 ? "s" : ""}`}
       />
 

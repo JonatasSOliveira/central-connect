@@ -273,7 +273,7 @@ export default function HomePage() {
                   title="Minhas Escalas"
                   description="Visualize as escalas em que você está escalado"
                   icon={ClipboardList}
-                  onClick={() => router.push("/scales")}
+                  onClick={() => router.push("/my-scales")}
                 />
               )}
 
