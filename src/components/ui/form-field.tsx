@@ -24,7 +24,13 @@ function FormField<T extends FieldValues>({
   disabled,
   children,
 }: FormFieldProps<T>) {
-  const error = form.formState.errors[name]?.message as string | undefined;
+  const fieldError = form.formState.errors[name];
+  const error =
+    typeof fieldError?.message === "string"
+      ? fieldError.message
+      : fieldError
+        ? "Valor inválido"
+        : undefined;
 
   return (
     <div className="space-y-1.5">
