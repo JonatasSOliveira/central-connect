@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { SubmitErrorHandler } from "react-hook-form";
+import { toast } from "sonner";
 import type { CreateRoleInput } from "@/application/dtos/role/CreateRoleDTO";
 import type { UpdateRoleInput } from "@/application/dtos/role/UpdateRoleDTO";
 import { FormTemplate } from "@/components/templates/form-template";
@@ -29,6 +31,11 @@ export function RoleForm({ mode, roleId }: RoleFormProps) {
 
   type FormData = CreateRoleInput | UpdateRoleInput;
 
+  const handleInvalidSubmit: SubmitErrorHandler<FormData> = (errors) => {
+    console.warn("[RoleForm] validation errors:", errors);
+    toast.error("Revise os campos obrigatórios antes de salvar.");
+  };
+
   if (isFetching) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -39,7 +46,11 @@ export function RoleForm({ mode, roleId }: RoleFormProps) {
 
   return (
     <FormTemplate>
-      <FormTemplate.Form<FormData> form={form} onSubmit={onSubmit}>
+      <FormTemplate.Form<FormData>
+        form={form}
+        onSubmit={onSubmit}
+        onInvalid={handleInvalidSubmit}
+      >
         <FormTemplate.Content>
           <FormField<FormData>
             form={form}

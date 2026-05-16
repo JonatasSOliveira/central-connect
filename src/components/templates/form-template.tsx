@@ -2,7 +2,11 @@
 
 import { Check, X } from "lucide-react";
 import type { ReactNode } from "react";
-import type { SubmitHandler, UseFormReturn } from "react-hook-form";
+import type {
+  SubmitErrorHandler,
+  SubmitHandler,
+  UseFormReturn,
+} from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +33,7 @@ interface FormProps<T extends Record<string, unknown>> {
   children: ReactNode;
   className?: string;
   onSubmit: SubmitHandler<T>;
+  onInvalid?: SubmitErrorHandler<T>;
   form: UseFormReturn<T>;
 }
 
@@ -93,13 +98,15 @@ function Form<T extends Record<string, unknown>>({
   children,
   className,
   onSubmit,
+  onInvalid,
   form,
 }: FormProps<T>) {
+  const submitHandler = onInvalid
+    ? form.handleSubmit(onSubmit, onInvalid)
+    : form.handleSubmit(onSubmit);
+
   return (
-    <form
-      onSubmit={form.handleSubmit(onSubmit)}
-      className={cn("space-y-4", className)}
-    >
+    <form onSubmit={submitHandler} className={cn("space-y-4", className)}>
       {children}
     </form>
   );
