@@ -11,6 +11,10 @@ interface MyScaleItem {
   ministryRoleName: string;
 }
 
+function isNonNullable<T>(value: T | null | undefined): value is T {
+  return value != null;
+}
+
 function startOfToday(): Date {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -119,12 +123,18 @@ export async function GET() {
     ),
   ]);
 
-  const serviceById = new Map(services.filter(Boolean).map((service) => [service.id, service]));
+  const serviceById = new Map(
+    services.filter(isNonNullable).map((service) => [service.id, service]),
+  );
   const ministryById = new Map(
-    ministries.filter(Boolean).map((ministry) => [ministry.id, ministry]),
+    ministries
+      .filter(isNonNullable)
+      .map((ministry) => [ministry.id, ministry]),
   );
   const ministryRoleById = new Map(
-    ministryRoles.filter(Boolean).map((ministryRole) => [ministryRole.id, ministryRole]),
+    ministryRoles
+      .filter(isNonNullable)
+      .map((ministryRole) => [ministryRole.id, ministryRole]),
   );
 
   const today = startOfToday();
