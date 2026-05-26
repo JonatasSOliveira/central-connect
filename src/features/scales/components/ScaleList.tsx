@@ -248,7 +248,7 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
                       ? () => handleDeleteScale(scale.id)
                       : undefined,
                     onShareImage:
-                      scale.status === "published"
+                      canWriteScales && scale.status === "published"
                         ? () => handleOpenShareDialog(scale.id)
                         : undefined,
                   }

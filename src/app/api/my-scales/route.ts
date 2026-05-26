@@ -18,8 +18,10 @@ export async function GET(request: NextRequest) {
   const { user } = auth;
   const canReadMyScales =
     user.isSuperAdmin || user.permissions.includes(Permission.MY_SCALES_READ);
+  const canReadOwnScales =
+    user.isSuperAdmin || user.permissions.includes(Permission.SCALE_SELF_READ);
 
-  if (!canReadMyScales) {
+  if (!canReadMyScales && !canReadOwnScales) {
     return NextResponse.json(
       {
         ok: false,

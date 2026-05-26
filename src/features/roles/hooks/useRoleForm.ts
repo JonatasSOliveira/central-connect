@@ -81,12 +81,6 @@ export function useRoleForm({
               description: data.value.description ?? "",
               permissions: validPermissions,
             });
-
-            if (validPermissions.length !== data.value.permissions.length) {
-              toast.warning(
-                "Algumas permissões antigas foram ignoradas. Revise antes de salvar.",
-              );
-            }
           } else {
             toast.error("Cargo do sistema não encontrado");
             router.push("/roles");

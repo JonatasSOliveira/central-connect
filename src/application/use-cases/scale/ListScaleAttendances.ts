@@ -114,8 +114,6 @@ export class ListScaleAttendances extends BaseUseCase<
       const filtered = items
         .filter((item): item is ScaleAttendanceListItemDTO => item !== null)
         .filter((item) => {
-          if (item.attendanceStatus !== "published") return false;
-
           const serviceDate = item.serviceDate;
 
           if (input.filter === "today") {
