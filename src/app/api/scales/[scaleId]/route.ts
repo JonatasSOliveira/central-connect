@@ -20,8 +20,10 @@ export async function GET(
 
   const hasReadAccess =
     user.isSuperAdmin || user.permissions.includes(Permission.SCALE_READ);
+  const hasSelfReadAccess =
+    user.isSuperAdmin || user.permissions.includes(Permission.SCALE_SELF_READ);
 
-  if (!hasReadAccess) {
+  if (!hasReadAccess && !hasSelfReadAccess) {
     return NextResponse.json(
       {
         ok: false,
@@ -44,6 +46,27 @@ export async function GET(
   }
 
   const scale = getResult.value.scale;
+
+  if (!hasReadAccess && hasSelfReadAccess && !user.isSuperAdmin) {
+    const scaleMembers =
+      await scaleContainer.scaleMemberRepository.findByScaleId(scaleId);
+    const isMemberInScale = scaleMembers.some(
+      (member) => member.memberId === user.memberId,
+    );
+
+    if (!isMemberInScale || scale.status !== "published") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: "NOT_AUTHORIZED",
+            message: "Sem permissão para visualizar esta escala",
+          },
+        },
+        { status: 403 },
+      );
+    }
+  }
 
   if (!user.isSuperAdmin) {
     const hasAccess = user.churches.some((c) => c.churchId === scale.churchId);

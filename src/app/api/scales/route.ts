@@ -20,8 +20,10 @@ export async function GET(request: NextRequest) {
 
   const hasReadAccess =
     user.isSuperAdmin || user.permissions.includes(Permission.SCALE_READ);
+  const hasSelfReadAccess =
+    user.isSuperAdmin || user.permissions.includes(Permission.SCALE_SELF_READ);
 
-  if (!hasReadAccess) {
+  if (!hasReadAccess && !hasSelfReadAccess) {
     return NextResponse.json(
       {
         ok: false,
@@ -77,6 +79,39 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result, {
       status: getHttpStatus(errorCode),
     });
+  }
+
+  if (!hasReadAccess && hasSelfReadAccess && !user.isSuperAdmin) {
+    const scaleIds = result.value.scales.map((scale) => scale.id);
+
+    if (scaleIds.length === 0) {
+      return NextResponse.json(result, { status: 200 });
+    }
+
+    const scaleMembers =
+      await scaleContainer.scaleMemberRepository.findByScaleIds(scaleIds);
+
+    const allowedScaleIds = new Set(
+      scaleMembers
+        .filter((member) => member.memberId === user.memberId)
+        .map((member) => member.scaleId),
+    );
+
+    const filteredScales = result.value.scales.filter(
+      (scale) =>
+        allowedScaleIds.has(scale.id) &&
+        scale.status === "published",
+    );
+
+    return NextResponse.json(
+      {
+        ok: true,
+        value: {
+          scales: filteredScales,
+        },
+      },
+      { status: 200 },
+    );
   }
 
   return NextResponse.json(result, { status: 200 });

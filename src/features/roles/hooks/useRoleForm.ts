@@ -31,7 +31,7 @@ interface UseRoleFormReturn {
 
 const _defaultPermissions = Object.values(Permission);
 
-function isPermission(value: string): value is Permission {
+function isValidPermission(value: string): value is Permission {
   return _defaultPermissions.includes(value as Permission);
 }
 
@@ -68,7 +68,7 @@ export function useRoleForm({
             const rawPermissions = Array.isArray(data.value.permissions)
               ? data.value.permissions
               : [];
-            const validPermissions = rawPermissions.filter(isPermission);
+            const validPermissions = rawPermissions.filter(isValidPermission);
 
             if (rawPermissions.length !== validPermissions.length) {
               toast.warning(
@@ -81,6 +81,12 @@ export function useRoleForm({
               description: data.value.description ?? "",
               permissions: validPermissions,
             });
+
+            if (validPermissions.length !== data.value.permissions.length) {
+              toast.warning(
+                "Algumas permissões antigas foram ignoradas. Revise antes de salvar.",
+              );
+            }
           } else {
             toast.error("Cargo do sistema não encontrado");
             router.push("/roles");
@@ -100,11 +106,19 @@ export function useRoleForm({
     setIsLoading(true);
 
     try {
+      const normalizedPermissions = (formData.permissions ?? []).filter(
+        isValidPermission,
+      );
+      const payload = {
+        ...formData,
+        permissions: normalizedPermissions,
+      };
+
       if (mode === "create") {
         const response = await fetch("/api/roles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
 
         const data = await response.json();
@@ -122,7 +136,7 @@ export function useRoleForm({
         const response = await fetch(`/api/roles/${roleId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         });
 
         const data = await response.json();

@@ -88,6 +88,10 @@ export default function HomePage() {
     requiredPermissions: [Permission.SCALE_READ],
   });
 
+  const { hasPermission: canReadOwnScales } = usePermissions({
+    requiredPermissions: [Permission.SCALE_SELF_READ],
+  });
+
   const { hasPermission: canReadScaleAttendance } = usePermissions({
     requiredPermissions: [Permission.SCALE_ATTENDANCE_READ],
   });
@@ -112,6 +116,7 @@ export default function HomePage() {
   const canShowChurchSelfItem = canReadChurchSelf && !canManageChurches;
   const canShowQuickActions =
     canReadMyScales ||
+    canReadOwnScales ||
     canReadScaleAttendance ||
     canReadScaleAttendanceReport ||
     canShowChurchSelfItem;
@@ -273,6 +278,15 @@ export default function HomePage() {
                   description="Consulte indicadores por período"
                   icon={BarChart3}
                   onClick={() => router.push("/scale-attendance-reports")}
+                />
+              )}
+
+              {canReadOwnScales && !canManageScales && (
+                <CardItem
+                  title="Minhas Escalas"
+                  description="Visualize as escalas em que você está escalado"
+                  icon={ClipboardList}
+                  onClick={() => router.push("/my-scales")}
                 />
               )}
 
