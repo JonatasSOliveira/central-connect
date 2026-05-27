@@ -10,6 +10,7 @@ import { SearchInput } from "@/components/ui/search-input";
 import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { GenerateScaleDialog } from "./generate-scale-dialog";
+import { NotifyScalesByDateDialog } from "./notify-scales-by-date-dialog";
 import { ShareScaleImageDialog } from "./ShareScaleImageDialog";
 import { ScaleFilter } from "./ScaleFilter";
 import { ScaleItem } from "./ScaleItem";
@@ -292,6 +293,7 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
 
       {canWriteScales && (
         <div className="flex justify-end gap-2">
+          <NotifyScalesByDateDialog />
           <GenerateScaleDialog onSuccess={refresh} />
           <Button onClick={handleCreateScale}>
             <Plus className="w-4 h-4 mr-2" />
