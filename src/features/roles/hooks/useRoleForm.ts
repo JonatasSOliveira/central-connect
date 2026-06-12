@@ -65,21 +65,22 @@ export function useRoleForm({
           const data = await response.json();
 
           if (data.ok && data.value) {
-            const validPermissions = (data.value.permissions ?? []).filter(
-              isValidPermission,
-            );
+            const rawPermissions = Array.isArray(data.value.permissions)
+              ? data.value.permissions
+              : [];
+            const validPermissions = rawPermissions.filter(isValidPermission);
+
+            if (rawPermissions.length !== validPermissions.length) {
+              toast.warning(
+                "Este cargo possui permissões antigas inválidas e elas foram ignoradas.",
+              );
+            }
 
             form.reset({
               name: data.value.name,
               description: data.value.description ?? "",
               permissions: validPermissions,
             });
-
-            if (validPermissions.length !== data.value.permissions.length) {
-              toast.warning(
-                "Algumas permissões antigas foram ignoradas. Revise antes de salvar.",
-              );
-            }
           } else {
             toast.error("Cargo do sistema não encontrado");
             router.push("/roles");

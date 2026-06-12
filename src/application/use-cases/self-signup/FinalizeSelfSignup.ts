@@ -11,12 +11,18 @@ import {
   MemberChurch,
   type MemberChurchParams,
 } from "@/domain/entities/MemberChurch";
+import {
+  MemberMinistry,
+  type MemberMinistryParams,
+} from "@/domain/entities/MemberMinistry";
 import { User, type UserParams } from "@/domain/entities/User";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
 import type { ILegalConsentRepository } from "@/domain/ports/ILegalConsentRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
+import type { IMinistryRepository } from "@/domain/ports/IMinistryRepository";
 import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
@@ -46,6 +52,8 @@ export class FinalizeSelfSignup extends BaseUseCase<
     private readonly rolePermissionRepository: IRolePermissionRepository,
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
+    private readonly memberMinistryRepository: IMemberMinistryRepository,
+    private readonly ministryRepository: IMinistryRepository,
     private readonly userRepository: IUserRepository,
     private readonly legalConsentRepository: ILegalConsentRepository,
     private readonly googleAuthService: IGoogleAuthService,
@@ -116,6 +124,11 @@ export class FinalizeSelfSignup extends BaseUseCase<
 
       const user = await this.ensureUser(member.id);
       await this.ensureMemberChurch(member.id, church.id, roleId);
+      await this.ensureMemberMinistries(
+        member.id,
+        church.id,
+        input.ministryIds,
+      );
       await this.registerLegalConsent(member.id, user.id, church.id, input);
 
       return {
@@ -159,6 +172,44 @@ export class FinalizeSelfSignup extends BaseUseCase<
     };
 
     return this.userRepository.create(new User(params));
+  }
+
+  private async ensureMemberMinistries(
+    memberId: string,
+    churchId: string,
+    ministryIds: string[],
+  ): Promise<void> {
+    if (ministryIds.length === 0) return;
+
+    const validMinistries =
+      await this.ministryRepository.findByChurchId(churchId);
+    const validIds = new Set(validMinistries.map((m) => m.id));
+    const invalidIds = ministryIds.filter((id) => !validIds.has(id));
+
+    if (invalidIds.length > 0) {
+      throw new Error(SelfSignupErrors.INVALID_MINISTRIES.message);
+    }
+
+    const now = new Date();
+
+    for (const ministryId of ministryIds) {
+      const existing = await this.memberMinistryRepository
+        .findByMemberAndMinistry(memberId, ministryId);
+
+      if (existing) continue;
+
+      const params: MemberMinistryParams = {
+        memberId,
+        churchId,
+        ministryId,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      await this.memberMinistryRepository.create(
+        new MemberMinistry(params),
+      );
+    }
   }
 
   private async ensureMemberChurch(

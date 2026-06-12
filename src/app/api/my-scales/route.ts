@@ -1,26 +1,14 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import {
+  ListMyScalesQuerySchema,
+  type MyScalesPeriod,
+} from "@/application/dtos/scale/MyScalesDTO";
 import { Permission } from "@/domain/enums/Permission";
 import { scaleContainer } from "@/infra/di";
-import { getChurchIdFromSession, validateSession } from "../_lib/auth";
+import { getHttpStatus } from "@/shared/utils/apiResponse";
+import { validateSession } from "../_lib/auth";
 
-interface MyScaleItem {
-  scaleId: string;
-  serviceDate: string;
-  serviceTime: string;
-  ministryName: string;
-  ministryRoleName: string;
-}
-
-function isNonNullable<T>(value: T | null | undefined): value is T {
-  return value != null;
-}
-
-function startOfToday(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   const auth = await validateSession();
 
   if (!auth.ok) {
@@ -28,27 +16,38 @@ export async function GET() {
   }
 
   const { user } = auth;
-  const canReadAll =
-    user.isSuperAdmin || user.permissions.includes(Permission.SCALE_READ);
-  const canReadOwn =
+  const canReadMyScales =
+    user.isSuperAdmin || user.permissions.includes(Permission.MY_SCALES_READ);
+  const canReadOwnScales =
     user.isSuperAdmin || user.permissions.includes(Permission.SCALE_SELF_READ);
 
-  if (!canReadAll && !canReadOwn) {
+  if (!canReadMyScales && !canReadOwnScales) {
     return NextResponse.json(
       {
         ok: false,
         error: {
           code: "NOT_AUTHORIZED",
-          message: "Sem permissão para visualizar escalas",
+          message: "Sem permissão para visualizar suas escalas",
         },
       },
       { status: 403 },
     );
   }
 
-  const churchId = getChurchIdFromSession(user, null);
+  if (!user.memberId) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Usuário sem membro vinculado",
+        },
+      },
+      { status: 403 },
+    );
+  }
 
-  if (!churchId) {
+  if (!user.churchId) {
     return NextResponse.json(
       {
         ok: false,
@@ -61,131 +60,32 @@ export async function GET() {
     );
   }
 
-  const scales = await scaleContainer.scaleRepository.findByChurchId(churchId);
-  const scaleIds = scales.map((scale) => scale.id);
+  const { searchParams } = new URL(request.url);
+  const periodRaw = searchParams.get("period") ?? "upcoming";
+  const parsed = ListMyScalesQuerySchema.safeParse({ period: periodRaw });
 
-  if (scaleIds.length === 0) {
+  if (!parsed.success) {
     return NextResponse.json(
-      { ok: true, value: { currentAndFuture: [], past: [] } },
-      { status: 200 },
-    );
-  }
-
-  const scaleMembers = await scaleContainer.scaleMemberRepository.findByScaleIds(
-    scaleIds,
-  );
-  const myScaleMembers = scaleMembers.filter(
-    (scaleMember) => scaleMember.memberId === user.memberId,
-  );
-
-  if (myScaleMembers.length === 0) {
-    return NextResponse.json(
-      { ok: true, value: { currentAndFuture: [], past: [] } },
-      { status: 200 },
-    );
-  }
-
-  const scaleById = new Map(scales.map((scale) => [scale.id, scale]));
-
-  const serviceIds = Array.from(
-    new Set(
-      myScaleMembers
-        .map((scaleMember) => scaleById.get(scaleMember.scaleId)?.serviceId)
-        .filter((serviceId): serviceId is string => Boolean(serviceId)),
-    ),
-  );
-
-  const ministryIds = Array.from(
-    new Set(
-      myScaleMembers
-        .map((scaleMember) => scaleById.get(scaleMember.scaleId)?.ministryId)
-        .filter((ministryId): ministryId is string => Boolean(ministryId)),
-    ),
-  );
-
-  const ministryRoleIds = Array.from(
-    new Set(myScaleMembers.map((scaleMember) => scaleMember.ministryRoleId)),
-  );
-
-  const [services, ministries, ministryRoles] = await Promise.all([
-    Promise.all(
-      serviceIds.map((serviceId) => scaleContainer.serviceRepository.findById(serviceId)),
-    ),
-    Promise.all(
-      ministryIds.map((ministryId) =>
-        scaleContainer.ministryRepository.findById(ministryId),
-      ),
-    ),
-    Promise.all(
-      ministryRoleIds.map((ministryRoleId) =>
-        scaleContainer.ministryRoleRepository.findById(ministryRoleId),
-      ),
-    ),
-  ]);
-
-  const serviceById = new Map(
-    services.filter(isNonNullable).map((service) => [service.id, service]),
-  );
-  const ministryById = new Map(
-    ministries
-      .filter(isNonNullable)
-      .map((ministry) => [ministry.id, ministry]),
-  );
-  const ministryRoleById = new Map(
-    ministryRoles
-      .filter(isNonNullable)
-      .map((ministryRole) => [ministryRole.id, ministryRole]),
-  );
-
-  const today = startOfToday();
-
-  const items: MyScaleItem[] = myScaleMembers
-    .map((scaleMember) => {
-      const scale = scaleById.get(scaleMember.scaleId);
-      if (!scale || scale.status !== "published") {
-        return null;
-      }
-
-      const service = serviceById.get(scale.serviceId);
-      const ministry = ministryById.get(scale.ministryId);
-      const ministryRole = ministryRoleById.get(scaleMember.ministryRoleId);
-
-      if (!service || !ministry || !ministryRole) {
-        return null;
-      }
-
-      return {
-        scaleId: scale.id,
-        serviceDate: service.date.toISOString(),
-        serviceTime: service.time,
-        ministryName: ministry.name,
-        ministryRoleName: ministryRole.name,
-      };
-    })
-    .filter((item): item is MyScaleItem => item !== null);
-
-  const currentAndFuture = items
-    .filter((item) => new Date(item.serviceDate) >= today)
-    .sort(
-      (a, b) =>
-        new Date(a.serviceDate).getTime() - new Date(b.serviceDate).getTime(),
-    );
-
-  const past = items
-    .filter((item) => new Date(item.serviceDate) < today)
-    .sort(
-      (a, b) =>
-        new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime(),
-    );
-
-  return NextResponse.json(
-    {
-      ok: true,
-      value: {
-        currentAndFuture,
-        past,
+      {
+        ok: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Período inválido",
+        },
       },
-    },
-    { status: 200 },
-  );
+      { status: 400 },
+    );
+  }
+
+  const result = await scaleContainer.listMyScales.execute({
+    churchId: user.churchId,
+    memberId: user.memberId,
+    period: parsed.data.period as MyScalesPeriod,
+  });
+
+  const errorCode = "error" in result ? result.error?.code : undefined;
+
+  return NextResponse.json(result, {
+    status: result.ok ? 200 : getHttpStatus(errorCode),
+  });
 }

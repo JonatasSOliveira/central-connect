@@ -1,66 +1,65 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+export type MyScalePeriod = "upcoming" | "past";
 
 export interface MyScaleItem {
   scaleId: string;
+  serviceId: string;
+  serviceTitle: string;
   serviceDate: string;
   serviceTime: string;
+  ministryId: string;
   ministryName: string;
+  ministryRoleId: string;
   ministryRoleName: string;
+  scaleNotes: string | null;
+  memberNotes: string | null;
 }
 
-type TabKey = "current" | "past";
-
-interface UseMyScalesReturn {
-  activeTab: TabKey;
-  setActiveTab: (tab: TabKey) => void;
+interface UseMyScalesResult {
+  period: MyScalePeriod;
+  setPeriod: (period: MyScalePeriod) => void;
+  scales: MyScaleItem[];
   isLoading: boolean;
-  currentAndFuture: MyScaleItem[];
-  past: MyScaleItem[];
+  refresh: () => Promise<void>;
 }
 
-export function useMyScales(): UseMyScalesReturn {
-  const [activeTab, setActiveTab] = useState<TabKey>("current");
+export function useMyScales(): UseMyScalesResult {
+  const [period, setPeriod] = useState<MyScalePeriod>("upcoming");
+  const [scales, setScales] = useState<MyScaleItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentAndFuture, setCurrentAndFuture] = useState<MyScaleItem[]>([]);
-  const [past, setPast] = useState<MyScaleItem[]>([]);
 
   const fetchMyScales = useCallback(async () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/my-scales");
+      const response = await fetch(`/api/my-scales?period=${period}`);
       const data = await response.json();
 
-      if (!response.ok || !data.ok) {
-        setCurrentAndFuture([]);
-        setPast([]);
+      if (data.ok) {
+        setScales(data.value.scales);
         return;
       }
 
-      setCurrentAndFuture(data.value.currentAndFuture ?? []);
-      setPast(data.value.past ?? []);
+      setScales([]);
     } catch {
-      setCurrentAndFuture([]);
-      setPast([]);
+      setScales([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [period]);
 
   useEffect(() => {
     fetchMyScales();
   }, [fetchMyScales]);
 
-  return useMemo(
-    () => ({
-      activeTab,
-      setActiveTab,
-      isLoading,
-      currentAndFuture,
-      past,
-    }),
-    [activeTab, isLoading, currentAndFuture, past],
-  );
+  return {
+    period,
+    setPeriod,
+    scales,
+    isLoading,
+    refresh: fetchMyScales,
+  };
 }

@@ -14,7 +14,7 @@ export class ScaleAttendanceFirebaseRepository
   private static readonly IN_QUERY_LIMIT = 10;
 
   constructor() {
-    super("scale_attendances");
+    super("scaleAttendances");
   }
 
   protected toEntity(data: DocumentData, id: string): ScaleAttendance {

@@ -5,6 +5,7 @@ import { GetScaleAttendanceReport } from "@/application/use-cases/scale/GetScale
 import { GetScaleAttendance } from "@/application/use-cases/scale/GetScaleAttendance";
 import { GetScale } from "@/application/use-cases/scale/GetScale";
 import { ListScaleAttendances } from "@/application/use-cases/scale/ListScaleAttendances";
+import { ListMyScales } from "@/application/use-cases/scale/ListMyScales";
 import { ListScales } from "@/application/use-cases/scale/ListScales";
 import { PublishScaleAttendance } from "@/application/use-cases/scale/PublishScaleAttendance";
 import { RunScheduledScaleGeneration } from "@/application/use-cases/scale/RunScheduledScaleGeneration";
@@ -45,6 +46,7 @@ class ScaleContainer {
     null;
   private static _getScale: GetScale | null = null;
   private static _listScaleAttendances: ListScaleAttendances | null = null;
+  private static _listMyScales: ListMyScales | null = null;
   private static _listScales: ListScales | null = null;
   private static _churchRepository: IChurchRepository | null = null;
   private static _memberAvailabilityRepository: IMemberAvailabilityRepository | null =
@@ -170,6 +172,19 @@ private static _publishScaleAttendance: PublishScaleAttendance | null =
       );
     }
     return ScaleContainer._listScaleAttendances;
+  }
+
+  static get listMyScales(): ListMyScales {
+    if (!ScaleContainer._listMyScales) {
+      ScaleContainer._listMyScales = new ListMyScales(
+        ScaleContainer.scaleMemberRepository,
+        ScaleContainer.scaleRepository,
+        ScaleContainer.serviceRepository,
+        ScaleContainer.ministryRepository,
+        ScaleContainer.ministryRoleRepository,
+      );
+    }
+    return ScaleContainer._listMyScales;
   }
 
   static get updateScale(): UpdateScale {

@@ -1,6 +1,7 @@
 import type { GetSelfSignupContextOutputDTO } from "@/application/dtos/self-signup/GetSelfSignupContextDTO";
 import { SelfSignupErrors } from "@/application/errors/SelfSignupErrors";
 import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IMinistryRepository } from "@/domain/ports/IMinistryRepository";
 import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { Result } from "@/shared/types/Result";
@@ -18,6 +19,7 @@ export class GetSelfSignupChurchContext extends BaseUseCase<
     private readonly churchRepository: IChurchRepository,
     private readonly roleRepository: IRoleRepository,
     private readonly rolePermissionRepository: IRolePermissionRepository,
+    private readonly ministryRepository: IMinistryRepository,
   ) {
     super();
   }
@@ -40,6 +42,10 @@ export class GetSelfSignupChurchContext extends BaseUseCase<
         church.selfSignupDefaultRoleId,
       );
 
+      const ministries = await this.ministryRepository.findByChurchId(
+        input.churchId,
+      );
+
       if (!resolvedRole) {
         return {
           ok: true,
@@ -52,6 +58,10 @@ export class GetSelfSignupChurchContext extends BaseUseCase<
             defaultRoleId: null,
             message:
               "Auto cadastro indisponível no momento. Peça para a liderança configurar o cargo padrão.",
+            ministries: ministries.map((m) => ({
+              id: m.id,
+              name: m.name,
+            })),
           },
         };
       }
@@ -68,6 +78,10 @@ export class GetSelfSignupChurchContext extends BaseUseCase<
             defaultRoleId: resolvedRole.roleId,
             message:
               "A igreja ainda não definiu um cargo padrão. Um cargo de menor privilégio será usado temporariamente.",
+            ministries: ministries.map((m) => ({
+              id: m.id,
+              name: m.name,
+            })),
           },
         };
       }
@@ -82,6 +96,10 @@ export class GetSelfSignupChurchContext extends BaseUseCase<
           hasDefaultRoleConfigured,
           defaultRoleId: resolvedRole.roleId,
           message: null,
+          ministries: ministries.map((m) => ({
+            id: m.id,
+            name: m.name,
+          })),
         },
       };
     } catch {

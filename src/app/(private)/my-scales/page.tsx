@@ -4,31 +4,30 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { MyScalesScreen } from "@/features/my-scales/components/MyScalesScreen";
+import { MyScalesList } from "@/features/my-scales/components/MyScalesList";
 
 export default function MyScalesPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
-  const canReadScales =
-    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_READ);
+  const canReadMyScales =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.MY_SCALES_READ);
   const canReadOwnScales =
-    user?.isSuperAdmin ||
-    user?.permissions.includes(Permission.SCALE_SELF_READ);
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_SELF_READ);
 
   useEffect(() => {
     if (isLoading || !user) {
       return;
     }
 
-    if (!canReadScales && !canReadOwnScales) {
+    if (!canReadMyScales && !canReadOwnScales) {
       router.push("/home");
     }
-  }, [canReadOwnScales, canReadScales, isLoading, router, user]);
+  }, [canReadMyScales, canReadOwnScales, isLoading, router, user]);
 
-  if (isLoading || (!canReadScales && !canReadOwnScales)) {
+  if (isLoading || (!canReadMyScales && !canReadOwnScales)) {
     return null;
   }
 
-  return <MyScalesScreen />;
+  return <MyScalesList />;
 }

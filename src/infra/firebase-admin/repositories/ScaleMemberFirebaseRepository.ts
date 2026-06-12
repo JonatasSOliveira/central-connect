@@ -14,7 +14,7 @@ export class ScaleMemberFirebaseRepository
   private static readonly IN_QUERY_LIMIT = 10;
 
   constructor() {
-    super("scale_members");
+    super("scaleMembers");
   }
 
   protected toEntity(data: DocumentData, id: string): ScaleMember {
@@ -23,6 +23,15 @@ export class ScaleMemberFirebaseRepository
 
   protected toFirestoreData(entity: ScaleMember): DocumentData {
     return scaleMemberToPersistence(entity);
+  }
+
+  async findByMemberId(memberId: string): Promise<ScaleMember[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("memberId", "==", memberId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
   }
 
   async findByScaleId(scaleId: string): Promise<ScaleMember[]> {

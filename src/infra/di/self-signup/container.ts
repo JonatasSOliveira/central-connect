@@ -5,7 +5,9 @@ import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
 import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
 import type { ILegalConsentRepository } from "@/domain/ports/ILegalConsentRepository";
 import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
+import type { IMinistryRepository } from "@/domain/ports/IMinistryRepository";
 import type { IRolePermissionRepository } from "@/domain/ports/IRolePermissionRepository";
 import type { IRoleRepository } from "@/domain/ports/IRoleRepository";
 import type { IUserRepository } from "@/domain/ports/IUserRepository";
@@ -13,6 +15,8 @@ import { ChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/Ch
 import { LegalConsentFirebaseRepository } from "@/infra/firebase-admin/repositories/LegalConsentFirebaseRepository";
 import { MemberChurchFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberChurchFirebaseRepository";
 import { MemberFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberFirebaseRepository";
+import { MemberMinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberMinistryFirebaseRepository";
+import { MinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MinistryFirebaseRepository";
 import { RolePermissionFirebaseRepository } from "@/infra/firebase-admin/repositories/RolePermissionFirebaseRepository";
 import { RoleFirebaseRepository } from "@/infra/firebase-admin/repositories/RoleFirebaseRepository";
 import { UserFirebaseRepository } from "@/infra/firebase-admin/repositories/UserFirebaseRepository";
@@ -27,6 +31,9 @@ class SelfSignupContainer {
   private static _legalConsentRepository: ILegalConsentRepository | null = null;
   private static _memberChurchRepository: IMemberChurchRepository | null = null;
   private static _userRepository: IUserRepository | null = null;
+  private static _memberMinistryRepository: IMemberMinistryRepository | null =
+    null;
+  private static _ministryRepository: IMinistryRepository | null = null;
   private static _googleAuthService: IGoogleAuthService | null = null;
 
   private static _getSelfSignupChurchContext: GetSelfSignupChurchContext | null =
@@ -88,6 +95,22 @@ class SelfSignupContainer {
     return SelfSignupContainer._userRepository;
   }
 
+  static get memberMinistryRepository(): IMemberMinistryRepository {
+    if (!SelfSignupContainer._memberMinistryRepository) {
+      SelfSignupContainer._memberMinistryRepository =
+        new MemberMinistryFirebaseRepository();
+    }
+    return SelfSignupContainer._memberMinistryRepository;
+  }
+
+  static get ministryRepository(): IMinistryRepository {
+    if (!SelfSignupContainer._ministryRepository) {
+      SelfSignupContainer._ministryRepository =
+        new MinistryFirebaseRepository();
+    }
+    return SelfSignupContainer._ministryRepository;
+  }
+
   static get googleAuthService(): IGoogleAuthService {
     if (!SelfSignupContainer._googleAuthService) {
       SelfSignupContainer._googleAuthService = new GoogleAuthFirebaseService();
@@ -102,6 +125,7 @@ class SelfSignupContainer {
           SelfSignupContainer.churchRepository,
           SelfSignupContainer.roleRepository,
           SelfSignupContainer.rolePermissionRepository,
+          SelfSignupContainer.ministryRepository,
         );
     }
     return SelfSignupContainer._getSelfSignupChurchContext;
@@ -125,6 +149,8 @@ class SelfSignupContainer {
         SelfSignupContainer.rolePermissionRepository,
         SelfSignupContainer.memberRepository,
         SelfSignupContainer.memberChurchRepository,
+        SelfSignupContainer.memberMinistryRepository,
+        SelfSignupContainer.ministryRepository,
         SelfSignupContainer.userRepository,
         SelfSignupContainer.legalConsentRepository,
         SelfSignupContainer.googleAuthService,

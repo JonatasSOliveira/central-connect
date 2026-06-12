@@ -10,6 +10,8 @@ import { SearchInput } from "@/components/ui/search-input";
 import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { GenerateScaleDialog } from "./generate-scale-dialog";
+import { NotifyScalesByDateDialog } from "./notify-scales-by-date-dialog";
+import { ShareScaleImageDialog } from "./ShareScaleImageDialog";
 import { ScaleFilter } from "./ScaleFilter";
 import { ScaleItem } from "./ScaleItem";
 import { useScales } from "../hooks/useScales";
@@ -53,6 +55,7 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
 
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [ministries, setMinistries] = useState<MinistryOption[]>([]);
+  const [shareScaleId, setShareScaleId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchServicesAndMinistries = async () => {
@@ -124,6 +127,10 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
     },
     [deleteScale],
   );
+
+  const handleOpenShareDialog = useCallback((scaleId: string) => {
+    setShareScaleId(scaleId);
+  }, []);
 
   const getServiceTitle = (serviceId: string) => {
     const service = services.find((s) => s.id === serviceId);
@@ -241,6 +248,10 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
                     onDelete: canDeleteScales
                       ? () => handleDeleteScale(scale.id)
                       : undefined,
+                    onShareImage:
+                      canWriteScales && scale.status === "published"
+                        ? () => handleOpenShareDialog(scale.id)
+                        : undefined,
                   }
                 : undefined
             }
@@ -282,6 +293,7 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
 
       {canWriteScales && (
         <div className="flex justify-end gap-2">
+          <NotifyScalesByDateDialog />
           <GenerateScaleDialog onSuccess={refresh} />
           <Button onClick={handleCreateScale}>
             <Plus className="w-4 h-4 mr-2" />
@@ -291,6 +303,20 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
       )}
 
       {renderContent()}
+
+      {shareScaleId && churchId ? (
+        <ShareScaleImageDialog
+          open={!!shareScaleId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setShareScaleId(null);
+            }
+          }}
+          scaleId={shareScaleId}
+          churchId={churchId}
+          churchName={user?.churchName ?? "Igreja"}
+        />
+      ) : null}
     </ListTemplate>
   );
 }

@@ -1,10 +1,15 @@
 import { DeactivateMemberPushToken } from "@/application/use-cases/notification/DeactivateMemberPushToken";
+import { NotifyPublishedScalesByDate } from "@/application/use-cases/notification/NotifyPublishedScalesByDate";
 import { NotifyScaleMembers } from "@/application/use-cases/notification/NotifyScaleMembers";
 import { UpsertMemberPushToken } from "@/application/use-cases/notification/UpsertMemberPushToken";
 import type { IMemberPushTokenRepository } from "@/domain/ports/IMemberPushTokenRepository";
 import type { IPushNotificationService } from "@/domain/ports/IPushNotificationService";
+import type { IScaleMemberRepository } from "@/domain/ports/IScaleMemberRepository";
+import type { IScaleRepository } from "@/domain/ports/IScaleRepository";
 import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
 import { MemberPushTokenFirebaseRepository } from "@/infra/firebase-admin/repositories/MemberPushTokenFirebaseRepository";
+import { ScaleFirebaseRepository } from "@/infra/firebase-admin/repositories/ScaleFirebaseRepository";
+import { ScaleMemberFirebaseRepository } from "@/infra/firebase-admin/repositories/ScaleMemberFirebaseRepository";
 import { ServiceFirebaseRepository } from "@/infra/firebase-admin/repositories/ServiceFirebaseRepository";
 import { FirebasePushNotificationService } from "@/infra/firebase-admin/services/FirebasePushNotificationService";
 
@@ -12,12 +17,16 @@ class NotificationContainer {
   private static _memberPushTokenRepository: IMemberPushTokenRepository | null =
     null;
   private static _pushNotificationService: IPushNotificationService | null = null;
+  private static _scaleRepository: IScaleRepository | null = null;
+  private static _scaleMemberRepository: IScaleMemberRepository | null = null;
   private static _serviceRepository: IServiceRepository | null = null;
 
   private static _upsertMemberPushToken: UpsertMemberPushToken | null = null;
   private static _deactivateMemberPushToken: DeactivateMemberPushToken | null =
     null;
   private static _notifyScaleMembers: NotifyScaleMembers | null = null;
+  private static _notifyPublishedScalesByDate: NotifyPublishedScalesByDate | null =
+    null;
 
   private constructor() {}
 
@@ -45,6 +54,23 @@ class NotificationContainer {
     }
 
     return NotificationContainer._serviceRepository;
+  }
+
+  static get scaleRepository(): IScaleRepository {
+    if (!NotificationContainer._scaleRepository) {
+      NotificationContainer._scaleRepository = new ScaleFirebaseRepository();
+    }
+
+    return NotificationContainer._scaleRepository;
+  }
+
+  static get scaleMemberRepository(): IScaleMemberRepository {
+    if (!NotificationContainer._scaleMemberRepository) {
+      NotificationContainer._scaleMemberRepository =
+        new ScaleMemberFirebaseRepository();
+    }
+
+    return NotificationContainer._scaleMemberRepository;
   }
 
   static get upsertMemberPushToken(): UpsertMemberPushToken {
@@ -78,6 +104,21 @@ class NotificationContainer {
     }
 
     return NotificationContainer._notifyScaleMembers;
+  }
+
+  static get notifyPublishedScalesByDate(): NotifyPublishedScalesByDate {
+    if (!NotificationContainer._notifyPublishedScalesByDate) {
+      NotificationContainer._notifyPublishedScalesByDate =
+        new NotifyPublishedScalesByDate(
+          NotificationContainer.serviceRepository,
+          NotificationContainer.scaleRepository,
+          NotificationContainer.scaleMemberRepository,
+          NotificationContainer.memberPushTokenRepository,
+          NotificationContainer.pushNotificationService,
+        );
+    }
+
+    return NotificationContainer._notifyPublishedScalesByDate;
   }
 }
 

@@ -6,6 +6,9 @@
 - Versão do app exibida em login, home e self-signup
 - Usuários com CHURCH_SELF_READ/WRITE podem editar dados da igreja
 - Usuários com MEMBER_SELF_WRITE podem editar seu próprio perfil
+- Ministry selection in self-signup flow with explicit no-ministry confirmation checkbox
+- Firebase collection names normalized to camelCase (6 collections)
+- `pnpm install` restored vitest/vite-tsconfig-paths — zero TypeScript errors, 14/14 tests pass
 
 ---
 

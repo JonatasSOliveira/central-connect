@@ -12,7 +12,7 @@ export class LegalConsentFirebaseRepository
   implements ILegalConsentRepository
 {
   constructor() {
-    super("legal_consents");
+    super("legalConsents");
   }
 
   protected toEntity(data: DocumentData, id: string): LegalConsent {

@@ -23,6 +23,8 @@ export async function finalizeSelfSignupAndLogin({
     fullName: payload.fullName,
     phone: payload.phone,
     acceptedTerms: payload.acceptedTerms,
+    ministryIds: payload.ministryIds,
+    confirmNoMinistry: payload.confirmNoMinistry,
   });
 
   const loginResult = await login(googleToken);

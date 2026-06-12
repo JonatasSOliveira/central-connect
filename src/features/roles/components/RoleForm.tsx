@@ -75,7 +75,14 @@ export function RoleForm({ mode, roleId }: RoleFormProps) {
           >
             <PermissionSelect
               value={permissions || []}
-              onChange={(perms) => form.setValue("permissions", perms as never)}
+              onChange={(perms) =>
+                form.setValue("permissions", perms as never, {
+                  shouldDirty: true,
+                  shouldTouch: true,
+                  shouldValidate: true,
+                })
+              }
+              disabled={isLoading}
             />
           </FormField>
         </FormTemplate.Content>
