@@ -34,6 +34,10 @@ import { normalizePhone } from "@/shared/utils/phone";
 import type { Result } from "@/shared/types/Result";
 import { BaseUseCase } from "../BaseUseCase";
 import { resolveSelfSignupRoleId } from "./helpers/resolveSelfSignupRoleId";
+import {
+  saveSelfSignupMemberForm,
+  type SaveSelfSignupMemberFormRepositories,
+} from "./helpers/saveSelfSignupMemberForm";
 import { upsertSelfSignupMember } from "./helpers/upsertSelfSignupMember";
 
 export interface FinalizeSelfSignupInput extends FinalizeSelfSignupInputDTO {
@@ -57,6 +61,7 @@ export class FinalizeSelfSignup extends BaseUseCase<
     private readonly userRepository: IUserRepository,
     private readonly legalConsentRepository: ILegalConsentRepository,
     private readonly googleAuthService: IGoogleAuthService,
+    private readonly memberFormRepositories: SaveSelfSignupMemberFormRepositories,
   ) {
     super();
   }
@@ -120,10 +125,16 @@ export class FinalizeSelfSignup extends BaseUseCase<
         fullName,
         input.phone,
         email,
+        input.memberForm,
       );
 
       const user = await this.ensureUser(member.id);
       await this.ensureMemberChurch(member.id, church.id, roleId);
+      await saveSelfSignupMemberForm(this.memberFormRepositories, {
+        memberId: member.id,
+        churchId: church.id,
+        memberForm: input.memberForm,
+      });
       await this.ensureMemberMinistries(
         member.id,
         church.id,
@@ -193,8 +204,11 @@ export class FinalizeSelfSignup extends BaseUseCase<
     const now = new Date();
 
     for (const ministryId of ministryIds) {
-      const existing = await this.memberMinistryRepository
-        .findByMemberAndMinistry(memberId, ministryId);
+      const existing =
+        await this.memberMinistryRepository.findByMemberAndMinistry(
+          memberId,
+          ministryId,
+        );
 
       if (existing) continue;
 
@@ -206,9 +220,7 @@ export class FinalizeSelfSignup extends BaseUseCase<
         updatedAt: now,
       };
 
-      await this.memberMinistryRepository.create(
-        new MemberMinistry(params),
-      );
+      await this.memberMinistryRepository.create(new MemberMinistry(params));
     }
   }
 
