@@ -89,6 +89,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     acceptedTerms: parsed.data.acceptedTerms,
     ministryIds: parsed.data.ministryIds,
     confirmNoMinistry: parsed.data.confirmNoMinistry,
+    memberForm: parsed.data.memberForm,
     ipAddress,
     userAgent,
   });

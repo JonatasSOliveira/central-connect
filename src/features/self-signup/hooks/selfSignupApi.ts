@@ -1,3 +1,5 @@
+import type { SelfSignupMemberFormState } from "./selfSignupMemberFormState";
+
 export interface SelfSignupContext {
   churchId: string;
   churchName: string;
@@ -89,6 +91,7 @@ export async function finalizeSelfSignup(
     acceptedTerms: boolean;
     ministryIds: string[];
     confirmNoMinistry: boolean;
+    memberForm: SelfSignupMemberFormState;
   },
 ): Promise<void> {
   const response = await fetch(
@@ -100,6 +103,7 @@ export async function finalizeSelfSignup(
         ...payload,
         ministryIds: payload.ministryIds,
         confirmNoMinistry: payload.confirmNoMinistry,
+        memberForm: payload.memberForm,
       }),
     },
   );

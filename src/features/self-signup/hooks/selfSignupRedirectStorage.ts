@@ -1,3 +1,5 @@
+import type { SelfSignupMemberFormState } from "./selfSignupMemberFormState";
+
 const SELF_SIGNUP_REDIRECT_KEY = "self-signup-google-redirect";
 const SELF_SIGNUP_REDIRECT_WINDOW_MS = 10 * 60 * 1000;
 
@@ -8,6 +10,7 @@ export interface SelfSignupRedirectPayload {
   acceptedTerms: boolean;
   ministryIds: string[];
   confirmNoMinistry: boolean;
+  memberForm: SelfSignupMemberFormState;
   createdAt: number;
 }
 
@@ -62,7 +65,9 @@ export function getSelfSignupRedirectPayload(): SelfSignupRedirectPayload | null
       typeof parsed.acceptedTerms !== "boolean" ||
       typeof parsed.createdAt !== "number" ||
       !Array.isArray(parsed.ministryIds) ||
-      typeof parsed.confirmNoMinistry !== "boolean"
+      typeof parsed.confirmNoMinistry !== "boolean" ||
+      typeof parsed.memberForm !== "object" ||
+      parsed.memberForm === null
     ) {
       clearSelfSignupRedirectPayload();
       return null;

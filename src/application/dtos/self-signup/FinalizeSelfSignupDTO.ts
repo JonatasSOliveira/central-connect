@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SelfSignupMemberFormSchema } from "./SelfSignupMemberFormDTO";
 
 export const FinalizeSelfSignupInputSchema = z
   .object({
@@ -10,6 +11,7 @@ export const FinalizeSelfSignupInputSchema = z
     }),
     ministryIds: z.array(z.string()).default([]),
     confirmNoMinistry: z.boolean().default(false),
+    memberForm: SelfSignupMemberFormSchema,
   })
   .refine(
     (data) => data.ministryIds.length > 0 || data.confirmNoMinistry === true,
