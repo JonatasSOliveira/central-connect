@@ -1,3 +1,4 @@
+import type { SelfSignupMemberFormDTO } from "@/application/dtos/self-signup/SelfSignupMemberFormDTO";
 import { Member, type MemberParams } from "@/domain/entities/Member";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 
@@ -7,6 +8,7 @@ export async function upsertSelfSignupMember(
   fullName: string,
   phone: string,
   email: string,
+  memberForm: SelfSignupMemberFormDTO,
 ): Promise<Member> {
   if (!targetMember) {
     const now = new Date();
@@ -14,6 +16,7 @@ export async function upsertSelfSignupMember(
       fullName,
       phone,
       email,
+      birthDate: memberForm.basicData.birthDate,
       createdAt: now,
       updatedAt: now,
     };
@@ -29,8 +32,8 @@ export async function upsertSelfSignupMember(
     maxServicesPerMonth: targetMember.maxServicesPerMonth,
     status: targetMember.status,
     avatarUrl: targetMember.avatarUrl,
-    birthDate: targetMember.birthDate,
     notes: targetMember.notes,
+    birthDate: memberForm.basicData.birthDate,
     createdAt: targetMember.createdAt,
     updatedAt: new Date(),
     createdByUserId: targetMember.createdByUserId,

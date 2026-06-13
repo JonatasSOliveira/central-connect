@@ -21,6 +21,7 @@ import { RolePermissionFirebaseRepository } from "@/infra/firebase-admin/reposit
 import { RoleFirebaseRepository } from "@/infra/firebase-admin/repositories/RoleFirebaseRepository";
 import { UserFirebaseRepository } from "@/infra/firebase-admin/repositories/UserFirebaseRepository";
 import { GoogleAuthFirebaseService } from "@/infra/firebase-admin/services/GoogleAuthFirebaseService";
+import { getSelfSignupMemberFormRepositories } from "./memberFormRepositories";
 
 class SelfSignupContainer {
   private static _churchRepository: IChurchRepository | null = null;
@@ -154,6 +155,7 @@ class SelfSignupContainer {
         SelfSignupContainer.userRepository,
         SelfSignupContainer.legalConsentRepository,
         SelfSignupContainer.googleAuthService,
+        getSelfSignupMemberFormRepositories(),
       );
     }
     return SelfSignupContainer._finalizeSelfSignup;
