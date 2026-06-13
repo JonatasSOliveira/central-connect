@@ -25,6 +25,7 @@ export async function finalizeSelfSignupAndLogin({
     acceptedTerms: payload.acceptedTerms,
     ministryIds: payload.ministryIds,
     confirmNoMinistry: payload.confirmNoMinistry,
+    memberForm: payload.memberForm,
   });
 
   const loginResult = await login(googleToken);
