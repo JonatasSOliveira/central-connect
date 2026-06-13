@@ -1,5 +1,5 @@
 import { type FirebaseApp, getApps, initializeApp } from "firebase/app";
-import { type Auth, getAuth } from "firebase/auth";
+import { type Auth, connectAuthEmulator, getAuth } from "firebase/auth";
 
 function resolveAuthDomain(): string | undefined {
   return process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
@@ -16,6 +16,11 @@ const firebaseConfig = {
 
 let firebaseApp: FirebaseApp | null = null;
 let auth: Auth | null = null;
+let authEmulatorConnected = false;
+
+function shouldUseEmulators(): boolean {
+  return process.env.NEXT_PUBLIC_FIREBASE_USE_EMULATORS === "true";
+}
 
 export function getFirebaseClientApp(): FirebaseApp {
   if (!firebaseApp) {
@@ -32,6 +37,12 @@ export function getFirebaseClientApp(): FirebaseApp {
 export function getFirebaseAuth(): Auth {
   if (!auth) {
     auth = getAuth(getFirebaseClientApp());
+    if (shouldUseEmulators() && !authEmulatorConnected) {
+      connectAuthEmulator(auth, "http://127.0.0.1:9099", {
+        disableWarnings: true,
+      });
+      authEmulatorConnected = true;
+    }
   }
   return auth;
 }

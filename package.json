@@ -4,11 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:firebase": "node scripts/dev-with-firebase.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "test": "vitest run",
+    "firebase:emulators": "firebase emulators:start --only auth,firestore --project central-connect-local",
+    "seed:firebase-local": "npx --yes tsx scripts/seed-local-firebase.ts",
     "import:ministries": "npx tsx scripts/import-ministries.ts"
   },
   "dependencies": {
