@@ -13,14 +13,28 @@ function getCredentials() {
   return JSON.parse(raw);
 }
 
+function shouldUseEmulators(): boolean {
+  return (
+    process.env.FIREBASE_USE_EMULATORS === "true" ||
+    Boolean(process.env.FIRESTORE_EMULATOR_HOST) ||
+    Boolean(process.env.FIREBASE_AUTH_EMULATOR_HOST)
+  );
+}
+
 let firebaseApp: App;
 let firestoreDb: Firestore;
 
 export function getFirebaseApp(): App {
   if (getApps().length === 0) {
-    firebaseApp = initializeApp({
-      credential: cert(getCredentials()),
-    });
+    firebaseApp = initializeApp(
+      shouldUseEmulators()
+        ? {
+            projectId:
+              process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ??
+              "central-connect-local",
+          }
+        : { credential: cert(getCredentials()) },
+    );
   } else {
     firebaseApp = getApp();
   }
