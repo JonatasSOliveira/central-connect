@@ -26,6 +26,7 @@ const permissionLabels: Record<Permission, string> = {
   [Permission.MEMBER_WRITE]: "Membros: Escrita",
   [Permission.MEMBER_DELETE]: "Membros: Excluir",
   [Permission.MEMBER_SELF_WRITE]: "Membros: Edição Própria",
+  [Permission.MEMBER_PROFILE_READ]: "Perfis de membros: Leitura",
   [Permission.MY_SCALES_READ]: "Membros: Minhas escalas",
   [Permission.SCALE_READ]: "Escalas: Leitura",
   [Permission.SCALE_SELF_READ]: "Escalas: Minhas escalas",

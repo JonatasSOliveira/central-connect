@@ -23,6 +23,28 @@ export class MemberServiceAvailabilityFirebaseRepository
     return memberServiceAvailabilityToPersistence(entity);
   }
 
+  async findByMemberAndChurch(
+    memberId: string,
+    churchId: string,
+  ): Promise<MemberServiceAvailability[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("memberId", "==", memberId)
+      .where("churchId", "==", churchId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
+  async findByChurchId(churchId: string): Promise<MemberServiceAvailability[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("churchId", "==", churchId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
   async replaceByMemberAndChurch(
     memberId: string,
     churchId: string,
