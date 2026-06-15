@@ -141,10 +141,12 @@ async function main(): Promise<void> {
   Permission.MINISTRY_READ,
 ];
 
+  const adminPermissions = AllPermissions;
+
   const adminRole = await ensureRole(
   "Administrador Local",
   "Acesso administrativo para desenvolvimento local.",
-  AllPermissions,
+  adminPermissions,
 );
   const memberRole = await ensureRole(
   "Membro",

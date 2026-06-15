@@ -1,6 +1,7 @@
 export { authContainer } from "./auth/container";
 export { churchContainer } from "./church/container";
 export { memberContainer } from "./member/container";
+export { memberProfileContainer } from "./member-profile/container";
 export { ministryContainer } from "./ministry/container";
 export { notificationContainer } from "./notification/container";
 export { roleContainer } from "./role/container";
@@ -19,6 +20,10 @@ class ContainerProxy {
 
   get member() {
     return require("./member/container").memberContainer;
+  }
+
+  get memberProfile() {
+    return require("./member-profile/container").memberProfileContainer;
   }
 
   get ministry() {
