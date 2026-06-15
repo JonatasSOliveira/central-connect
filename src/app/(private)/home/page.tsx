@@ -56,6 +56,10 @@ export default function HomePage() {
     requiredPermissions: [Permission.MEMBER_READ],
   });
 
+  const { hasPermission: canReadMemberProfiles } = usePermissions({
+    requiredPermissions: [Permission.MEMBER_PROFILE_READ],
+  });
+
   const { hasPermission: canManageRoles } = usePermissions({
     requiredPermissions: [Permission.ROLE_READ],
   });
@@ -110,6 +114,7 @@ export default function HomePage() {
 
   const canShowAdminSection =
     canManageMembers ||
+    canReadMemberProfiles ||
     canManageRoles ||
     canManageChurches ||
     canManageMinistries ||
@@ -206,6 +211,14 @@ export default function HomePage() {
                   description="Gerencie os membros da igreja"
                   icon={Users}
                   onClick={() => router.push("/members")}
+                />
+              )}
+              {canReadMemberProfiles && (
+                <CardItem
+                  title="Perfis dos membros"
+                  description="Veja indicadores e respostas do autocadastro"
+                  icon={BarChart3}
+                  onClick={() => router.push("/member-profiles")}
                 />
               )}
               {canManageRoles && (
