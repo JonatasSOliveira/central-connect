@@ -107,7 +107,7 @@ export function SelfSignupFormStep({
               <select
                 value={selectedMinistryId}
                 onChange={(e) => setSelectedMinistryId(e.target.value)}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                className="h-10 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground shadow-[var(--shadow-soft-sm)] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:text-disabled-foreground"
               >
                 <option value="">Selecione um ministério</option>
                 {availableToSelect.map((m) => (

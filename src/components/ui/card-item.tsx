@@ -59,6 +59,7 @@ export function CardItem({
         href={href}
         className={cn(
           "group flex cursor-pointer items-center gap-4 rounded-xl border border-border bg-card p-4 transition-all duration-200",
+          "shadow-[var(--shadow-soft-sm)]",
           hoverClass,
           className,
         )}
@@ -75,6 +76,7 @@ export function CardItem({
         onClick={onClick}
         className={cn(
           "group flex w-full cursor-pointer items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-all duration-200",
+          "shadow-[var(--shadow-soft-sm)]",
           hoverClass,
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           className,
@@ -89,6 +91,7 @@ export function CardItem({
     <div
       className={cn(
         "flex items-center gap-4 rounded-xl border border-border bg-card p-4",
+        "shadow-[var(--shadow-soft-sm)]",
         className,
       )}
     >

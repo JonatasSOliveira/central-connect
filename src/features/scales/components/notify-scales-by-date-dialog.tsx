@@ -145,8 +145,8 @@ export function NotifyScalesByDateDialog() {
               <div
                 className={`mt-3 rounded-lg border px-3 py-2 text-sm ${
                   feedbackType === "success"
-                    ? "border-green-300 bg-green-50 text-green-900"
-                    : "border-red-300 bg-red-50 text-red-900"
+                    ? "border-primary/30 bg-primary/10 text-primary-selected"
+                    : "border-destructive/30 bg-destructive/10 text-destructive"
                 }`}
               >
                 <p className="font-medium">{feedbackMessage}</p>

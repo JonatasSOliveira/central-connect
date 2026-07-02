@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Footer } from "@/components/modules/footer";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 export const metadata: Metadata = {
@@ -29,13 +30,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className="dark">
       <body
         suppressHydrationWarning
-        className="antialiased flex flex-col h-dvh"
+        className="app-shell antialiased flex flex-col h-dvh"
       >
         <ServiceWorkerRegistration />
         <main className="flex flex-col h-full overflow-hidden">{children}</main>
+        <Footer />
       </body>
     </html>
   );

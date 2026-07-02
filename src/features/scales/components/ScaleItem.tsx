@@ -79,7 +79,10 @@ export function ScaleItem({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDeleteConfirm}>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={handleDeleteConfirm}
+          >
             <Trash2 className="h-4 w-4 mr-2" />
             Excluir
           </AlertDialogAction>
@@ -199,7 +202,7 @@ export function ScaleItem({
   );
 
   const baseClasses =
-    "flex items-center gap-4 rounded-2xl border border-border/70 bg-card p-4 transition-all duration-200";
+    "flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-soft-sm)] transition-all duration-200";
 
   if (onClick) {
     return (
@@ -218,7 +221,7 @@ export function ScaleItem({
           className={cn(
             "w-full text-left",
             baseClasses,
-            "hover:border-primary/30 hover:shadow-sm hover:shadow-primary/5",
+            "hover:border-primary/40 hover:shadow-[var(--shadow-soft)]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer",
             className,
           )}

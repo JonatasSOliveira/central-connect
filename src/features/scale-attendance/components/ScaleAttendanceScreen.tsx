@@ -95,8 +95,8 @@ export function ScaleAttendanceScreen({
   return (
     <div className="space-y-4 pb-24">
       {isServiceDateFuture && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 flex items-start gap-3">
-          <CalendarX className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-3">
+          <CalendarX className="mt-0.5 h-5 w-5 shrink-0 text-primary-selected" />
           <div>
             <p className="text-sm font-medium text-foreground">Data futura</p>
             <p className="text-xs text-muted-foreground mt-0.5">

@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Central Connect - Gestão de dispositivos",
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#000000",
+    background_color: "#111827",
+    theme_color: "#16a34a",
     icons: [
       {
         src: "/icon-192x192.png",

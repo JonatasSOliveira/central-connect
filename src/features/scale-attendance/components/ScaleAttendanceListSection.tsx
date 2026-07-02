@@ -43,7 +43,7 @@ export function ScaleAttendanceListSection({
 
   return (
     <section className="mb-6">
-      <div className="mb-3 rounded-xl border border-primary/20 bg-card p-4 shadow-sm">
+      <div className="mb-3 rounded-xl border border-primary/20 bg-card p-4 shadow-[var(--shadow-soft-sm)]">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
