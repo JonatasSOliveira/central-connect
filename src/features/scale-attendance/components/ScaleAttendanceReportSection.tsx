@@ -103,7 +103,7 @@ export function ScaleAttendanceReportSection({
         </div>
       </div>
 
-      <div className="rounded-xl border border-primary/20 bg-card p-4 shadow-sm">
+      <div className="rounded-xl border border-primary/20 bg-card p-4 shadow-[var(--shadow-soft-sm)]">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">

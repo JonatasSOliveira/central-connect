@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { DM_Sans, Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/components/modules/footer";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
-const inter = Inter({
-  variable: "--font-inter",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -41,10 +41,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className="dark">
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${dmSans.variable} antialiased flex flex-col h-dvh`}
+        className={`${geistSans.variable} ${geistMono.variable} app-shell flex h-dvh flex-col antialiased`}
       >
         <ServiceWorkerRegistration />
         <main className="flex flex-col h-full overflow-hidden">{children}</main>

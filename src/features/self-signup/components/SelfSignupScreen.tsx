@@ -74,7 +74,7 @@ export function SelfSignupScreen({ churchId }: SelfSignupScreenProps) {
       className="h-full overflow-y-auto bg-background px-4 py-8 pb-24"
     >
       <div className="mx-auto w-full max-w-md">
-        <Card className="border-primary/20 bg-card p-6 shadow-sm">
+        <Card className="border-primary/20 bg-card p-6">
           <h1 className="font-heading text-2xl font-semibold text-foreground">
             Auto cadastro
           </h1>
