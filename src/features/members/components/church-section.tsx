@@ -22,6 +22,8 @@ interface ChurchSectionProps {
   roles: RoleListItem[];
   readonlyChurches: ReadonlyChurch[];
   canChangeChurch: boolean;
+  canEditSystemRole: boolean;
+  canEditMinistries: boolean;
   getMinistriesByChurch: (churchId: string) => MinistryListItemDTO[];
   fetchMinistriesByChurch: (churchId: string) => Promise<void>;
   isLoadingMinistries: boolean;
@@ -43,6 +45,8 @@ export function ChurchSection({
   roles,
   readonlyChurches,
   canChangeChurch,
+  canEditSystemRole,
+  canEditMinistries,
   getMinistriesByChurch,
   fetchMinistriesByChurch,
   isLoadingMinistries,
@@ -52,7 +56,7 @@ export function ChurchSection({
   editableRemove,
   disabled = false,
 }: ChurchSectionProps) {
-  if (!canChangeChurch || disabled) {
+  if (disabled) {
     if (readonlyChurches.length > 0) {
       return <ReadonlyChurchList churches={readonlyChurches} />;
     }
@@ -74,7 +78,15 @@ export function ChurchSection({
     );
   }
 
-  if (editableChurches.length === 0) {
+  if (!canChangeChurch && !canEditMinistries) {
+    if (readonlyChurches.length > 0) {
+      return <ReadonlyChurchList churches={readonlyChurches} />;
+    }
+
+    return null;
+  }
+
+  if (editableChurches.length === 0 && canChangeChurch) {
     return null;
   }
 
@@ -92,17 +104,19 @@ export function ChurchSection({
         <span className="text-sm font-medium text-muted-foreground">
           Igrejas
         </span>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9"
-          onClick={handleAppend}
-          disabled={disabled}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Adicionar
-        </Button>
+        {canChangeChurch && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9"
+            onClick={handleAppend}
+            disabled={disabled}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Adicionar
+          </Button>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -123,7 +137,10 @@ export function ChurchSection({
               roles={roles}
               availableMinistries={availableMinistries}
               isLoadingMinistries={isLoadingMinistries}
-              canRemove={editableFields.length > 1}
+              canChangeChurch={canChangeChurch}
+              canEditSystemRole={canEditSystemRole}
+              canEditMinistries={canEditMinistries}
+              canRemove={canChangeChurch && editableFields.length > 1}
               onChurchChange={(value) =>
                 form.setValue(`churches.${index}.churchId`, value, {
                   shouldValidate: true,

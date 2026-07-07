@@ -38,6 +38,8 @@ export function MemberForm({
     editableChurches,
     readonlyChurches,
     canChangeChurch,
+    canEditSystemRole,
+    canEditMinistries,
     editableAppendMinistry,
     editableRemoveMinistry,
     getMinistriesByChurch,
@@ -119,6 +121,8 @@ export function MemberForm({
               roles={roles}
               readonlyChurches={readonlyChurches}
               canChangeChurch={canChangeChurch}
+              canEditSystemRole={canEditSystemRole}
+              canEditMinistries={canEditMinistries}
               getMinistriesByChurch={getMinistriesByChurch}
               fetchMinistriesByChurch={fetchMinistriesByChurch}
               isLoadingMinistries={isLoadingMinistries}

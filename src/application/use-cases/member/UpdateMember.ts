@@ -102,6 +102,52 @@ export class UpdateMember extends BaseUseCase<
         }
       }
 
+      if (input.ministryAssignments !== undefined) {
+        const existingMemberChurches =
+          await this.memberChurchRepository.findByMemberId(memberId);
+        const existingChurchIds = new Set(
+          existingMemberChurches.map((memberChurch) => memberChurch.churchId),
+        );
+
+        for (const assignment of input.ministryAssignments) {
+          if (!existingChurchIds.has(assignment.churchId)) {
+            return {
+              ok: false,
+              error: {
+                code: "MEMBER_CHURCH_NOT_FOUND",
+                message: "Membro nao pertence a esta igreja",
+              },
+            };
+          }
+        }
+
+        const assignmentChurchIds = new Set(
+          input.ministryAssignments.map((assignment) => assignment.churchId),
+        );
+        const existingMemberMinistries =
+          await this.memberMinistryRepository.findByMemberId(memberId);
+
+        for (const existingMm of existingMemberMinistries) {
+          if (assignmentChurchIds.has(existingMm.churchId)) {
+            await this.memberMinistryRepository.delete(existingMm.id);
+          }
+        }
+
+        for (const assignment of input.ministryAssignments) {
+          for (const ministryId of assignment.ministryIds) {
+            const memberMinistryParams: MemberMinistryParams = {
+              memberId,
+              churchId: assignment.churchId,
+              ministryId,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+            const memberMinistry = new MemberMinistry(memberMinistryParams);
+            await this.memberMinistryRepository.create(memberMinistry);
+          }
+        }
+      }
+
       if (input.availability) {
         const memberAvailabilityParams: MemberAvailabilityParams = {
           memberId,
