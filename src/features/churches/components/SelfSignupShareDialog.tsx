@@ -117,7 +117,11 @@ export function SelfSignupShareDialog({
 
           <AlertDialogFooter>
             <AlertDialogCancel type="button">Fechar</AlertDialogCancel>
-            <AlertDialogAction type="button" onClick={printPoster}>
+            <AlertDialogAction
+              type="button"
+              variant="print"
+              onClick={printPoster}
+            >
               <Printer className="mr-2 h-4 w-4" />
               Imprimir
             </AlertDialogAction>
@@ -130,7 +134,7 @@ export function SelfSignupShareDialog({
       </AlertDialog>
 
       <div className="self-signup-print-shell hidden print:block">
-        <div className="w-full max-w-xl rounded-2xl border border-black/20 bg-white p-10 text-black">
+        <div className="share-card-light w-full max-w-xl rounded-2xl border border-black/20 bg-white p-10 text-black">
           <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-black/10">
             <LinkIcon className="h-6 w-6" />
           </div>

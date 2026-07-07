@@ -79,7 +79,7 @@ const sections = [
 
 export function PrivacyPolicyDocument() {
   return (
-    <article className="mx-auto w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
+    <article className="mx-auto w-full max-w-3xl rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft-sm)] md:p-8">
       <header className="space-y-2 border-b border-border pb-5">
         <h1 className="font-heading text-2xl font-semibold text-foreground md:text-3xl">
           Política de Privacidade - Central Connect

@@ -19,17 +19,17 @@ export function CardAdmin({
   const content = (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-xl border border-primary/20 bg-card p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-sm",
+        "app-surface-interactive group relative overflow-hidden p-5",
         className,
       )}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
-            <Icon className="h-6 w-6 text-primary" strokeWidth={1.5} />
+          <div className="app-icon-tile h-12 w-12 group-hover:bg-primary/15">
+            <Icon className="h-5 w-5" strokeWidth={1.75} />
           </div>
           <div>
-            <h3 className="font-semibold text-lg text-foreground mb-1">
+            <h3 className="mb-1 text-base font-semibold text-foreground">
               {title}
             </h3>
             <p className="text-sm text-muted-foreground">{description}</p>

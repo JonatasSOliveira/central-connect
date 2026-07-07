@@ -40,6 +40,9 @@ yarn-error.log*
 
 # firebase
 FirebaseAdminCredentials.json
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # vercel
 .vercel

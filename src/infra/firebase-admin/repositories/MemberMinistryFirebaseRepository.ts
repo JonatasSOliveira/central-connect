@@ -24,7 +24,7 @@ export class MemberMinistryFirebaseRepository
   }
 
   async findByMemberId(memberId: string): Promise<MemberMinistry[]> {
-    const snapshot = await this.collection
+    const snapshot = await this.buildActiveQuery()
       .where("memberId", "==", memberId)
       .get();
     return snapshot.docs.map((doc) =>
@@ -32,8 +32,17 @@ export class MemberMinistryFirebaseRepository
     );
   }
 
+  async findByChurchId(churchId: string): Promise<MemberMinistry[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("churchId", "==", churchId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
   async findByMinistryId(ministryId: string): Promise<MemberMinistry[]> {
-    const snapshot = await this.collection
+    const snapshot = await this.buildActiveQuery()
       .where("ministryId", "==", ministryId)
       .get();
     return snapshot.docs.map((doc) =>
@@ -45,7 +54,7 @@ export class MemberMinistryFirebaseRepository
     memberId: string,
     ministryId: string,
   ): Promise<MemberMinistry | null> {
-    const snapshot = await this.collection
+    const snapshot = await this.buildActiveQuery()
       .where("memberId", "==", memberId)
       .where("ministryId", "==", ministryId)
       .limit(1)

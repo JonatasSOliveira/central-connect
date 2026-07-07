@@ -13,13 +13,15 @@ import {
   lookupSelfSignupPhone,
   type SelfSignupContext,
 } from "./selfSignupApi";
+import { clearSelfSignupDraft } from "./selfSignupDraftStorage";
 import { finalizeSelfSignupAndLogin } from "./selfSignupFinalize";
 import {
   clearSelfSignupRedirectPayload,
   setSelfSignupRedirectPayload,
   type SelfSignupRedirectPayload,
 } from "./selfSignupRedirectStorage";
-import type { SignupFormState, UseSelfSignupReturn } from "./selfSignupTypes";
+import type { UseSelfSignupReturn } from "./selfSignupTypes";
+import { useSelfSignupFormState } from "./useSelfSignupFormState";
 import {
   isLocalhostRuntime,
   useSelfSignupRedirectFlow,
@@ -30,17 +32,12 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
   const login = useAuthStore((state) => state.login);
 
   const [context, setContext] = useState<SelfSignupContext | null>(null);
-  const [form, setForm] = useState<SignupFormState>({
-    fullName: "",
-    phone: "",
-    ministryIds: [],
-    confirmNoMinistry: false,
-  });
   const [isFetchingContext, setIsFetchingContext] = useState(true);
   const [isLookingUpPhone, setIsLookingUpPhone] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [phoneConfirmed, setPhoneConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const formState = useSelfSignupFormState(churchId, context?.ministries ?? []);
 
   const finalizeSignupWithToken = useCallback(
     async (googleToken: string, payload: SelfSignupRedirectPayload) => {
@@ -49,21 +46,18 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
         payload,
         login,
         onSuccess: () => {
+          clearSelfSignupDraft(churchId);
           router.push("/select-church");
         },
       });
     },
-    [login, router],
+    [churchId, login, router],
   );
-
-  const onRedirectError = useCallback((message: string) => {
-    setError(message);
-  }, []);
 
   const { isProcessingRedirect } = useSelfSignupRedirectFlow({
     churchId,
     finalizeSignupWithToken,
-    onError: onRedirectError,
+    onError: setError,
   });
 
   useEffect(() => {
@@ -88,15 +82,8 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
     fetchContext();
   }, [churchId]);
 
-  const updateField = useCallback(
-    (field: keyof SignupFormState, value: string) => {
-      setForm((state) => ({ ...state, [field]: value }));
-    },
-    [],
-  );
-
   const lookupByPhone = useCallback(async () => {
-    const phone = normalizePhone(form.phone);
+    const phone = normalizePhone(formState.form.phone);
 
     if (!phone) {
       setError("Informe o telefone para continuar");
@@ -108,17 +95,9 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
 
     try {
       const lookup = await lookupSelfSignupPhone(churchId, phone);
-
-      if (lookup.memberExists && lookup.prefill) {
-        const prefill = lookup.prefill;
-        setForm((state) => ({
-          ...state,
-          fullName: prefill.fullName || state.fullName,
-          phone: normalizePhone(prefill.phone) || state.phone,
-        }));
-      }
-
-      setPhoneConfirmed(true);
+      formState.applyLookupPrefill(
+        lookup.memberExists ? lookup.prefill : undefined,
+      );
     } catch (err) {
       const message =
         err instanceof Error
@@ -128,35 +107,23 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
     } finally {
       setIsLookingUpPhone(false);
     }
-  }, [churchId, form.phone]);
+  }, [churchId, formState]);
 
   const finalizeWithGoogle = useCallback(
     async (acceptedTerms: boolean) => {
-      if (!context?.canProceed) {
-        setError(context?.message ?? "Auto cadastro indisponível");
+      const validationError = getFinalizeValidationError(
+        acceptedTerms,
+        context,
+        formState.form,
+      );
+      if (validationError) {
+        setError(validationError);
         return;
       }
 
-      if (!acceptedTerms) {
-        setError("Aceite os termos para continuar");
-        return;
-      }
-
-      if (!form.fullName.trim()) {
-        setError("Informe o nome completo");
-        return;
-      }
-
-      const phone = normalizePhone(form.phone);
-      if (!phone) {
-        setError("Informe o telefone para continuar");
-        return;
-      }
-
-      if (form.ministryIds.length === 0 && !form.confirmNoMinistry) {
-        setError(
-          "Selecione ao menos um ministério ou confirme que não serve em nenhum",
-        );
+      const stepError = formState.validateAllSteps();
+      if (stepError) {
+        setError(stepError);
         return;
       }
 
@@ -164,13 +131,15 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
       setError(null);
 
       try {
+        const phone = normalizePhone(formState.form.phone);
         const payload: Omit<SelfSignupRedirectPayload, "createdAt"> = {
           churchId,
-          fullName: form.fullName,
+          fullName: formState.form.fullName,
           phone,
           acceptedTerms,
-          ministryIds: form.ministryIds,
-          confirmNoMinistry: form.confirmNoMinistry,
+          ministryIds: formState.form.ministryIds,
+          confirmNoMinistry: formState.form.confirmNoMinistry,
+          memberForm: formState.form.memberForm,
         };
 
         if (isLocalhostRuntime()) {
@@ -193,48 +162,55 @@ export function useSelfSignup(churchId: string): UseSelfSignupReturn {
         setIsSubmitting(false);
       }
     },
-    [churchId, context, finalizeSignupWithToken, form.fullName, form.phone, form.ministryIds, form.confirmNoMinistry],
+    [churchId, context, finalizeSignupWithToken, formState],
   );
-
-  const toggleMinistry = useCallback((ministryId: string) => {
-    setForm((state) => {
-      const exists = state.ministryIds.includes(ministryId);
-
-      if (exists) {
-        return {
-          ...state,
-          ministryIds: state.ministryIds.filter((id) => id !== ministryId),
-        };
-      }
-
-      return {
-        ...state,
-        ministryIds: [...state.ministryIds, ministryId],
-        confirmNoMinistry: false,
-      };
-    });
-  }, []);
-
-  const setConfirmNoMinistry = useCallback((value: boolean) => {
-    setForm((state) => ({
-      ...state,
-      confirmNoMinistry: value,
-      ...(value ? { ministryIds: [] } : {}),
-    }));
-  }, []);
 
   return {
     context,
-    form,
+    form: formState.form,
     isFetchingContext,
     isLookingUpPhone,
     isSubmitting: isSubmitting || isProcessingRedirect,
-    phoneConfirmed,
+    phoneConfirmed: formState.phoneConfirmed,
+    currentStep: formState.currentStep,
     error,
-    updateField,
+    updateField: formState.updateField,
+    updateMemberFormSection: formState.updateMemberFormSection,
     lookupByPhone,
     finalizeWithGoogle,
-    toggleMinistry,
-    setConfirmNoMinistry,
+    toggleMinistry: formState.toggleMinistry,
+    toggleDesiredMinistry: formState.toggleDesiredMinistry,
+    toggleAvailabilitySlot: formState.toggleAvailabilitySlot,
+    togglePracticalSkill: formState.togglePracticalSkill,
+    goToPreviousStep: () => {
+      setError(null);
+      formState.goToPreviousStep();
+    },
+    goToNextStep: () => {
+      const stepError = formState.goToNextStep();
+      setError(stepError);
+      return !stepError;
+    },
+    setConfirmNoMinistry: formState.setConfirmNoMinistry,
   };
+}
+
+function getFinalizeValidationError(
+  acceptedTerms: boolean,
+  context: SelfSignupContext | null,
+  form: UseSelfSignupReturn["form"],
+): string | null {
+  if (!context?.canProceed) {
+    return context?.message ?? "Auto cadastro indisponível";
+  }
+
+  if (!acceptedTerms) return "Aceite os termos para continuar";
+  if (!form.fullName.trim()) return "Informe o nome completo";
+  if (!normalizePhone(form.phone)) return "Informe o telefone para continuar";
+
+  if (form.ministryIds.length === 0 && !form.confirmNoMinistry) {
+    return "Selecione ao menos um ministério ou confirme que não serve em nenhum";
+  }
+
+  return null;
 }

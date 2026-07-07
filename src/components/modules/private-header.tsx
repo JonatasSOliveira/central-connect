@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { getContrastColor } from "@/lib/utils";
+import { cn, getContrastColor } from "@/lib/utils";
 
 interface PrivateHeaderProps {
   title: string;
@@ -31,18 +31,21 @@ export function PrivateHeader({
 
   const textColor = bgColor ? getContrastColor(bgColor) : null;
   const bgStyle = bgColor ? { backgroundColor: bgColor } : undefined;
-  const textClass = textColor === "white" ? "text-white" : "text-black";
+  const textClass = textColor === "white" ? "text-white" : "text-foreground";
   const mutedTextClass =
-    textColor === "white" ? "text-white/80" : "text-black/60";
+    textColor === "white" ? "text-white/80" : "text-muted-foreground";
   const hoverClass = bgColor
     ? textColor === "white"
       ? "hover:bg-white/20"
-      : "hover:bg-black/20"
+      : "hover:bg-muted"
     : "";
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 h-16 px-4 flex items-center border-b ${bgColor ? "" : "bg-primary text-primary-foreground"}`}
+      className={cn(
+        "fixed inset-x-0 top-0 z-50 flex h-16 items-center border-b border-border bg-background/95 px-4 text-foreground shadow-[var(--shadow-soft-sm)] backdrop-blur",
+        bgColor && "text-current",
+      )}
       style={bgStyle}
     >
       <div className="flex items-center gap-3 w-full">
