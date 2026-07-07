@@ -17,6 +17,9 @@ interface EditableChurchCardProps {
   roles: RoleListItem[];
   availableMinistries: MinistryListItemDTO[];
   isLoadingMinistries: boolean;
+  canChangeChurch: boolean;
+  canEditSystemRole: boolean;
+  canEditMinistries: boolean;
   canRemove: boolean;
   onChurchChange: (value: string) => void;
   onRoleChange: (value: string) => void;
@@ -37,6 +40,9 @@ export function EditableChurchCard({
   roles,
   availableMinistries,
   isLoadingMinistries,
+  canChangeChurch,
+  canEditSystemRole,
+  canEditMinistries,
   canRemove,
   onChurchChange,
   onRoleChange,
@@ -47,6 +53,9 @@ export function EditableChurchCard({
   onRemove,
   disabled = false,
 }: EditableChurchCardProps) {
+  const churchName =
+    editableChurches.find((church) => church.id === churchId)?.name || "Igreja";
+
   const handleChurchChange = (value: string) => {
     onChurchChange(value);
     onMinistryChange("");
@@ -74,27 +83,38 @@ export function EditableChurchCard({
         )}
       </div>
 
-      <ChurchSelect
-        label="Igreja"
-        value={churchId || ""}
-        onChange={handleChurchChange}
-        churches={editableChurches}
-        placeholder="Selecione"
-        required
-        disabled={disabled}
-      />
+      {canChangeChurch ? (
+        <ChurchSelect
+          label="Igreja"
+          value={churchId || ""}
+          onChange={handleChurchChange}
+          churches={editableChurches}
+          placeholder="Selecione"
+          required
+          disabled={disabled}
+        />
+      ) : (
+        <div className="space-y-1">
+          <span className="text-sm font-medium text-foreground">Igreja</span>
+          <div className="min-h-10 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
+            {churchName}
+          </div>
+        </div>
+      )}
 
-      <RoleSelect
-        label="Cargo do sistema"
-        value={roleId || ""}
-        onChange={onRoleChange}
-        roles={roles}
-        placeholder="Selecione"
-        required
-        disabled={disabled}
-      />
+      {canEditSystemRole && (
+        <RoleSelect
+          label="Cargo do sistema"
+          value={roleId || ""}
+          onChange={onRoleChange}
+          roles={roles}
+          placeholder="Selecione"
+          required
+          disabled={disabled}
+        />
+      )}
 
-      {churchId && (
+      {churchId && canEditMinistries && (
         <MinistrySelector
           churchId={churchId}
           selectedMinistryIds={selectedMinistryIds}

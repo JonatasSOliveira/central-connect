@@ -58,6 +58,8 @@ export interface UseMemberFormReturn {
   editableChurches: ChurchListItemDTO[];
   readonlyChurches: ReadonlyChurch[];
   canChangeChurch: boolean;
+  canEditSystemRole: boolean;
+  canEditMinistries: boolean;
   editableAppendMinistry: (churchIndex: number, ministryId: string) => void;
   editableRemoveMinistry: (churchIndex: number, ministryIndex: number) => void;
   getMinistriesByChurch: (churchId: string) => MinistryListItemDTO[];
@@ -94,8 +96,14 @@ export function useMemberForm({
   const isSuperAdmin = user?.isSuperAdmin ?? false;
   const hasMemberWrite =
     user?.permissions?.includes(Permission.MEMBER_WRITE) ?? false;
+  const hasMemberSelfWrite =
+    user?.permissions?.includes(Permission.MEMBER_SELF_WRITE) ?? false;
 
-  const canChangeChurch = isSuperAdmin || hasMemberWrite;
+  const canEditSystemRole = isSuperAdmin || hasMemberWrite;
+  const canChangeChurch = canEditSystemRole;
+  const canEditOwnMinistries =
+    isSelfEdit && memberId === user?.memberId && hasMemberSelfWrite;
+  const canEditMinistries = canEditSystemRole || canEditOwnMinistries;
 
   const userChurches = user?.churches ?? [];
   const userWritableChurchIds = useMemo(() => {
@@ -291,7 +299,7 @@ export function useMemberForm({
             const readonly: ReadonlyChurch[] = [];
 
             for (const church of memberData.churches) {
-              if (church.userPermission === "write") {
+              if (church.userPermission === "write" || canEditOwnMinistries) {
                 editable.push({
                   churchId: church.churchId,
                   roleId: church.roleId,
@@ -310,6 +318,22 @@ export function useMemberForm({
             }
 
             setReadonlyChurches(readonly);
+
+            if (!canChangeChurch && canEditMinistries) {
+              setEditableChurches(
+                memberData.churches.map(
+                  (church: {
+                    churchId: string;
+                    churchName: string;
+                    roleId: string;
+                  }) => ({
+                    id: church.churchId,
+                    name: church.churchName,
+                    selfSignupDefaultRoleId: church.roleId || null,
+                  }),
+                ),
+              );
+            }
 
             if (editable.length > 0) {
               form.reset({
@@ -373,6 +397,9 @@ export function useMemberForm({
     defaultEditableChurchId,
     hasSingleWritableChurch,
     fetchMinistriesByChurch,
+    canChangeChurch,
+    canEditMinistries,
+    canEditOwnMinistries,
   ]);
 
   const onSubmit = async (formData: CreateMemberInput) => {
@@ -416,6 +443,13 @@ export function useMemberForm({
 
         if (canChangeChurch) {
           payload.churches = formData.churches;
+        } else if (canEditMinistries) {
+          payload.ministryAssignments = formData.churches
+            .filter((church) => church.churchId)
+            .map((church) => ({
+              churchId: church.churchId,
+              ministryIds: church.ministryIds,
+            }));
         }
 
         const response = await fetch(`/api/members/${memberId}`, {
@@ -462,6 +496,8 @@ export function useMemberForm({
     editableChurches,
     readonlyChurches,
     canChangeChurch,
+    canEditSystemRole,
+    canEditMinistries,
     editableAppendMinistry,
     editableRemoveMinistry,
     getMinistriesByChurch,

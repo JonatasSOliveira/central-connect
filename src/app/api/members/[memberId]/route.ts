@@ -14,6 +14,7 @@ function buildUserChurches(
   userChurches: { churchId: string; roleId: string | null }[],
   permissions: string[],
   selectedChurchId: string | null,
+  canReadOwnMember: boolean,
 ): {
   churchId: string;
   roleId: string | null;
@@ -32,8 +33,9 @@ function buildUserChurches(
     churchId: c.churchId,
     roleId: c.roleId,
     hasMemberRead:
-      c.churchId === selectedChurchId &&
-      permissions.includes(Permission.MEMBER_READ),
+      canReadOwnMember ||
+      (c.churchId === selectedChurchId &&
+        permissions.includes(Permission.MEMBER_READ)),
     hasMemberWrite:
       c.churchId === selectedChurchId &&
       permissions.includes(Permission.MEMBER_WRITE),
@@ -58,6 +60,8 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       user.churches,
       user.permissions,
       user.churchId,
+      memberId === user.memberId &&
+        user.permissions.includes(Permission.MEMBER_SELF_WRITE),
     ),
   });
 
@@ -82,6 +86,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   const { memberId } = await params;
 
   const canEdit = canEditMember(user, memberId);
+  const canManageMemberChurches =
+    user.isSuperAdmin || user.permissions.includes(Permission.MEMBER_WRITE);
+  const canEditOwnMinistries =
+    memberId === user.memberId &&
+    user.permissions.includes(Permission.MEMBER_SELF_WRITE);
 
   if (!canEdit) {
     return NextResponse.json(
@@ -120,6 +129,50 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(apiError("VALIDATION_ERROR", parsed.error), {
       status: 400,
     });
+  }
+
+  if (parsed.data.churches && parsed.data.ministryAssignments) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "VALIDATION_ERROR",
+          message:
+            "Nao envie churches e ministryAssignments na mesma requisicao",
+        },
+      },
+      { status: 400 },
+    );
+  }
+
+  if (parsed.data.churches && !canManageMemberChurches) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissao para editar cargos deste membro",
+        },
+      },
+      { status: 403 },
+    );
+  }
+
+  if (
+    parsed.data.ministryAssignments &&
+    !canManageMemberChurches &&
+    !canEditOwnMinistries
+  ) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: "NOT_AUTHORIZED",
+          message: "Sem permissao para editar ministerios deste membro",
+        },
+      },
+      { status: 403 },
+    );
   }
 
   if (!user.isSuperAdmin && parsed.data.churches) {
