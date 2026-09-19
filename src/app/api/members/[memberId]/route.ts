@@ -182,7 +182,11 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     );
   }
 
-  const result = await memberContainer.deleteMember.execute({ memberId });
+  const result = await memberContainer.deleteMember.execute({
+    memberId,
+    churchId: user.churchId,
+    isSuperAdmin: user.isSuperAdmin,
+  });
 
   if (!result.ok) {
     const errorCode = result.error?.code;

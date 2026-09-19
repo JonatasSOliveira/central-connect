@@ -3,6 +3,7 @@
 import { CalendarCheck2, Clock3, History, ListChecks } from "lucide-react";
 import { ListTemplate } from "@/components/templates/list-template";
 import { cn } from "@/lib/utils";
+import { DateTile } from "@/components/ui/date-tile";
 import { useMyScales } from "../hooks/useMyScales";
 
 function formatServiceDate(dateValue: string): string {
@@ -134,21 +135,13 @@ export function MyScalesList() {
                     {serviceDateBadge}
                   </p>
                 )}
-                <p className="font-semibold text-foreground">{scale.serviceTitle}</p>
-                <div className="mt-3 rounded-lg border border-primary/30 bg-primary/10 p-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-                    Data do culto
-                  </p>
-                  <p className="mt-1 font-heading text-2xl font-bold leading-none text-primary">
-                    {formatServiceDate(scale.serviceDate)}
-                  </p>
-                  <p className="mt-1 text-xs font-medium capitalize text-primary/90">
-                    {formatServiceWeekday(scale.serviceDate)}
-                  </p>
-                  <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-                    <Clock3 className="h-4 w-4" />
-                    {scale.serviceTime}
-                  </p>
+                <div className="flex gap-3">
+                  <DateTile date={scale.serviceDate} time={scale.serviceTime} />
+                  <div className="min-w-0">
+                    <p className="font-heading text-lg font-semibold text-foreground">{scale.serviceTitle}</p>
+                    <p className="mt-1 text-sm capitalize text-muted-foreground">{formatServiceWeekday(scale.serviceDate)}, {formatServiceDate(scale.serviceDate)}</p>
+                    <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary"><Clock3 className="h-4 w-4" />{scale.serviceTime}</p>
+                  </div>
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
                   <p>

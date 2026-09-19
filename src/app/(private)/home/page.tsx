@@ -38,6 +38,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { APP_VERSION } from "@/shared/constants/app";
+import { useMyScales } from "@/features/my-scales/hooks/useMyScales";
+import { NextScaleCard } from "@/features/home/components/next-scale-card";
 
 export default function HomePage() {
   const router = useRouter();
@@ -47,6 +49,8 @@ export default function HomePage() {
   const { isSupported, permission, isRegistering, enableNotifications } =
     usePushNotifications({ enableForegroundListener: false });
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const { scales: upcomingScales, isLoading: isLoadingScales } = useMyScales();
+  const nextScale = upcomingScales[0] ?? null;
 
   const { hasPermission: canManageMembers } = usePermissions({
     requiredPermissions: [Permission.MEMBER_READ],
@@ -142,7 +146,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="p-6 app-background">
+    <div className="app-background py-2">
       <div className="max-w-2xl mx-auto">
         <PrivateHeader title="Central Connect" showBackButton={false} />
 
@@ -175,6 +179,8 @@ export default function HomePage() {
             )}
           </div>
         </div>
+
+        {!isLoadingScales && <div className="mb-7"><NextScaleCard scale={nextScale} /></div>}
 
         {canShowAdminSection && (
           <>

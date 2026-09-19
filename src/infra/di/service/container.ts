@@ -15,7 +15,6 @@ import type { IServiceTemplateRepository } from "@/domain/ports/IServiceTemplate
 import { MinistryFirebaseRepository } from "@/infra/firebase-admin/repositories/MinistryFirebaseRepository";
 import { ServiceFirebaseRepository } from "@/infra/firebase-admin/repositories/ServiceFirebaseRepository";
 import { ServiceTemplateFirebaseRepository } from "@/infra/firebase-admin/repositories/ServiceTemplateFirebaseRepository";
-import { scaleContainer } from "@/infra/di/scale/container";
 
 class ServiceContainer {
   private static _serviceRepository: IServiceRepository | null = null;

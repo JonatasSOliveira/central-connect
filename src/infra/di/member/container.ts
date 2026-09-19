@@ -131,6 +131,7 @@ class MemberContainer {
     if (!MemberContainer._deleteMember) {
       MemberContainer._deleteMember = new DeleteMember(
         MemberContainer.memberRepository,
+        MemberContainer.memberChurchRepository,
       );
     }
     return MemberContainer._deleteMember;

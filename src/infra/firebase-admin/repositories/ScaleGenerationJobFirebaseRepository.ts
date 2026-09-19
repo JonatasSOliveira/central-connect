@@ -7,8 +7,6 @@ import {
 } from "../mappers/scaleGenerationJobMapper";
 import { BaseFirebaseRepository } from "./BaseFirebaseRepository";
 
-const LEASE_TTL_MS = 5 * 60 * 1000;
-
 export class ScaleGenerationJobFirebaseRepository
   extends BaseFirebaseRepository<ScaleGenerationJob>
   implements IScaleGenerationJobRepository

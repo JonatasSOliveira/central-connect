@@ -91,6 +91,7 @@ private static _publishScaleAttendance: PublishScaleAttendance | null =
         ScaleContainer.scaleMemberRepository,
         ScaleContainer.churchRepository,
         ScaleContainer.serviceRepository,
+        ScaleContainer.ministryRepository,
         ScaleContainer.ministryRoleRepository,
         ScaleContainer.memberRepository,
         ScaleContainer.memberChurchRepository,
@@ -192,6 +193,13 @@ private static _publishScaleAttendance: PublishScaleAttendance | null =
       ScaleContainer._updateScale = new UpdateScale(
         ScaleContainer.scaleRepository,
         ScaleContainer.scaleMemberRepository,
+        ScaleContainer.churchRepository,
+        ScaleContainer.serviceRepository,
+        ScaleContainer.ministryRepository,
+        ScaleContainer.ministryRoleRepository,
+        ScaleContainer.memberRepository,
+        ScaleContainer.memberChurchRepository,
+        ScaleContainer.memberMinistryRepository,
       );
     }
     return ScaleContainer._updateScale;

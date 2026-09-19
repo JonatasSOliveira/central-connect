@@ -18,24 +18,21 @@ export class RunScheduledScaleGeneration extends BaseUseCase<
   ScheduledRunInput,
   ScheduledRunOutput
 > {
-  constructor() {
-    super();
-  }
-
   async execute(input: ScheduledRunInput): Promise<Result<ScheduledRunOutput>> {
     try {
       const churchRepository = scaleContainer.churchRepository;
       const serviceRepository = scaleContainer.serviceRepository;
       const ministryRepository = scaleContainer.ministryRepository;
-      const scaleRepository = scaleContainer.scaleRepository;
-      const scaleMemberRepository = scaleContainer.scaleMemberRepository;
-      const memberRepository = scaleContainer.memberRepository;
-      const memberChurchRepository = scaleContainer.memberChurchRepository;
-      const memberMinistryRepository = scaleContainer.memberMinistryRepository;
-      const memberAvailabilityRepository = scaleContainer.memberAvailabilityRepository;
-      const ministryRoleRepository = scaleContainer.ministryRoleRepository;
-
       const lookaheadDays = input.lookaheadDays ?? 7;
+      if (!Number.isInteger(lookaheadDays) || lookaheadDays < 1 || lookaheadDays > 31) {
+        return {
+          ok: false,
+          error: {
+            code: "INVALID_LOOKAHEAD_DAYS",
+            message: "O período deve ser um número inteiro entre 1 e 31 dias",
+          },
+        };
+      }
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + lookaheadDays);
       endDate.setHours(23, 59, 59, 999);

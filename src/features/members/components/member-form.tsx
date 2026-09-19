@@ -9,6 +9,7 @@ import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation"
 import { AvailabilitySection } from "./availability-section";
 import { BasicInfoSection } from "./basic-info-section";
 import { ChurchSection } from "./church-section";
+import { FormSection } from "@/components/ui/form-section";
 
 interface MemberFormProps {
   mode: "create" | "edit";
@@ -102,26 +103,32 @@ export function MemberForm({
     <FormTemplate>
       <FormTemplate.Form<CreateMemberInput> form={form} onSubmit={onSubmit}>
         <FormTemplate.Content>
-          <BasicInfoSection form={form} disabled={readOnly} />
+          <FormSection title="Dados pessoais" description="Informações usadas para identificar o membro.">
+            <BasicInfoSection form={form} disabled={readOnly} />
+          </FormSection>
 
-          <AvailabilitySection form={form} disabled={readOnly} />
+          <FormSection title="Disponibilidade" description="Defina os dias em que esta pessoa pode servir.">
+            <AvailabilitySection form={form} disabled={readOnly} />
+          </FormSection>
 
-          <ChurchSection
-            form={form}
-            editableFields={editableFields}
-            editableChurches={editableChurches}
-            roles={roles}
-            readonlyChurches={readonlyChurches}
-            canChangeChurch={canChangeChurch}
-            getMinistriesByChurch={getMinistriesByChurch}
-            fetchMinistriesByChurch={fetchMinistriesByChurch}
-            isLoadingMinistries={isLoadingMinistries}
-            editableAppendMinistry={editableAppendMinistry}
-            editableRemoveMinistry={editableRemoveMinistry}
-            editableAppend={editableAppend}
-            editableRemove={editableRemove}
-            disabled={readOnly}
-          />
+          <FormSection title="Vínculos e ministérios" description="Defina a igreja, o cargo e as áreas em que o membro atua.">
+            <ChurchSection
+              form={form}
+              editableFields={editableFields}
+              editableChurches={editableChurches}
+              roles={roles}
+              readonlyChurches={readonlyChurches}
+              canChangeChurch={canChangeChurch}
+              getMinistriesByChurch={getMinistriesByChurch}
+              fetchMinistriesByChurch={fetchMinistriesByChurch}
+              isLoadingMinistries={isLoadingMinistries}
+              editableAppendMinistry={editableAppendMinistry}
+              editableRemoveMinistry={editableRemoveMinistry}
+              editableAppend={editableAppend}
+              editableRemove={editableRemove}
+              disabled={readOnly}
+            />
+          </FormSection>
         </FormTemplate.Content>
 
         {!readOnly && (

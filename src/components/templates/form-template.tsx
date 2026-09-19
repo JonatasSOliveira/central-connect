@@ -64,32 +64,21 @@ function FormFooter({
   return (
     <div
       className={cn(
-        "flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-border/50",
+        "fixed inset-x-0 bottom-16 z-40 border-t border-border/80 bg-background/95 p-4 backdrop-blur",
         className,
       )}
     >
-      {onCancel && (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isLoading}
-          className="flex-1 min-h-12"
-        >
-          <X className="w-4 h-4 mr-2" />
-          {cancelLabel}
-        </Button>
-      )}
-      <Button type="submit" disabled={isLoading} className="flex-1 min-h-12">
-        {isLoading ? (
-          "Salvando..."
-        ) : (
-          <>
-            <Check className="w-4 h-4 mr-2" />
-            {submitLabel}
-          </>
+      <div className="mx-auto flex w-full max-w-xl flex-col-reverse gap-3 sm:flex-row">
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading} className="min-h-12 flex-1">
+            <X className="mr-2 w-4 h-4" />
+            {cancelLabel}
+          </Button>
         )}
-      </Button>
+        <Button type="submit" disabled={isLoading} className="min-h-12 flex-1">
+          {isLoading ? "Salvando..." : <><Check className="mr-2 w-4 h-4" />{submitLabel}</>}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -106,7 +95,7 @@ function Form<T extends Record<string, unknown>>({
     : form.handleSubmit(onSubmit);
 
   return (
-    <form onSubmit={submitHandler} className={cn("space-y-4", className)}>
+    <form onSubmit={submitHandler} className={cn("space-y-4 pb-24", className)}>
       {children}
     </form>
   );

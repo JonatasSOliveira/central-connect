@@ -4,27 +4,30 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLoginScreen } from "@/features/auth/hooks/useLoginScreen";
 import { APP_VERSION } from "@/shared/constants/app";
+import { Logo } from "@/components/ui/logo";
 
 export default function LoginPage() {
   const { isLoading, error, handleGoogleLogin } = useLoginScreen();
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center p-6 bg-background">
-      <div className="w-full max-w-sm flex flex-col items-center animate-in fade-in zoom-in duration-500 flex-1 justify-center">
-        <div className="mb-8">
-          <img
-            src="/logo-central-redonda.svg"
-            alt="Central Connect"
-            className="w-28 h-28 object-contain"
-          />
-        </div>
+    <div className="min-h-dvh bg-muted/30">
+      <section className="rounded-b-[2rem] bg-primary px-6 pb-14 pt-12 text-primary-foreground">
+        <Logo variant="light" className="mx-auto h-24 w-24" priority />
 
-        <h1 className="font-heading text-2xl font-bold text-foreground text-center leading-tight">
+        <h1 className="mt-5 text-center font-heading text-3xl font-bold">
           Central Connect
         </h1>
-        <p className="text-muted-foreground text-center mt-2 text-sm">
-          Gestão de escalas ministeriais
+        <p className="mx-auto mt-2 max-w-xs text-center text-sm text-primary-foreground/80">
+          Escalas e equipes da sua igreja, em um só lugar.
         </p>
+      </section>
+
+      <div className="mx-auto -mt-5 w-full max-w-sm px-5">
+        <div className="animate-in fade-in zoom-in rounded-2xl border bg-card p-5 shadow-sm duration-500">
+          <h2 className="font-heading text-xl font-semibold">Acesse sua igreja</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Entre com sua conta Google para continuar.
+          </p>
 
         {error && (
           <div className="w-full mt-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -37,10 +40,11 @@ export default function LoginPage() {
           </div>
         )}
 
-        <div className="w-full mt-8 space-y-4">
+        <div className="mt-6 w-full space-y-4">
           <Button
             size="lg"
-            className="w-full h-12 text-base font-medium gap-3"
+            variant="outline"
+            className="h-12 w-full gap-3 bg-background text-base font-medium"
             onClick={handleGoogleLogin}
             disabled={isLoading}
           >
@@ -71,12 +75,10 @@ export default function LoginPage() {
           </Button>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-8 text-center">
-          Made for Ministries
-        </p>
-        <p className="text-[10px] text-muted-foreground/60 mt-1 text-center">
+        <p className="mt-6 text-center text-[10px] text-muted-foreground/60">
           v{APP_VERSION}
         </p>
+        </div>
       </div>
     </div>
   );

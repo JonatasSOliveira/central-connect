@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { StickyActionBar } from "@/components/ui/sticky-action-bar";
 import { ScaleAttendanceMemberItem } from "./ScaleAttendanceMemberItem";
 import { useScaleAttendanceScreen } from "../hooks/useScaleAttendanceScreen";
 
@@ -55,6 +56,7 @@ export function ScaleAttendanceScreen({
   );
 
   const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
+  const [filter, setFilter] = useState<"all" | "pending" | "present" | "absent">("all");
 
   const missingJustificationIdSet = useMemo(
     () => new Set(missingJustificationIds),
@@ -67,6 +69,12 @@ export function ScaleAttendanceScreen({
     isPublishing ||
     hasPendingChanges ||
     hasMissingJustifications;
+  const visibleEntries = sortedEntries.filter((entry) => {
+    if (filter === "all") return true;
+    if (filter === "present") return entry.status === "present";
+    if (filter === "pending") return entry.status === "pending";
+    return entry.status === "absent_excused" || entry.status === "absent_unexcused";
+  });
 
   if (isLoading) {
     return (
@@ -85,7 +93,7 @@ export function ScaleAttendanceScreen({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24">
       {isServiceDateFuture && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 flex items-start gap-3">
           <CalendarX className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
@@ -124,8 +132,25 @@ export function ScaleAttendanceScreen({
         </div>
       </div>
 
+      <div className="sticky top-16 z-30 -mx-4 border-y border-border bg-background/95 px-4 py-3 backdrop-blur">
+        <div className="flex items-center justify-between text-sm">
+          <p className="font-medium">Progresso da chamada</p>
+          <p className="text-muted-foreground">{summary.present + summary.absentExcused + summary.absentUnexcused}/{entries.length} conferidos</p>
+        </div>
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${entries.length ? ((summary.present + summary.absentExcused + summary.absentUnexcused) / entries.length) * 100 : 0}%` }} />
+        </div>
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          {(["all", "pending", "present", "absent"] as const).map((item) => (
+            <button key={item} type="button" onClick={() => setFilter(item)} className={`min-h-9 shrink-0 rounded-full border px-3 text-xs font-medium ${filter === item ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground"}`}>
+              {{ all: "Todos", pending: "Pendentes", present: "Presentes", absent: "Ausentes" }[item]}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="space-y-3">
-        {sortedEntries.map((entry) => (
+        {visibleEntries.map((entry) => (
           <ScaleAttendanceMemberItem
             key={entry.scaleMemberId}
             entry={entry}
@@ -144,26 +169,11 @@ export function ScaleAttendanceScreen({
           Esta chamada está em modo somente leitura.
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-card p-3 shadow-sm">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-medium text-muted-foreground">
-              {hasPendingChanges ? "Alterações não salvas" : "Tudo salvo"}
-            </p>
-            {hasPendingChanges && (
-              <span
-                className="h-2 w-2 rounded-full bg-primary"
-                aria-hidden="true"
-              />
-            )}
+        <StickyActionBar className="flex-col sm:flex-row">
+          <div className="flex-1 text-xs text-muted-foreground">
+            {hasMissingJustifications ? "Preencha as justificativas pendentes." : hasPendingChanges ? "Alterações não salvas" : "Tudo salvo"}
           </div>
-
-          {hasMissingJustifications && (
-            <p className="mb-2 text-xs text-destructive">
-              Preencha todas as justificativas para salvar ou publicar.
-            </p>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:w-96">
             <Button
               onClick={save}
               disabled={
@@ -197,7 +207,7 @@ export function ScaleAttendanceScreen({
               )}
             </Button>
           </div>
-        </div>
+        </StickyActionBar>
       )}
 
       <AlertDialog

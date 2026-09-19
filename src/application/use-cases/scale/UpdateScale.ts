@@ -5,10 +5,18 @@ import {
 } from "@/domain/entities/ScaleMember";
 import type { IScaleRepository } from "@/domain/ports/IScaleRepository";
 import type { IScaleMemberRepository } from "@/domain/ports/IScaleMemberRepository";
+import type { IChurchRepository } from "@/domain/ports/IChurchRepository";
+import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
+import type { IMinistryRepository } from "@/domain/ports/IMinistryRepository";
+import type { IMinistryRoleRepository } from "@/domain/ports/IMinistryRoleRepository";
+import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
+import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchRepository";
+import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { Result } from "@/shared/types/Result";
 import type { ScaleDetailDTO } from "../../dtos/scale/ScaleDTO";
 import { ScaleErrors } from "../../errors/ScaleErrors";
 import { BaseUseCase } from "../BaseUseCase";
+import { validateScaleContext } from "./helpers/validateScaleContext";
 
 export interface UpdateScaleMemberInput {
   id: string | null;
@@ -39,6 +47,13 @@ export class UpdateScale extends BaseUseCase<
   constructor(
     private readonly scaleRepository: IScaleRepository,
     private readonly scaleMemberRepository: IScaleMemberRepository,
+    private readonly churchRepository: IChurchRepository,
+    private readonly serviceRepository: IServiceRepository,
+    private readonly ministryRepository: IMinistryRepository,
+    private readonly ministryRoleRepository: IMinistryRoleRepository,
+    private readonly memberRepository: IMemberRepository,
+    private readonly memberChurchRepository: IMemberChurchRepository,
+    private readonly memberMinistryRepository: IMemberMinistryRepository,
   ) {
     super();
   }
@@ -52,6 +67,22 @@ export class UpdateScale extends BaseUseCase<
           ok: false,
           error: ScaleErrors.SCALE_NOT_FOUND,
         };
+      }
+
+      const contextError = await validateScaleContext(
+        {
+          churchRepository: this.churchRepository,
+          serviceRepository: this.serviceRepository,
+          ministryRepository: this.ministryRepository,
+          ministryRoleRepository: this.ministryRoleRepository,
+          memberRepository: this.memberRepository,
+          memberChurchRepository: this.memberChurchRepository,
+          memberMinistryRepository: this.memberMinistryRepository,
+        },
+        { ...input, members: input.members },
+      );
+      if (contextError) {
+        return { ok: false, error: ScaleErrors[contextError as keyof typeof ScaleErrors] ?? ScaleErrors.SCALE_UPDATE_FAILED };
       }
 
       const duplicateScale =

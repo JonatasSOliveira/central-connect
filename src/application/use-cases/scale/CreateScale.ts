@@ -9,6 +9,7 @@ import type { IMemberChurchRepository } from "@/domain/ports/IMemberChurchReposi
 import type { IMemberMinistryRepository } from "@/domain/ports/IMemberMinistryRepository";
 import type { IMemberRepository } from "@/domain/ports/IMemberRepository";
 import type { IMinistryRoleRepository } from "@/domain/ports/IMinistryRoleRepository";
+import type { IMinistryRepository } from "@/domain/ports/IMinistryRepository";
 import type { IScaleRepository } from "@/domain/ports/IScaleRepository";
 import type { IScaleMemberRepository } from "@/domain/ports/IScaleMemberRepository";
 import type { IServiceRepository } from "@/domain/ports/IServiceRepository";
@@ -17,6 +18,7 @@ import type { ScaleDetailDTO } from "../../dtos/scale/ScaleDTO";
 import { ScaleErrors } from "../../errors/ScaleErrors";
 import { autoAssignScaleMembers } from "./autoAssignScaleMembers";
 import { BaseUseCase } from "../BaseUseCase";
+import { validateScaleContext } from "./helpers/validateScaleContext";
 
 export interface CreateScaleInput {
   churchId: string;
@@ -46,6 +48,7 @@ export class CreateScale extends BaseUseCase<
     private readonly scaleMemberRepository: IScaleMemberRepository,
     private readonly churchRepository: IChurchRepository,
     private readonly serviceRepository: IServiceRepository,
+    private readonly ministryRepository: IMinistryRepository,
     private readonly ministryRoleRepository: IMinistryRoleRepository,
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
@@ -57,6 +60,21 @@ export class CreateScale extends BaseUseCase<
 
   async execute(input: CreateScaleInput): Promise<Result<CreateScaleOutput>> {
     try {
+      const contextError = await validateScaleContext(
+        {
+          churchRepository: this.churchRepository,
+          serviceRepository: this.serviceRepository,
+          ministryRepository: this.ministryRepository,
+          ministryRoleRepository: this.ministryRoleRepository,
+          memberRepository: this.memberRepository,
+          memberChurchRepository: this.memberChurchRepository,
+          memberMinistryRepository: this.memberMinistryRepository,
+        },
+        { ...input, members: input.members ?? [] },
+      );
+      if (contextError) {
+        return { ok: false, error: ScaleErrors[contextError as keyof typeof ScaleErrors] ?? ScaleErrors.SCALE_CREATION_FAILED };
+      }
       const existingScale = await this.scaleRepository.findByServiceAndMinistry(
         input.churchId,
         input.serviceId,

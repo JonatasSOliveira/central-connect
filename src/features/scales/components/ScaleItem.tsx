@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface ScaleItemActions {
   onEdit?: () => void;
@@ -61,16 +62,9 @@ export function ScaleItem({
   };
 
   const statusBadge = status ? (
-    <span
-      className={cn(
-        "px-2 py-0.5 text-xs rounded-full",
-        status === "published"
-          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-      )}
-    >
+    <StatusBadge status={status}>
       {status === "published" ? "Publicada" : "Rascunho"}
-    </span>
+    </StatusBadge>
   ) : null;
 
   const deleteDialog = actions?.onDelete ? (
@@ -205,7 +199,7 @@ export function ScaleItem({
   );
 
   const baseClasses =
-    "flex items-center gap-4 rounded-xl border border-border/50 bg-card p-4 transition-all duration-200";
+    "flex items-center gap-4 rounded-2xl border border-border/70 bg-card p-4 transition-all duration-200";
 
   if (onClick) {
     return (

@@ -1,9 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { scaleContainer } from "@/infra/di";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 
 const INTERNAL_API_KEY_HEADER = "x-internal-api-key";
 const EXPECTED_API_KEY = process.env.INTERNAL_API_KEY;
+const ScheduledRunSchema = z.object({
+  churchIds: z.array(z.string().min(1)).max(500).optional(),
+  lookaheadDays: z.number().int().min(1).max(31).default(7),
+});
 
 export async function POST(request: NextRequest) {
   const providedKey = request.headers.get(INTERNAL_API_KEY_HEADER);
@@ -50,13 +55,18 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const input = body as { churchIds?: string[]; lookaheadDays?: number };
+  const parsed = ScheduledRunSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(apiError("VALIDATION_ERROR", parsed.error), {
+      status: 400,
+    });
+  }
 
   const useCase = scaleContainer.runScheduledScaleGeneration;
 
   const result = await useCase.execute({
-    churchIds: input.churchIds,
-    lookaheadDays: input.lookaheadDays ?? 7,
+    churchIds: parsed.data.churchIds,
+    lookaheadDays: parsed.data.lookaheadDays,
   });
 
   const errorCode = "error" in result ? result.error?.code : undefined;

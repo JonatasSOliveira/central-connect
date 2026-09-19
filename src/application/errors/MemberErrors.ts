@@ -19,4 +19,8 @@ export const MemberErrors = {
     code: "MEMBER_DELETION_FAILED",
     message: "Falha ao excluir membro",
   },
+  MEMBER_NOT_IN_CHURCH: {
+    code: "NOT_AUTHORIZED",
+    message: "Membro não pertence à igreja selecionada",
+  },
 } as const;

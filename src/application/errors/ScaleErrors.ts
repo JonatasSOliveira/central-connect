@@ -43,4 +43,28 @@ export const ScaleErrors = {
     code: "MEMBER_NOT_FOUND",
     message: "Membro não encontrado",
   },
+  CHURCH_NOT_FOUND: {
+    code: "CHURCH_NOT_FOUND",
+    message: "Igreja não encontrada",
+  },
+  SERVICE_INVALID: {
+    code: "SERVICE_INVALID",
+    message: "Culto não pertence à igreja selecionada",
+  },
+  MINISTRY_INVALID: {
+    code: "MINISTRY_INVALID",
+    message: "Ministério não pertence à igreja selecionada",
+  },
+  MINISTRY_ROLE_INVALID: {
+    code: "MINISTRY_ROLE_INVALID",
+    message: "Função não pertence ao ministério selecionado",
+  },
+  MEMBER_CONTEXT_INVALID: {
+    code: "MEMBER_CONTEXT_INVALID",
+    message: "Membro não pertence à igreja e ao ministério selecionados",
+  },
+  DUPLICATE_SCALE_MEMBER: {
+    code: "DUPLICATE_SCALE_MEMBER",
+    message: "O mesmo membro não pode ser adicionado duas vezes",
+  },
 } as const;

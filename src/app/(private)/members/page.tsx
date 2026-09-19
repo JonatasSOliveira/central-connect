@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Plus, Inbox, Search } from "lucide-react";
+import { User, Inbox, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useMembersListScreen } from "@/features/members/hooks/useMembers";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
 
 export default function MembersPage() {
   const router = useRouter();
@@ -125,15 +126,9 @@ export default function MembersPage() {
         )}
       </div>
 
-      {canWrite && (
-        <ListTemplate.Action
-          label="Novo membro"
-          icon={Plus}
-          onClick={handleCreateMember}
-        />
-      )}
-
       {renderContent()}
+
+      {canWrite && <FloatingActionButton label="Novo membro" onClick={handleCreateMember} />}
     </ListTemplate>
   );
 }
