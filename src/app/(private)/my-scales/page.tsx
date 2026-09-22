@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { MyScalesList } from "@/features/my-scales/components/MyScalesList";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function MyScalesPage() {
   const router = useRouter();
@@ -13,7 +13,8 @@ export default function MyScalesPage() {
   const canReadMyScales =
     user?.isSuperAdmin || user?.permissions.includes(Permission.MY_SCALES_READ);
   const canReadOwnScales =
-    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_SELF_READ);
+    user?.isSuperAdmin ||
+    user?.permissions.includes(Permission.SCALE_SELF_READ);
 
   useEffect(() => {
     if (isLoading || !user) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { ChurchForm } from "@/features/churches/components/ChurchForm";
 import { PrivateHeader } from "@/components/modules/private-header";
+import { ChurchForm } from "@/features/churches/components/ChurchForm";
 
 export default function NewChurchPage() {
   return (

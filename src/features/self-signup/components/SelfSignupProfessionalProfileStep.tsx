@@ -4,13 +4,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FormSelect } from "@/components/ui/form-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MutiraoAvailability } from "@/domain/enums/MutiraoAvailability";
-import { PracticalSkill } from "@/domain/enums/PracticalSkill";
 import {
   mutiraoAvailabilityLabels,
   practicalSkillLabels,
 } from "@/features/self-signup/constants/practicalSkillLabels";
 import type { SelfSignupMemberFormState } from "@/features/self-signup/hooks/selfSignupMemberFormState";
+import { MutiraoAvailability } from "@/shared/domain/enums/MutiraoAvailability";
+import { PracticalSkill } from "@/shared/domain/enums/PracticalSkill";
 
 interface SelfSignupProfessionalProfileStepProps {
   data: SelfSignupMemberFormState["professionalProfile"];

@@ -1,7 +1,11 @@
-import type { MemberProfileDetailDTO } from "@/application/dtos/member-profile/MemberProfileDTO";
-import { labelList, memberProfileLabels, yesNoLabel } from "./member-profile-labels";
+import type { MemberProfileDetailDTO } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
 import { MemberProfileField } from "./MemberProfileField";
 import { MemberProfileSection } from "./MemberProfileSection";
+import {
+  labelList,
+  memberProfileLabels,
+  yesNoLabel,
+} from "./member-profile-labels";
 
 interface MemberProfileServiceSectionProps {
   profile: MemberProfileDetailDTO;
@@ -20,11 +24,17 @@ export function MemberProfileServiceSection({
       />
       <MemberProfileField
         label="Ministerios atuais"
-        value={labelList(service?.currentMinistryIds ?? [], profile.ministriesById)}
+        value={labelList(
+          service?.currentMinistryIds ?? [],
+          profile.ministriesById,
+        )}
       />
       <MemberProfileField
         label="Ministerios desejados"
-        value={labelList(service?.desiredMinistryIds ?? [], profile.ministriesById)}
+        value={labelList(
+          service?.desiredMinistryIds ?? [],
+          profile.ministriesById,
+        )}
       />
       <MemberProfileField
         label="Disponibilidade"

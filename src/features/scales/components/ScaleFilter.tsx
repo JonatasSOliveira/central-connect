@@ -3,8 +3,14 @@
 import { ChevronDown, ChevronUp, Filter } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MinistrySelect, type MinistrySelectItem } from "@/components/ui/ministry-select";
-import { ServiceSelect, type ServiceSelectItem } from "@/components/ui/service-select";
+import {
+  MinistrySelect,
+  type MinistrySelectItem,
+} from "@/components/ui/ministry-select";
+import {
+  ServiceSelect,
+  type ServiceSelectItem,
+} from "@/components/ui/service-select";
 
 interface ScaleFilterProps {
   services: ServiceSelectItem[];

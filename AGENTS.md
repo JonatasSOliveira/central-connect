@@ -1,859 +1,309 @@
-# AGENTS.md - Instruções para Agentes de Código
+# AGENTS.md - Regras para agentes de código
 
-## Atividade Atual
+Estas regras se aplicam a todos os arquivos do projeto Central Connect.
 
-**Atividade 15** - Autocadastro de Membros e Selbst-Services
-- Versão do app exibida em login, home e self-signup
-- Usuários com CHURCH_SELF_READ/WRITE podem editar dados da igreja
-- Usuários com MEMBER_SELF_WRITE podem editar seu próprio perfil
-- Ministry selection in self-signup flow with explicit no-ministry confirmation checkbox
-- Firebase collection names normalized to camelCase (6 collections)
-- `pnpm install` restored vitest/vite-tsconfig-paths — zero TypeScript errors, 14/14 tests pass
+## Contexto do produto
 
----
+O Central Connect é um Progressive Web App para gestão de escalas ministeriais de igrejas.
 
-## 1. Visão Geral do Projeto
+Usuários autenticados podem pertencer a uma ou mais igrejas. Cada igreja possui membros, ministérios, funções, serviços e escalas. Administradores e líderes gerenciam os dados e publicam escalas; membros consultam suas escalas e, quando autorizados, editam o próprio perfil.
 
-**Central Connect** é um sistema de gestão de escalas para igrejas. Permite criar, gerenciar e publicar escalas de membros para diferentes funções liturgical/missas.
+O sistema usa autenticação Google, Firebase Authentication, Firestore e Firebase Cloud Messaging. A autorização é orientada por permissões e sempre deve respeitar o isolamento entre igrejas.
 
-O sistema é um Progressive Web App (PWA) instalado no celular dos usuários, com autenticação via Google e armazenamento em Firebase (Firestore).
+O escopo atual inclui:
 
-## 2. Stack e Versões
+- autenticação, sessão e seleção de igreja;
+- cadastro de igrejas;
+- membros e perfis de membros;
+- ministérios, funções e permissões;
+- serviços e modelos de serviço;
+- geração, publicação e consulta de escalas;
+- presença em escalas;
+- notificações push;
+- autocadastro público de membros;
+- consentimentos legais.
 
-| Dependência | Versão |
-|-------------|--------|
-| Next.js | 16.1.6 |
-| React | 19.2.3 |
-| TypeScript | 5.x |
-| Tailwind CSS | 4.x |
-| Biome | 2.4.7 |
-| Firebase Admin | 13.7.0 |
-| Firebase SDK | 12.10.0 |
-| Zod | 4.3.6 |
-| pnpm | 10.x |
+Novos recursos devem ser introduzidos como módulos independentes quando fizerem sentido. Não transforme conceitos específicos de um módulo em abstrações compartilhadas sem necessidade real.
 
-## 2.1 Design System
+## Identidade visual
 
-### Princípios
-- **Mobile-first**: O projeto é desenvolvido para mobile primeiro, depois adaptado para desktop
-- **PWA**: Progressive Web App instalado no celular dos usuários
+Preserve a direção visual mobile-first, flat e acolhedora existente até que uma nova identidade seja solicitada explicitamente.
 
-### Fontes
-O projeto utiliza duas fontes do Google Fonts:
+- Use Inter para corpo, labels e controles.
+- Use DM Sans via `font-heading` para títulos e headings.
+- Preserve os tokens semânticos do tema em `src/app/globals.css`.
+- Prefira superfícies sólidas, cards arredondados, hierarquia clara e sombras discretas.
+- Mantenha a interface acessível e responsiva, com foco em uso no celular.
+- Use texto claro, humano e consistente em português.
+- Não use cor como único indicador de estado.
+- Não introduza gradientes em headers, cards administrativos ou elementos estruturais.
+- Preserve o padrão shadcn/ui e os componentes existentes.
 
-| Fonte | Uso |
-|-------|-----|
-| **Inter** | Corpo do texto, labels, botões (padrão) |
-| **DM Sans** | Títulos e headings |
+Regras visuais principais:
 
-**Aplicação no código:**
-- `font-sans` (Tailwind) → Inter (padrão)
-- `font-heading` → DM Sans para títulos
+- Header privado: `bg-primary text-primary-foreground`.
+- Cards administrativos: `bg-card border-primary/20`.
+- Cards de itens: `bg-card border-border`.
+- Ícones destacados: `bg-primary/10 text-primary`.
+- Footer: `bg-background border-t`.
 
-**Exemplo de uso:**
-```tsx
-// Títulos com DM Sans
-<h1 className="font-heading text-3xl">Título</h1>
+## Versão do Next.js
 
-// Corpo com Inter (padrão)
-<p className="text-sm">Corpo do texto</p>
+O projeto usa Next.js 16. Antes de alterar código específico do Next.js, consulte a documentação instalada em `node_modules/next/dist/docs/` e siga as APIs e avisos de depreciação da versão instalada.
+
+## Direção arquitetural
+
+O projeto segue Clean Architecture modular. As dependências apontam para dentro:
+
+```text
+Entrada Next.js
+    -> presentation
+    -> application
+    -> domain
+
+infrastructure
+    -> application ports
+    -> domain
+
+composition
+    -> implementações concretas das camadas externas
 ```
 
-## 2.2 Padrões Visuais (UI/UX)
+Responsabilidades das pastas:
 
-### Estilo: Flat Design
+- `src/modules/<module>/domain`: entidades, value objects, invariantes e erros de domínio.
+- `src/modules/<module>/application`: casos de uso, DTOs, erros e ports.
+- `src/modules/<module>/infrastructure`: adaptadores concretos dos ports, como Firebase repositories e mappers.
+- `src/modules/<module>/presentation`: handlers HTTP, schemas e presenters.
+- `src/composition`: composition root da aplicação.
+- `src/app`: entradas finas do App Router: páginas e route handlers.
+- `src/features`: hooks, componentes e estado específico da experiência frontend.
+- `src/stores`: estado global genuíno, usando Zustand.
+- `src/infra`: infraestrutura técnica compartilhada, como Firebase Admin, Firebase Client e JWT.
+- `src/shared`: código realmente reutilizável que não importa módulos de negócio.
+- `src/components`: componentes UI compartilhados e componentes compostos.
 
-O projeto utiliza o padrão **Flat Design** para uma interface limpa, moderna e consistente.
+As árvores históricas `src/application` e `src/domain` não devem receber código novo. Novas entidades, ports, DTOs e casos de uso pertencem ao módulo correspondente; conceitos transversais genuínos pertencem a `src/shared/domain`.
 
-### Princípios Visuais
+## Limites obrigatórios de dependência
 
-| Princípio | Descrição |
-|-----------|-----------|
-| **Cores Sólidas** | Sem gradientes em elementos estruturais (header, cards) |
-| **Bordas Sutiles** | Usar `border-primary/20` ou `border-border` |
-| **Hierarquia Clara** | Sombras leves (`shadow-sm`) para elementos elevados |
-| **shadcn/ui Compliant** | Seguir padrões do design system |
+- O domínio não pode importar application, presentation, infrastructure, composition, Next.js, Firebase, Zod ou drivers externos.
+- A camada application pode depender do domínio e de ports, nunca de adaptadores concretos.
+- A presentation pode depender de application e domain, nunca de repositories ou Firebase.
+- Adaptadores de infrastructure implementam ports voltados para dentro.
+- `src/shared` nunca pode importar de `src/modules`.
+- `src/app` obtém comportamento por meio de compositions e contratos públicos; não acessa repositories diretamente.
+- `src/composition` é o único lugar para montar repositories concretos, serviços de autenticação, token services, casos de uso e handlers.
+- Componentes React e hooks de frontend não podem importar diretamente `@/infra/*`.
+- Composições de um módulo não podem importar a composição de outro módulo.
+- Dependências entre módulos devem usar ports ou contratos públicos mínimos.
+- Mantenha `dependency-cruiser.config.mjs` sincronizado com as decisões arquiteturais.
 
-### Cores do Tema
+Valide as regras com:
 
-| Variável | Uso |
-|----------|-----|
-| `--primary` | Header, botões principais, ícones de destaque |
-| `--primary-foreground` | Texto sobre primary |
-| `--card` | Fundo de cards |
-| `--muted` | Fundos sutis, hover states |
-| `--border` | Bordas de cards e elementos |
-| `--background` | Fundo da página |
-
-### Regras de Estilo por Componente
-
-#### Header (PrivateHeader)
-```tsx
-className="bg-primary text-primary-foreground"
-```
-- ✅ Cor sólida primary
-- ✅ Texto em primary-foreground
-- ❌ Sem gradientes
-
-#### CardAdmin (cards administrativos)
-```tsx
-className="bg-card border-primary/20 hover:border-primary/30"
-```
-- ✅ Fundo `bg-card` (sólido)
-- ✅ Borda sutil `border-primary/20`
-- ✅ Hover com borda mais visível
-- ❌ Sem gradiente `from-primary/5`
-
-#### CardItem (itens de lista)
-```tsx
-className="bg-card border-border hover:bg-muted/50"
-```
-- ✅ Fundo `bg-card` (sólido)
-- ✅ Borda `border-border`
-- ✅ Hover com fundo sutil
-
-#### Ícones em Cards
-```tsx
-className="bg-primary/10 text-primary"
-```
-- ✅ Fundo colorido sutil `bg-primary/10`
-- ✅ Ícone com cor primary
-
-#### Footer
-```tsx
-className="bg-background border-t"
-```
-- ✅ Fundo `bg-background`
-- ✅ Borda superior sutil
-
-### Checklist de Implementação
-
-```
-✅ Header: bg-primary text-primary-foreground (sempre)
-✅ Cards Admin: bg-card border-primary/20
-✅ Cards Item: bg-card border-border
-✅ Ícones: bg-primary/10 text-primary
-✅ Footer: bg-background border-t
-✅ Sem gradientes em elementos estruturais
+```bash
+pnpm lint:architecture
 ```
 
-### Exemplo de Estrutura Visual
+## Módulos atuais
 
-```
-┌─────────────────────────────┐
-│ ████████████████████████████ │  ← Header: bg-primary
-├─────────────────────────────┤
-│                             │
-│ ┌─────────────────────────┐ │
-│ │ ●  Título              → │ │  ← Card: bg-card, border-primary/20
-│ │    Descrição             │ │
-│ └─────────────────────────┘ │
-│                             │
-│ ┌─────────────────────────┐ │
-│ │ ●  Item                → │ │  ← Item: bg-card, border-border
-│ └─────────────────────────┘ │
-│                             │
-└─────────────────────────────┘
-░░░░░░░░░░░░░░░░░░░░░░░░░░░ │  ← Footer: bg-background, border-t
-```
+Os módulos de negócio atuais são:
 
-## 3. Arquitetura e Regras de Dependência
-
-### Visão Geral da Arquitetura
-
-O projeto segue uma arquitetura híbrida que combina:
-
-1. **Zustand** → Estado global (auth, igreja selecionada, tema)
-2. **Feature-based Hooks** → Lógica de tela desacoplada da UI
-3. **Clean Architecture** → Domínio e regras de negócio isolados
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                           UI Layer                              │
-│  app/(pages)/page.tsx → Componentes puros → Só renderizam      │
-├─────────────────────────────────────────────────────────────────┤
-│                       Hooks Layer (Features)                    │
-│  features/[feature]/hooks/*.ts → Lógica de tela desacoplada    │
-├─────────────────────────────────────────────────────────────────┤
-│                      Zustand (Stores)                           │
-│  stores/*.ts → Estado global (auth, church, tema)              │
-├─────────────────────────────────────────────────────────────────┤
-│                       API Layer                                 │
-│  app/api/*/route.ts → Route Handlers                           │
-├─────────────────────────────────────────────────────────────────┤
-│                     Application Layer                           │
-│  application/use-cases/*.ts → Casos de uso                     │
-├─────────────────────────────────────────────────────────────────┤
-│                       Infra Layer                               │
-│  infra/firebase/repositories/*.ts → Implementações Firebase   │
-├─────────────────────────────────────────────────────────────────┤
-│                       Domain Layer                              │
-│  domain/entities/*.ts → Entidades de negócio                    │
-└─────────────────────────────────────────────────────────────────┘
+```text
+src/modules/
+├── churches
+├── identity
+├── member-profiles
+├── members
+├── ministries
+├── notifications
+├── roles
+├── scales
+├── self-signup
+├── service-templates
+└── services
 ```
 
-### Estrutura de Pastas
+Cada módulo funcional deve manter, quando aplicável:
 
-```
-src/
-├── stores/                    # Zustand (estado global)
-│   ├── authStore.ts          # user, churches, login/logout
-│   └── ...
-│
-├── features/                  # Hooks organizados por feature
-│   ├── auth/
-│   │   ├── hooks/
-│   │   │   ├── useAuth.ts           # Hook de autenticação
-│   │   │   └── useLoginScreen.ts    # Lógica da tela de login
-│   │   └── types/
-│   │
-│   ├── home/
-│   │   └── hooks/
-│   │       └── useHomeScreen.ts
-│   │
-│   ├── schedules/
-│   │   └── hooks/
-│   │       ├── useSchedules.ts
-│   │       └── useScheduleForm.ts
-│   │
-│   └── members/
-│       └── hooks/
-│           ├── useMembers.ts
-│           └── useMemberForm.ts
-│
-├── domain/                    # Entidades, ports e erros
-│   ├── entities/
-│   ├── ports/
-│   └── errors/
-│
-├── application/               # Casos de uso e regras de negócio
-│   ├── use-cases/
-│   ├── dtos/
-│   └── services/
-│
-├── infra/                     # Implementações externas
-│   ├── firebase-admin/        # Firebase Admin SDK (server-side)
-│   │   ├── firebaseConfig.ts
-│   │   ├── repositories/
-│   │   └── services/
-│   ├── firebase-client/       # Firebase Client SDK (client-side)
-│   │   ├── firebaseConfig.ts
-│   │   └── services/
-│   └── jose/
-│
-├── app/                       # Next.js App Router
-│   ├── api/
-│   └── (pages)/
-│
-├── components/                # Componentes React
-│   ├── ui/                    # Atoms (shadcn-like)
-│   ├── modules/               # Molecules (componentes compostos)
-│   └── templates/            # Templates (estruturas de página)
-│
-└── shared/
-    ├── utils/
-    ├── constants/
-    └── types/
+```text
+module/
+├── domain/
+├── application/
+├── infrastructure/
+├── presentation/
+└── composition/
 ```
 
-### Regras de Dependência
-
-| Camada | Pode importar de |
-|--------|------------------|
-| `domain` | Nada (é o núcleo) |
-| `application` | `domain` |
-| `infra/firebase-admin` | `domain`, `application` (server-side apenas) |
-| `infra/firebase-client` | `domain`, `application` (client-side apenas) |
-| `stores` | `domain`, `application` |
-| `features/*/hooks` | `domain`, `application`, `stores`, `infra/firebase-client` |
-| `components` | `features/*/hooks`, `stores` |
-| `app/(pages)/*` | `components`, `features/*/hooks` |
-
-**Regras de Ouro**:
-1. Componentes React **nunca** podem importar diretamente de `@/infra/*`
-2. Todas as comunicações com backend passam pelos hooks
-3. Hooks de tela ficam dentro de `features/[nome]/hooks/`
-4. **Server-side** usa `infra/firebase-admin`
-5. **Client-side** usa `infra/firebase-client`
-
-## 4. Padrões de Código Obrigatórios
-
-### Nomenclatura
-
-- **Arquivos**: PascalCase (`UserRepository.ts`, `GetUserById.ts`)
-- **Componentes React**: PascalCase (`Button.tsx`, `UserForm.tsx`)
-- **Funções**: Prefixo `get`, `create`, `update`, `delete` (`getUserById`, `createSchedule`)
-- **Variáveis**: camelCase
-
-### Componentes React
-
-- **Sempre** usar named exports
-- Tipar props com interface ou type
-- Usar `"use client"` apenas quando necessário (interações com browser)
-
-```tsx
-// ✅ Correto
-interface ButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
-}
-
-export function Button({ children, onClick }: ButtonProps) {
-  return <button onClick={onClick}>{children}</button>;
-}
-
-// ❌ Errado
-export default function Button({ children, onClick }) {
-  return <button onClick={onClick}>{children}</button>;
-}
-```
-
-### Atomic Design
-
-O projeto segue o padrão **Atomic Design** para organização de componentes:
-
-```
-src/components/
-├── ui/           # Atoms (elementos básicos)
-│   ├── button.tsx
-│   ├── card.tsx
-│   ├── card-admin.tsx
-│   ├── card-item.tsx
-│   ├── empty-state.tsx
-│   ├── form-field.tsx
-│   ├── form-select.tsx
-│   ├── input.tsx
-│   ├── label.tsx
-│   ├── list-item-card.tsx
-│   ├── number-stepper.tsx
-│   └── ...
-│
-├── modules/      # Molecules (combinações simples)
-│   ├── card-item.tsx
-│   ├── private-header.tsx
-│   └── private-footer.tsx
-│
-└── templates/    # Templates (estruturas de página)
-    ├── form-template.tsx
-    ├── list-template.tsx
-    └── page-template.tsx
-```
-
-**Níveis de Atomic Design:**
-
-| Nível | Descrição | Exemplos |
-|-------|-----------|----------|
-| **Atoms** | Elementos básicos e indivisíveis | Button, Input, Card |
-| **Molecules** | Combinações simples de atoms | CardItem, EmptyState |
-| **Templates** | Estruturas completas de página | ListTemplate, PageTemplate |
-
-### Componentes de Formulário Mobile-First
-
-Para garantir uma experiência mobile otimizada, o projeto possui componentes específicos para formulários:
-
-#### NumberStepper
-Input numérico com botões +/- para facilitar a interação em touch screens.
-
-```tsx
-<NumberStepper
-  label="Quantidade"
-  value={quantity}
-  onChange={setQuantity}
-  min={0}
-  max={99}
-/>
-```
-
-#### ListItemCard
-Card para itens de lista com suporte a ações (remover, editar).
-
-```tsx
-<ListItemCard
-  index={0}
-  onRemove={handleRemove}
->
-  <Input placeholder="Nome da função" />
-</ListItemCard>
-```
-
-#### FormSelect
-Select estilizado com ícone de seta customizado.
-
-```tsx
-<FormSelect
-  label="Igreja"
-  value={churchId}
-  onChange={setChurchId}
-  options={[
-    { value: "1", label: "Igreja Central" },
-    { value: "2", label: "Igreja Norte" }
-  ]}
-  placeholder="Selecione"
-  required
-/>
-```
-
-### Compound Components
-
-Compound Components permitem criar APIs declarativas e flexíveis:
-
-```tsx
-// Uso do ListTemplate
-<ListTemplate>
-  <ListTemplate.Header title="Igrejas" subtitle="Gerencie..." />
-  <ListTemplate.Action label="Nova" icon={Plus} onClick={handleAdd} />
-  
-  {items.length === 0 ? (
-    <ListTemplate.EmptyState
-      icon={Inbox}
-      title="Nenhuma igreja"
-      description="Cadastre sua primeira igreja"
-    />
-  ) : (
-    <ListTemplate.List>
-      {items.map(item => (
-        <ListTemplate.Item
-          key={item.id}
-          icon={Building2}
-          title={item.name}
-          onClick={() => handleSelect(item.id)}
-        />
-      ))}
-    </ListTemplate.List>
-  )}
-</ListTemplate>
-```
-
-**Implementação do Compound Component:**
-
-```tsx
-// templates/list-template.tsx
-interface ListTemplateProps {
-  children: React.ReactNode;
-}
-
-function Header({ title, subtitle }: { title: string; subtitle?: string }) {
-  return <header>...</header>;
-}
-
-function List({ children }: { children: React.ReactNode }) {
-  return <div className="grid">{children}</div>;
-}
-
-export function ListTemplate({ children }: ListTemplateProps) {
-  return <main>{children}</main>;
-}
-
-ListTemplate.Header = Header;
-ListTemplate.List = List;
-```
-
-**Benefícios:**
-- **DRY**: Template reutilizável para todas as listagens
-- **Consistência**: Mesma estrutura visual em todas as páginas
-- **Composição**: Cada parte é independente e testável
-- **Flexibilidade**: Pode usar apenas as partes necessárias
-
-### API REST
-
-- **URLs**: kebab-case (`/api/users`, `/api/church-functions`, `/api/schedules`)
-- **Métodos**: GET (listar), POST (criar), PUT/PATCH (atualizar), DELETE (remover)
-- **Respostas**: JSON padronizado
-
-### TypeScript
-
-- **Sempre** tipar retorno de funções
-- Usar Zod para validação de DTOs
-- Evitar `any`
-
-### Git Commits
-
-**NUNCA criar branches automaticamente**. Apenas criar branch quando o usuário solicitar explicitamente.
-
-**Estrutura de branches:**
-- `master` - Branch principal, produção
-- `develop` - Branch para atividades em revisão
-- `<sufixo>/<id-atividade>-<descricao-curto>` - Branchs de atividades
-
-**Exemplos de branchs:**
-```
-feat/3-autenticacao-google
-fix/5-corrigir-login
-refactor/10-reestruturar-repositories
-```
-
-**Formato de commit:**
-Usar Conventional Commits com referência ao issue:
-
-```
-feat: add user authentication with Google
-
-refs #3
-
----
-fix: resolve schedule date timezone issue
-
-refs #5
-
----
-docs: update API endpoints documentation
-
-refs #10
-```
-
-### Página de Componentes
-
-Sempre que um novo componente shadcn for adicionado ou atualizado, a página `/components` deve refletir essas mudanças.
-
-A página está em `src/app/components/page.tsx` e usa um array de configuração para renderizar os componentes automaticamente. Para adicionar um novo componente:
-
-1. Adicionar o componente via shadcn: `pnpm dlx shadcn@latest add <componente>`
-2. Atualizar o arquivo `src/app/components/page.tsx`:
-   - Importar o componente
-   - Adicionar uma nova entrada no array `components` com a função `render()` que exibe as variações
-
-Exemplo de nova entrada:
-
-```typescript
-{
-  name: "Input",
-  description: "Campo de entrada de texto",
-  render: () => (
-    <div className="space-y-2">
-      <Input placeholder="Default" />
-      <Input placeholder="Disabled" disabled />
-    </div>
-  ),
-},
-```
-
-Para verificar se está funcionando, execute `pnpm build` e acesso `http://localhost:3000/components`.
-
-## 5. Como Adicionar uma Nova Feature
-
-### Passo a Passo
-
-1. **Definir a entidade no domínio**
-   - Criar entidade em `src/domain/entities/`
-   - Definir tipos e validações básicas
-
-2. **Criar o port (interface)**
-   - Criar interface em `src/domain/ports/`
-   - Ex: `IUserRepository.ts`
-
-3. **Implementar o repository**
-   - Criar implementação em `src/infra/firebase/repositories/`
-   - Implementar métodos definidos no port
-
-4. **Criar o DTO com Zod**
-   - Criar em `src/application/dtos/`
-   - Definir schemas de validação
-
-5. **Criar o use case**
-   - Criar em `src/application/use-cases/`
-   - Implementar lógica de negócio
-   - Não importar nada de infra diretamente (usar injeção de dependência)
-
-6. **Criar a API (Route Handler)**
-   - Criar arquivo em `src/app/api/[recurso]/route.ts`
-   - Mapear HTTP method para use case
-
-7. **Criar o store (se necessário)**
-   - Criar em `src/stores/[feature]Store.ts` (Zustand)
-   - Apenas para estado verdadeiramente global
-
-8. **Criar o hook de feature**
-   - Criar em `src/features/[feature]/hooks/`
-   - Consumir API interna via `fetch`
-   - Tipar retorno corretamente
-
-9. **Criar componentes**
-   - Adicionar em `src/components/modules/`
-   - Usar hooks criados
-   - Não importar de infra!
-
-10. **Testar**
-    - Verificar build: `pnpm build`
-    - Verificar lint: `pnpm lint`
-    - Verificar format: `pnpm format`
-
-### Artefatos Temporários (Playwright / Evidências)
-
-- Todo screenshot, log de teste visual e arquivo auxiliar de validação deve ser salvo em `.temp/`.
-- Não salvar artefatos temporários na raiz do projeto.
-- Para testes com Playwright, usar caminhos como `.temp/playwright/<arquivo>.png`.
-- Esses artefatos não devem ser commitados.
-
-### Exemplo de Fluxo Completo
-
-```typescript
-// 1. domain/entities/User.ts
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'leader' | 'member';
-  churchId: string;
-}
-
-// 2. domain/ports/IUserRepository.ts
-export interface IUserRepository {
-  getById(id: string): Promise<User | null>;
-  getByEmail(email: string): Promise<User | null>;
-  create(user: Omit<User, 'id'>): Promise<User>;
-}
-
-// 3. application/dtos/CreateUserDTO.ts
-import { z } from 'zod';
-export const CreateUserDTO = z.object({
-  name: z.string().min(1),
-  email: z.string().email(),
-  role: z.enum(['admin', 'leader', 'member']),
-});
-
-// 4. application/use-cases/CreateUser.ts
-import { IUserRepository } from '@/domain/ports/IUserRepository';
-import { CreateUserDTO } from '../dtos/CreateUserDTO';
-
-export class CreateUser {
-  constructor(private userRepository: IUserRepository) {}
-
-  async execute(input: z.infer<typeof CreateUserDTO>) {
-    const data = CreateUserDTO.parse(input);
-    const user = await this.userRepository.create(data);
-    return user;
-  }
-}
-
-// 5. app/api/users/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { container } from '@/infra/container';
-
-export async function POST(request: NextRequest) {
-  const useCase = container.createUser();
-  const body = await request.json();
-  const user = await useCase.execute(body);
-  return NextResponse.json(user, { status: 201 });
-}
-
-// 6. stores/userStore.ts (Zustand - para estado global)
-import { create } from 'zustand';
-
-interface UserState {
-  users: User[];
-  loading: boolean;
-  fetchUsers: () => Promise<void>;
-}
-
-export const useUserStore = create<UserState>((set) => ({
-  users: [],
-  loading: false,
-  fetchUsers: async () => {
-    set({ loading: true });
-    const res = await fetch('/api/users');
-    const users = await res.json();
-    set({ users, loading: false });
-  },
-}));
-
-// 7. features/users/hooks/useUsers.ts (hook de tela)
-'use client';
-import { useUserStore } from '@/stores/userStore';
-
-export function useUsers() {
-  const { users, loading, fetchUsers } = useUserStore();
-
-  const createUser = async (data: unknown) => {
-    const res = await fetch('/api/users', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    const user = await res.json();
-    useUserStore.setState((state) => ({
-      users: [...state.users, user],
-    }));
-    return user;
-  };
-
-  return { users, loading, fetchUsers, createUser };
-}
-
-// 8. components/modules/UserForm.tsx
-'use client';
-import { useUsers } from '@/features/users/hooks/useUsers';
-import { Button } from '@/components/ui/Button';
-
-export function UserForm() {
-  const { createUser } = useUsers();
-
-  const handleSubmit = async () => {
-    await createUser({ name: 'John', email: 'john@example.com', role: 'member' });
-  };
-
-  return <Button onClick={handleSubmit}>Create User</Button>;
-}
-```
-
-## 5.x Limite de Tamanho de Arquivos
-
-### Regra Geral
-- **Target:** 150 linhas por arquivo
-- **Hard limit:** 200 linhas
-- **Componentes pequenos:** 50-100 linhas (atoms)
-
-### Quando Fragmentar
-- Componente com mais de 3 responsabilidades distintas
-- Função de renderização com mais de 100 linhas
-- Mais de 7 useState/useEffect no mesmo componente
-- Mapeamento de lista com mais de 30 linhas de JSX
-
-### Como Fragmentar
-1. Identificar responsabilidades separáveis
-2. Extrair para componente próprio
-3. Manter composição no componente pai
-4. Componentes genéricos vão para `components/ui/`
-5. Componentes específicos da feature vão para `features/[nome]/components/`
-
-### Exemplo de Refatoração
-
-**Antes (>200 linhas):**
-```tsx
-// MemberForm.tsx - 412 linhas
-export function MemberForm() {
-  // ... tudo junto
-}
-```
-
-**Depois (<150 linhas cada):**
-```tsx
-// features/members/components/basic-info-section.tsx (~30 linhas)
-// features/members/components/church-section.tsx (~80 linhas)
-// features/members/components/ministry-selector.tsx (~70 linhas)
-export function MemberForm() {
-  return (
-    <FormTemplate>
-      <BasicInfoSection />
-      <ChurchSection />
-    </FormTemplate>
-  );
-}
-```
-
-### Checklist de Refatoração
-```
-□ Maior arquivo < 200 linhas
-□ Target por arquivo < 150 linhas
-□ Componentes UI genéricos em components/ui/
-□ Componentes específicos em features/[feature]/components/
-□ Single Responsibility Principle respeitado
-```
-
-## 6. O Que Nunca Fazer
-
-### Proibidos
-
-- ❌ Importar repositories, Firebase ou qualquer coisa de `@/infra/*` em componentes ou hooks
-- ❌ Usar Firebase SDK diretamente em componentes React
-- ❌ Criar queries Firestore diretamente nos hooks
-- ❌ Ignorar o lint/format (`pnpm lint` e `pnpm format` devem passar)
-- ❌ Commitar secrets no repositório (usar `.env.local` e nunca commitar)
-- ❌ Criar arquivos grandes (>200 linhas, fragmentar em funções menores)
-- ❌ Misturar responsabilidades (um arquivo = uma responsabilidade)
-- ❌ Usar `any` em TypeScript
-- ❌ Criar APIs que expõem dados de outras igrejas (verificar `churchId` sempre)
-- ❌ **Commitar qualquer alteração sem o usuário solicitar explicitamente** - Sempre perguntar antes de commitar
-
-### Atenção Especial
-
-- ⚠️ **Multi-tenant**: Toda query deve filtrar por `churchId` do usuário logado
-- ⚠️ **Auth**: Nunca expor endpoints sem verificação de autenticação
-- ⚠️ **IDs**: Usar IDs do Firebase (UUID), não sequenciais
-
-## 7. Contexto de Negócio
-
-### O Sistema
-
-Central Connect é um sistema de **gestão de escalas ministeriais** para igrejas.
-
-### Funcionalidades Principais
-
-1. **Gestão de Membros**
-   - Cadastro de membros com funções específicas
-   - Cada membro pode ter uma ou mais funções na igreja
-
-2. **Funções da Igreja (ChurchFunction)**
-   - Ex: Música, Som, Projeção, Segurança, Porta, Cantora, Leitor, Preschool, etc.
-   - Cada função tem um número mínimo de pessoas necessárias (`requiredCount`)
-
-3. **Escalas (Schedule)**
-   - Criar escalas para datas específicas (missas/eventos)
-   - Status: `draft` (rascunho) ou `published` (publicada)
-   - Apenas escalas publicadas são visíveis aos membros
-
-4. **Membros da Escala (ScheduleMember)**
-   - Associar membros às escalas
-   - Cada membro tem uma função específica na escala
-   - Sistema avisa se a função não atingiu o número mínimo
-
-### Fluxo Typical
-
-1. **Admin/Líder** cria uma escala para uma data
-2. **Admin/Líder** atribui membros às funções
-3. Sistema verifica se todas as funções têm o número mínimo
-4. **Admin/Líder** publica a escala
-5. **Membros** visualizam suas escalas no app
-
-### Termos de Domínio
-
-| Termo | Descrição |
-|-------|------------|
-| ChurchFunction | Função na igreja (ex: "Música", "Som") |
-| Schedule | Uma escala para um evento específico |
-| ScheduleMember | Um membro atribuído a uma função em uma escala |
-| Draft | Escala em rascunho (não visível aos membros) |
-| Published | Escala publicada (visível aos membros) |
-
-### Firebase
+Não crie pastas vazias ou compositions para módulos sem comportamento funcional.
+
+## Identidade, autenticação e autorização
+
+- Usuários representam identidade e dados de autenticação; não devem conter responsabilidades de escalas ou outros módulos.
+- Tokens de acesso devem carregar apenas a identidade e o contexto mínimo necessário para validação.
+- Não exponha tokens, credenciais, hashes ou dados sensíveis em DTOs de resposta.
+- Mantenha login, logout, sessão, seleção de igreja e `/auth/me` cobertos por testes.
+- Erros de autenticação devem ser traduzidos para respostas HTTP somente na camada de presentation.
+- Toda autorização deve verificar o usuário autenticado e a permissão necessária.
+- Toda operação de negócio deve respeitar a igreja selecionada e o isolamento multi-tenant.
+- Nunca permita que um usuário leia ou altere dados de outra igreja.
+- Permissões como `CHURCH_SELF_READ`, `CHURCH_SELF_WRITE` e `MEMBER_SELF_WRITE` devem continuar sendo aplicadas no servidor, não apenas na UI.
+
+## Regras de domínio e application
+
+- Mantenha invariantes de negócio nas entidades e value objects.
+- Use erros explícitos de domínio/application para falhas esperadas.
+- Casos de uso dependem de ports, nunca de repositories concretos.
+- Cada caso de uso deve ficar em seu próprio arquivo dentro de `application/use-cases`.
+- Não agrupe operações CRUD não relacionadas em uma única classe ou arquivo.
+- Cada caso de uso deve ter contrato focado quando houver necessidade de abstração.
+- DTOs de casos de uso devem ficar em arquivos dedicados dentro de `application/dtos`.
+- Valide entradas com Zod na fronteira apropriada.
+- Não exponha entidades de domínio, tipos do Firebase ou objetos HTTP diretamente nos contratos públicos.
+- Evite abstrações especulativas e service locators globais.
+- Mantenha `create`, `update`, `delete`, `list` e `get` semanticamente claros.
+- IDs de documentos devem ser gerados pelo Firebase; não use IDs sequenciais.
+
+## Firebase e infraestrutura
 
 O projeto usa duas bibliotecas Firebase:
 
-| Biblioteca | Uso | Importar de |
-|------------|-----|-------------|
-| **Firebase Admin** | Server-side (APIs, repositories) | `@/infra/firebase-admin/*` |
-| **Firebase SDK** | Client-side (auth, UI) | `@/infra/firebase-client/*` |
+| Biblioteca | Uso | Local permitido |
+|---|---|---|
+| Firebase Admin | APIs, repositories e serviços server-side | `src/infra/firebase-admin` ou infrastructure do módulo |
+| Firebase SDK | autenticação e recursos client-side | `src/infra/firebase-client` |
 
-**Client-side auth (useLoginScreen):**
-```typescript
-import { signInWithGoogle } from "@/infra/firebase-client/services/googleAuth";
+Regras:
 
-const firebaseUser = await signInWithGoogle();
-const idToken = firebaseUser.idToken;
-```
+- Nunca use Firebase diretamente em componentes React.
+- Nunca crie queries Firestore diretamente em hooks.
+- Queries específicas de uma feature devem ficar no adapter/repository do módulo.
+- `BaseFirebaseRepository` é infraestrutura técnica compartilhada; repositories de negócio pertencem aos respectivos módulos.
+- Mappers de entidades pertencem ao módulo dono da entidade.
+- Serviços técnicos compartilhados devem permanecer isolados em `src/infra`.
+- Secrets devem ficar em `.env.local`; nunca commite credenciais ou arquivos de configuração sensíveis.
+- Toda query multi-tenant deve filtrar por `churchId` ou validar o contexto equivalente.
 
-**Server-side auth (container.ts):**
-```typescript
-import { GoogleAuthFirebaseService } from "@/infra/firebase-admin/services/GoogleAuthFirebaseService";
-```
+## HTTP e presentation
 
----
+- Mantenha páginas e route handlers do Next.js finos.
+- Parseie e valide entradas HTTP em schemas/handlers de presentation.
+- Um handler deve coordenar autenticação, validação de origem, parsing, chamada do caso de uso, tradução de erros e resposta.
+- Não crie um objeto `crud` ou handler único que concentre todas as operações de um recurso.
+- Não retorne entidades de domínio ou rows de persistência diretamente.
+- Use respostas JSON padronizadas e códigos de erro estáveis.
+- Não registre erros esperados de validação ou regra de negócio como erros inesperados de servidor.
+- Toda rota privada deve validar autenticação e autorização.
+- Rotas públicas de autocadastro devem limitar o escopo à igreja informada e aplicar rate limit/validações existentes.
 
-## Referência Rápida
+## Convenções de código
+
+- Prefira funções pequenas e nomes explícitos.
+- Use `import type` para imports somente de tipo.
+- Mantenha imports formatados pelo Biome.
+- Preserve espaços verticais entre métodos, funções, tipos e seções lógicas.
+- Preserve tipagem TypeScript estrita.
+- Não introduza `any`, casts não verificados ou tipos frouxos.
+- Mantenha pontos de entrada públicos pequenos.
+- Componentes React devem ter props tipadas.
+- Use `"use client"` somente quando houver necessidade de browser, estado ou interação.
+- Prefira named exports para componentes reutilizáveis.
+- Componentes específicos de feature devem ficar em `src/features/<feature>/components`.
+- Componentes genéricos devem ficar em `src/components/ui`, `src/components/modules` ou `src/components/templates`, conforme sua responsabilidade.
+- Nomes de arquivos e componentes devem seguir o padrão já adotado pelo diretório em que forem criados.
+
+## Limite de tamanho de arquivos
+
+- Target: 150 linhas por arquivo.
+- Hard limit: 200 linhas.
+- Componentes pequenos: aproximadamente 50-100 linhas.
+
+Fragmente quando houver:
+
+- mais de três responsabilidades distintas;
+- renderização com mais de 100 linhas;
+- mais de sete hooks de estado/efeito;
+- mapeamento de lista com mais de 30 linhas de JSX.
+
+Componentes específicos devem permanecer próximos da feature; componentes verdadeiramente genéricos devem ser promovidos para `src/components`.
+
+## Página de componentes
+
+Sempre que um componente shadcn/ui novo for adicionado ou atualizado, atualize `src/app/components/page.tsx` para demonstrar suas variações.
+
+Valide com:
 
 ```bash
-# Comandos principais
-pnpm dev          # Iniciar desenvolvimento
-pnpm build        # Build de produção
-pnpm lint         # Verificar código
-pnpm format       # Formatar código
+pnpm build
 ```
 
-```typescript
-// Importações típicas
-import { User } from '@/domain/entities/User';
-import { IUserRepository } from '@/domain/ports/IUserRepository';
-import { CreateUserDTO } from '@/application/dtos/CreateUserDTO';
-import { useAuthStore } from '@/stores/authStore';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { signInWithGoogle } from '@/infra/firebase-client/services/googleAuth';
-import { Button } from '@/components/ui/Button';
+## Artefatos temporários
+
+- Screenshots, logs de testes visuais e arquivos auxiliares devem ser salvos em `.temp/`.
+- Não salve artefatos temporários na raiz do projeto.
+- Para Playwright, use caminhos como `.temp/playwright/<arquivo>.png`.
+- Artefatos temporários não devem ser commitados.
+
+## Validação obrigatória
+
+Antes de entregar alterações de arquitetura, dependências, Firebase, composição, autenticação ou módulos, execute:
+
+```bash
+pnpm lint
+pnpm lint:architecture
+pnpm typecheck
+pnpm test
+pnpm build
+git diff --check
+```
+
+Se uma restrição ambiental impedir alguma verificação, informe a restrição exata e não declare a validação como aprovada.
+
+## Comunicação e execução
+
+- Comece comunicando o resultado esperado e os principais riscos.
+- Envie atualizações curtas durante tarefas longas.
+- Responda em português, salvo solicitação diferente.
+- Se houver uma decisão de negócio ou arquitetura que mude materialmente a implementação, pare e pergunte antes de escolher.
+- Preserve alterações existentes do usuário e não sobrescreva trabalho não relacionado.
+- Ao diagnosticar, não implemente a correção sem solicitação explícita.
+- Ao implementar, valide o resultado proporcionalmente ao risco.
+- Ao concluir, informe o que mudou, quais validações passaram e quais pendências permanecem.
+- Não use formatação excessiva; prefira explicações claras e objetivas.
+
+## Commits e Git
+
+Nunca crie commit, branch, tag, push ou pull request sem solicitação explícita do usuário.
+
+Nunca crie branches automaticamente. Se uma branch for solicitada, siga o padrão definido pelo usuário; na ausência de padrão, use o prefixo `codex/`.
+
+Quando um commit for autorizado:
+
+- use Conventional Commits;
+- mantenha o commit focado;
+- inclua a referência ao issue quando existir;
+- não inclua arquivos temporários, secrets ou mudanças não relacionadas;
+- revise o diff antes de commitar.
+
+Exemplo:
+
+```text
+refactor: organize modular architecture
+
+refs #15
+```
+
+## Comandos principais
+
+```bash
+pnpm dev
+pnpm dev:firebase
+pnpm build
+pnpm start
+pnpm lint
+pnpm lint:architecture
+pnpm typecheck
+pnpm test
+pnpm check
+pnpm format
 ```

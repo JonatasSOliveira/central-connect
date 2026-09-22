@@ -2,9 +2,9 @@
 
 import { use } from "react";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { ScaleForm } from "@/features/scales/components/ScaleForm";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 interface EditScalePageProps {
   params: Promise<{ scaleId: string }>;

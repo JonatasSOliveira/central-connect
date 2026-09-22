@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type {
-  MemberProfileFilters,
   MemberProfileFilterOptionsDTO,
+  MemberProfileFilters,
   MemberProfileListItemDTO,
   MemberProfileSummaryDTO,
-} from "@/application/dtos/member-profile/MemberProfileDTO";
+} from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
 import { buildMemberProfileQuery } from "./memberProfileFilterParams";
 
 type ActiveTab = "dashboard" | "members";
@@ -28,7 +28,9 @@ export function useMemberProfiles() {
   const fetchProfiles = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/member-profiles${query ? `?${query}` : ""}`);
+      const response = await fetch(
+        `/api/member-profiles${query ? `?${query}` : ""}`,
+      );
       const payload = await response.json();
 
       if (payload.ok) {

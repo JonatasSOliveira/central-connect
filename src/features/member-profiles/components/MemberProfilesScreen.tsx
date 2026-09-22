@@ -1,9 +1,9 @@
 "use client";
 
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useMemberProfiles } from "@/features/member-profiles/hooks/useMemberProfiles";
+import { Permission } from "@/shared/domain/enums/Permission";
 import { MemberProfileDashboard } from "./MemberProfileDashboard";
 import { MemberProfileFilters } from "./MemberProfileFilters";
 import { MemberProfileMembersList } from "./MemberProfileMembersList";
@@ -28,7 +28,10 @@ export function MemberProfilesScreen() {
   } = useMemberProfiles();
 
   const ministriesById = Object.fromEntries(
-    filterOptions.ministries.map((ministry) => [ministry.value, ministry.label]),
+    filterOptions.ministries.map((ministry) => [
+      ministry.value,
+      ministry.label,
+    ]),
   );
 
   return (

@@ -1,12 +1,11 @@
 "use client";
 
-import { use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { use, useEffect } from "react";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ScaleAttendanceScreen } from "@/features/scale-attendance/components/ScaleAttendanceScreen";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 interface ScaleAttendancePageProps {
   params: Promise<{ scaleId: string }>;

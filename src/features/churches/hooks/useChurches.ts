@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
 import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
 
 interface UseChurchesReturn {
@@ -17,8 +17,11 @@ interface UseChurchesReturn {
 
 export function useChurches(): UseChurchesReturn {
   const { user } = useAuth();
-  const { churches: cachedChurches, fetchIfStale, setChurches } =
-    useChurchCatalogStore();
+  const {
+    churches: cachedChurches,
+    fetchIfStale,
+    setChurches,
+  } = useChurchCatalogStore();
   const [allChurches, setAllChurches] = useState<ChurchListItemDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");

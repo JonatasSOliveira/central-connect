@@ -1,0 +1,273 @@
+import type { IChurchRepository } from "@/modules/churches/application/ports/IChurchRepository";
+import { BaseUseCase } from "@/modules/identity/application/BaseUseCase";
+import type { AuthLoginInputDTO } from "@/modules/identity/application/dtos/AuthLoginInputDTO";
+import type { AuthLoginOutputDTO } from "@/modules/identity/application/dtos/AuthLoginOutputDTO";
+import { AuthErrors } from "@/modules/identity/application/errors/AuthErrors";
+import type { IGoogleAuthService } from "@/modules/identity/application/ports/IGoogleAuthService";
+import type { ITokenService } from "@/modules/identity/application/ports/ITokenService";
+import type { IUserRepository } from "@/modules/identity/application/ports/IUserRepository";
+import { User, type UserParams } from "@/modules/identity/domain/entities/User";
+import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
+import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
+import {
+  Member,
+  type MemberParams,
+} from "@/modules/members/domain/entities/Member";
+import type { IRolePermissionRepository } from "@/modules/roles/application/ports/IRolePermissionRepository";
+import { Permission } from "@/shared/domain/enums/Permission";
+import type { Result } from "@/shared/types/Result";
+
+interface ChurchInfo {
+  churchId: string;
+  roleId: string | null;
+}
+
+export class AuthLoginUseCase extends BaseUseCase<
+  AuthLoginInputDTO,
+  AuthLoginOutputDTO
+> {
+  constructor(
+    private readonly googleAuthService: IGoogleAuthService,
+    private readonly tokenService: ITokenService,
+    private readonly userRepository: IUserRepository,
+    private readonly memberRepository: IMemberRepository,
+    private readonly memberChurchRepository: IMemberChurchRepository,
+    private readonly rolePermissionRepository: IRolePermissionRepository,
+    private readonly churchRepository: IChurchRepository,
+  ) {
+    super();
+  }
+
+  async execute(input: AuthLoginInputDTO): Promise<Result<AuthLoginOutputDTO>> {
+    try {
+      const googleUser = await this.verifyGoogleToken(input.googleToken);
+      if (!googleUser.email) {
+        return this.buildErrorResponse(AuthErrors.INVALID_GOOGLE_TOKEN);
+      }
+
+      const existingMember = await this.memberRepository.findByEmail(
+        googleUser.email,
+      );
+
+      if (existingMember) {
+        const existingUser = await this.userRepository.findByMemberId(
+          existingMember.id,
+        );
+
+        if (existingUser) {
+          const churches = await this.getMemberChurches(
+            existingMember.id,
+            existingUser.isSuperAdmin,
+          );
+          const selectedChurchId =
+            churches.length === 1 ? churches[0].churchId : null;
+          const permissions = await this.getPermissionsForChurch(
+            selectedChurchId,
+            churches,
+            existingUser.isSuperAdmin,
+          );
+          return this.buildSuccessResponse(
+            existingUser,
+            existingMember,
+            churches,
+            permissions,
+            selectedChurchId,
+          );
+        }
+
+        const newUser = await this.createUser(existingMember.id);
+        const churches = await this.getMemberChurches(
+          existingMember.id,
+          newUser.isSuperAdmin,
+        );
+        const selectedChurchId =
+          churches.length === 1 ? churches[0].churchId : null;
+        const permissions = await this.getPermissionsForChurch(
+          selectedChurchId,
+          churches,
+          newUser.isSuperAdmin,
+        );
+        return this.buildSuccessResponse(
+          newUser,
+          existingMember,
+          churches,
+          permissions,
+          selectedChurchId,
+        );
+      }
+
+      if (this.isSuperAdminEmail(googleUser.email)) {
+        const newMember = await this.createMember(
+          googleUser.email,
+          googleUser.name,
+          googleUser.picture,
+        );
+        const newUser = await this.createUser(newMember.id, true);
+        const churches = await this.getMemberChurches(newMember.id, true);
+        return this.buildSuccessResponse(
+          newUser,
+          newMember,
+          churches,
+          this.getAllPermissions(),
+          churches.length === 1 ? churches[0].churchId : null,
+        );
+      }
+
+      return this.buildErrorResponse(AuthErrors.NO_INVITE_FOUND);
+    } catch (error) {
+      console.error("[AuthLoginUseCase] Error:", error);
+      return this.buildErrorResponse(AuthErrors.INTERNAL_ERROR);
+    }
+  }
+
+  private async verifyGoogleToken(googleToken: string) {
+    return this.googleAuthService.verifyGoogleToken(googleToken);
+  }
+
+  private async createMember(
+    email: string,
+    name: string | undefined,
+    picture: string | undefined,
+  ): Promise<Member> {
+    const memberParams: MemberParams = {
+      email,
+      fullName: name ?? "",
+      avatarUrl: picture ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const member = new Member(memberParams);
+    return this.memberRepository.create(member);
+  }
+
+  private async createUser(
+    memberId: string,
+    isSuperAdmin = false,
+  ): Promise<User> {
+    const userParams: UserParams = {
+      memberId,
+      isSuperAdmin,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const user = new User(userParams);
+    return this.userRepository.create(user);
+  }
+
+  private async getMemberChurches(
+    memberId: string,
+    isSuperAdmin: boolean,
+  ): Promise<ChurchInfo[]> {
+    if (isSuperAdmin) {
+      const allChurches = await this.churchRepository.findAll();
+      return allChurches.map((church) => ({
+        churchId: church.id,
+        roleId: null,
+      }));
+    }
+
+    const memberChurches =
+      await this.memberChurchRepository.findByMemberId(memberId);
+    return memberChurches.map((mc) => ({
+      churchId: mc.churchId,
+      roleId: mc.roleId,
+    }));
+  }
+
+  private async getPermissionsForChurch(
+    selectedChurchId: string | null,
+    churches: ChurchInfo[],
+    isSuperAdmin: boolean,
+  ): Promise<string[]> {
+    if (isSuperAdmin) {
+      return this.getAllPermissions();
+    }
+
+    if (!selectedChurchId) {
+      return [];
+    }
+
+    const selectedChurch = churches.find(
+      (church) => church.churchId === selectedChurchId,
+    );
+
+    if (!selectedChurch?.roleId) {
+      return [];
+    }
+
+    const permissionsSet = new Set<string>();
+
+    const rolePermissions = await this.rolePermissionRepository.findByRoleId(
+      selectedChurch.roleId,
+    );
+    rolePermissions.forEach((rp) => {
+      permissionsSet.add(rp.permission);
+    });
+
+    return Array.from(permissionsSet);
+  }
+
+  private getAllPermissions(): string[] {
+    return Object.values(Permission);
+  }
+
+  private async buildSuccessResponse(
+    user: User,
+    member: Member,
+    churches: ChurchInfo[],
+    permissions: string[],
+    selectedChurchId: string | null,
+  ): Promise<Result<AuthLoginOutputDTO>> {
+    let churchName: string | null = null;
+
+    if (selectedChurchId) {
+      const selectedChurch =
+        await this.churchRepository.findById(selectedChurchId);
+      churchName = selectedChurch?.name ?? null;
+    }
+
+    const sessionPayload = {
+      userId: user.id,
+      memberId: member.id,
+      email: member.email,
+      fullName: member.fullName,
+      avatarUrl: member.avatarUrl,
+      isSuperAdmin: user.isSuperAdmin,
+      churchId: selectedChurchId,
+      churchName,
+      churches,
+      permissions,
+    };
+
+    const sessionToken = await this.tokenService.generateToken(sessionPayload);
+
+    return {
+      ok: true,
+      value: {
+        userId: user.id,
+        memberId: member.id,
+        email: member.email ?? "",
+        fullName: member.fullName,
+        avatarUrl: member.avatarUrl,
+        isSuperAdmin: user.isSuperAdmin,
+        churchId: selectedChurchId,
+        churchName,
+        churches,
+        permissions,
+        sessionToken,
+      },
+    };
+  }
+
+  private buildErrorResponse(
+    error: (typeof AuthErrors)[keyof typeof AuthErrors],
+  ): Result<AuthLoginOutputDTO> {
+    return { ok: false, error };
+  }
+
+  private isSuperAdminEmail(email: string): boolean {
+    const superAdminEmails = process.env.SUPER_ADMIN_EMAILS?.split(",") ?? [];
+    return superAdminEmails.includes(email);
+  }
+}

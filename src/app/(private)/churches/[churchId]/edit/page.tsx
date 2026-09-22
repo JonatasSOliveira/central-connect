@@ -1,7 +1,7 @@
 "use client";
 
-import { use } from "react";
 import { useSearchParams } from "next/navigation";
+import { use } from "react";
 import { PrivateHeader } from "@/components/modules/private-header";
 import { ChurchForm } from "@/features/churches/components/ChurchForm";
 

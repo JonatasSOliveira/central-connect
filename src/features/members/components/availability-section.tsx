@@ -1,9 +1,9 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDTO";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import type { CreateMemberInput } from "@/modules/members/application/dtos/member/CreateMemberDTO";
 
 interface AvailabilitySectionProps {
   form: UseFormReturn<CreateMemberInput>;
@@ -50,9 +50,13 @@ export function AvailabilitySection({
         label="Regra de disponibilidade"
         value={mode}
         onChange={(value) => {
-          form.setValue("availability.mode", value as "ALLOW_LIST" | "BLOCK_LIST", {
-            shouldValidate: true,
-          });
+          form.setValue(
+            "availability.mode",
+            value as "ALLOW_LIST" | "BLOCK_LIST",
+            {
+              shouldValidate: true,
+            },
+          );
         }}
         options={[
           {

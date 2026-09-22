@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import type { Permission } from "@/domain/enums/Permission";
+import type { Permission } from "@/shared/domain/enums/Permission";
 import { useAuth } from "./useAuth";
 
 interface UsePermissionsOptions {

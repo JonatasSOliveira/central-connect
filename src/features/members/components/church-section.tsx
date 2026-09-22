@@ -2,16 +2,16 @@
 
 import { Plus } from "lucide-react";
 import type { UseFormReturn } from "react-hook-form";
-import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
-import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDTO";
-import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
-import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { Button } from "@/components/ui/button";
 import { RoleSelect } from "@/components/ui/role-select";
 import type {
   ReadonlyChurch,
   UseMemberFormReturn,
 } from "@/features/members/hooks/useMemberForm";
+import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { CreateMemberInput } from "@/modules/members/application/dtos/member/CreateMemberDTO";
+import type { MinistryListItemDTO } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
+import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
 import { EditableChurchCard } from "./editable-church-card";
 import { ReadonlyChurchList } from "./readonly-church-list";
 

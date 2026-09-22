@@ -3,13 +3,13 @@
 import { useRouter } from "next/navigation";
 import type { SubmitErrorHandler } from "react-hook-form";
 import { toast } from "sonner";
-import type { CreateRoleInput } from "@/application/dtos/role/CreateRoleDTO";
-import type { UpdateRoleInput } from "@/application/dtos/role/UpdateRoleDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
 import { PermissionSelect } from "@/components/ui/permission-select";
-import type { Permission } from "@/domain/enums/Permission";
 import { useRoleForm } from "@/features/roles/hooks/useRoleForm";
+import type { CreateRoleInput } from "@/modules/roles/application/dtos/role/CreateRoleDTO";
+import type { UpdateRoleInput } from "@/modules/roles/application/dtos/role/UpdateRoleDTO";
+import type { Permission } from "@/shared/domain/enums/Permission";
 
 interface RoleFormProps {
   mode: "create" | "edit";

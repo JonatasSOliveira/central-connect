@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
-import { authService } from "@/application/services/AuthService";
-import type { ListChurchesOutput } from "@/application/use-cases/church/ListChurches";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   getPushToken,
   markPushTokenSyncedForChurch,
   shouldSyncPushTokenForChurch,
 } from "@/infra/firebase-client/services/pushMessaging";
-import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
+import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { ListChurchesOutput } from "@/modules/churches/application/use-cases/ListChurches";
+import { authService } from "@/modules/identity/application/services/AuthService";
 import type { Result } from "@/shared/types/Result";
+import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
 
 const PUSH_DEBUG_ENABLED = process.env.NEXT_PUBLIC_PUSH_DEBUG === "true";
 

@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { MaritalStatus } from "@/domain/enums/MaritalStatus";
 import { maritalStatusLabels } from "@/features/self-signup/constants/maritalStatusLabels";
 import type { SelfSignupMemberFormState } from "@/features/self-signup/hooks/selfSignupMemberFormState";
+import { MaritalStatus } from "@/shared/domain/enums/MaritalStatus";
 
 interface SelfSignupBasicDataStepProps {
   fullName: string;

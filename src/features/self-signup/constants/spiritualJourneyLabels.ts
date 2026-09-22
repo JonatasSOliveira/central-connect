@@ -1,9 +1,9 @@
-import { AcceptedJesusStatus } from "@/domain/enums/AcceptedJesusStatus";
-import { ChurchAttendanceTime } from "@/domain/enums/ChurchAttendanceTime";
-import { DiscipleshipStatus } from "@/domain/enums/DiscipleshipStatus";
-import { OfficialMemberStatus } from "@/domain/enums/OfficialMemberStatus";
-import { SmallGroupStatus } from "@/domain/enums/SmallGroupStatus";
-import { WaterBaptismStatus } from "@/domain/enums/WaterBaptismStatus";
+import { AcceptedJesusStatus } from "@/shared/domain/enums/AcceptedJesusStatus";
+import { ChurchAttendanceTime } from "@/shared/domain/enums/ChurchAttendanceTime";
+import { DiscipleshipStatus } from "@/shared/domain/enums/DiscipleshipStatus";
+import { OfficialMemberStatus } from "@/shared/domain/enums/OfficialMemberStatus";
+import { SmallGroupStatus } from "@/shared/domain/enums/SmallGroupStatus";
+import { WaterBaptismStatus } from "@/shared/domain/enums/WaterBaptismStatus";
 
 export const acceptedJesusStatusLabels: Record<AcceptedJesusStatus, string> = {
   [AcceptedJesusStatus.Yes]: "Sim",

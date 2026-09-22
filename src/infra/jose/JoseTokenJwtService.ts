@@ -1,5 +1,5 @@
 import { jwtVerify, SignJWT } from "jose";
-import type { ITokenService } from "@/domain/ports/ITokenService";
+import type { ITokenService } from "@/modules/identity/application/ports/ITokenService";
 
 export class JoseTokenJwtService implements ITokenService {
   private readonly secret: Uint8Array;

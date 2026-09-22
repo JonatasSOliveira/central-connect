@@ -57,7 +57,13 @@ export function GenerateScaleDialog({ onSuccess }: GenerateScaleDialogProps) {
       200,
     );
     return () => clearTimeout(timeoutId);
-  }, [isOpen, serviceId, ministryId, checkExistingScale, resetExistingScaleCheck]);
+  }, [
+    isOpen,
+    serviceId,
+    ministryId,
+    checkExistingScale,
+    resetExistingScaleCheck,
+  ]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -147,7 +153,10 @@ export function GenerateScaleDialog({ onSuccess }: GenerateScaleDialogProps) {
                       Ja existe uma escala para este culto e ministerio.
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Status: {existingScale.status === "published" ? "Publicada" : "Rascunho"}
+                      Status:{" "}
+                      {existingScale.status === "published"
+                        ? "Publicada"
+                        : "Rascunho"}
                     </p>
                   </div>
                 </div>
@@ -163,15 +172,20 @@ export function GenerateScaleDialog({ onSuccess }: GenerateScaleDialogProps) {
               </div>
             )}
 
-            {hasSelection && !isCheckingExisting && !existingScale && checkError && (
-              <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                {checkError}
-              </div>
-            )}
+            {hasSelection &&
+              !isCheckingExisting &&
+              !existingScale &&
+              checkError && (
+                <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                  {checkError}
+                </div>
+              )}
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isGenerating}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isGenerating}>
+              Cancelar
+            </AlertDialogCancel>
             <Button
               type="button"
               disabled={

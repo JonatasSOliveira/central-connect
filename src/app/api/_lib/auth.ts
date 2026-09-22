@@ -1,34 +1,18 @@
 import { cookies } from "next/headers";
-import { AuthErrors } from "@/application/errors/AuthErrors";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
+import { AuthErrors } from "@/modules/identity/application/errors/AuthErrors";
+import type {
+  AuthError,
+  AuthSuccess,
+  SessionPayload,
+} from "@/shared/contracts/auth";
 
-export interface ChurchInfo {
-  churchId: string;
-  roleId: string | null;
-}
-
-export interface SessionPayload {
-  userId: string;
-  memberId: string;
-  email: string;
-  fullName: string;
-  avatarUrl: string | null;
-  isSuperAdmin: boolean;
-  churchId: string | null;
-  churchName: string | null;
-  churches: ChurchInfo[];
-  permissions: string[];
-}
-
-export interface AuthSuccess {
-  ok: true;
-  user: SessionPayload;
-}
-
-export interface AuthError {
-  ok: false;
-  error: (typeof AuthErrors)[keyof typeof AuthErrors];
-}
+export type {
+  AuthError,
+  AuthSuccess,
+  ChurchInfo,
+  SessionPayload,
+} from "@/shared/contracts/auth";
 
 export async function validateSession(): Promise<AuthSuccess | AuthError> {
   const cookieStore = await cookies();

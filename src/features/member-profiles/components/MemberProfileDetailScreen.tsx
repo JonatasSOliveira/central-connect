@@ -1,9 +1,9 @@
 "use client";
 
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useMemberProfileDetail } from "@/features/member-profiles/hooks/useMemberProfileDetail";
+import { Permission } from "@/shared/domain/enums/Permission";
 import { MemberProfileBasicSection } from "./MemberProfileBasicSection";
 import { MemberProfileNotesSection } from "./MemberProfileNotesSection";
 import { MemberProfileProfessionalSection } from "./MemberProfileProfessionalSection";

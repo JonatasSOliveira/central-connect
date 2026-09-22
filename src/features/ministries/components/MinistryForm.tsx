@@ -2,7 +2,6 @@
 
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { MinistryFormInput } from "@/application/dtos/ministry/MinistryDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
@@ -11,6 +10,7 @@ import { ListItemCard } from "@/components/ui/list-item-card";
 import { MemberSelect } from "@/components/ui/member-select";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { useMinistryForm } from "@/features/ministries/hooks/useMinistryForm";
+import type { MinistryFormInput } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
 
 interface MinistryFormProps {
   mode: "create" | "edit";
@@ -108,7 +108,9 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
                   />
                   <NumberStepper
                     label="Qtd. obrigatória"
-                    value={Number(form.watch(`roles.${index}.requiredCount`)) || 1}
+                    value={
+                      Number(form.watch(`roles.${index}.requiredCount`)) || 1
+                    }
                     onChange={(value) =>
                       form.setValue(`roles.${index}.requiredCount`, value, {
                         shouldValidate: true,

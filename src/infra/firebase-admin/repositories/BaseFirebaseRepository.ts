@@ -3,7 +3,7 @@ import type {
   DocumentData,
   Query,
 } from "firebase-admin/firestore";
-import type { BaseEntity } from "@/domain/entities/BaseEntity";
+import type { BaseEntity } from "@/shared/domain/entities/BaseEntity";
 import { getFirestoreDb } from "../firebaseConfig";
 
 export abstract class BaseFirebaseRepository<Entity extends BaseEntity> {

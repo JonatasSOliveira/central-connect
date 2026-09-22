@@ -1,0 +1,66 @@
+import type { DocumentData } from "firebase-admin/firestore";
+import { BaseFirebaseRepository } from "@/infra/firebase-admin/repositories/BaseFirebaseRepository";
+import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { MemberMinistry } from "@/modules/members/domain/entities/MemberMinistry";
+import {
+  memberMinistryFromPersistence,
+  memberMinistryToPersistence,
+} from "../../mappers/memberMinistryMapper";
+
+export class MemberMinistryFirebaseRepository
+  extends BaseFirebaseRepository<MemberMinistry>
+  implements IMemberMinistryRepository
+{
+  constructor() {
+    super("memberMinistries");
+  }
+
+  protected toEntity(data: DocumentData, id: string): MemberMinistry {
+    return memberMinistryFromPersistence(data, id);
+  }
+
+  protected toFirestoreData(entity: MemberMinistry): DocumentData {
+    return memberMinistryToPersistence(entity);
+  }
+
+  async findByMemberId(memberId: string): Promise<MemberMinistry[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("memberId", "==", memberId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
+  async findByChurchId(churchId: string): Promise<MemberMinistry[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("churchId", "==", churchId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
+  async findByMinistryId(ministryId: string): Promise<MemberMinistry[]> {
+    const snapshot = await this.buildActiveQuery()
+      .where("ministryId", "==", ministryId)
+      .get();
+    return snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+  }
+
+  async findByMemberAndMinistry(
+    memberId: string,
+    ministryId: string,
+  ): Promise<MemberMinistry | null> {
+    const snapshot = await this.buildActiveQuery()
+      .where("memberId", "==", memberId)
+      .where("ministryId", "==", ministryId)
+      .limit(1)
+      .get();
+    if (snapshot.empty) return null;
+    const doc = snapshot.docs[0];
+    return this.toEntity(doc.data() as DocumentData, doc.id);
+  }
+}

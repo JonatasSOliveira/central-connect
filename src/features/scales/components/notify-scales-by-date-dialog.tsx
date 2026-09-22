@@ -64,7 +64,8 @@ export function NotifyScalesByDateDialog() {
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        const message = data.error?.message || "Falha ao notificar os escalados";
+        const message =
+          data.error?.message || "Falha ao notificar os escalados";
         setFeedbackType("error");
         setFeedbackMessage(message);
         toast.error(message);
@@ -103,7 +104,6 @@ export function NotifyScalesByDateDialog() {
           `Notificação enviada: ${nextSummary.successCount} sucesso(s), ${nextSummary.failureCount} falha(s).`,
         );
       }
-
     } catch {
       const message = "Erro ao enviar notificações. Tente novamente.";
       setFeedbackType("error");
@@ -132,7 +132,9 @@ export function NotifyScalesByDateDialog() {
           </AlertDialogHeader>
 
           <div className="py-4">
-            <label className="text-sm font-medium text-foreground">Data do culto</label>
+            <label className="text-sm font-medium text-foreground">
+              Data do culto
+            </label>
             <input
               type="date"
               value={selectedDate}
@@ -152,9 +154,10 @@ export function NotifyScalesByDateDialog() {
                 <p className="font-medium">{feedbackMessage}</p>
                 {summary && (
                   <p className="mt-1 text-xs">
-                    Cultos: {summary.serviceCount} | Escalas publicadas: {summary.scaleCount} |
-                    Membros alvo: {summary.targetedMembers} | Sucesso: {summary.successCount} |
-                    Falhas: {summary.failureCount}
+                    Cultos: {summary.serviceCount} | Escalas publicadas:{" "}
+                    {summary.scaleCount} | Membros alvo:{" "}
+                    {summary.targetedMembers} | Sucesso: {summary.successCount}{" "}
+                    | Falhas: {summary.failureCount}
                   </p>
                 )}
               </div>
@@ -162,7 +165,9 @@ export function NotifyScalesByDateDialog() {
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isSubmitting}>
+              Cancelar
+            </AlertDialogCancel>
             <Button
               type="button"
               onClick={handleNotify}

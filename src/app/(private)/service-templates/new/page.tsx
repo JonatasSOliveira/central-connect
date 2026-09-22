@@ -1,10 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ServiceTemplateForm } from "@/features/serviceTemplates/components/service-template-form";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { ServiceTemplateForm } from "@/features/serviceTemplates/components/service-template-form";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function NewServiceTemplatePage() {
   const router = useRouter();

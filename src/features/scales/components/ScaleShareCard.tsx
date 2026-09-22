@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ShareScaleView } from "../types/shareScale";
 
 interface ScaleShareCardProps {
@@ -36,14 +37,20 @@ export function ScaleShareCard({ data }: ScaleShareCardProps) {
     <section className="w-[1080px] bg-background p-10 text-foreground">
       <header className="rounded-3xl border border-primary/20 bg-card p-7">
         <div className="flex items-center gap-5 border-b border-border pb-6">
-          <img
+          <Image
             src="/logo-central-redonda.svg"
             alt="Central Connect"
+            width={96}
+            height={96}
             className="h-24 w-24 object-contain"
           />
           <div>
-            <p className="font-heading text-2xl text-primary">Central Connect</p>
-            <h1 className="font-heading text-6xl font-bold">Escala Publicada</h1>
+            <p className="font-heading text-2xl text-primary">
+              Central Connect
+            </p>
+            <h1 className="font-heading text-6xl font-bold">
+              Escala Publicada
+            </h1>
           </div>
         </div>
 
@@ -59,7 +66,9 @@ export function ScaleShareCard({ data }: ScaleShareCardProps) {
 
         {data.notes ? (
           <div className="mt-4 rounded-2xl border border-border bg-muted/30 p-5">
-            <p className="text-xl font-semibold text-muted-foreground">Observações</p>
+            <p className="text-xl font-semibold text-muted-foreground">
+              Observações
+            </p>
             <p className="mt-1 text-2xl text-foreground">{data.notes}</p>
           </div>
         ) : null}
@@ -73,7 +82,9 @@ export function ScaleShareCard({ data }: ScaleShareCardProps) {
               key={group.roleName}
               className="rounded-2xl border border-border bg-background px-5 py-4"
             >
-              <p className="text-3xl font-bold text-primary">{group.roleName}</p>
+              <p className="text-3xl font-bold text-primary">
+                {group.roleName}
+              </p>
               <ul className="mt-3 space-y-2">
                 {group.memberNames.map((memberName) => (
                   <li key={`${group.roleName}-${memberName}`}>

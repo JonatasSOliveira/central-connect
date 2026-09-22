@@ -3,9 +3,9 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ServiceAvailabilitySlot } from "@/domain/enums/ServiceAvailabilitySlot";
 import { serviceAvailabilityLabels } from "@/features/self-signup/constants/serviceAvailabilityLabels";
 import type { SelfSignupMemberFormState } from "@/features/self-signup/hooks/selfSignupMemberFormState";
+import { ServiceAvailabilitySlot } from "@/shared/domain/enums/ServiceAvailabilitySlot";
 
 interface MinistryOption {
   id: string;

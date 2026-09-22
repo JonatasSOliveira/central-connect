@@ -5,11 +5,6 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { ChurchFormData } from "@/application/dtos/church/ChurchDTO";
-import {
-  ChurchFormSchema,
-  churchFormDefaultValues,
-} from "@/application/dtos/church/ChurchDTO";
 import { Form, FormTemplate } from "@/components/templates/form-template";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +18,11 @@ import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
+import type { ChurchFormData } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import {
+  ChurchFormSchema,
+  churchFormDefaultValues,
+} from "@/modules/churches/application/dtos/church/ChurchDTO";
 
 interface ComponentConfig {
   name: string;

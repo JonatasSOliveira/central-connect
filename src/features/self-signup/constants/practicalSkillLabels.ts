@@ -1,5 +1,5 @@
-import { MutiraoAvailability } from "@/domain/enums/MutiraoAvailability";
-import { PracticalSkill } from "@/domain/enums/PracticalSkill";
+import { MutiraoAvailability } from "@/shared/domain/enums/MutiraoAvailability";
+import { PracticalSkill } from "@/shared/domain/enums/PracticalSkill";
 
 export const practicalSkillLabels: Record<PracticalSkill, string> = {
   [PracticalSkill.Electrical]: "Elétrica",

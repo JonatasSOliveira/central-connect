@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import {
   getPushToken,
   getStoredPushToken,
@@ -11,7 +12,6 @@ import {
   requestNotificationPermission,
   shouldSyncPushTokenForChurch,
 } from "@/infra/firebase-client/services/pushMessaging";
-import { useAuth } from "@/features/auth/hooks/useAuth";
 
 interface UsePushNotificationsResult {
   isSupported: boolean;
@@ -57,7 +57,8 @@ export function usePushNotifications(
   const AUTO_PROMPT_TS_KEY = "cc:push-auto-prompt-ts";
   const enableForegroundListener = options?.enableForegroundListener ?? true;
   const [isSupportedState, setIsSupportedState] = useState(false);
-  const [permission, setPermission] = useState<NotificationPermission>("default");
+  const [permission, setPermission] =
+    useState<NotificationPermission>("default");
   const [isRegistering, setIsRegistering] = useState(false);
   const registerInFlightRef = useRef<Promise<boolean> | null>(null);
   const lastRegisterFailureRef = useRef<string | null>(null);
@@ -72,104 +73,104 @@ export function usePushNotifications(
       const retryDelaysMs = [0, 300, 700, 1500];
       lastRegisterFailureRef.current = null;
 
-    for (let attempt = 1; attempt <= retryDelaysMs.length; attempt += 1) {
-      const delayMs = retryDelaysMs[attempt - 1];
+      for (let attempt = 1; attempt <= retryDelaysMs.length; attempt += 1) {
+        const delayMs = retryDelaysMs[attempt - 1];
 
-      if (delayMs > 0) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-      }
-
-      pushDebug("registerToken attempt", {
-        attempt,
-        maxAttempts: retryDelaysMs.length,
-        delayMs,
-        permission:
-          typeof window !== "undefined" && "Notification" in window
-            ? Notification.permission
-            : "unsupported",
-      });
-
-      const ok = await (async () => {
-        setIsRegistering(true);
-        pushDebug("registerToken start");
-
-        try {
-          const { token, deviceId } = await getPushToken();
-          pushDebug("registerToken generated", {
-            hasToken: Boolean(token),
-            token: token ? tokenPreview(token) : null,
-            deviceId,
-          });
-
-          if (!token) {
-            lastRegisterFailureRef.current =
-              "Não foi possível registrar o dispositivo para notificações agora.";
-            pushDebug("registerToken aborted: no token", { attempt });
-            return false;
-          }
-
-          const churchId = user?.churchId;
-          if (churchId && !shouldSyncPushTokenForChurch(churchId, token)) {
-            pushDebug("registerToken skipped: token recently synced", {
-              churchId,
-            });
-            return true;
-          }
-
-          const response = await fetch("/api/push-tokens", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token, deviceId, platform: "web" }),
-          });
-
-          let responseBody: unknown = null;
-          try {
-            responseBody = await response.json();
-          } catch {
-            responseBody = null;
-          }
-
-          pushDebug("registerToken api response", {
-            status: response.status,
-            ok: response.ok,
-            responseBody,
-          });
-
-          if (!response.ok) {
-            lastRegisterFailureRef.current =
-              "Não foi possível vincular este dispositivo à sua conta.";
-            return false;
-          }
-
-          if (churchId) {
-            markPushTokenSyncedForChurch(churchId, token);
-          }
-
-          return true;
-        } catch (error) {
-          pushDebug("registerToken error", {
-            error: error instanceof Error ? error.message : String(error),
-            attempt,
-          });
-          lastRegisterFailureRef.current =
-            error instanceof Error
-              ? error.message
-              : "Falha ao registrar notificações";
-          return false;
-        } finally {
-          setIsRegistering(false);
-          pushDebug("registerToken end", { attempt });
+        if (delayMs > 0) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
         }
-      })();
 
-      if (ok) {
-        pushDebug("registerToken success", { attempt });
-        return true;
+        pushDebug("registerToken attempt", {
+          attempt,
+          maxAttempts: retryDelaysMs.length,
+          delayMs,
+          permission:
+            typeof window !== "undefined" && "Notification" in window
+              ? Notification.permission
+              : "unsupported",
+        });
+
+        const ok = await (async () => {
+          setIsRegistering(true);
+          pushDebug("registerToken start");
+
+          try {
+            const { token, deviceId } = await getPushToken();
+            pushDebug("registerToken generated", {
+              hasToken: Boolean(token),
+              token: token ? tokenPreview(token) : null,
+              deviceId,
+            });
+
+            if (!token) {
+              lastRegisterFailureRef.current =
+                "Não foi possível registrar o dispositivo para notificações agora.";
+              pushDebug("registerToken aborted: no token", { attempt });
+              return false;
+            }
+
+            const churchId = user?.churchId;
+            if (churchId && !shouldSyncPushTokenForChurch(churchId, token)) {
+              pushDebug("registerToken skipped: token recently synced", {
+                churchId,
+              });
+              return true;
+            }
+
+            const response = await fetch("/api/push-tokens", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token, deviceId, platform: "web" }),
+            });
+
+            let responseBody: unknown = null;
+            try {
+              responseBody = await response.json();
+            } catch {
+              responseBody = null;
+            }
+
+            pushDebug("registerToken api response", {
+              status: response.status,
+              ok: response.ok,
+              responseBody,
+            });
+
+            if (!response.ok) {
+              lastRegisterFailureRef.current =
+                "Não foi possível vincular este dispositivo à sua conta.";
+              return false;
+            }
+
+            if (churchId) {
+              markPushTokenSyncedForChurch(churchId, token);
+            }
+
+            return true;
+          } catch (error) {
+            pushDebug("registerToken error", {
+              error: error instanceof Error ? error.message : String(error),
+              attempt,
+            });
+            lastRegisterFailureRef.current =
+              error instanceof Error
+                ? error.message
+                : "Falha ao registrar notificações";
+            return false;
+          } finally {
+            setIsRegistering(false);
+            pushDebug("registerToken end", { attempt });
+          }
+        })();
+
+        if (ok) {
+          pushDebug("registerToken success", { attempt });
+          return true;
+        }
       }
-    }
 
-    pushDebug("registerToken exhausted retries");
-    return false;
+      pushDebug("registerToken exhausted retries");
+      return false;
     })();
 
     registerInFlightRef.current = run;
@@ -272,55 +273,68 @@ export function usePushNotifications(
     return false;
   }, [isSupportedState, registerToken]);
 
-  const autoEnableNotificationsAfterLogin = useCallback(async (): Promise<boolean> => {
-    pushDebug("autoEnableNotificationsAfterLogin start", {
-      isSupportedState,
-      hasNotificationApi:
-        typeof window !== "undefined" && "Notification" in window,
-      permission:
-        typeof window !== "undefined" && "Notification" in window
-          ? Notification.permission
-          : "unsupported",
-    });
-
-    if (
-      typeof window === "undefined" ||
-      !("Notification" in window) ||
-      !isSupportedState
-    ) {
-      pushDebug("autoEnableNotificationsAfterLogin skipped: preconditions not met");
-      return false;
-    }
-
-    if (Notification.permission === "granted") {
-      setPermission("granted");
-      pushDebug("autoEnableNotificationsAfterLogin: permission already granted");
-      await syncRegisteredToken();
-      return true;
-    }
-
-    if (Notification.permission === "denied") {
-      setPermission("denied");
-      pushDebug("autoEnableNotificationsAfterLogin: permission denied");
-      return false;
-    }
-
-    const rawLastPrompt = window.localStorage.getItem(AUTO_PROMPT_TS_KEY);
-    const lastPrompt = rawLastPrompt ? Number(rawLastPrompt) : 0;
-
-    if (Number.isFinite(lastPrompt) && Date.now() - lastPrompt < AUTO_PROMPT_COOLDOWN_MS) {
-      pushDebug("autoEnableNotificationsAfterLogin skipped: cooldown active", {
-        lastPrompt,
-        elapsedMs: Date.now() - lastPrompt,
-        cooldownMs: AUTO_PROMPT_COOLDOWN_MS,
+  const autoEnableNotificationsAfterLogin =
+    useCallback(async (): Promise<boolean> => {
+      pushDebug("autoEnableNotificationsAfterLogin start", {
+        isSupportedState,
+        hasNotificationApi:
+          typeof window !== "undefined" && "Notification" in window,
+        permission:
+          typeof window !== "undefined" && "Notification" in window
+            ? Notification.permission
+            : "unsupported",
       });
-      return false;
-    }
 
-    pushDebug("autoEnableNotificationsAfterLogin prompting notification permission");
-    window.localStorage.setItem(AUTO_PROMPT_TS_KEY, String(Date.now()));
-    return enableNotifications();
-  }, [enableNotifications, isSupportedState, syncRegisteredToken]);
+      if (
+        typeof window === "undefined" ||
+        !("Notification" in window) ||
+        !isSupportedState
+      ) {
+        pushDebug(
+          "autoEnableNotificationsAfterLogin skipped: preconditions not met",
+        );
+        return false;
+      }
+
+      if (Notification.permission === "granted") {
+        setPermission("granted");
+        pushDebug(
+          "autoEnableNotificationsAfterLogin: permission already granted",
+        );
+        await syncRegisteredToken();
+        return true;
+      }
+
+      if (Notification.permission === "denied") {
+        setPermission("denied");
+        pushDebug("autoEnableNotificationsAfterLogin: permission denied");
+        return false;
+      }
+
+      const rawLastPrompt = window.localStorage.getItem(AUTO_PROMPT_TS_KEY);
+      const lastPrompt = rawLastPrompt ? Number(rawLastPrompt) : 0;
+
+      if (
+        Number.isFinite(lastPrompt) &&
+        Date.now() - lastPrompt < AUTO_PROMPT_COOLDOWN_MS
+      ) {
+        pushDebug(
+          "autoEnableNotificationsAfterLogin skipped: cooldown active",
+          {
+            lastPrompt,
+            elapsedMs: Date.now() - lastPrompt,
+            cooldownMs: AUTO_PROMPT_COOLDOWN_MS,
+          },
+        );
+        return false;
+      }
+
+      pushDebug(
+        "autoEnableNotificationsAfterLogin prompting notification permission",
+      );
+      window.localStorage.setItem(AUTO_PROMPT_TS_KEY, String(Date.now()));
+      return enableNotifications();
+    }, [enableNotifications, isSupportedState, syncRegisteredToken]);
 
   useEffect(() => {
     let mounted = true;
@@ -359,7 +373,8 @@ export function usePushNotifications(
 
     const bindForegroundNotifications = async () => {
       unsubscribe = await onForegroundPush((payload) => {
-        const title = payload.notification?.title ?? "Central Connect • Nova atualização";
+        const title =
+          payload.notification?.title ?? "Central Connect • Nova atualização";
         const body =
           payload.notification?.body ??
           "Há uma atualização importante na sua escala. Abra para ver os detalhes.";

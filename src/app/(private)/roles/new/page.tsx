@@ -1,7 +1,7 @@
 "use client";
 
-import { RoleForm } from "@/features/roles/components/RoleForm";
 import { PrivateHeader } from "@/components/modules/private-header";
+import { RoleForm } from "@/features/roles/components/RoleForm";
 
 export default function NewRolePage() {
   return (

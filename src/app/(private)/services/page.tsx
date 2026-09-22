@@ -1,24 +1,24 @@
 "use client";
 
 import {
-  Cross,
-  Plus,
-  Inbox,
-  Search,
-  Filter,
   ChevronDown,
   ChevronUp,
+  Cross,
+  Filter,
+  Inbox,
+  Plus,
+  Search,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { ListTemplate } from "@/components/templates/list-template";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
-import { ListTemplate } from "@/components/templates/list-template";
-import { Permission } from "@/domain/enums/Permission";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useServices } from "@/features/services/hooks/useServices";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function ServicesPage() {
   const router = useRouter();

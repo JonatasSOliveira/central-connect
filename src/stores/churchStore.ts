@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
+import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
 
 interface ChurchStore {
   selectedChurch: ChurchListItemDTO | null;

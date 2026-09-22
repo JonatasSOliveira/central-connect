@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Permission } from "@/shared/domain/enums/Permission";
 import {
   getScaleAttendance,
   publishScaleAttendance,

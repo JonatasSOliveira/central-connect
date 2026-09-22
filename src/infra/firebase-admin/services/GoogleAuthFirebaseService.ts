@@ -1,6 +1,6 @@
 import { type Auth, getAuth } from "firebase-admin/auth";
-import type { GoogleUserPayload } from "@/application/dtos/auth/GoogleUserPayload";
-import type { IGoogleAuthService } from "@/domain/ports/IGoogleAuthService";
+import type { IGoogleAuthService } from "@/modules/identity/application/ports/IGoogleAuthService";
+import type { GoogleUserPayload } from "@/shared/contracts/auth";
 import { getFirebaseApp } from "../firebaseConfig";
 
 export class GoogleAuthFirebaseService implements IGoogleAuthService {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { PracticalSkill } from "@/domain/enums/PracticalSkill";
-import { WaterBaptismStatus } from "@/domain/enums/WaterBaptismStatus";
+import { PracticalSkill } from "@/shared/domain/enums/PracticalSkill";
+import { WaterBaptismStatus } from "@/shared/domain/enums/WaterBaptismStatus";
 import {
   buildMemberProfileQuery,
   toggleFilterValue,
@@ -27,10 +27,11 @@ describe("memberProfileFilterParams", () => {
   });
 
   it("toggles array filter values", () => {
-    expect(toggleFilterValue([PracticalSkill.IT], PracticalSkill.Driving)).toEqual([
-      PracticalSkill.IT,
-      PracticalSkill.Driving,
-    ]);
-    expect(toggleFilterValue([PracticalSkill.IT], PracticalSkill.IT)).toBeUndefined();
+    expect(
+      toggleFilterValue([PracticalSkill.IT], PracticalSkill.Driving),
+    ).toEqual([PracticalSkill.IT, PracticalSkill.Driving]);
+    expect(
+      toggleFilterValue([PracticalSkill.IT], PracticalSkill.IT),
+    ).toBeUndefined();
   });
 });

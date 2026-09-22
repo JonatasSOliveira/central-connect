@@ -1,9 +1,9 @@
 "use client";
 
 import type { UseFormReturn } from "react-hook-form";
-import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDTO";
 import { FormField } from "@/components/ui/form-field";
 import { PhoneInput } from "@/components/ui/phone-input";
+import type { CreateMemberInput } from "@/modules/members/application/dtos/member/CreateMemberDTO";
 
 interface BasicInfoSectionProps {
   form: UseFormReturn<CreateMemberInput>;

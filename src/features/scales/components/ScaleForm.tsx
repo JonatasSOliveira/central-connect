@@ -1,18 +1,18 @@
 "use client";
 
+import { Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
-import { Share2 } from "lucide-react";
 import { FormTemplate } from "@/components/templates/form-template";
 import { Button } from "@/components/ui/button";
 import { MinistrySelect } from "@/components/ui/ministry-select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { ServiceSelect } from "@/components/ui/service-select";
-import type { ScaleFormInput } from "@/application/dtos/scale/ScaleDTO";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import type { ScaleFormInput } from "@/modules/scales/application/dtos/ScaleDTO";
+import { useScaleForm } from "../hooks/useScaleForm";
 import { ScaleMemberList } from "./ScaleMemberList";
 import { ShareScaleImageDialog } from "./ShareScaleImageDialog";
-import { useScaleForm } from "../hooks/useScaleForm";
 
 interface ScaleFormProps {
   mode: "create" | "edit";
@@ -148,23 +148,25 @@ export function ScaleForm({ mode, scaleId }: ScaleFormProps) {
             isLoadingRoles={isLoadingRoles}
           />
 
-          {mode === "edit" && scaleId && form.watch("status") === "published" && (
-            <div className="rounded-xl border border-primary/20 bg-card p-4">
-              <p className="text-sm text-muted-foreground">
-                Esta escala está publicada. Gere uma imagem com todos os dados
-                e compartilhe no WhatsApp.
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-3"
-                onClick={() => setShareDialogOpen(true)}
-              >
-                <Share2 className="mr-2 h-4 w-4" />
-                Compartilhar imagem da escala
-              </Button>
-            </div>
-          )}
+          {mode === "edit" &&
+            scaleId &&
+            form.watch("status") === "published" && (
+              <div className="rounded-xl border border-primary/20 bg-card p-4">
+                <p className="text-sm text-muted-foreground">
+                  Esta escala está publicada. Gere uma imagem com todos os dados
+                  e compartilhe no WhatsApp.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-3"
+                  onClick={() => setShareDialogOpen(true)}
+                >
+                  <Share2 className="mr-2 h-4 w-4" />
+                  Compartilhar imagem da escala
+                </Button>
+              </div>
+            )}
         </FormTemplate.Content>
 
         <FormTemplate.Footer

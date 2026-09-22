@@ -1,0 +1,108 @@
+import { type DocumentData, FieldPath } from "firebase-admin/firestore";
+import { BaseFirebaseRepository } from "@/infra/firebase-admin/repositories/BaseFirebaseRepository";
+import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
+import type { Member } from "@/modules/members/domain/entities/Member";
+import {
+  memberFromPersistence,
+  memberToPersistence,
+} from "@/modules/members/infrastructure/mappers/memberMapper";
+
+export class MemberFirebaseRepository
+  extends BaseFirebaseRepository<Member>
+  implements IMemberRepository
+{
+  constructor() {
+    super("members");
+  }
+
+  protected toEntity(data: DocumentData, id: string): Member {
+    return memberFromPersistence(data, id);
+  }
+
+  protected toFirestoreData(entity: Member): DocumentData {
+    return memberToPersistence(entity);
+  }
+
+  async findByEmail(email: string): Promise<Member | null> {
+    if (!email) return null;
+    const snapshot = await this.buildActiveQuery()
+      .where("email", "==", email)
+      .limit(1)
+      .get();
+    if (snapshot.empty) return null;
+    const doc = snapshot.docs[0];
+    return this.toEntity(doc.data() as DocumentData, doc.id);
+  }
+
+  async findByNormalizedPhone(phoneNormalized: string): Promise<Member | null> {
+    if (!phoneNormalized) return null;
+
+    const snapshot = await this.buildActiveQuery()
+      .where("phoneNormalized", "==", phoneNormalized)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    return this.toEntity(doc.data() as DocumentData, doc.id);
+  }
+
+  async findBySearch(search: string): Promise<Member[]> {
+    if (!search?.trim()) {
+      return this.findAll();
+    }
+
+    const searchLower = search.toLowerCase().trim();
+    const searchUpper = searchLower.replace(/.$/, (c) =>
+      String.fromCharCode(c.charCodeAt(0) + 1),
+    );
+
+    const snapshot = await this.buildActiveQuery()
+      .orderBy("fullName")
+      .startAt(searchLower)
+      .endAt(searchUpper)
+      .get();
+
+    const members = snapshot.docs.map((doc) =>
+      this.toEntity(doc.data() as DocumentData, doc.id),
+    );
+
+    return members.filter(
+      (m) =>
+        m.fullName.toLowerCase().startsWith(searchLower) ||
+        m.fullName.toLowerCase().includes(searchLower),
+    );
+  }
+
+  async findByIds(ids: string[]): Promise<Member[]> {
+    if (ids.length === 0) return [];
+
+    const uniqueIds = Array.from(new Set(ids));
+    const chunkSize = 10;
+    const idChunks: string[][] = [];
+
+    for (let index = 0; index < uniqueIds.length; index += chunkSize) {
+      idChunks.push(uniqueIds.slice(index, index + chunkSize));
+    }
+
+    const snapshots = await Promise.all(
+      idChunks.map((chunk) =>
+        this.buildActiveQuery()
+          .where(FieldPath.documentId(), "in", chunk)
+          .get(),
+      ),
+    );
+
+    const mapped = snapshots.flatMap((snapshot) =>
+      snapshot.docs.map((doc) =>
+        this.toEntity(doc.data() as DocumentData, doc.id),
+      ),
+    );
+
+    const membersById = new Map(mapped.map((member) => [member.id, member]));
+    return uniqueIds
+      .map((id) => membersById.get(id) ?? null)
+      .filter((member): member is Member => member !== null);
+  }
+}

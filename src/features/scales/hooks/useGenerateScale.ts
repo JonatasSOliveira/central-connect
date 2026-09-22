@@ -32,7 +32,9 @@ export function useGenerateScale() {
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCheckingExisting, setIsCheckingExisting] = useState(false);
-  const [existingScale, setExistingScale] = useState<ExistingScale | null>(null);
+  const [existingScale, setExistingScale] = useState<ExistingScale | null>(
+    null,
+  );
   const [checkError, setCheckError] = useState<string | null>(null);
   const checkRequestIdRef = useRef(0);
 

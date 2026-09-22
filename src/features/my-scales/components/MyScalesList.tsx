@@ -2,8 +2,8 @@
 
 import { CalendarCheck2, Clock3, History, ListChecks } from "lucide-react";
 import { ListTemplate } from "@/components/templates/list-template";
-import { cn } from "@/lib/utils";
 import { DateTile } from "@/components/ui/date-tile";
+import { cn } from "@/lib/utils";
 import { useMyScales } from "../hooks/useMyScales";
 
 function formatServiceDate(dateValue: string): string {
@@ -138,24 +138,38 @@ export function MyScalesList() {
                 <div className="flex gap-3">
                   <DateTile date={scale.serviceDate} time={scale.serviceTime} />
                   <div className="min-w-0">
-                    <p className="font-heading text-lg font-semibold text-foreground">{scale.serviceTitle}</p>
-                    <p className="mt-1 text-sm capitalize text-muted-foreground">{formatServiceWeekday(scale.serviceDate)}, {formatServiceDate(scale.serviceDate)}</p>
-                    <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary"><Clock3 className="h-4 w-4" />{scale.serviceTime}</p>
+                    <p className="font-heading text-lg font-semibold text-foreground">
+                      {scale.serviceTitle}
+                    </p>
+                    <p className="mt-1 text-sm capitalize text-muted-foreground">
+                      {formatServiceWeekday(scale.serviceDate)},{" "}
+                      {formatServiceDate(scale.serviceDate)}
+                    </p>
+                    <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
+                      <Clock3 className="h-4 w-4" />
+                      {scale.serviceTime}
+                    </p>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1 text-sm">
                   <p>
                     <span className="text-muted-foreground">Ministério:</span>{" "}
-                    <span className="text-foreground">{scale.ministryName}</span>
+                    <span className="text-foreground">
+                      {scale.ministryName}
+                    </span>
                   </p>
                   <p>
                     <span className="text-muted-foreground">Função:</span>{" "}
-                    <span className="text-foreground">{scale.ministryRoleName}</span>
+                    <span className="text-foreground">
+                      {scale.ministryRoleName}
+                    </span>
                   </p>
                   {scale.memberNotes && (
                     <p>
                       <span className="text-muted-foreground">Observação:</span>{" "}
-                      <span className="text-foreground">{scale.memberNotes}</span>
+                      <span className="text-foreground">
+                        {scale.memberNotes}
+                      </span>
                     </p>
                   )}
                 </div>

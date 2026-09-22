@@ -1,7 +1,17 @@
-import { acceptedJesusStatusLabels, churchAttendanceTimeLabels, discipleshipStatusLabels, officialMemberStatusLabels, smallGroupStatusLabels, waterBaptismStatusLabels } from "@/features/self-signup/constants/spiritualJourneyLabels";
 import { maritalStatusLabels } from "@/features/self-signup/constants/maritalStatusLabels";
-import { mutiraoAvailabilityLabels, practicalSkillLabels } from "@/features/self-signup/constants/practicalSkillLabels";
+import {
+  mutiraoAvailabilityLabels,
+  practicalSkillLabels,
+} from "@/features/self-signup/constants/practicalSkillLabels";
 import { serviceAvailabilityLabels } from "@/features/self-signup/constants/serviceAvailabilityLabels";
+import {
+  acceptedJesusStatusLabels,
+  churchAttendanceTimeLabels,
+  discipleshipStatusLabels,
+  officialMemberStatusLabels,
+  smallGroupStatusLabels,
+  waterBaptismStatusLabels,
+} from "@/features/self-signup/constants/spiritualJourneyLabels";
 
 export const memberProfileLabels = {
   acceptedJesus: acceptedJesusStatusLabels,

@@ -1,16 +1,16 @@
 "use client";
 
-import { Settings2, Plus, Inbox, Search } from "lucide-react";
+import { Inbox, Plus, Search, Settings2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { SearchInput } from "@/components/ui/search-input";
 import { ListTemplate } from "@/components/templates/list-template";
-import { Permission } from "@/domain/enums/Permission";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { SearchInput } from "@/components/ui/search-input";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useServiceTemplates } from "@/features/serviceTemplates/hooks/useServiceTemplates";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { GenerateWeekDialog } from "@/features/serviceTemplates/components/generate-week-dialog";
+import { useServiceTemplates } from "@/features/serviceTemplates/hooks/useServiceTemplates";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 const dayOfWeekLabels: Record<string, string> = {
   Sunday: "Domingo",

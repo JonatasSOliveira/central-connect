@@ -8,12 +8,12 @@ import { toast } from "sonner";
 import {
   type CreateRoleInput,
   CreateRoleInputSchema,
-} from "@/application/dtos/role/CreateRoleDTO";
+} from "@/modules/roles/application/dtos/role/CreateRoleDTO";
 import {
   type UpdateRoleInput,
   UpdateRoleInputSchema,
-} from "@/application/dtos/role/UpdateRoleDTO";
-import { Permission } from "@/domain/enums/Permission";
+} from "@/modules/roles/application/dtos/role/UpdateRoleDTO";
+import { Permission } from "@/shared/domain/enums/Permission";
 import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
 interface UseRoleFormProps {

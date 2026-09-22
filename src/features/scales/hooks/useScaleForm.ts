@@ -8,15 +8,15 @@ import { toast } from "sonner";
 import type {
   ScaleDetailDTO,
   ScaleFormInput,
-} from "@/application/dtos/scale/ScaleDTO";
-import { ScaleFormSchema } from "@/application/dtos/scale/ScaleDTO";
+} from "@/modules/scales/application/dtos/ScaleDTO";
+import { ScaleFormSchema } from "@/modules/scales/application/dtos/ScaleDTO";
+import { useAuthStore } from "@/stores/authStore";
 import type {
   MemberOption,
   MinistryOption,
   MinistryRoleOption,
   ServiceOption,
 } from "../types";
-import { useAuthStore } from "@/stores/authStore";
 
 interface UseScaleFormProps {
   mode: "create" | "edit";

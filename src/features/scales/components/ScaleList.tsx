@@ -7,14 +7,14 @@ import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
-import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Permission } from "@/shared/domain/enums/Permission";
+import { useScales } from "../hooks/useScales";
 import { GenerateScaleDialog } from "./generate-scale-dialog";
 import { NotifyScalesByDateDialog } from "./notify-scales-by-date-dialog";
-import { ShareScaleImageDialog } from "./ShareScaleImageDialog";
 import { ScaleFilter } from "./ScaleFilter";
 import { ScaleItem } from "./ScaleItem";
-import { useScales } from "../hooks/useScales";
+import { ShareScaleImageDialog } from "./ShareScaleImageDialog";
 
 interface ServiceOption {
   id: string;
@@ -238,7 +238,9 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
             tertiary={getServiceTitle(scale.serviceId)}
             status={scale.status}
             description={scale.notes ?? undefined}
-            onClick={canWriteScales ? () => handleEditScale(scale.id) : undefined}
+            onClick={
+              canWriteScales ? () => handleEditScale(scale.id) : undefined
+            }
             actions={
               canWriteScales || canDeleteScales
                 ? {

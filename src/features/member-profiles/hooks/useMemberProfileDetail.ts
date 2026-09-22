@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { MemberProfileDetailDTO } from "@/application/dtos/member-profile/MemberProfileDTO";
+import type { MemberProfileDetailDTO } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
 
 export function useMemberProfileDetail(memberId: string) {
   const [profile, setProfile] = useState<MemberProfileDetailDTO | null>(null);

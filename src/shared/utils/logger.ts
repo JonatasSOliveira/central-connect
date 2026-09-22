@@ -14,7 +14,9 @@ interface LogPayload {
   details?: Record<string, unknown>;
 }
 
-function getLogMethod(level: LogLevel): (message?: unknown, ...optionalParams: unknown[]) => void {
+function getLogMethod(
+  level: LogLevel,
+): (message?: unknown, ...optionalParams: unknown[]) => void {
   if (level === "error") {
     return console.error;
   }

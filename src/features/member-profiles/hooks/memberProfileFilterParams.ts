@@ -1,10 +1,8 @@
 "use client";
 
-import type { MemberProfileFilters } from "@/application/dtos/member-profile/MemberProfileDTO";
+import type { MemberProfileFilters } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
 
-export function buildMemberProfileQuery(
-  filters: MemberProfileFilters,
-): string {
+export function buildMemberProfileQuery(filters: MemberProfileFilters): string {
   const params = new URLSearchParams();
 
   const appendMany = (key: string, values?: string[]) => {

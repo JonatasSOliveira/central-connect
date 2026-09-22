@@ -1,11 +1,11 @@
 "use client";
 
-import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
-import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
-import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { Button } from "@/components/ui/button";
 import { ChurchSelect } from "@/components/ui/church-select";
 import { RoleSelect } from "@/components/ui/role-select";
+import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { MinistryListItemDTO } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
+import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
 import { MinistrySelector } from "./ministry-selector";
 
 interface EditableChurchCardProps {

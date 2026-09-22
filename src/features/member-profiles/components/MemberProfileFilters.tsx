@@ -1,24 +1,24 @@
 "use client";
 
 import { ChevronDown, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MultiSelect } from "@/components/ui/multi-select";
 import type {
   MemberProfileFilters as Filters,
   MemberProfileFilterOptionsDTO,
-} from "@/application/dtos/member-profile/MemberProfileDTO";
-import { MultiSelect } from "@/components/ui/multi-select";
-import { Button } from "@/components/ui/button";
-import { AcceptedJesusStatus } from "@/domain/enums/AcceptedJesusStatus";
-import { ChurchAttendanceTime } from "@/domain/enums/ChurchAttendanceTime";
-import { DiscipleshipStatus } from "@/domain/enums/DiscipleshipStatus";
-import { MaritalStatus } from "@/domain/enums/MaritalStatus";
-import { MutiraoAvailability } from "@/domain/enums/MutiraoAvailability";
-import { OfficialMemberStatus } from "@/domain/enums/OfficialMemberStatus";
-import { PracticalSkill } from "@/domain/enums/PracticalSkill";
-import { ServiceAvailabilitySlot } from "@/domain/enums/ServiceAvailabilitySlot";
-import { SmallGroupStatus } from "@/domain/enums/SmallGroupStatus";
-import { WaterBaptismStatus } from "@/domain/enums/WaterBaptismStatus";
-import { enumOptions } from "./MemberProfileFilterControls";
+} from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
+import { AcceptedJesusStatus } from "@/shared/domain/enums/AcceptedJesusStatus";
+import { ChurchAttendanceTime } from "@/shared/domain/enums/ChurchAttendanceTime";
+import { DiscipleshipStatus } from "@/shared/domain/enums/DiscipleshipStatus";
+import { MaritalStatus } from "@/shared/domain/enums/MaritalStatus";
+import { MutiraoAvailability } from "@/shared/domain/enums/MutiraoAvailability";
+import { OfficialMemberStatus } from "@/shared/domain/enums/OfficialMemberStatus";
+import { PracticalSkill } from "@/shared/domain/enums/PracticalSkill";
+import { ServiceAvailabilitySlot } from "@/shared/domain/enums/ServiceAvailabilitySlot";
+import { SmallGroupStatus } from "@/shared/domain/enums/SmallGroupStatus";
+import { WaterBaptismStatus } from "@/shared/domain/enums/WaterBaptismStatus";
 import { MemberProfileBooleanFilter } from "./MemberProfileBooleanFilter";
+import { enumOptions } from "./MemberProfileFilterControls";
 import { memberProfileLabels } from "./member-profile-labels";
 
 interface MemberProfileFiltersProps {
@@ -55,22 +55,32 @@ export function MemberProfileFilters({
           label="Habilidades"
           value={filters.practicalSkills ?? []}
           onChange={(value) =>
-            onChange({ ...filters, practicalSkills: compact(value as PracticalSkill[]) })
+            onChange({
+              ...filters,
+              practicalSkills: compact(value as PracticalSkill[]),
+            })
           }
-          options={enumOptions(PracticalSkill, memberProfileLabels.practicalSkills)}
+          options={enumOptions(
+            PracticalSkill,
+            memberProfileLabels.practicalSkills,
+          )}
           placeholder="Todas as habilidades"
         />
         <MultiSelect
           label="Ministerios atuais"
           value={filters.currentMinistryIds ?? []}
-          onChange={(value) => onChange({ ...filters, currentMinistryIds: compact(value) })}
+          onChange={(value) =>
+            onChange({ ...filters, currentMinistryIds: compact(value) })
+          }
           options={filterOptions.ministries}
           placeholder="Todos os ministerios"
         />
         <MultiSelect
           label="Ministerios desejados"
           value={filters.desiredMinistryIds ?? []}
-          onChange={(value) => onChange({ ...filters, desiredMinistryIds: compact(value) })}
+          onChange={(value) =>
+            onChange({ ...filters, desiredMinistryIds: compact(value) })
+          }
           options={filterOptions.ministries}
           placeholder="Todos os ministerios"
         />
@@ -78,81 +88,135 @@ export function MemberProfileFilters({
           label="Aceitou Jesus"
           value={filters.acceptedJesus ?? []}
           onChange={(value) =>
-            onChange({ ...filters, acceptedJesus: compact(value as AcceptedJesusStatus[]) })
+            onChange({
+              ...filters,
+              acceptedJesus: compact(value as AcceptedJesusStatus[]),
+            })
           }
-          options={enumOptions(AcceptedJesusStatus, memberProfileLabels.acceptedJesus)}
+          options={enumOptions(
+            AcceptedJesusStatus,
+            memberProfileLabels.acceptedJesus,
+          )}
           placeholder="Todos"
         />
         <MultiSelect
           label="Batismo nas aguas"
           value={filters.waterBaptized ?? []}
           onChange={(value) =>
-            onChange({ ...filters, waterBaptized: compact(value as WaterBaptismStatus[]) })
+            onChange({
+              ...filters,
+              waterBaptized: compact(value as WaterBaptismStatus[]),
+            })
           }
-          options={enumOptions(WaterBaptismStatus, memberProfileLabels.waterBaptized)}
+          options={enumOptions(
+            WaterBaptismStatus,
+            memberProfileLabels.waterBaptized,
+          )}
           placeholder="Todos"
         />
         <MultiSelect
           label="Estado civil"
           value={filters.maritalStatus ?? []}
           onChange={(value) =>
-            onChange({ ...filters, maritalStatus: compact(value as MaritalStatus[]) })
+            onChange({
+              ...filters,
+              maritalStatus: compact(value as MaritalStatus[]),
+            })
           }
-          options={enumOptions(MaritalStatus, memberProfileLabels.maritalStatus)}
+          options={enumOptions(
+            MaritalStatus,
+            memberProfileLabels.maritalStatus,
+          )}
           placeholder="Todos"
         />
         <MultiSelect
           label="Disponibilidade"
           value={filters.availabilitySlots ?? []}
           onChange={(value) =>
-            onChange({ ...filters, availabilitySlots: compact(value as ServiceAvailabilitySlot[]) })
+            onChange({
+              ...filters,
+              availabilitySlots: compact(value as ServiceAvailabilitySlot[]),
+            })
           }
-          options={enumOptions(ServiceAvailabilitySlot, memberProfileLabels.availabilitySlots)}
+          options={enumOptions(
+            ServiceAvailabilitySlot,
+            memberProfileLabels.availabilitySlots,
+          )}
           placeholder="Todas"
         />
         <MultiSelect
           label="Discipulado"
           value={filters.discipleshipStatus ?? []}
           onChange={(value) =>
-            onChange({ ...filters, discipleshipStatus: compact(value as DiscipleshipStatus[]) })
+            onChange({
+              ...filters,
+              discipleshipStatus: compact(value as DiscipleshipStatus[]),
+            })
           }
-          options={enumOptions(DiscipleshipStatus, memberProfileLabels.discipleshipStatus)}
+          options={enumOptions(
+            DiscipleshipStatus,
+            memberProfileLabels.discipleshipStatus,
+          )}
           placeholder="Todos"
         />
         <MultiSelect
           label="Pequeno grupo"
           value={filters.smallGroupStatus ?? []}
           onChange={(value) =>
-            onChange({ ...filters, smallGroupStatus: compact(value as SmallGroupStatus[]) })
+            onChange({
+              ...filters,
+              smallGroupStatus: compact(value as SmallGroupStatus[]),
+            })
           }
-          options={enumOptions(SmallGroupStatus, memberProfileLabels.smallGroupStatus)}
+          options={enumOptions(
+            SmallGroupStatus,
+            memberProfileLabels.smallGroupStatus,
+          )}
           placeholder="Todos"
         />
         <MultiSelect
           label="Tempo de igreja"
           value={filters.churchAttendanceTime ?? []}
           onChange={(value) =>
-            onChange({ ...filters, churchAttendanceTime: compact(value as ChurchAttendanceTime[]) })
+            onChange({
+              ...filters,
+              churchAttendanceTime: compact(value as ChurchAttendanceTime[]),
+            })
           }
-          options={enumOptions(ChurchAttendanceTime, memberProfileLabels.churchAttendanceTime)}
+          options={enumOptions(
+            ChurchAttendanceTime,
+            memberProfileLabels.churchAttendanceTime,
+          )}
           placeholder="Todos"
         />
         <MultiSelect
           label="Membro oficial"
           value={filters.officialMemberStatus ?? []}
           onChange={(value) =>
-            onChange({ ...filters, officialMemberStatus: compact(value as OfficialMemberStatus[]) })
+            onChange({
+              ...filters,
+              officialMemberStatus: compact(value as OfficialMemberStatus[]),
+            })
           }
-          options={enumOptions(OfficialMemberStatus, memberProfileLabels.officialMemberStatus)}
+          options={enumOptions(
+            OfficialMemberStatus,
+            memberProfileLabels.officialMemberStatus,
+          )}
           placeholder="Todos"
         />
         <MultiSelect
           label="Mutirao"
           value={filters.mutiraoAvailability ?? []}
           onChange={(value) =>
-            onChange({ ...filters, mutiraoAvailability: compact(value as MutiraoAvailability[]) })
+            onChange({
+              ...filters,
+              mutiraoAvailability: compact(value as MutiraoAvailability[]),
+            })
           }
-          options={enumOptions(MutiraoAvailability, memberProfileLabels.mutiraoAvailability)}
+          options={enumOptions(
+            MutiraoAvailability,
+            memberProfileLabels.mutiraoAvailability,
+          )}
           placeholder="Todos"
         />
         <MemberProfileBooleanFilter
@@ -163,7 +227,9 @@ export function MemberProfileFilters({
         <MemberProfileBooleanFilter
           label="CNH"
           value={filters.hasDriverLicense}
-          onChange={(value) => onChange({ ...filters, hasDriverLicense: value })}
+          onChange={(value) =>
+            onChange({ ...filters, hasDriverLicense: value })
+          }
         />
         <MemberProfileBooleanFilter
           label="Veiculo proprio"

@@ -3,12 +3,6 @@
 import { FormSelect } from "@/components/ui/form-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AcceptedJesusStatus } from "@/domain/enums/AcceptedJesusStatus";
-import { ChurchAttendanceTime } from "@/domain/enums/ChurchAttendanceTime";
-import { DiscipleshipStatus } from "@/domain/enums/DiscipleshipStatus";
-import { OfficialMemberStatus } from "@/domain/enums/OfficialMemberStatus";
-import { SmallGroupStatus } from "@/domain/enums/SmallGroupStatus";
-import { WaterBaptismStatus } from "@/domain/enums/WaterBaptismStatus";
 import {
   acceptedJesusStatusLabels,
   churchAttendanceTimeLabels,
@@ -18,6 +12,12 @@ import {
   waterBaptismStatusLabels,
 } from "@/features/self-signup/constants/spiritualJourneyLabels";
 import type { SelfSignupMemberFormState } from "@/features/self-signup/hooks/selfSignupMemberFormState";
+import { AcceptedJesusStatus } from "@/shared/domain/enums/AcceptedJesusStatus";
+import { ChurchAttendanceTime } from "@/shared/domain/enums/ChurchAttendanceTime";
+import { DiscipleshipStatus } from "@/shared/domain/enums/DiscipleshipStatus";
+import { OfficialMemberStatus } from "@/shared/domain/enums/OfficialMemberStatus";
+import { SmallGroupStatus } from "@/shared/domain/enums/SmallGroupStatus";
+import { WaterBaptismStatus } from "@/shared/domain/enums/WaterBaptismStatus";
 
 interface SelfSignupSpiritualJourneyStepProps {
   data: SelfSignupMemberFormState["spiritualJourney"];

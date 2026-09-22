@@ -1,13 +1,13 @@
 "use client";
 
+import { Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Chip } from "@/components/ui/chip";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { formatPhoneBrDynamic } from "@/shared/utils/phone";
 
 interface SelfSignupFormStepProps {

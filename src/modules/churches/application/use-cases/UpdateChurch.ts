@@ -1,0 +1,93 @@
+import type { IChurchRepository } from "@/modules/churches/application/ports/IChurchRepository";
+import {
+  Church,
+  type ChurchParams,
+} from "@/modules/churches/domain/entities/Church";
+import type { IRoleRepository } from "@/modules/roles/application/ports/IRoleRepository";
+import type { Result } from "@/shared/types/Result";
+import { BaseUseCase } from "../BaseUseCase";
+import { ChurchErrors } from "../errors/ChurchErrors";
+
+export interface UpdateChurchInput {
+  churchId: string;
+  name: string;
+  selfSignupDefaultRoleId?: string;
+  maxConsecutiveScalesPerMember?: number;
+  updatedByUserId: string;
+}
+
+export interface UpdateChurchOutput {
+  church: Church;
+}
+
+export class UpdateChurch extends BaseUseCase<
+  UpdateChurchInput,
+  UpdateChurchOutput
+> {
+  constructor(
+    private readonly churchRepository: IChurchRepository,
+    private readonly roleRepository: IRoleRepository,
+  ) {
+    super();
+  }
+
+  async execute(input: UpdateChurchInput): Promise<Result<UpdateChurchOutput>> {
+    try {
+      const existingChurch = await this.churchRepository.findById(
+        input.churchId,
+      );
+
+      if (!existingChurch) {
+        return {
+          ok: false,
+          error: ChurchErrors.CHURCH_NOT_FOUND,
+        };
+      }
+
+      const selfSignupDefaultRoleId =
+        input.selfSignupDefaultRoleId === undefined
+          ? existingChurch.selfSignupDefaultRoleId
+          : input.selfSignupDefaultRoleId.trim() || null;
+
+      if (selfSignupDefaultRoleId) {
+        const role = await this.roleRepository.findById(
+          selfSignupDefaultRoleId,
+        );
+        if (!role) {
+          return {
+            ok: false,
+            error: ChurchErrors.INVALID_SELF_SIGNUP_ROLE,
+          };
+        }
+      }
+
+      const churchParams: ChurchParams = {
+        id: existingChurch.id,
+        name: input.name,
+        selfSignupDefaultRoleId,
+        maxConsecutiveScalesPerMember:
+          input.maxConsecutiveScalesPerMember ??
+          existingChurch.maxConsecutiveScalesPerMember,
+        createdByUserId: existingChurch.createdByUserId ?? null,
+        createdAt: existingChurch.createdAt,
+        updatedAt: new Date(),
+        updatedByUserId: input.updatedByUserId,
+      };
+
+      const updatedChurch = new Church(churchParams);
+      const result = await this.churchRepository.update(updatedChurch);
+
+      return {
+        ok: true,
+        value: {
+          church: result,
+        },
+      };
+    } catch {
+      return {
+        ok: false,
+        error: ChurchErrors.CHURCH_UPDATE_FAILED,
+      };
+    }
+  }
+}

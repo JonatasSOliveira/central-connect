@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Permission } from "@/domain/enums/Permission";
+import { Permission } from "@/shared/domain/enums/Permission";
 import { canReadMemberProfiles } from "./canReadMemberProfiles";
 
 describe("canReadMemberProfiles", () => {

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
 import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
 interface UseRolesReturn {
@@ -58,33 +58,36 @@ export function useRoles(): UseRolesReturn {
     setSearchQuery(value);
   }, []);
 
-  const deleteRole = useCallback(async (roleId: string): Promise<boolean> => {
-    try {
-      const response = await fetch(`/api/roles/${roleId}`, {
-        method: "DELETE",
-      });
+  const deleteRole = useCallback(
+    async (roleId: string): Promise<boolean> => {
+      try {
+        const response = await fetch(`/api/roles/${roleId}`, {
+          method: "DELETE",
+        });
 
-      if (response.status === 204) {
-        const updatedRoles = allRoles.filter((role) => role.id !== roleId);
-        setAllRoles(updatedRoles);
-        setRoles(updatedRoles);
-        return true;
+        if (response.status === 204) {
+          const updatedRoles = allRoles.filter((role) => role.id !== roleId);
+          setAllRoles(updatedRoles);
+          setRoles(updatedRoles);
+          return true;
+        }
+
+        const data = await response.json();
+
+        if (data.ok) {
+          const updatedRoles = allRoles.filter((role) => role.id !== roleId);
+          setAllRoles(updatedRoles);
+          setRoles(updatedRoles);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error("Error deleting role:", error);
+        return false;
       }
-
-      const data = await response.json();
-
-      if (data.ok) {
-        const updatedRoles = allRoles.filter((role) => role.id !== roleId);
-        setAllRoles(updatedRoles);
-        setRoles(updatedRoles);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error deleting role:", error);
-      return false;
-    }
-  }, [allRoles, setRoles]);
+    },
+    [allRoles, setRoles],
+  );
 
   return {
     roles: filteredRoles,

@@ -1,10 +1,10 @@
 "use client";
 
 import { Droplets, HeartHandshake, UserCheck, Users } from "lucide-react";
-import type { MemberProfileSummaryDTO } from "@/application/dtos/member-profile/MemberProfileDTO";
-import { AcceptedJesusStatus } from "@/domain/enums/AcceptedJesusStatus";
-import { MaritalStatus } from "@/domain/enums/MaritalStatus";
-import { WaterBaptismStatus } from "@/domain/enums/WaterBaptismStatus";
+import type { MemberProfileSummaryDTO } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
+import { AcceptedJesusStatus } from "@/shared/domain/enums/AcceptedJesusStatus";
+import { MaritalStatus } from "@/shared/domain/enums/MaritalStatus";
+import { WaterBaptismStatus } from "@/shared/domain/enums/WaterBaptismStatus";
 import { MemberProfileMetricCard } from "./MemberProfileMetricCard";
 import { MemberProfileRankingList } from "./MemberProfileRankingList";
 import { memberProfileLabels } from "./member-profile-labels";

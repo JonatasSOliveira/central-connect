@@ -1,9 +1,9 @@
 "use client";
 
-import { MinistryForm } from "@/features/ministries/components/MinistryForm";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { MinistryForm } from "@/features/ministries/components/MinistryForm";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function NewMinistryPage() {
   usePermissions({

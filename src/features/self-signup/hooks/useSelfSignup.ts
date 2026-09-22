@@ -17,8 +17,8 @@ import { clearSelfSignupDraft } from "./selfSignupDraftStorage";
 import { finalizeSelfSignupAndLogin } from "./selfSignupFinalize";
 import {
   clearSelfSignupRedirectPayload,
-  setSelfSignupRedirectPayload,
   type SelfSignupRedirectPayload,
+  setSelfSignupRedirectPayload,
 } from "./selfSignupRedirectStorage";
 import type { UseSelfSignupReturn } from "./selfSignupTypes";
 import { useSelfSignupFormState } from "./useSelfSignupFormState";

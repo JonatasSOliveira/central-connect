@@ -9,8 +9,8 @@ import {
   type ChurchFormData,
   ChurchFormSchema,
   churchFormDefaultValues,
-} from "@/application/dtos/church/ChurchDTO";
-import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
+} from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
 import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
 interface UseChurchFormProps {
@@ -38,7 +38,11 @@ export function useChurchForm({
   );
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [roles, setRoles] = useState<RoleListItem[]>([]);
-  const { roles: cachedRoles, fetchIfStale, invalidate } = useRoleCatalogStore();
+  const {
+    roles: cachedRoles,
+    fetchIfStale,
+    invalidate,
+  } = useRoleCatalogStore();
 
   const form = useForm<ChurchFormData>({
     resolver: zodResolver(ChurchFormSchema),

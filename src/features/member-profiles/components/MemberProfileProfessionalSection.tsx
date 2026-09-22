@@ -1,7 +1,11 @@
-import type { MemberProfileDetailDTO } from "@/application/dtos/member-profile/MemberProfileDTO";
-import { labelList, memberProfileLabels, yesNoLabel } from "./member-profile-labels";
+import type { MemberProfileDetailDTO } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
 import { MemberProfileField } from "./MemberProfileField";
 import { MemberProfileSection } from "./MemberProfileSection";
+import {
+  labelList,
+  memberProfileLabels,
+  yesNoLabel,
+} from "./member-profile-labels";
 
 interface MemberProfileProfessionalSectionProps {
   profile: MemberProfileDetailDTO;

@@ -1,16 +1,16 @@
 "use client";
 
-import { User, Inbox, Search } from "lucide-react";
+import { Inbox, Search, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { SearchInput } from "@/components/ui/search-input";
 import { ListTemplate } from "@/components/templates/list-template";
-import { Permission } from "@/domain/enums/Permission";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useMembersListScreen } from "@/features/members/hooks/useMembers";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { SearchInput } from "@/components/ui/search-input";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useMembersListScreen } from "@/features/members/hooks/useMembers";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function MembersPage() {
   const router = useRouter();
@@ -128,7 +128,12 @@ export default function MembersPage() {
 
       {renderContent()}
 
-      {canWrite && <FloatingActionButton label="Novo membro" onClick={handleCreateMember} />}
+      {canWrite && (
+        <FloatingActionButton
+          label="Novo membro"
+          onClick={handleCreateMember}
+        />
+      )}
     </ListTemplate>
   );
 }

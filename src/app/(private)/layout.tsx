@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { AppShell } from "@/components/templates/app-shell";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { usePushNotifications } from "@/features/notifications/hooks/usePushNotifications";
-import { Loader2 } from "lucide-react";
-import { AppShell } from "@/components/templates/app-shell";
 
 const PUSH_DEBUG_ENABLED = process.env.NEXT_PUBLIC_PUSH_DEBUG === "true";
 
@@ -86,7 +86,5 @@ export default function PrivateLayout({
     return null;
   }
 
-  return (
-    <AppShell>{children}</AppShell>
-  );
+  return <AppShell>{children}</AppShell>;
 }

@@ -1,11 +1,11 @@
 "use client";
 
-import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ServiceTemplateForm } from "@/features/serviceTemplates/components/service-template-form";
+import { use } from "react";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { ServiceTemplateForm } from "@/features/serviceTemplates/components/service-template-form";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 interface EditServiceTemplatePageProps {
   params: Promise<{

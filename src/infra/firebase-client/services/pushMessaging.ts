@@ -2,8 +2,8 @@ import {
   getMessaging,
   getToken,
   isSupported,
-  onMessage,
   type MessagePayload,
+  onMessage,
   type Unsubscribe,
 } from "firebase/messaging";
 import { getFirebaseClientApp } from "@/infra/firebase-client/firebaseConfig";
@@ -59,7 +59,9 @@ function normalizeVapidKey(rawValue: string | undefined): string | null {
   return withoutQuotes.length > 0 ? withoutQuotes : null;
 }
 
-async function waitForServiceWorkerReady(timeoutMs: number): Promise<ServiceWorkerRegistration> {
+async function waitForServiceWorkerReady(
+  timeoutMs: number,
+): Promise<ServiceWorkerRegistration> {
   if (!("serviceWorker" in navigator)) {
     throw new Error("Service Worker não suportado");
   }
@@ -152,7 +154,10 @@ function setPushTokenSyncMarkers(markers: PushTokenSyncMarkers): void {
     return;
   }
 
-  window.localStorage.setItem(PUSH_TOKEN_SYNC_MARKERS_KEY, JSON.stringify(markers));
+  window.localStorage.setItem(
+    PUSH_TOKEN_SYNC_MARKERS_KEY,
+    JSON.stringify(markers),
+  );
 }
 
 export function shouldSyncPushTokenForChurch(
@@ -167,12 +172,16 @@ export function shouldSyncPushTokenForChurch(
   }
 
   const isSameToken = marker.token === token;
-  const isMarkerFresh = Date.now() - marker.syncedAt < PUSH_TOKEN_SYNC_MARKER_TTL_MS;
+  const isMarkerFresh =
+    Date.now() - marker.syncedAt < PUSH_TOKEN_SYNC_MARKER_TTL_MS;
 
   return !(isSameToken && isMarkerFresh);
 }
 
-export function markPushTokenSyncedForChurch(churchId: string, token: string): void {
+export function markPushTokenSyncedForChurch(
+  churchId: string,
+  token: string,
+): void {
   const markers = getPushTokenSyncMarkers();
   markers[churchId] = {
     token,

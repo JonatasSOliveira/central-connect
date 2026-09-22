@@ -81,30 +81,43 @@ async function buildShareScaleData({
 
   const scale = scaleData.value.scale;
 
-  const [servicesResponse, ministriesResponse, ministryResponse, membersResponse] =
-    await Promise.all([
-      fetch(`/api/services?churchId=${churchId}`),
-      fetch(`/api/ministries?churchId=${churchId}`),
-      fetch(`/api/ministries/${scale.ministryId}`),
-      fetch(`/api/members?churchId=${churchId}&ministryId=${scale.ministryId}`),
-    ]);
+  const [
+    servicesResponse,
+    ministriesResponse,
+    ministryResponse,
+    membersResponse,
+  ] = await Promise.all([
+    fetch(`/api/services?churchId=${churchId}`),
+    fetch(`/api/ministries?churchId=${churchId}`),
+    fetch(`/api/ministries/${scale.ministryId}`),
+    fetch(`/api/members?churchId=${churchId}&ministryId=${scale.ministryId}`),
+  ]);
 
   const servicesData = (await servicesResponse.json()) as ServiceResponse;
-  const ministriesData = (await ministriesResponse.json()) as MinistriesResponse;
+  const ministriesData =
+    (await ministriesResponse.json()) as MinistriesResponse;
   const ministryData = (await ministryResponse.json()) as MinistryResponse;
   const membersData = (await membersResponse.json()) as MembersResponse;
 
-  const service = servicesData.value?.services.find((item) => item.id === scale.serviceId);
+  const service = servicesData.value?.services.find(
+    (item) => item.id === scale.serviceId,
+  );
   const ministry = ministriesData.value?.ministries.find(
     (item) => item.id === scale.ministryId,
   );
 
   const rolesMap = new Map(
-    (ministryData.value?.ministry.roles ?? []).map((role) => [role.id, role.name]),
+    (ministryData.value?.ministry.roles ?? []).map((role) => [
+      role.id,
+      role.name,
+    ]),
   );
 
   const membersMap = new Map(
-    (membersData.value?.members ?? []).map((member) => [member.id, member.fullName]),
+    (membersData.value?.members ?? []).map((member) => [
+      member.id,
+      member.fullName,
+    ]),
   );
 
   const members: ShareScaleMemberView[] = scale.members.map((member) => ({
@@ -116,7 +129,9 @@ async function buildShareScaleData({
     scaleId: scale.id,
     churchName,
     serviceTitle: service?.title ?? "Culto não encontrado",
-    serviceDateLabel: service ? getFormattedDateLabel(service.date) : "Data não encontrada",
+    serviceDateLabel: service
+      ? getFormattedDateLabel(service.date)
+      : "Data não encontrada",
     serviceTime: service?.time ?? "Horário não encontrado",
     ministryName: ministry?.name ?? "Ministério não encontrado",
     notes: scale.notes,

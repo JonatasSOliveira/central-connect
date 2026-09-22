@@ -54,7 +54,9 @@ export function ShareScaleImageDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isGenerating}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={isGenerating}>
+            Cancelar
+          </AlertDialogCancel>
           <AlertDialogAction onClick={handleShare} disabled={isGenerating}>
             {isGenerating ? (
               <>

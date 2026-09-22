@@ -1,10 +1,10 @@
 "use client";
 
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { ScaleAttendanceReportSection } from "@/features/scale-attendance/components/ScaleAttendanceReportSection";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function ScaleAttendanceReportsPage() {
   const { user } = useAuth();

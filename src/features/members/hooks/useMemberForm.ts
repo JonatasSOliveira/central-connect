@@ -5,19 +5,19 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { ChurchListItemDTO } from "@/application/dtos/church/ChurchDTO";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
+import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
 import {
   type CreateMemberInput,
   CreateMemberInputSchema,
-} from "@/application/dtos/member/CreateMemberDTO";
-import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
-import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
-import { Permission } from "@/domain/enums/Permission";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
+} from "@/modules/members/application/dtos/member/CreateMemberDTO";
+import type { MinistryListItemDTO } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
+import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
+import { Permission } from "@/shared/domain/enums/Permission";
+import { normalizePhone } from "@/shared/utils/phone";
 import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
 import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
-import { normalizePhone } from "@/shared/utils/phone";
 
 interface UseMemberFormProps {
   mode: "create" | "edit";

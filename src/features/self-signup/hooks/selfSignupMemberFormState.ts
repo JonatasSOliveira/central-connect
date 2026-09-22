@@ -1,4 +1,4 @@
-import { MutiraoAvailability } from "@/domain/enums/MutiraoAvailability";
+import { MutiraoAvailability } from "@/shared/domain/enums/MutiraoAvailability";
 
 export interface SelfSignupMemberFormState {
   basicData: {

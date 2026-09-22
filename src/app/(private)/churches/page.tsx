@@ -1,14 +1,14 @@
 "use client";
 
-import { Church, Plus, Inbox, Search } from "lucide-react";
+import { Church, Inbox, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
-import { useChurches } from "@/features/churches/hooks/useChurches";
-import { Permission } from "@/domain/enums/Permission";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { useChurches } from "@/features/churches/hooks/useChurches";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function ChurchesPage() {
   const router = useRouter();

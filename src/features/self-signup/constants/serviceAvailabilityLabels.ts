@@ -1,4 +1,4 @@
-import { ServiceAvailabilitySlot } from "@/domain/enums/ServiceAvailabilitySlot";
+import { ServiceAvailabilitySlot } from "@/shared/domain/enums/ServiceAvailabilitySlot";
 
 export const serviceAvailabilityLabels: Record<
   ServiceAvailabilitySlot,

@@ -2,14 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import type { CreateMemberInput } from "@/application/dtos/member/CreateMemberDTO";
 import { FormTemplate } from "@/components/templates/form-template";
+import { FormSection } from "@/components/ui/form-section";
 import { useMemberForm } from "@/features/members/hooks/useMemberForm";
 import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
+import type { CreateMemberInput } from "@/modules/members/application/dtos/member/CreateMemberDTO";
 import { AvailabilitySection } from "./availability-section";
 import { BasicInfoSection } from "./basic-info-section";
 import { ChurchSection } from "./church-section";
-import { FormSection } from "@/components/ui/form-section";
 
 interface MemberFormProps {
   mode: "create" | "edit";
@@ -105,15 +105,24 @@ export function MemberForm({
     <FormTemplate>
       <FormTemplate.Form<CreateMemberInput> form={form} onSubmit={onSubmit}>
         <FormTemplate.Content>
-          <FormSection title="Dados pessoais" description="Informações usadas para identificar o membro.">
+          <FormSection
+            title="Dados pessoais"
+            description="Informações usadas para identificar o membro."
+          >
             <BasicInfoSection form={form} disabled={readOnly} />
           </FormSection>
 
-          <FormSection title="Disponibilidade" description="Defina os dias em que esta pessoa pode servir.">
+          <FormSection
+            title="Disponibilidade"
+            description="Defina os dias em que esta pessoa pode servir."
+          >
             <AvailabilitySection form={form} disabled={readOnly} />
           </FormSection>
 
-          <FormSection title="Vínculos e ministérios" description="Defina a igreja, o cargo e as áreas em que o membro atua.">
+          <FormSection
+            title="Vínculos e ministérios"
+            description="Defina a igreja, o cargo e as áreas em que o membro atua."
+          >
             <ChurchSection
               form={form}
               editableFields={editableFields}

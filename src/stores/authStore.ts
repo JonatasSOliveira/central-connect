@@ -1,14 +1,14 @@
 import { create } from "zustand";
-import {
-  authService,
-  type CurrentUser,
-} from "@/application/services/AuthService";
 import { signOut as firebaseClientSignOut } from "@/infra/firebase-client/services/googleAuth";
 import {
   clearPushTokenSyncMarkers,
   clearStoredPushToken,
   getStoredPushToken,
 } from "@/infra/firebase-client/services/pushMessaging";
+import {
+  authService,
+  type CurrentUser,
+} from "@/modules/identity/application/services/AuthService";
 
 interface AuthState {
   user: CurrentUser | null;

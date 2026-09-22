@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { RoleListItem } from "@/application/dtos/role/ListRolesDTO";
+import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000;
 

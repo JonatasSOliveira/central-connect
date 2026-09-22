@@ -2,11 +2,11 @@
 
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import type { MinistryListItemDTO } from "@/application/dtos/ministry/MinistryDTO";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { MinistrySelect } from "@/components/ui/ministry-select";
+import type { MinistryListItemDTO } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
 
 interface MinistrySelectorProps {
   churchId: string;

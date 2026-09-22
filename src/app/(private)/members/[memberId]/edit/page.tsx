@@ -1,9 +1,9 @@
 "use client";
 
-import { use } from "react";
 import { useSearchParams } from "next/navigation";
-import { MemberForm } from "@/features/members/components";
+import { use } from "react";
 import { PrivateHeader } from "@/components/modules/private-header";
+import { MemberForm } from "@/features/members/components";
 
 interface EditMemberPageProps {
   params: Promise<{ memberId: string }>;

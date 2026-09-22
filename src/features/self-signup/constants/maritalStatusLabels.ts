@@ -1,4 +1,4 @@
-import { MaritalStatus } from "@/domain/enums/MaritalStatus";
+import { MaritalStatus } from "@/shared/domain/enums/MaritalStatus";
 
 export const maritalStatusLabels: Record<MaritalStatus, string> = {
   [MaritalStatus.Single]: "Solteiro(a)",

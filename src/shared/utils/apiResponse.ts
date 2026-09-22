@@ -1,6 +1,6 @@
 import type { ZodError } from "zod";
-import { ApiErrors } from "@/application/errors/ApiErrors";
 import { HttpStatus } from "@/shared/constants/HttpStatus";
+import { ApiErrors } from "@/shared/errors/ApiErrors";
 
 const ERROR_STATUS_MAP: Record<
   string,
@@ -24,6 +24,18 @@ const ERROR_STATUS_MAP: Record<
   SERVICE_DUPLICATE: HttpStatus.BAD_REQUEST,
   SELF_SIGNUP_LOOKUP_FAILED: HttpStatus.INTERNAL_SERVER_ERROR,
   SELF_SIGNUP_FINALIZE_FAILED: HttpStatus.INTERNAL_SERVER_ERROR,
+  MINISTRY_NOT_FOUND: HttpStatus.NOT_FOUND,
+  MINISTRY_ALREADY_EXISTS: HttpStatus.BAD_REQUEST,
+  MINISTRY_CREATION_FAILED: HttpStatus.INTERNAL_SERVER_ERROR,
+  MINISTRY_UPDATE_FAILED: HttpStatus.INTERNAL_SERVER_ERROR,
+  MINISTRY_DELETION_FAILED: HttpStatus.INTERNAL_SERVER_ERROR,
+  ROLE_NOT_FOUND: HttpStatus.NOT_FOUND,
+  ROLE_ALREADY_EXISTS: HttpStatus.BAD_REQUEST,
+  ROLE_CREATION_FAILED: HttpStatus.INTERNAL_SERVER_ERROR,
+  ROLE_UPDATE_FAILED: HttpStatus.INTERNAL_SERVER_ERROR,
+  ROLE_DELETION_FAILED: HttpStatus.INTERNAL_SERVER_ERROR,
+  ROLE_IS_SYSTEM: HttpStatus.BAD_REQUEST,
+  INVALID_PERMISSION: HttpStatus.BAD_REQUEST,
 };
 
 export function apiError(

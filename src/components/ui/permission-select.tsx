@@ -8,7 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Permission, PermissionGroups } from "@/domain/enums/Permission";
+import { Permission, PermissionGroups } from "@/shared/domain/enums/Permission";
 
 interface PermissionSelectProps {
   value: Permission[];

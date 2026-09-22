@@ -1,32 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
+  ArrowRightLeft,
+  BarChart3,
+  BellRing,
+  Building2,
+  CalendarCheck2,
+  CalendarDays,
   Church,
+  ClipboardCheck,
+  ClipboardList,
+  HandHeart,
+  LogOut,
+  Settings2,
   UserRoundKey,
   Users,
-  LogOut,
-  HandHeart,
-  ArrowRightLeft,
-  CalendarDays,
-  CalendarCheck2,
-  Settings2,
-  ClipboardList,
-  ClipboardCheck,
-  BellRing,
-  BarChart3,
-  Building2,
 } from "lucide-react";
-import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
-import { GreetingSection } from "@/features/home/components/greeting-section";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { CardItem } from "@/components/ui/card-item";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { PrivateHeader } from "@/components/modules/private-header";
-import { Permission } from "@/domain/enums/Permission";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
-import { usePushNotifications } from "@/features/notifications/hooks/usePushNotifications";
-import { useChurchStore } from "@/stores/churchStore";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,9 +29,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { APP_VERSION } from "@/shared/constants/app";
-import { useMyScales } from "@/features/my-scales/hooks/useMyScales";
+import { CardItem } from "@/components/ui/card-item";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { usePermissions } from "@/features/auth/hooks/usePermissions";
+import { GreetingSection } from "@/features/home/components/greeting-section";
 import { NextScaleCard } from "@/features/home/components/next-scale-card";
+import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
+import { useMyScales } from "@/features/my-scales/hooks/useMyScales";
+import { usePushNotifications } from "@/features/notifications/hooks/usePushNotifications";
+import { APP_VERSION } from "@/shared/constants/app";
+import { Permission } from "@/shared/domain/enums/Permission";
+import { useChurchStore } from "@/stores/churchStore";
 
 export default function HomePage() {
   const router = useRouter();
@@ -185,7 +185,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {!isLoadingScales && <div className="mb-7"><NextScaleCard scale={nextScale} /></div>}
+        {!isLoadingScales && (
+          <div className="mb-7">
+            <NextScaleCard scale={nextScale} />
+          </div>
+        )}
 
         {canShowAdminSection && (
           <>
@@ -330,7 +334,6 @@ export default function HomePage() {
                   onClick={handleMemberSelfClick}
                 />
               )}
-
             </div>
           </>
         )}

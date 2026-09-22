@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { ChurchFormData } from "@/application/dtos/church/ChurchDTO";
 import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { RoleSelect } from "@/components/ui/role-select";
 import { SelfSignupShareDialog } from "@/features/churches/components/SelfSignupShareDialog";
 import { useChurchForm } from "@/features/churches/hooks/useChurchForm";
+import type { ChurchFormData } from "@/modules/churches/application/dtos/church/ChurchDTO";
 
 interface ChurchFormProps {
   mode: "create" | "edit";

@@ -2,9 +2,9 @@
 
 import { UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { MemberProfileListItemDTO } from "@/application/dtos/member-profile/MemberProfileDTO";
-import { Chip } from "@/components/ui/chip";
 import { ListTemplate } from "@/components/templates/list-template";
+import { Chip } from "@/components/ui/chip";
+import type { MemberProfileListItemDTO } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
 import { labelList, memberProfileLabels } from "./member-profile-labels";
 
 interface MemberProfileMembersListProps {
@@ -67,7 +67,8 @@ export function MemberProfileMembersList({
                     {description || "Sem resumo estruturado"}
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Ministerios: {labelList(member.currentMinistryIds, ministriesById)}
+                    Ministerios:{" "}
+                    {labelList(member.currentMinistryIds, ministriesById)}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {member.practicalSkills.slice(0, 4).map((skill) => (

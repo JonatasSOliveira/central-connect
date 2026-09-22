@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Permission } from "@/domain/enums/Permission";
+import { Permission } from "@/shared/domain/enums/Permission";
 import { getNavigationItems } from "./navigationItems";
 
 describe("getNavigationItems", () => {
@@ -16,7 +16,13 @@ describe("getNavigationItems", () => {
       getNavigationItems({
         permissions: [Permission.SCALE_READ, Permission.SCALE_ATTENDANCE_READ],
       }).map((item) => item.href),
-    ).toEqual(["/home", "/my-scales", "/scales", "/scale-attendances", "/more"]);
+    ).toEqual([
+      "/home",
+      "/my-scales",
+      "/scales",
+      "/scale-attendances",
+      "/more",
+    ]);
   });
 
   it("shows all navigation destinations to a super admin", () => {

@@ -1,4 +1,4 @@
-import { Permission } from "@/domain/enums/Permission";
+import { Permission } from "@/shared/domain/enums/Permission";
 
 interface MemberProfileReader {
   isSuperAdmin: boolean;
