@@ -9,7 +9,7 @@ import { CreateMemberInputSchema } from "../schemas/member-schema";
 
 interface UseCases {
   listMembers: ListMembers;
-  createMember: CreateMember;
+  createMember: Pick<CreateMember, "execute">;
 }
 function userChurches(user: SessionPayload) {
   return user.isSuperAdmin

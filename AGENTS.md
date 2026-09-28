@@ -8,7 +8,7 @@ O Central Connect é um Progressive Web App para gestão de escalas ministeriais
 
 Usuários autenticados podem pertencer a uma ou mais igrejas. Cada igreja possui membros, ministérios, funções, serviços e escalas. Administradores e líderes gerenciam os dados e publicam escalas; membros consultam suas escalas e, quando autorizados, editam o próprio perfil.
 
-O sistema usa autenticação Google, Firebase Authentication, Firestore e Firebase Cloud Messaging. A autorização é orientada por permissões e sempre deve respeitar o isolamento entre igrejas.
+O sistema usa autenticação Google com Firebase Authentication, PostgreSQL para os dados de negócio e Firebase Cloud Messaging para notificações. A autorização é orientada por permissões e sempre deve respeitar o isolamento entre igrejas.
 
 O escopo atual inclui:
 
@@ -73,13 +73,13 @@ Responsabilidades das pastas:
 
 - `src/modules/<module>/domain`: entidades, value objects, invariantes e erros de domínio.
 - `src/modules/<module>/application`: casos de uso, DTOs, erros e ports.
-- `src/modules/<module>/infrastructure`: adaptadores concretos dos ports, como Firebase repositories e mappers.
+- `src/modules/<module>/infrastructure`: adaptadores concretos dos ports, como repositories Drizzle/Firebase e mappers.
 - `src/modules/<module>/presentation`: handlers HTTP, schemas e presenters.
 - `src/composition`: composition root da aplicação.
 - `src/app`: entradas finas do App Router: páginas e route handlers.
 - `src/features`: hooks, componentes e estado específico da experiência frontend.
 - `src/stores`: estado global genuíno, usando Zustand.
-- `src/infra`: infraestrutura técnica compartilhada, como Firebase Admin, Firebase Client e JWT.
+- `src/infra`: infraestrutura técnica compartilhada, como banco PostgreSQL/Drizzle, Firebase Admin, Firebase Client e JWT.
 - `src/shared`: código realmente reutilizável que não importa módulos de negócio.
 - `src/components`: componentes UI compartilhados e componentes compostos.
 
@@ -162,15 +162,35 @@ Não crie pastas vazias ou compositions para módulos sem comportamento funciona
 - Não exponha entidades de domínio, tipos do Firebase ou objetos HTTP diretamente nos contratos públicos.
 - Evite abstrações especulativas e service locators globais.
 - Mantenha `create`, `update`, `delete`, `list` e `get` semanticamente claros.
-- IDs de documentos devem ser gerados pelo Firebase; não use IDs sequenciais.
+- IDs de entidades devem ser UUIDs gerados pelo PostgreSQL; não use IDs sequenciais.
 
-## Firebase e infraestrutura
+## Banco, Firebase e infraestrutura
 
-O projeto usa duas bibliotecas Firebase:
+O PostgreSQL é a fonte de verdade dos dados de negócio. Drizzle ORM e
+drizzle-kit controlam o schema por migrations versionadas em `migrations/`.
+
+| Tecnologia | Uso | Local permitido |
+|---|---|---|
+| PostgreSQL + Drizzle | entidades, relações, consultas e transações server-side | `src/infra/database` e infrastructure dos módulos |
+| Firebase Authentication | login e validação da identidade externa | `src/infra/firebase-admin` e `src/infra/firebase-client` |
+| Firebase Cloud Messaging | envio de notificações push | `src/infra/firebase-admin` e infrastructure dos módulos |
+
+Regras do PostgreSQL:
+
+- Nunca acesse Drizzle ou `DATABASE_URL` no client.
+- Repositories PostgreSQL devem implementar ports do módulo e ficar na camada infrastructure.
+- Rows do Drizzle nunca devem atravessar a fronteira do repository; use mappers.
+- Use transactions para operações que alteram múltiplas tabelas relacionadas.
+- Use `timestamptz` em UTC e mantenha constraints/indexes no schema.
+- Crie e aplique migrations com `pnpm migrations:gen` e `pnpm migrations:migrate`.
+- Não use `drizzle-kit push` em ambientes compartilhados.
+- A URL e credenciais do banco devem ficar somente em `.env.local`.
+
+O projeto mantém duas bibliotecas Firebase:
 
 | Biblioteca | Uso | Local permitido |
 |---|---|---|
-| Firebase Admin | APIs, repositories e serviços server-side | `src/infra/firebase-admin` ou infrastructure do módulo |
+| Firebase Admin | autenticação server-side e FCM | `src/infra/firebase-admin` ou infrastructure do módulo |
 | Firebase SDK | autenticação e recursos client-side | `src/infra/firebase-client` |
 
 Regras:
@@ -178,7 +198,7 @@ Regras:
 - Nunca use Firebase diretamente em componentes React.
 - Nunca crie queries Firestore diretamente em hooks.
 - Queries específicas de uma feature devem ficar no adapter/repository do módulo.
-- `BaseFirebaseRepository` é infraestrutura técnica compartilhada; repositories de negócio pertencem aos respectivos módulos.
+- Não existem repositories Firestore ativos; repositories de negócio usam PostgreSQL/Drizzle.
 - Mappers de entidades pertencem ao módulo dono da entidade.
 - Serviços técnicos compartilhados devem permanecer isolados em `src/infra`.
 - Secrets devem ficar em `.env.local`; nunca commite credenciais ou arquivos de configuração sensíveis.

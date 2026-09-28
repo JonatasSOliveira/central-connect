@@ -1,19 +1,21 @@
 import { validateSession } from "@/app/api/_lib/auth";
+import { getDatabaseClient } from "@/infra/database/get-database-client";
 import { CreateServiceTemplate } from "@/modules/service-templates/application/use-cases/CreateServiceTemplate";
 import { DeleteServiceTemplate } from "@/modules/service-templates/application/use-cases/DeleteServiceTemplate";
 import { GenerateWeekServices } from "@/modules/service-templates/application/use-cases/GenerateWeekServices";
 import { GetServiceTemplate } from "@/modules/service-templates/application/use-cases/GetServiceTemplate";
 import { ListServiceTemplates } from "@/modules/service-templates/application/use-cases/ListServiceTemplates";
 import { UpdateServiceTemplate } from "@/modules/service-templates/application/use-cases/UpdateServiceTemplate";
-import { ServiceTemplateFirebaseRepository } from "@/modules/service-templates/infrastructure/persistence/firebase/ServiceTemplateFirebaseRepository";
+import { ServiceTemplateDrizzleRepository } from "@/modules/service-templates/infrastructure/persistence/drizzle/ServiceTemplateDrizzleRepository";
 import { createGenerateWeekHandler } from "@/modules/service-templates/presentation/http/handlers/generate-week-handler";
 import { createServiceTemplateHandler } from "@/modules/service-templates/presentation/http/handlers/service-template-handler";
 import { createServiceTemplatesHandler } from "@/modules/service-templates/presentation/http/handlers/service-templates-handler";
-import { ServiceFirebaseRepository } from "@/modules/services/infrastructure/persistence/firebase/ServiceFirebaseRepository";
+import { ServiceDrizzleRepository } from "@/modules/services/infrastructure/persistence/drizzle/ServiceDrizzleRepository";
 
 export function createServiceTemplatesComposition() {
-  const templateRepository = new ServiceTemplateFirebaseRepository();
-  const serviceRepository = new ServiceFirebaseRepository();
+  const database = getDatabaseClient();
+  const templateRepository = new ServiceTemplateDrizzleRepository(database);
+  const serviceRepository = new ServiceDrizzleRepository(database);
   const useCases = {
     listServiceTemplates: new ListServiceTemplates(templateRepository),
     getServiceTemplate: new GetServiceTemplate(templateRepository),

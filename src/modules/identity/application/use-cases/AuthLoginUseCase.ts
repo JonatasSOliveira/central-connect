@@ -55,19 +55,23 @@ export class AuthLoginUseCase extends BaseUseCase<
         );
 
         if (existingUser) {
+          const authenticatedUser = await this.ensureFirebaseUid(
+            existingUser,
+            googleUser.sub,
+          );
           const churches = await this.getMemberChurches(
             existingMember.id,
-            existingUser.isSuperAdmin,
+            authenticatedUser.isSuperAdmin,
           );
           const selectedChurchId =
             churches.length === 1 ? churches[0].churchId : null;
           const permissions = await this.getPermissionsForChurch(
             selectedChurchId,
             churches,
-            existingUser.isSuperAdmin,
+            authenticatedUser.isSuperAdmin,
           );
           return this.buildSuccessResponse(
-            existingUser,
+            authenticatedUser,
             existingMember,
             churches,
             permissions,
@@ -75,7 +79,7 @@ export class AuthLoginUseCase extends BaseUseCase<
           );
         }
 
-        const newUser = await this.createUser(existingMember.id);
+        const newUser = await this.createUser(existingMember.id, googleUser.sub);
         const churches = await this.getMemberChurches(
           existingMember.id,
           newUser.isSuperAdmin,
@@ -102,7 +106,7 @@ export class AuthLoginUseCase extends BaseUseCase<
           googleUser.name,
           googleUser.picture,
         );
-        const newUser = await this.createUser(newMember.id, true);
+        const newUser = await this.createUser(newMember.id, googleUser.sub, true);
         const churches = await this.getMemberChurches(newMember.id, true);
         return this.buildSuccessResponse(
           newUser,
@@ -142,10 +146,12 @@ export class AuthLoginUseCase extends BaseUseCase<
 
   private async createUser(
     memberId: string,
+    firebaseUid: string,
     isSuperAdmin = false,
   ): Promise<User> {
     const userParams: UserParams = {
       memberId,
+      firebaseUid,
       isSuperAdmin,
       isActive: true,
       createdAt: new Date(),
@@ -153,6 +159,32 @@ export class AuthLoginUseCase extends BaseUseCase<
     };
     const user = new User(userParams);
     return this.userRepository.create(user);
+  }
+
+  private async ensureFirebaseUid(
+    user: User,
+    firebaseUid: string,
+  ): Promise<User> {
+    if (user.firebaseUid === firebaseUid) return user;
+
+    if (user.firebaseUid) {
+      throw new Error("User is linked to a different Firebase identity");
+    }
+
+    return this.userRepository.update(
+      new User({
+        id: user.id,
+        firebaseUid,
+        memberId: user.memberId,
+        googleAccessToken: user.googleAccessToken,
+        googleRefreshToken: user.googleRefreshToken,
+        isActive: user.isActive,
+        isSuperAdmin: user.isSuperAdmin,
+        lastLoginAt: new Date(),
+        createdAt: user.createdAt,
+        updatedAt: new Date(),
+      }),
+    );
   }
 
   private async getMemberChurches(

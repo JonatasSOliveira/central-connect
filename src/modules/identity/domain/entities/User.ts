@@ -5,6 +5,7 @@ import {
 
 export class User extends AuditableEntity {
   protected readonly _memberId: string | null;
+  protected readonly _firebaseUid: string | null;
   protected readonly _googleAccessToken: string | null;
   protected readonly _googleRefreshToken: string | null;
   protected readonly _isActive: boolean;
@@ -14,6 +15,7 @@ export class User extends AuditableEntity {
   constructor(params: UserParams) {
     super(params);
     this._memberId = params.memberId ?? null;
+    this._firebaseUid = params.firebaseUid ?? null;
     this._googleAccessToken = params.googleAccessToken ?? null;
     this._googleRefreshToken = params.googleRefreshToken ?? null;
     this._isActive = params.isActive ?? true;
@@ -23,6 +25,10 @@ export class User extends AuditableEntity {
 
   get memberId(): string | null {
     return this._memberId;
+  }
+
+  get firebaseUid(): string | null {
+    return this._firebaseUid;
   }
 
   get googleAccessToken(): string | null {
@@ -48,6 +54,7 @@ export class User extends AuditableEntity {
 
 export interface UserParams extends AuditableEntityParams {
   memberId?: string | null;
+  firebaseUid?: string | null;
   googleAccessToken?: string | null;
   googleRefreshToken?: string | null;
   isActive?: boolean;

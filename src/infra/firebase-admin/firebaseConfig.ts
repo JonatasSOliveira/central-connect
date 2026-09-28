@@ -5,7 +5,6 @@ import {
   getApps,
   initializeApp,
 } from "firebase-admin/app";
-import { type Firestore, getFirestore } from "firebase-admin/firestore";
 
 function getCredentials() {
   const raw = process.env.FIREBASE_CREDENTIALS;
@@ -22,8 +21,6 @@ function shouldUseEmulators(): boolean {
 }
 
 let firebaseApp: App;
-let firestoreDb: Firestore;
-
 export function getFirebaseApp(): App {
   if (getApps().length === 0) {
     firebaseApp = initializeApp(
@@ -40,11 +37,4 @@ export function getFirebaseApp(): App {
   }
 
   return firebaseApp;
-}
-
-export function getFirestoreDb(): Firestore {
-  if (!firestoreDb) {
-    firestoreDb = getFirestore(getFirebaseApp());
-  }
-  return firestoreDb;
 }

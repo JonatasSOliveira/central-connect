@@ -1,0 +1,1 @@
+CREATE INDEX "member_push_tokens_church_member_active_idx" ON "member_push_tokens" USING btree ("church_id","member_id","is_active");

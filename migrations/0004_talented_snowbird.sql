@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "member_availabilities_member_idx" ON "member_availabilities" USING btree ("member_id");

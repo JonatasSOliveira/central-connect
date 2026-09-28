@@ -1,32 +1,13 @@
-# AGENTS.md - Firebase Admin Repositories
+# Firebase Admin
 
-Regras para criação de repositories Firebase Admin (server-side).
+O Firebase Admin é usado apenas para integrações externas que não pertencem à
+persistência de dados de negócio:
 
-## Estrutura
+- Firebase Authentication, quando necessário para validar identidade externa;
+- Firebase Cloud Messaging, para envio de notificações push.
 
-```
-src/infra/firebase-admin/
-├── firebaseConfig.ts           # Configuração do Firebase Admin
-├── repositories/
-│   ├── BaseFirebaseRepository.ts  # Classe abstrata com métodos comuns
-│   └── [Entity]FirebaseRepository.ts  # Implementação por entidade
-```
+Dados de negócio devem ser persistidos exclusivamente em PostgreSQL por meio
+dos repositories Drizzle dos respectivos módulos.
 
-## Regras de Implementação
-
-### BaseFirebaseRepository
-- Toda entidade deve ter seu repository em `repositories/`
-- Usar classe abstrata base para métodos comuns (findById, findAll, create, update, delete)
-- Converter Date para Timestamp ao salvar no Firestore
-- Converter Timestamp para Date ao ler do Firestore
-- Usar ID do documento Firestore como ID da entidade
-
-### Implementação de Repository
-- Implementar a interface de port correspondente (IUserRepository, etc)
-- Implementar métodos abstratos: `toEntity` e `toFirestoreData`
-- Criar métodos específicos da entidade quando necessário (findByEmail, etc)
-
-### Serialização
-- Todos os campos do tipo Date devem ser convertidos para Timestamp
-- Todos os campos do tipo Timestamp devem ser convertidos para Date
-- Usar métodos auxiliares `convertToTimestamp` e `convertFromTimestamp`
+Não criar repositories Firestore, mappers Firestore ou queries de negócio nesta
+infraestrutura.

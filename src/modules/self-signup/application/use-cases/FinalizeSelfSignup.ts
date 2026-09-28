@@ -128,7 +128,7 @@ export class FinalizeSelfSignup extends BaseUseCase<
         input.memberForm,
       );
 
-      const user = await this.ensureUser(member.id);
+      const user = await this.ensureUser(member.id, googleUser.sub);
       await this.ensureMemberChurch(member.id, church.id, roleId);
       await saveSelfSignupMemberForm(this.memberFormRepositories, {
         memberId: member.id,
@@ -169,13 +169,29 @@ export class FinalizeSelfSignup extends BaseUseCase<
     );
   }
 
-  private async ensureUser(memberId: string): Promise<User> {
+  private async ensureUser(memberId: string, firebaseUid: string): Promise<User> {
     const existingUser = await this.userRepository.findByMemberId(memberId);
-    if (existingUser) return existingUser;
+    if (existingUser) {
+      if (existingUser.firebaseUid === firebaseUid) return existingUser;
+
+      return this.userRepository.update(
+        new User({
+          id: existingUser.id,
+          firebaseUid,
+          memberId: existingUser.memberId,
+          isActive: existingUser.isActive,
+          isSuperAdmin: existingUser.isSuperAdmin,
+          lastLoginAt: existingUser.lastLoginAt,
+          createdAt: existingUser.createdAt,
+          updatedAt: new Date(),
+        }),
+      );
+    }
 
     const now = new Date();
     const params: UserParams = {
       memberId,
+      firebaseUid,
       isActive: true,
       isSuperAdmin: false,
       createdAt: now,

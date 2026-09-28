@@ -1,11 +1,14 @@
-import { ChurchFirebaseRepository } from "@/modules/churches/infrastructure/persistence/firebase/ChurchFirebaseRepository";
-import { MemberAvailabilityFirebaseRepository } from "@/modules/members/infrastructure/persistence/firebase/MemberAvailabilityFirebaseRepository";
-import { MemberChurchFirebaseRepository } from "@/modules/members/infrastructure/persistence/firebase/MemberChurchFirebaseRepository";
-import { MemberFirebaseRepository } from "@/modules/members/infrastructure/persistence/firebase/MemberFirebaseRepository";
-import { MemberMinistryFirebaseRepository } from "@/modules/members/infrastructure/persistence/firebase/MemberMinistryFirebaseRepository";
+import { getDatabaseClient } from "@/infra/database/get-database-client";
+import { createTransactionalUseCase } from "@/infra/database/create-transactional-use-case";
+import type { DatabaseExecutor } from "@/infra/database/contracts/database-executor";
+import { ChurchDrizzleRepository } from "@/modules/churches/infrastructure/persistence/drizzle/ChurchDrizzleRepository";
+import { MemberAvailabilityDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberAvailabilityDrizzleRepository";
+import { MemberChurchDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberChurchDrizzleRepository";
+import { MemberDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberDrizzleRepository";
+import { MemberMinistryDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryDrizzleRepository";
 import { ListMinistries } from "@/modules/ministries/application/use-cases/ListMinistries";
-import { MinistryFirebaseRepository } from "@/modules/ministries/infrastructure/persistence/firebase/MinistryFirebaseRepository";
-import { MinistryRoleFirebaseRepository } from "@/modules/ministries/infrastructure/persistence/firebase/MinistryRoleFirebaseRepository";
+import { MinistryDrizzleRepository } from "@/modules/ministries/infrastructure/persistence/drizzle/MinistryDrizzleRepository";
+import { MinistryRoleDrizzleRepository } from "@/modules/ministries/infrastructure/persistence/drizzle/MinistryRoleDrizzleRepository";
 import { createNotificationsInfrastructure } from "@/modules/notifications/infrastructure/composition/notifications-infrastructure";
 import { AddMemberToScale } from "@/modules/scales/application/use-cases/AddMemberToScale";
 import { CreateScale } from "@/modules/scales/application/use-cases/CreateScale";
@@ -21,44 +24,38 @@ import { RemoveMemberFromScale } from "@/modules/scales/application/use-cases/Re
 import { RunScheduledScaleGeneration } from "@/modules/scales/application/use-cases/RunScheduledScaleGeneration";
 import { SaveScaleAttendance } from "@/modules/scales/application/use-cases/SaveScaleAttendance";
 import { UpdateScale } from "@/modules/scales/application/use-cases/UpdateScale";
-import { ScaleAttendanceFirebaseRepository } from "@/modules/scales/infrastructure/persistence/firebase/ScaleAttendanceFirebaseRepository";
-import { ScaleAttendanceMemberFirebaseRepository } from "@/modules/scales/infrastructure/persistence/firebase/ScaleAttendanceMemberFirebaseRepository";
-import { ScaleFirebaseRepository } from "@/modules/scales/infrastructure/persistence/firebase/ScaleFirebaseRepository";
-import { ScaleMemberFirebaseRepository } from "@/modules/scales/infrastructure/persistence/firebase/ScaleMemberFirebaseRepository";
+import { ScaleAttendanceDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleAttendanceDrizzleRepository";
+import { ScaleAttendanceMemberDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleAttendanceMemberDrizzleRepository";
+import { ScaleDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleDrizzleRepository";
+import { ScaleMemberDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleMemberDrizzleRepository";
+import { ScaleGenerationJobDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleGenerationJobDrizzleRepository";
 import { ScaleNotificationServiceAdapter } from "@/modules/scales/infrastructure/services/ScaleNotificationServiceAdapter";
-import { ServiceFirebaseRepository } from "@/modules/services/infrastructure/persistence/firebase/ServiceFirebaseRepository";
+import { ServiceDrizzleRepository } from "@/modules/services/infrastructure/persistence/drizzle/ServiceDrizzleRepository";
 
 export function createScalesInfrastructure() {
-  const scaleRepository = new ScaleFirebaseRepository();
-  const scaleMemberRepository = new ScaleMemberFirebaseRepository();
-  const scaleAttendanceRepository = new ScaleAttendanceFirebaseRepository();
+  const database = getDatabaseClient();
+  const scaleRepository = new ScaleDrizzleRepository(database);
+  const scaleMemberRepository = new ScaleMemberDrizzleRepository(database);
+  const scaleAttendanceRepository = new ScaleAttendanceDrizzleRepository(
+    database,
+  );
   const scaleAttendanceMemberRepository =
-    new ScaleAttendanceMemberFirebaseRepository();
-  const churchRepository = new ChurchFirebaseRepository();
-  const memberRepository = new MemberFirebaseRepository();
-  const memberChurchRepository = new MemberChurchFirebaseRepository();
-  const memberMinistryRepository = new MemberMinistryFirebaseRepository();
-  const memberAvailabilityRepository =
-    new MemberAvailabilityFirebaseRepository();
-  const ministryRepository = new MinistryFirebaseRepository();
-  const ministryRoleRepository = new MinistryRoleFirebaseRepository();
-  const serviceRepository = new ServiceFirebaseRepository();
+    new ScaleAttendanceMemberDrizzleRepository(database);
+  const scaleGenerationJobRepository = new ScaleGenerationJobDrizzleRepository(
+    database,
+  );
+  const churchRepository = new ChurchDrizzleRepository(database);
+  const memberRepository = new MemberDrizzleRepository(database);
+  const ministryRepository = new MinistryDrizzleRepository(database);
+  const ministryRoleRepository = new MinistryRoleDrizzleRepository(database);
+  const serviceRepository = new ServiceDrizzleRepository(database);
   const notificationDependencies = createNotificationsInfrastructure();
   const notificationService = new ScaleNotificationServiceAdapter(
     notificationDependencies,
   );
 
-  const createScale = new CreateScale(
-    scaleRepository,
-    scaleMemberRepository,
-    churchRepository,
-    serviceRepository,
-    ministryRepository,
-    ministryRoleRepository,
-    memberRepository,
-    memberChurchRepository,
-    memberMinistryRepository,
-    memberAvailabilityRepository,
+  const createScale = createTransactionalUseCase(database, (transaction) =>
+    createScaleUseCase(transaction),
   );
 
   const useCases = {
@@ -75,16 +72,8 @@ export function createScalesInfrastructure() {
     ),
     getScale: new GetScale(scaleRepository, scaleMemberRepository),
     listScales: new ListScales(scaleRepository),
-    updateScale: new UpdateScale(
-      scaleRepository,
-      scaleMemberRepository,
-      churchRepository,
-      serviceRepository,
-      ministryRepository,
-      ministryRoleRepository,
-      memberRepository,
-      memberChurchRepository,
-      memberMinistryRepository,
+    updateScale: createTransactionalUseCase(database, (transaction) =>
+      createUpdateScaleUseCase(transaction),
     ),
     getScaleAttendance: new GetScaleAttendance(
       scaleRepository,
@@ -151,6 +140,7 @@ export function createScalesInfrastructure() {
       scaleMemberRepository,
       scaleAttendanceRepository,
       scaleAttendanceMemberRepository,
+      scaleGenerationJobRepository,
     },
     notification: {
       notifyScaleMembers: {
@@ -177,3 +167,32 @@ export function createScalesInfrastructure() {
 export type ScalesInfrastructure = ReturnType<
   typeof createScalesInfrastructure
 >;
+
+function createScaleUseCase(database: DatabaseExecutor) {
+  return new CreateScale(
+    new ScaleDrizzleRepository(database),
+    new ScaleMemberDrizzleRepository(database),
+    new ChurchDrizzleRepository(database),
+    new ServiceDrizzleRepository(database),
+    new MinistryDrizzleRepository(database),
+    new MinistryRoleDrizzleRepository(database),
+    new MemberDrizzleRepository(database),
+    new MemberChurchDrizzleRepository(database),
+    new MemberMinistryDrizzleRepository(database),
+    new MemberAvailabilityDrizzleRepository(database),
+  );
+}
+
+function createUpdateScaleUseCase(database: DatabaseExecutor) {
+  return new UpdateScale(
+    new ScaleDrizzleRepository(database),
+    new ScaleMemberDrizzleRepository(database),
+    new ChurchDrizzleRepository(database),
+    new ServiceDrizzleRepository(database),
+    new MinistryDrizzleRepository(database),
+    new MinistryRoleDrizzleRepository(database),
+    new MemberDrizzleRepository(database),
+    new MemberChurchDrizzleRepository(database),
+    new MemberMinistryDrizzleRepository(database),
+  );
+}

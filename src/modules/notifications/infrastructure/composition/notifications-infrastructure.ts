@@ -2,18 +2,22 @@ import { DeactivateMemberPushToken } from "@/modules/notifications/application/u
 import { NotifyPublishedScalesByDate } from "@/modules/notifications/application/use-cases/NotifyPublishedScalesByDate";
 import { NotifyScaleMembers } from "@/modules/notifications/application/use-cases/NotifyScaleMembers";
 import { UpsertMemberPushToken } from "@/modules/notifications/application/use-cases/UpsertMemberPushToken";
-import { MemberPushTokenFirebaseRepository } from "@/modules/notifications/infrastructure/persistence/firebase/MemberPushTokenFirebaseRepository";
+import { getDatabaseClient } from "@/infra/database/get-database-client";
+import { MemberPushTokenDrizzleRepository } from "@/modules/notifications/infrastructure/persistence/drizzle/MemberPushTokenDrizzleRepository";
 import { FirebasePushNotificationService } from "@/modules/notifications/infrastructure/services/FirebasePushNotificationService";
-import { ScaleFirebaseRepository } from "@/modules/scales/infrastructure/persistence/firebase/ScaleFirebaseRepository";
-import { ScaleMemberFirebaseRepository } from "@/modules/scales/infrastructure/persistence/firebase/ScaleMemberFirebaseRepository";
-import { ServiceFirebaseRepository } from "@/modules/services/infrastructure/persistence/firebase/ServiceFirebaseRepository";
+import { ScaleDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleDrizzleRepository";
+import { ScaleMemberDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleMemberDrizzleRepository";
+import { ServiceDrizzleRepository } from "@/modules/services/infrastructure/persistence/drizzle/ServiceDrizzleRepository";
 
 export function createNotificationsInfrastructure() {
-  const memberPushTokenRepository = new MemberPushTokenFirebaseRepository();
+  const database = getDatabaseClient();
+  const memberPushTokenRepository = new MemberPushTokenDrizzleRepository(
+    database,
+  );
   const pushNotificationService = new FirebasePushNotificationService();
-  const serviceRepository = new ServiceFirebaseRepository();
-  const scaleRepository = new ScaleFirebaseRepository();
-  const scaleMemberRepository = new ScaleMemberFirebaseRepository();
+  const serviceRepository = new ServiceDrizzleRepository(database);
+  const scaleRepository = new ScaleDrizzleRepository(database);
+  const scaleMemberRepository = new ScaleMemberDrizzleRepository(database);
 
   return {
     memberPushTokenRepository,

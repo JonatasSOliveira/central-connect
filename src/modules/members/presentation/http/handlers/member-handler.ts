@@ -10,7 +10,7 @@ import { UpdateMemberInputSchema } from "../schemas/member-schema";
 
 interface UseCases {
   getMember: GetMember;
-  updateMember: UpdateMember;
+  updateMember: Pick<UpdateMember, "execute">;
   deleteMember: DeleteMember;
 }
 function memberships(
