@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import type {
   ScaleDetailDTO,
   ScaleFormInput,
-} from "@/modules/scales/application/dtos/ScaleDTO";
-import { ScaleFormSchema } from "@/modules/scales/application/dtos/ScaleDTO";
+} from "@/modules/scales/presentation/contracts/ScaleDTO";
+import { ScaleFormSchema } from "@/modules/scales/presentation/contracts/ScaleDTO";
 import { useAuthStore } from "@/stores/authStore";
 import type {
   MemberOption,

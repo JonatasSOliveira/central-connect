@@ -8,11 +8,11 @@ import { toast } from "sonner";
 import {
   type CreateRoleInput,
   CreateRoleInputSchema,
-} from "@/modules/roles/application/dtos/role/CreateRoleDTO";
+} from "@/modules/roles/presentation/contracts/role/CreateRoleDTO";
 import {
   type UpdateRoleInput,
   UpdateRoleInputSchema,
-} from "@/modules/roles/application/dtos/role/UpdateRoleDTO";
+} from "@/modules/roles/presentation/contracts/role/UpdateRoleDTO";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 

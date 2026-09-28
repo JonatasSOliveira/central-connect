@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canSelectChurch } from "./canSelectChurch";
+import { canSelectChurch } from "@/modules/identity/presentation/http/authorization/canSelectChurch";
 
 describe("canSelectChurch", () => {
   it("allows super admin to select any church", () => {

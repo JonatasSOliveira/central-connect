@@ -9,7 +9,7 @@ import { MinistrySelect } from "@/components/ui/ministry-select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { ServiceSelect } from "@/components/ui/service-select";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { ScaleFormInput } from "@/modules/scales/application/dtos/ScaleDTO";
+import type { ScaleFormInput } from "@/modules/scales/presentation/contracts/ScaleDTO";
 import { useScaleForm } from "../hooks/useScaleForm";
 import { ScaleMemberList } from "./ScaleMemberList";
 import { ShareScaleImageDialog } from "./ShareScaleImageDialog";

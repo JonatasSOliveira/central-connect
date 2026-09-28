@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { ChurchListItemDTO } from "@/modules/churches/presentation/contracts/church/ChurchDTO";
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000;
 

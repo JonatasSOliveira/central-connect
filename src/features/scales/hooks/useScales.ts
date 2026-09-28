@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { ScaleListItemDTO } from "@/modules/scales/application/dtos/ScaleDTO";
+import type { ScaleListItemDTO } from "@/modules/scales/presentation/contracts/ScaleDTO";
 
 interface UseScalesFilters {
   serviceId?: string;

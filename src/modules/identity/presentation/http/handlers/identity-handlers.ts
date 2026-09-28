@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { isTrustedOrigin } from "@/app/api/_lib/csrf";
-import { canSelectChurch } from "@/app/api/auth/_lib/canSelectChurch";
+import { isTrustedOrigin } from "@/shared/presentation/http/csrf";
+import { canSelectChurch } from "@/modules/identity/presentation/http/authorization/canSelectChurch";
 import type { IChurchRepository } from "@/modules/churches/application/ports/IChurchRepository";
 import type { ITokenService } from "@/modules/identity/application/ports/ITokenService";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";

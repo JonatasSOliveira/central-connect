@@ -3,7 +3,7 @@
 import type { UseFormReturn } from "react-hook-form";
 import { FormField } from "@/components/ui/form-field";
 import { PhoneInput } from "@/components/ui/phone-input";
-import type { CreateMemberInput } from "@/modules/members/application/dtos/member/CreateMemberDTO";
+import type { CreateMemberInput } from "@/modules/members/presentation/contracts/member/CreateMemberDTO";
 
 interface BasicInfoSectionProps {
   form: UseFormReturn<CreateMemberInput>;

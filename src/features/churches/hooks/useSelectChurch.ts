@@ -4,10 +4,10 @@ import {
   getPushToken,
   markPushTokenSyncedForChurch,
   shouldSyncPushTokenForChurch,
-} from "@/infra/firebase-client/services/pushMessaging";
-import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
-import type { ListChurchesOutput } from "@/modules/churches/application/use-cases/ListChurches";
-import { authService } from "@/modules/identity/application/services/AuthService";
+} from "@/shared/frontend/push-notifications";
+import type { ChurchListItemDTO } from "@/modules/churches/presentation/contracts/church/ChurchDTO";
+import type { ListChurchesOutput } from "@/modules/churches/presentation/contracts/ListChurches";
+import { authService } from "@/shared/frontend/auth-service";
 import type { Result } from "@/shared/types/Result";
 import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
 

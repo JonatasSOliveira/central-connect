@@ -1,30 +1,39 @@
-import { validateSession } from "@/app/api/_lib/auth";
-import { getDatabaseClient } from "@/infra/database/get-database-client";
+import { validateSession } from "@/shared/presentation/http/auth";
 import { CreateServiceTemplate } from "@/modules/service-templates/application/use-cases/CreateServiceTemplate";
 import { DeleteServiceTemplate } from "@/modules/service-templates/application/use-cases/DeleteServiceTemplate";
 import { GenerateWeekServices } from "@/modules/service-templates/application/use-cases/GenerateWeekServices";
 import { GetServiceTemplate } from "@/modules/service-templates/application/use-cases/GetServiceTemplate";
 import { ListServiceTemplates } from "@/modules/service-templates/application/use-cases/ListServiceTemplates";
 import { UpdateServiceTemplate } from "@/modules/service-templates/application/use-cases/UpdateServiceTemplate";
-import { ServiceTemplateDrizzleRepository } from "@/modules/service-templates/infrastructure/persistence/drizzle/ServiceTemplateDrizzleRepository";
+import type { IServiceTemplateRepository } from "@/modules/service-templates/application/ports/IServiceTemplateRepository";
+import type { IServiceRepository } from "@/modules/services/application/ports/IServiceRepository";
 import { createGenerateWeekHandler } from "@/modules/service-templates/presentation/http/handlers/generate-week-handler";
 import { createServiceTemplateHandler } from "@/modules/service-templates/presentation/http/handlers/service-template-handler";
 import { createServiceTemplatesHandler } from "@/modules/service-templates/presentation/http/handlers/service-templates-handler";
-import { ServiceDrizzleRepository } from "@/modules/services/infrastructure/persistence/drizzle/ServiceDrizzleRepository";
 
-export function createServiceTemplatesComposition() {
-  const database = getDatabaseClient();
-  const templateRepository = new ServiceTemplateDrizzleRepository(database);
-  const serviceRepository = new ServiceDrizzleRepository(database);
+export function createServiceTemplatesComposition(dependencies: {
+  templateRepository: IServiceTemplateRepository;
+  serviceRepository: IServiceRepository;
+}) {
   const useCases = {
-    listServiceTemplates: new ListServiceTemplates(templateRepository),
-    getServiceTemplate: new GetServiceTemplate(templateRepository),
-    createServiceTemplate: new CreateServiceTemplate(templateRepository),
-    updateServiceTemplate: new UpdateServiceTemplate(templateRepository),
-    deleteServiceTemplate: new DeleteServiceTemplate(templateRepository),
+    listServiceTemplates: new ListServiceTemplates(
+      dependencies.templateRepository,
+    ),
+    getServiceTemplate: new GetServiceTemplate(
+      dependencies.templateRepository,
+    ),
+    createServiceTemplate: new CreateServiceTemplate(
+      dependencies.templateRepository,
+    ),
+    updateServiceTemplate: new UpdateServiceTemplate(
+      dependencies.templateRepository,
+    ),
+    deleteServiceTemplate: new DeleteServiceTemplate(
+      dependencies.templateRepository,
+    ),
     generateWeekServices: new GenerateWeekServices(
-      templateRepository,
-      serviceRepository,
+      dependencies.templateRepository,
+      dependencies.serviceRepository,
     ),
   };
   return {

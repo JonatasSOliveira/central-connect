@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { canEditMember } from "@/app/api/members/_lib/canEditMember";
+import { canEditMember } from "@/modules/members/presentation/http/authorization/canEditMember";
 import type { DeleteMember } from "@/modules/members/application/use-cases/DeleteMember";
 import type { GetMember } from "@/modules/members/application/use-cases/GetMember";
 import type { UpdateMember } from "@/modules/members/application/use-cases/UpdateMember";

@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import type {
   MinistryDetailDTO,
   MinistryFormInput,
-} from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
-import { MinistryFormSchema } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
+} from "@/modules/ministries/presentation/contracts/ministry/MinistryDTO";
+import { MinistryFormSchema } from "@/modules/ministries/presentation/contracts/ministry/MinistryDTO";
 import { useAuthStore } from "@/stores/authStore";
 
 interface MemberOption {

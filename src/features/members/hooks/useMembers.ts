@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { MemberListItem } from "@/modules/members/application/dtos/member/ListMembersDTO";
+import type { MemberListItem } from "@/modules/members/presentation/contracts/member/ListMembersDTO";
 
 export function useMembersListScreen() {
   const { user } = useAuth();

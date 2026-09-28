@@ -1,5 +1,18 @@
-import type { AuthLoginOutputDTO } from "@/modules/identity/application/dtos/AuthLoginOutputDTO";
 import type { Result } from "@/shared/types/Result";
+
+interface AuthLoginOutput {
+  userId: string;
+  memberId: string;
+  email: string;
+  fullName: string;
+  avatarUrl: string | null;
+  isSuperAdmin: boolean;
+  churchId: string | null;
+  churchName: string | null;
+  churches: CurrentUserChurch[];
+  permissions: string[];
+  sessionToken: string;
+}
 
 export interface CurrentUserChurch {
   churchId: string;
@@ -20,61 +33,34 @@ export interface CurrentUser {
 }
 
 export class AuthService {
-  async login(googleToken: string): Promise<Result<AuthLoginOutputDTO>> {
+  async login(googleToken: string): Promise<Result<AuthLoginOutput>> {
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ googleToken }),
     });
-
     const data = await response.json();
-
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[auth-debug] /api/auth/login response", {
-        status: response.status,
-        ok: response.ok,
-        dataOk: data?.ok,
-        errorCode: data?.error?.code,
-        errorMessage: data?.error?.message,
-      });
-    }
-
     if (!response.ok || !data.ok) {
       return {
         ok: false,
         error: {
           code: data.error?.code ?? "UNKNOWN_ERROR",
-          message:
-            data.error?.message ?? "Erro ao fazer login. Tente novamente",
+          message: data.error?.message ?? "Erro ao fazer login. Tente novamente",
         },
       };
     }
-
     return { ok: true, value: data.value };
   }
 
   async getCurrentUser(): Promise<CurrentUser | null> {
     const response = await fetch("/api/auth/me");
-
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[auth-debug] /api/auth/me status", {
-        status: response.status,
-        ok: response.ok,
-      });
-    }
-
-    if (!response.ok) {
-      return null;
-    }
-
+    if (!response.ok) return null;
     const data = await response.json();
     return data.value ?? null;
   }
 
   async logout(): Promise<void> {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
+    await fetch("/api/auth/logout", { method: "POST" });
   }
 
   async selectChurch(churchId: string): Promise<Result<{ success: boolean }>> {
@@ -83,20 +69,18 @@ export class AuthService {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ churchId }),
     });
-
     const data = await response.json();
-
     if (!response.ok || !data.ok) {
       return {
         ok: false,
         error: {
           code: data.error?.code ?? "SELECT_CHURCH_FAILED",
           message:
-            data.error?.message ?? "Erro ao selecionar igreja. Tente novamente",
+            data.error?.message ??
+            "Erro ao selecionar igreja. Tente novamente",
         },
       };
     }
-
     return { ok: true, value: { success: true } };
   }
 }

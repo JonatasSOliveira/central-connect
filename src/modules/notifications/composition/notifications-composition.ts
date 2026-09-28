@@ -1,13 +1,14 @@
-import { createNotificationsInfrastructure } from "@/modules/notifications/infrastructure/composition/notifications-infrastructure";
+import type { NotificationsInfrastructure } from "@/modules/notifications/infrastructure/composition/notifications-infrastructure";
 import { createPushTokenHandlers } from "@/modules/notifications/presentation/http/handlers/push-token-handlers";
 
-export function createNotificationsComposition() {
-  const dependencies = createNotificationsInfrastructure();
+export function createNotificationsComposition(
+  infrastructure: NotificationsInfrastructure,
+) {
 
   return {
-    dependencies,
+    dependencies: infrastructure,
     httpHandlers: {
-      pushTokens: createPushTokenHandlers(dependencies),
+      pushTokens: createPushTokenHandlers(infrastructure),
     },
   };
 }

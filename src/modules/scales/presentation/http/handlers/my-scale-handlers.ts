@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { validateSession } from "@/app/api/_lib/auth";
+import { validateSession } from "@/shared/presentation/http/auth";
 import {
   ListMyScalesQuerySchema,
   type MyScalesPeriod,
 } from "@/modules/scales/application/dtos/MyScalesDTO";
-import type { ScalesInfrastructure } from "@/modules/scales/infrastructure/composition/scales-infrastructure";
+import type { ScalesHandlerDependencies } from "@/modules/scales/presentation/contracts/scales-handler-dependencies";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { getHttpStatus } from "@/shared/utils/apiResponse";
 
@@ -17,7 +17,7 @@ function unauthorized(message: string) {
 
 export async function listMyScales(
   request: NextRequest,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const auth = await validateSession();
   if (!auth.ok)

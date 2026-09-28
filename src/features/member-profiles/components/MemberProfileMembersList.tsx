@@ -4,7 +4,7 @@ import { UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ListTemplate } from "@/components/templates/list-template";
 import { Chip } from "@/components/ui/chip";
-import type { MemberProfileListItemDTO } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
+import type { MemberProfileListItemDTO } from "@/modules/member-profiles/presentation/contracts/member-profile/MemberProfileDTO";
 import { labelList, memberProfileLabels } from "./member-profile-labels";
 
 interface MemberProfileMembersListProps {

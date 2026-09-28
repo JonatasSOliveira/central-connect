@@ -16,7 +16,7 @@ complementares no documento `members/{memberId}`.
 Cada enum, DTO, estrutura de dominio e componente deve ter uma responsabilidade
 própria. Não usar arquivos agrupados genéricos para vários conceitos.
 
-Enums ficam em arquivos separados em `src/domain/enums/`:
+Enums ficam em arquivos separados em `src/shared/domain/enums/`:
 
 - `MaritalStatus.ts`
 - `AcceptedJesusStatus.ts`
@@ -36,7 +36,7 @@ Estruturas complementares de membro ficam em arquivos proprios:
 - `MemberProfessionalProfile.ts`
 
 Labels traduzidos ficam na feature de self-signup, separados do dominio. O
-Firestore persiste valores estaveis em ingles; a UI traduz os valores.
+PostgreSQL persiste valores estaveis em ingles; a UI traduz os valores.
 
 ## Mudancas de Dominio e DTOs
 
@@ -79,10 +79,10 @@ Fluxo esperado:
 7. Aceite legal e login Google.
 
 O rascunho deve ser salvo apenas em `localStorage`, chaveado por `churchId`.
-Não criar coleção Firestore para rascunho porque os dados são pessoais e ainda
-não autenticados.
+Não persistir rascunhos no servidor porque os dados são pessoais e ainda não
+autenticados.
 
-## API, Use Case e Firestore
+## API, Use Case e PostgreSQL
 
 Manter a rota publica atual:
 
@@ -110,12 +110,8 @@ Payload atualizado:
 }
 ```
 
-Persistir em `members/{memberId}` os dados complementares e manter as colecoes
-atuais para vinculos:
-
-- `memberChurches`
-- `memberMinistries`
-- `legalConsents`
+Persistir os dados complementares nas tabelas PostgreSQL correspondentes e
+manter os vínculos relacionais de igreja, ministério e consentimento legal.
 
 ## Testes
 

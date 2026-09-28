@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getChurchIdFromSession, validateSession } from "@/app/api/_lib/auth";
+import { getChurchIdFromSession, validateSession } from "@/shared/presentation/http/auth";
 import { ScaleAttendanceReportQuerySchema } from "@/modules/scales/application/dtos/ScaleAttendanceReportDTO";
-import type { ScalesInfrastructure } from "@/modules/scales/infrastructure/composition/scales-infrastructure";
+import type { ScalesHandlerDependencies } from "@/modules/scales/presentation/contracts/scales-handler-dependencies";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { apiError } from "@/shared/utils/apiResponse";
 
@@ -20,7 +20,7 @@ function unauthorized(message: string) {
 
 async function getReport(
   request: NextRequest,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const auth = await validateSession();
   if (!auth.ok)
@@ -72,7 +72,7 @@ async function getReport(
 
 async function listReportMinistries(
   request: NextRequest,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const auth = await validateSession();
   if (!auth.ok)
@@ -122,7 +122,9 @@ async function listReportMinistries(
   );
 }
 
-export function createScaleReportHandlers(dependencies: ScalesInfrastructure) {
+export function createScaleReportHandlers(
+  dependencies: ScalesHandlerDependencies,
+) {
   return {
     get: (request: NextRequest) => getReport(request, dependencies),
     ministries: (request: NextRequest) =>

@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { validateSession } from "@/app/api/_lib/auth";
+import { validateSession } from "@/shared/presentation/http/auth";
 import { createPushTokenHandlers } from "./push-token-handlers";
 
-vi.mock("@/app/api/_lib/auth", () => ({
+vi.mock("@/shared/presentation/http/auth", () => ({
   validateSession: vi.fn(),
 }));
 

@@ -1,8 +1,8 @@
-import { SelfSignupBasicDataSchema } from "@/modules/self-signup/application/dtos/SelfSignupBasicDataDTO";
-import { SelfSignupFinalNotesSchema } from "@/modules/self-signup/application/dtos/SelfSignupFinalNotesDTO";
-import { SelfSignupProfessionalProfileSchema } from "@/modules/self-signup/application/dtos/SelfSignupProfessionalProfileDTO";
-import { SelfSignupServiceProfileSchema } from "@/modules/self-signup/application/dtos/SelfSignupServiceProfileDTO";
-import { SelfSignupSpiritualJourneySchema } from "@/modules/self-signup/application/dtos/SelfSignupSpiritualJourneyDTO";
+import { SelfSignupBasicDataSchema } from "@/modules/self-signup/presentation/contracts/SelfSignupBasicDataDTO";
+import { SelfSignupFinalNotesSchema } from "@/modules/self-signup/presentation/contracts/SelfSignupFinalNotesDTO";
+import { SelfSignupProfessionalProfileSchema } from "@/modules/self-signup/presentation/contracts/SelfSignupProfessionalProfileDTO";
+import { SelfSignupServiceProfileSchema } from "@/modules/self-signup/presentation/contracts/SelfSignupServiceProfileDTO";
+import { SelfSignupSpiritualJourneySchema } from "@/modules/self-signup/presentation/contracts/SelfSignupSpiritualJourneyDTO";
 import type { SelfSignupMemberFormState } from "./selfSignupMemberFormState";
 
 interface MinistryOption {

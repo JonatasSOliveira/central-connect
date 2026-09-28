@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getChurchIdFromSession, validateSession } from "@/app/api/_lib/auth";
+import { getChurchIdFromSession, validateSession } from "@/shared/presentation/http/auth";
 import { ListScaleAttendancesQuerySchema } from "@/modules/scales/application/dtos/ListScaleAttendancesDTO";
 import { SaveScaleAttendanceSchema } from "@/modules/scales/application/dtos/ScaleAttendanceDTO";
-import type { ScalesInfrastructure } from "@/modules/scales/infrastructure/composition/scales-infrastructure";
+import type { ScalesHandlerDependencies } from "@/modules/scales/presentation/contracts/scales-handler-dependencies";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { apiError } from "@/shared/utils/apiResponse";
 
@@ -44,7 +44,7 @@ async function parseJson(
 async function getAttendance(
   _request: NextRequest,
   scaleId: string,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const auth = await validateSession();
   if (!auth.ok)
@@ -77,7 +77,7 @@ async function getAttendance(
 async function saveAttendance(
   request: NextRequest,
   scaleId: string,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const auth = await validateSession();
   if (!auth.ok)
@@ -127,7 +127,7 @@ async function saveAttendance(
 async function publishAttendance(
   _request: NextRequest,
   scaleId: string,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const auth = await validateSession();
   if (!auth.ok)
@@ -164,7 +164,7 @@ async function publishAttendance(
 
 async function listAttendances(
   request: NextRequest,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const auth = await validateSession();
   if (!auth.ok)
@@ -210,7 +210,7 @@ async function listAttendances(
 }
 
 export function createScaleAttendanceHandlers(
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   return {
     get: (request: NextRequest, scaleId: string) =>

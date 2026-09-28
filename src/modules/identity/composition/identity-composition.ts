@@ -1,43 +1,44 @@
-import { validateSession } from "@/app/api/_lib/auth";
-import { getDatabaseClient } from "@/infra/database/get-database-client";
-import { GoogleAuthFirebaseService } from "@/infra/firebase-admin/services/GoogleAuthFirebaseService";
-import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
-import { ChurchDrizzleRepository } from "@/modules/churches/infrastructure/persistence/drizzle/ChurchDrizzleRepository";
+import { validateSession } from "@/shared/presentation/http/auth";
 import { AuthLoginUseCase } from "@/modules/identity/application/use-cases/AuthLoginUseCase";
-import { UserDrizzleRepository } from "@/modules/identity/infrastructure/persistence/drizzle/UserDrizzleRepository";
+import type { IGoogleAuthService } from "@/modules/identity/application/ports/IGoogleAuthService";
+import type { ITokenService } from "@/modules/identity/application/ports/ITokenService";
+import type { IUserRepository } from "@/modules/identity/application/ports/IUserRepository";
+import type { IChurchRepository } from "@/modules/churches/application/ports/IChurchRepository";
+import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
+import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
+import type { IRolePermissionRepository } from "@/modules/roles/application/ports/IRolePermissionRepository";
 import { createIdentityHandlers } from "@/modules/identity/presentation/http/handlers/identity-handlers";
 import { createLoginHandler } from "@/modules/identity/presentation/http/handlers/login-handler";
-import { MemberChurchDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberChurchDrizzleRepository";
-import { MemberDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberDrizzleRepository";
-import { RolePermissionDrizzleRepository } from "@/modules/roles/infrastructure/persistence/drizzle/RolePermissionDrizzleRepository";
 
-export function createIdentityComposition() {
-  const tokenService = new JoseTokenJwtService();
-  const database = getDatabaseClient();
-  const churchRepository = new ChurchDrizzleRepository(database);
-  const memberRepository = new MemberDrizzleRepository(database);
-  const memberChurchRepository = new MemberChurchDrizzleRepository(database);
-  const rolePermissionRepository = new RolePermissionDrizzleRepository(database);
+export function createIdentityComposition(externalDependencies: {
+  churchRepository: IChurchRepository;
+  memberRepository: IMemberRepository;
+  memberChurchRepository: IMemberChurchRepository;
+  rolePermissionRepository: IRolePermissionRepository;
+  googleAuthService: IGoogleAuthService;
+  tokenService: ITokenService;
+  userRepository: IUserRepository;
+}) {
   const authLoginUseCase = new AuthLoginUseCase(
-    new GoogleAuthFirebaseService(),
-    tokenService,
-    new UserDrizzleRepository(database),
-    memberRepository,
-    memberChurchRepository,
-    rolePermissionRepository,
-    churchRepository,
+    externalDependencies.googleAuthService,
+    externalDependencies.tokenService,
+    externalDependencies.userRepository,
+    externalDependencies.memberRepository,
+    externalDependencies.memberChurchRepository,
+    externalDependencies.rolePermissionRepository,
+    externalDependencies.churchRepository,
   );
-  const dependencies = {
+  const handlerDependencies = {
     authLoginUseCase,
-    tokenService,
-    churchRepository,
-    memberChurchRepository,
-    rolePermissionRepository,
+    tokenService: externalDependencies.tokenService,
+    churchRepository: externalDependencies.churchRepository,
+    memberChurchRepository: externalDependencies.memberChurchRepository,
+    rolePermissionRepository: externalDependencies.rolePermissionRepository,
   };
   return {
     httpHandlers: {
-      login: createLoginHandler(dependencies),
-      ...createIdentityHandlers(dependencies, validateSession),
+      login: createLoginHandler(handlerDependencies),
+      ...createIdentityHandlers(handlerDependencies, validateSession),
     },
   };
 }

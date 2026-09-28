@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { MinistryListItemDTO } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
+import type { MinistryListItemDTO } from "@/modules/ministries/presentation/contracts/ministry/MinistryDTO";
 
 interface UseMinistriesReturn {
   ministries: MinistryListItemDTO[];

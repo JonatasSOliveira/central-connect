@@ -1,10 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { validateSession } from "@/app/api/_lib/auth";
+import { validateSession } from "@/shared/presentation/http/auth";
 import {
   RemovePushTokenSchema,
   UpsertPushTokenSchema,
 } from "@/modules/notifications/application/dtos/PushTokenDTO";
-import type { NotificationsInfrastructure } from "@/modules/notifications/infrastructure/composition/notifications-infrastructure";
+import type { NotificationHandlerDependencies } from "@/modules/notifications/presentation/contracts/notification-handler-dependencies";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 
 const PUSH_DEBUG_ENABLED =
@@ -39,7 +39,7 @@ async function readJson(request: NextRequest): Promise<unknown | NextResponse> {
 
 export async function registerPushToken(
   request: NextRequest,
-  dependencies: NotificationsInfrastructure,
+  dependencies: NotificationHandlerDependencies,
 ) {
   const requestId = crypto.randomUUID();
   const startedAt = Date.now();
@@ -92,7 +92,7 @@ export async function registerPushToken(
 
 export async function deactivatePushToken(
   request: NextRequest,
-  dependencies: NotificationsInfrastructure,
+  dependencies: NotificationHandlerDependencies,
 ) {
   const requestId = crypto.randomUUID();
   const startedAt = Date.now();
@@ -136,7 +136,7 @@ export async function deactivatePushToken(
 }
 
 export function createPushTokenHandlers(
-  dependencies: NotificationsInfrastructure,
+  dependencies: NotificationHandlerDependencies,
 ) {
   return {
     register: (request: NextRequest) =>

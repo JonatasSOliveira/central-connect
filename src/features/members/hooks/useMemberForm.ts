@@ -7,13 +7,13 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
-import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { ChurchListItemDTO } from "@/modules/churches/presentation/contracts/church/ChurchDTO";
 import {
   type CreateMemberInput,
   CreateMemberInputSchema,
-} from "@/modules/members/application/dtos/member/CreateMemberDTO";
-import type { MinistryListItemDTO } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
-import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
+} from "@/modules/members/presentation/contracts/member/CreateMemberDTO";
+import type { MinistryListItemDTO } from "@/modules/ministries/presentation/contracts/ministry/MinistryDTO";
+import type { RoleListItem } from "@/modules/roles/presentation/contracts/role/ListRolesDTO";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { normalizePhone } from "@/shared/utils/phone";
 import { useChurchCatalogStore } from "@/stores/churchCatalogStore";

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import {
   getCurrentUserToken,
   getGoogleRedirectUser,
-} from "@/infra/firebase-client/services/googleAuth";
+} from "@/shared/frontend/firebase-auth";
 import {
   clearSelfSignupRedirectPayload,
   getSelfSignupRedirectPayload,

@@ -20,11 +20,20 @@ base, enums transversais e contratos comuns) vive em `src/shared/domain`,
 enquanto entidades, casos de uso, ports e adaptadores específicos permanecem
 dentro de seus respectivos módulos.
 
-## Primeiro módulo migrado
+## Estado atual
 
-`ministries` possui composição própria em `src/modules/ministries/composition`.
-As dependências são montadas explicitamente pela composição, sem depender do
-container global.
+Todos os módulos de negócio possuem implementação de persistência em Drizzle
+ou adapters externos específicos, sem repositories Firestore ativos. O
+`src/composition/application.ts` é o ponto de entrada das compositions.
+
+As compositions de módulo recebem repositories, serviços técnicos e factories
+transacionais pela composition root global. O frontend acessa autenticação,
+notificações push e contratos HTTP por facades públicas, sem importar
+Firebase, Drizzle, repositories ou entidades de domínio diretamente.
+
+Os próximos trabalhos arquiteturais devem ser incrementais: adicionar novos
+ports no módulo dono, montar adapters somente em `src/composition` e manter os
+contratos de presentation independentes da infraestrutura.
 
 ## Validação
 

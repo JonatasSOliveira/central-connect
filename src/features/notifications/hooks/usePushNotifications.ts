@@ -11,7 +11,7 @@ import {
   onForegroundPush,
   requestNotificationPermission,
   shouldSyncPushTokenForChurch,
-} from "@/infra/firebase-client/services/pushMessaging";
+} from "@/shared/frontend/push-notifications";
 
 interface UsePushNotificationsResult {
   isSupported: boolean;

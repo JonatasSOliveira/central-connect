@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { ChurchListItemDTO } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { ChurchListItemDTO } from "@/modules/churches/presentation/contracts/church/ChurchDTO";
 import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
 
 interface UseChurchesReturn {

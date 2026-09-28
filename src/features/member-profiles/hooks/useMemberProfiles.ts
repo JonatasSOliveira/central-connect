@@ -6,7 +6,7 @@ import type {
   MemberProfileFilters,
   MemberProfileListItemDTO,
   MemberProfileSummaryDTO,
-} from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
+} from "@/modules/member-profiles/presentation/contracts/member-profile/MemberProfileDTO";
 import { buildMemberProfileQuery } from "./memberProfileFilterParams";
 
 type ActiveTab = "dashboard" | "members";

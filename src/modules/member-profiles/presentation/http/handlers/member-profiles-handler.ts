@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getChurchIdFromSession } from "@/app/api/_lib/auth";
-import { canReadMemberProfiles } from "@/app/api/member-profiles/_lib/canReadMemberProfiles";
+import { getChurchIdFromSession } from "@/shared/presentation/http/auth";
+import { canReadMemberProfiles } from "@/modules/member-profiles/presentation/http/authorization/canReadMemberProfiles";
 import type { ListMemberProfiles } from "@/modules/member-profiles/application/use-cases/ListMemberProfiles";
 import type { AuthResult } from "@/shared/contracts/auth";
 import { AcceptedJesusStatus } from "@/shared/domain/enums/AcceptedJesusStatus";

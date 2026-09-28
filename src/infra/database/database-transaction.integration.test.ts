@@ -7,7 +7,13 @@ import { Pool } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createTransactionalUseCase } from "@/infra/database/create-transactional-use-case";
 import * as schema from "@/infra/database/drizzle/schema";
+import { ChurchDrizzleRepository } from "@/modules/churches/infrastructure/persistence/drizzle/ChurchDrizzleRepository";
+import { MemberAvailabilityDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberAvailabilityDrizzleRepository";
+import { MemberChurchDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberChurchDrizzleRepository";
+import { MemberDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberDrizzleRepository";
+import { MemberMinistryDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryDrizzleRepository";
 import { createMembersComposition } from "@/modules/members/composition/members-composition";
+import { RoleDrizzleRepository } from "@/modules/roles/infrastructure/persistence/drizzle/RoleDrizzleRepository";
 import {
   createFinalizeSelfSignup,
   createScaleFixture,
@@ -47,7 +53,25 @@ describe("transactional business flows", () => {
       .insert(schema.churches)
       .values({ id: churchId, name: `Church ${churchId}` });
     const result =
-      await createMembersComposition().useCases.createMember.execute({
+      await createMembersComposition({
+        database,
+        memberRepository: new MemberDrizzleRepository(database),
+        memberChurchRepository: new MemberChurchDrizzleRepository(database),
+        memberMinistryRepository: new MemberMinistryDrizzleRepository(
+          database,
+        ),
+        memberAvailabilityRepository: new MemberAvailabilityDrizzleRepository(
+          database,
+        ),
+        createTransactionalRepositories: (executor) => [
+          new MemberDrizzleRepository(executor),
+          new MemberChurchDrizzleRepository(executor),
+          new MemberMinistryDrizzleRepository(executor),
+          new MemberAvailabilityDrizzleRepository(executor),
+        ],
+        churchRepository: new ChurchDrizzleRepository(database),
+        roleRepository: new RoleDrizzleRepository(database),
+      }).useCases.createMember.execute({
         email,
         fullName: "Member",
         churches: [{ churchId, roleId, ministryIds: [randomUUID()] }],

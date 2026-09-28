@@ -7,7 +7,7 @@ import { NumberStepper } from "@/components/ui/number-stepper";
 import { RoleSelect } from "@/components/ui/role-select";
 import { SelfSignupShareDialog } from "@/features/churches/components/SelfSignupShareDialog";
 import { useChurchForm } from "@/features/churches/hooks/useChurchForm";
-import type { ChurchFormData } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { ChurchFormData } from "@/modules/churches/presentation/contracts/church/ChurchDTO";
 
 interface ChurchFormProps {
   mode: "create" | "edit";

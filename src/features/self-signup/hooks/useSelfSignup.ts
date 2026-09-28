@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   signInWithGoogle,
   signInWithGoogleRedirect,
-} from "@/infra/firebase-client/services/googleAuth";
+} from "@/shared/frontend/firebase-auth";
 import { normalizePhone } from "@/shared/utils/phone";
 import { useAuthStore } from "@/stores/authStore";
 import {

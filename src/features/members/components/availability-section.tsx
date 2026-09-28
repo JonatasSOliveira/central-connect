@@ -3,7 +3,7 @@
 import type { UseFormReturn } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SearchableSelect } from "@/components/ui/searchable-select";
-import type { CreateMemberInput } from "@/modules/members/application/dtos/member/CreateMemberDTO";
+import type { CreateMemberInput } from "@/modules/members/presentation/contracts/member/CreateMemberDTO";
 
 interface AvailabilitySectionProps {
   form: UseFormReturn<CreateMemberInput>;

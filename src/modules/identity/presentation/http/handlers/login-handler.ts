@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
-import { isTrustedOrigin } from "@/app/api/_lib/csrf";
+import { isTrustedOrigin } from "@/shared/presentation/http/csrf";
 import { AuthLoginInputSchema } from "@/modules/identity/application/dtos/AuthLoginInputDTO";
 import type { AuthLoginUseCase } from "@/modules/identity/application/use-cases/AuthLoginUseCase";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";

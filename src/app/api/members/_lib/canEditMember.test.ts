@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Permission } from "@/shared/domain/enums/Permission";
-import { canEditMember } from "./canEditMember";
+import { canEditMember } from "@/modules/members/presentation/http/authorization/canEditMember";
 
 describe("canEditMember", () => {
   it("allows editing when user is super admin", () => {

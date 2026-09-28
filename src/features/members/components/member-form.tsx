@@ -6,7 +6,7 @@ import { FormTemplate } from "@/components/templates/form-template";
 import { FormSection } from "@/components/ui/form-section";
 import { useMemberForm } from "@/features/members/hooks/useMemberForm";
 import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
-import type { CreateMemberInput } from "@/modules/members/application/dtos/member/CreateMemberDTO";
+import type { CreateMemberInput } from "@/modules/members/presentation/contracts/member/CreateMemberDTO";
 import { AvailabilitySection } from "./availability-section";
 import { BasicInfoSection } from "./basic-info-section";
 import { ChurchSection } from "./church-section";

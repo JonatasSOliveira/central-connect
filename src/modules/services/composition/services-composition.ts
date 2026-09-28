@@ -1,16 +1,17 @@
-import { validateSession } from "@/app/api/_lib/auth";
-import { getDatabaseClient } from "@/infra/database/get-database-client";
+import { validateSession } from "@/shared/presentation/http/auth";
 import { CreateService } from "@/modules/services/application/use-cases/CreateService";
 import { DeleteService } from "@/modules/services/application/use-cases/DeleteService";
 import { GetService } from "@/modules/services/application/use-cases/GetService";
 import { ListServices } from "@/modules/services/application/use-cases/ListServices";
 import { UpdateService } from "@/modules/services/application/use-cases/UpdateService";
-import { ServiceDrizzleRepository } from "@/modules/services/infrastructure/persistence/drizzle/ServiceDrizzleRepository";
+import type { IServiceRepository } from "@/modules/services/application/ports/IServiceRepository";
 import { createServiceHandler } from "@/modules/services/presentation/http/handlers/service-handler";
 import { createServicesHandler } from "@/modules/services/presentation/http/handlers/services-handler";
 
-export function createServicesComposition() {
-  const repository = new ServiceDrizzleRepository(getDatabaseClient());
+export function createServicesComposition(dependencies: {
+  repository: IServiceRepository;
+}) {
+  const repository = dependencies.repository;
   const useCases = {
     listServices: new ListServices(repository),
     createService: new CreateService(repository),

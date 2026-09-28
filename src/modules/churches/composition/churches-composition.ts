@@ -1,31 +1,33 @@
-import { validateSession } from "@/app/api/_lib/auth";
-import { getDatabaseClient } from "@/infra/database/get-database-client";
+import { validateSession } from "@/shared/presentation/http/auth";
 import { CreateChurch } from "@/modules/churches/application/use-cases/CreateChurch";
 import { DeleteChurch } from "@/modules/churches/application/use-cases/DeleteChurch";
 import { GetChurch } from "@/modules/churches/application/use-cases/GetChurch";
 import { ListChurches } from "@/modules/churches/application/use-cases/ListChurches";
 import { UpdateChurch } from "@/modules/churches/application/use-cases/UpdateChurch";
-import { ChurchDrizzleRepository } from "@/modules/churches/infrastructure/persistence/drizzle/ChurchDrizzleRepository";
+import type { IChurchRepository } from "@/modules/churches/application/ports/IChurchRepository";
+import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
+import type { IRoleRepository } from "@/modules/roles/application/ports/IRoleRepository";
 import { createChurchHandler } from "@/modules/churches/presentation/http/handlers/church-handler";
 import { createChurchesHandler } from "@/modules/churches/presentation/http/handlers/churches-handler";
-import { MemberChurchDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberChurchDrizzleRepository";
-import { RoleDrizzleRepository } from "@/modules/roles/infrastructure/persistence/drizzle/RoleDrizzleRepository";
 
-export function createChurchesComposition() {
-  const database = getDatabaseClient();
-  const churchRepository = new ChurchDrizzleRepository(database);
-  const roleRepository = new RoleDrizzleRepository(database);
-  const memberChurchRepository = new MemberChurchDrizzleRepository(database);
+export function createChurchesComposition(dependencies: {
+  churchRepository: IChurchRepository;
+  memberChurchRepository: IMemberChurchRepository;
+  roleRepository: IRoleRepository;
+}) {
   const useCases = {
     createChurch: new CreateChurch(
-      churchRepository,
-      roleRepository,
-      memberChurchRepository,
+      dependencies.churchRepository,
+      dependencies.roleRepository,
+      dependencies.memberChurchRepository,
     ),
-    getChurch: new GetChurch(churchRepository),
-    listChurches: new ListChurches(churchRepository),
-    updateChurch: new UpdateChurch(churchRepository, roleRepository),
-    deleteChurch: new DeleteChurch(churchRepository),
+    getChurch: new GetChurch(dependencies.churchRepository),
+    listChurches: new ListChurches(dependencies.churchRepository),
+    updateChurch: new UpdateChurch(
+      dependencies.churchRepository,
+      dependencies.roleRepository,
+    ),
+    deleteChurch: new DeleteChurch(dependencies.churchRepository),
   };
   return {
     useCases,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Permission } from "@/shared/domain/enums/Permission";
-import { canReadMemberProfiles } from "./canReadMemberProfiles";
+import { canReadMemberProfiles } from "@/modules/member-profiles/presentation/http/authorization/canReadMemberProfiles";
 
 describe("canReadMemberProfiles", () => {
   it("allows super admin to read any church", () => {

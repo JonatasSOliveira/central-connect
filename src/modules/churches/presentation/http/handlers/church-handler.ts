@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { canAccessChurch, hasAnyPermission } from "@/app/api/_lib/auth";
+import { canAccessChurch, hasAnyPermission } from "@/shared/presentation/http/auth";
 import type { DeleteChurch } from "@/modules/churches/application/use-cases/DeleteChurch";
 import type { GetChurch } from "@/modules/churches/application/use-cases/GetChurch";
 import type { UpdateChurch } from "@/modules/churches/application/use-cases/UpdateChurch";

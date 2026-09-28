@@ -1,4 +1,4 @@
-import type { MemberProfileDetailDTO } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
+import type { MemberProfileDetailDTO } from "@/modules/member-profiles/presentation/contracts/member-profile/MemberProfileDTO";
 import { MemberProfileField } from "./MemberProfileField";
 import { MemberProfileSection } from "./MemberProfileSection";
 import { memberProfileLabels } from "./member-profile-labels";

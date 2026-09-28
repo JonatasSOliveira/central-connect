@@ -32,9 +32,10 @@ migrations fica na tabela `drizzle.__drizzle_migrations`.
 
 ## Primeira migration
 
-A migration `0000_chemical_galactus.sql` cria o schema inicial vazio, sem
-importar dados do Firestore. Os IDs são UUIDs gerados pelo PostgreSQL e as
-tabelas usam `timestamptz` para armazenar datas em UTC.
+A migration `0000_chemical_galactus.sql` cria o schema inicial vazio. Os IDs
+são UUIDs gerados pelo PostgreSQL e as tabelas usam `timestamptz` para
+armazenar datas em UTC.
 
-Durante a migração gradual, os repositories Firebase permanecem disponíveis
-até que cada módulo seja substituído pelo repository Drizzle correspondente.
+A migração da persistência de negócio para PostgreSQL/Drizzle foi concluída.
+Firebase permanece apenas para Authentication e Cloud Messaging; não existem
+repositories Firestore ativos.

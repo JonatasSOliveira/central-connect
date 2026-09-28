@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getChurchIdFromSession, validateSession } from "@/app/api/_lib/auth";
+import { getChurchIdFromSession, validateSession } from "@/shared/presentation/http/auth";
 import { NotifyScalesByDateSchema } from "@/modules/notifications/application/dtos/NotifyScalesByDateDTO";
-import type { ScalesInfrastructure } from "@/modules/scales/infrastructure/composition/scales-infrastructure";
+import type { ScalesHandlerDependencies } from "@/modules/scales/presentation/contracts/scales-handler-dependencies";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 import { getRequestId, logEvent } from "@/shared/utils/logger";
@@ -38,7 +38,7 @@ async function readJson(request: NextRequest): Promise<unknown | NextResponse> {
 
 async function generateScale(
   request: NextRequest,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const auth = await validateSession();
   if (!auth.ok)
@@ -86,7 +86,7 @@ async function generateScale(
 
 async function runScheduledGeneration(
   request: NextRequest,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const expectedKey = process.env.INTERNAL_API_KEY;
   if (!expectedKey)
@@ -127,7 +127,7 @@ async function runScheduledGeneration(
 
 async function notifyByDate(
   request: NextRequest,
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   const requestId = getRequestId(request);
   const auth = await validateSession();
@@ -179,7 +179,7 @@ async function notifyByDate(
 }
 
 export function createScaleGenerationHandlers(
-  dependencies: ScalesInfrastructure,
+  dependencies: ScalesHandlerDependencies,
 ) {
   return {
     generate: (request: NextRequest) => generateScale(request, dependencies),

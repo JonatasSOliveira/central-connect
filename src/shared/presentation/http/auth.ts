@@ -1,11 +1,25 @@
 import { cookies } from "next/headers";
 import { JoseTokenJwtService } from "@/infra/jose/JoseTokenJwtService";
-import { AuthErrors } from "@/modules/identity/application/errors/AuthErrors";
 import type {
   AuthError,
   AuthSuccess,
   SessionPayload,
 } from "@/shared/contracts/auth";
+
+const SessionErrors = {
+  UNAUTHORIZED: {
+    code: "UNAUTHORIZED",
+    message: "Não autenticado",
+  },
+  INVALID_TOKEN: {
+    code: "INVALID_TOKEN",
+    message: "Token inválido ou expirado",
+  },
+  NOT_AUTHORIZED: {
+    code: "NOT_AUTHORIZED",
+    message: "Você não tem permissão para realizar esta ação",
+  },
+} as const;
 
 export type {
   AuthError,
@@ -21,7 +35,7 @@ export async function validateSession(): Promise<AuthSuccess | AuthError> {
   if (!token) {
     return {
       ok: false,
-      error: AuthErrors.UNAUTHORIZED,
+      error: SessionErrors.UNAUTHORIZED,
     };
   }
 
@@ -35,7 +49,7 @@ export async function validateSession(): Promise<AuthSuccess | AuthError> {
   } catch {
     return {
       ok: false,
-      error: AuthErrors.INVALID_TOKEN,
+      error: SessionErrors.INVALID_TOKEN,
     };
   }
 }
@@ -93,7 +107,7 @@ export function requireSuperAdmin(user: SessionPayload): AuthError | null {
   if (!user.isSuperAdmin) {
     return {
       ok: false,
-      error: AuthErrors.NOT_AUTHORIZED,
+      error: SessionErrors.NOT_AUTHORIZED,
     };
   }
   return null;

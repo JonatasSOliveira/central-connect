@@ -18,11 +18,11 @@ import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
-import type { ChurchFormData } from "@/modules/churches/application/dtos/church/ChurchDTO";
+import type { ChurchFormData } from "@/modules/churches/presentation/contracts/church/ChurchDTO";
 import {
   ChurchFormSchema,
   churchFormDefaultValues,
-} from "@/modules/churches/application/dtos/church/ChurchDTO";
+} from "@/modules/churches/presentation/contracts/church/ChurchDTO";
 
 interface ComponentConfig {
   name: string;

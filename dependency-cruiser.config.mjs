@@ -37,6 +37,25 @@ export default {
       },
     },
     {
+      name: "module-code-does-not-depend-on-app-entries",
+      comment: "Modules must not import Next.js route handlers or app helpers.",
+      severity: "error",
+      from: { path: "^src/modules" },
+      to: { path: "^src/app" },
+    },
+    {
+      name: "app-does-not-depend-on-infrastructure-adapters",
+      comment: "App Router entries use compositions instead of concrete adapters.",
+      severity: "error",
+      from: { path: "^src/app" },
+      to: {
+        path: [
+          "^src/infra/.*/(repositories|services)",
+          "^src/modules/.*/infrastructure",
+        ],
+      },
+    },
+    {
       name: "module-frontend-does-not-depend-on-backend",
       comment: "Frontend code communicates through public API contracts.",
       severity: "error",

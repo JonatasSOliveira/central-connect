@@ -1,45 +1,41 @@
-import { validateSession } from "@/app/api/_lib/auth";
-import { getDatabaseClient } from "@/infra/database/get-database-client";
+import { validateSession } from "@/shared/presentation/http/auth";
 import { CreateMinistry } from "@/modules/ministries/application/use-cases/CreateMinistry";
 import { DeleteMinistry } from "@/modules/ministries/application/use-cases/DeleteMinistry";
 import { GetMinistry } from "@/modules/ministries/application/use-cases/GetMinistry";
 import { ListMinistries } from "@/modules/ministries/application/use-cases/ListMinistries";
 import { UpdateMinistry } from "@/modules/ministries/application/use-cases/UpdateMinistry";
-import { MinistryDrizzleRepository } from "@/modules/ministries/infrastructure/persistence/drizzle/MinistryDrizzleRepository";
-import { MinistryRoleDrizzleRepository } from "@/modules/ministries/infrastructure/persistence/drizzle/MinistryRoleDrizzleRepository";
-import { ScaleDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleDrizzleRepository";
+import type { IMinistryRepository } from "@/modules/ministries/application/ports/IMinistryRepository";
+import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
+import type { IScaleRepository } from "@/modules/scales/application/ports/IScaleRepository";
 import { MinistriesHandler } from "../presentation/http/handlers/ministries-handler";
 import { MinistryHandler } from "../presentation/http/handlers/ministry-handler";
 
-/**
- * Transitional composition for ministries.
- *
- * The use cases and Firebase adapters still live in their legacy locations,
- * but they are now assembled here instead of through the global DI container.
- */
-export function createMinistriesComposition() {
-  const database = getDatabaseClient();
-  const ministryRepository = new MinistryDrizzleRepository(database);
-  const ministryRoleRepository = new MinistryRoleDrizzleRepository(database);
-  const scaleRepository = new ScaleDrizzleRepository(database);
+export function createMinistriesComposition(dependencies: {
+  ministryRepository: IMinistryRepository;
+  ministryRoleRepository: IMinistryRoleRepository;
+  scaleRepository: IScaleRepository;
+}) {
   const useCases = {
     createMinistry: new CreateMinistry(
-      ministryRepository,
-      ministryRoleRepository,
+      dependencies.ministryRepository,
+      dependencies.ministryRoleRepository,
     ),
     deleteMinistry: new DeleteMinistry(
-      ministryRepository,
-      ministryRoleRepository,
+      dependencies.ministryRepository,
+      dependencies.ministryRoleRepository,
     ),
-    getMinistry: new GetMinistry(ministryRepository, ministryRoleRepository),
+    getMinistry: new GetMinistry(
+      dependencies.ministryRepository,
+      dependencies.ministryRoleRepository,
+    ),
     listMinistries: new ListMinistries(
-      ministryRepository,
-      ministryRoleRepository,
-      scaleRepository,
+      dependencies.ministryRepository,
+      dependencies.ministryRoleRepository,
+      dependencies.scaleRepository,
     ),
     updateMinistry: new UpdateMinistry(
-      ministryRepository,
-      ministryRoleRepository,
+      dependencies.ministryRepository,
+      dependencies.ministryRoleRepository,
     ),
   };
 

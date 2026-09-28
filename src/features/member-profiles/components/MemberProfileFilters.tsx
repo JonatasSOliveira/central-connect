@@ -6,7 +6,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import type {
   MemberProfileFilters as Filters,
   MemberProfileFilterOptionsDTO,
-} from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
+} from "@/modules/member-profiles/presentation/contracts/member-profile/MemberProfileDTO";
 import { AcceptedJesusStatus } from "@/shared/domain/enums/AcceptedJesusStatus";
 import { ChurchAttendanceTime } from "@/shared/domain/enums/ChurchAttendanceTime";
 import { DiscipleshipStatus } from "@/shared/domain/enums/DiscipleshipStatus";

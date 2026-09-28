@@ -9,8 +9,8 @@ import {
   type ChurchFormData,
   ChurchFormSchema,
   churchFormDefaultValues,
-} from "@/modules/churches/application/dtos/church/ChurchDTO";
-import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
+} from "@/modules/churches/presentation/contracts/church/ChurchDTO";
+import type { RoleListItem } from "@/modules/roles/presentation/contracts/role/ListRolesDTO";
 import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
 interface UseChurchFormProps {

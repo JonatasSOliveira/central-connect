@@ -1,25 +1,36 @@
-import { validateSession } from "@/app/api/_lib/auth";
-import { getDatabaseClient } from "@/infra/database/get-database-client";
+import { validateSession } from "@/shared/presentation/http/auth";
 import { CreateRole } from "@/modules/roles/application/use-cases/CreateRole";
 import { DeleteRole } from "@/modules/roles/application/use-cases/DeleteRole";
 import { GetRole } from "@/modules/roles/application/use-cases/GetRole";
 import { ListRoles } from "@/modules/roles/application/use-cases/ListRoles";
 import { UpdateRole } from "@/modules/roles/application/use-cases/UpdateRole";
-import { RoleDrizzleRepository } from "@/modules/roles/infrastructure/persistence/drizzle/RoleDrizzleRepository";
-import { RolePermissionDrizzleRepository } from "@/modules/roles/infrastructure/persistence/drizzle/RolePermissionDrizzleRepository";
+import type { IRoleRepository } from "@/modules/roles/application/ports/IRoleRepository";
+import type { IRolePermissionRepository } from "@/modules/roles/application/ports/IRolePermissionRepository";
 import { createRoleHandler } from "@/modules/roles/presentation/http/handlers/role-handler";
 import { createRolesHandler } from "@/modules/roles/presentation/http/handlers/roles-handler";
 
-export function createRolesComposition() {
-  const database = getDatabaseClient();
-  const roleRepository = new RoleDrizzleRepository(database);
-  const rolePermissionRepository = new RolePermissionDrizzleRepository(database);
+export function createRolesComposition(dependencies: {
+  roleRepository: IRoleRepository;
+  rolePermissionRepository: IRolePermissionRepository;
+}) {
   const useCases = {
-    createRole: new CreateRole(roleRepository, rolePermissionRepository),
-    listRoles: new ListRoles(roleRepository),
-    getRole: new GetRole(roleRepository, rolePermissionRepository),
-    updateRole: new UpdateRole(roleRepository, rolePermissionRepository),
-    deleteRole: new DeleteRole(roleRepository, rolePermissionRepository),
+    createRole: new CreateRole(
+      dependencies.roleRepository,
+      dependencies.rolePermissionRepository,
+    ),
+    listRoles: new ListRoles(dependencies.roleRepository),
+    getRole: new GetRole(
+      dependencies.roleRepository,
+      dependencies.rolePermissionRepository,
+    ),
+    updateRole: new UpdateRole(
+      dependencies.roleRepository,
+      dependencies.rolePermissionRepository,
+    ),
+    deleteRole: new DeleteRole(
+      dependencies.roleRepository,
+      dependencies.rolePermissionRepository,
+    ),
   };
 
   return {

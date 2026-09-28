@@ -10,7 +10,7 @@ import { ListItemCard } from "@/components/ui/list-item-card";
 import { MemberSelect } from "@/components/ui/member-select";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { useMinistryForm } from "@/features/ministries/hooks/useMinistryForm";
-import type { MinistryFormInput } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
+import type { MinistryFormInput } from "@/modules/ministries/presentation/contracts/ministry/MinistryDTO";
 
 interface MinistryFormProps {
   mode: "create" | "edit";

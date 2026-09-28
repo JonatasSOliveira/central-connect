@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { MinistrySelect } from "@/components/ui/ministry-select";
-import type { MinistryListItemDTO } from "@/modules/ministries/application/dtos/ministry/MinistryDTO";
+import type { MinistryListItemDTO } from "@/modules/ministries/presentation/contracts/ministry/MinistryDTO";
 
 interface MinistrySelectorProps {
   churchId: string;

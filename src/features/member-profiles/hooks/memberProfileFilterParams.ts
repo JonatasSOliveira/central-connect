@@ -1,6 +1,6 @@
 "use client";
 
-import type { MemberProfileFilters } from "@/modules/member-profiles/application/dtos/member-profile/MemberProfileDTO";
+import type { MemberProfileFilters } from "@/modules/member-profiles/presentation/contracts/member-profile/MemberProfileDTO";
 
 export function buildMemberProfileQuery(filters: MemberProfileFilters): string {
   const params = new URLSearchParams();

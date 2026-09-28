@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { RoleListItem } from "@/modules/roles/application/dtos/role/ListRolesDTO";
+import type { RoleListItem } from "@/modules/roles/presentation/contracts/role/ListRolesDTO";
 import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
 interface UseRolesReturn {

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { canAccessChurch } from "@/app/api/_lib/auth";
+import { canAccessChurch } from "@/shared/presentation/http/auth";
 import type { GenerateWeekServices } from "@/modules/service-templates/application/use-cases/GenerateWeekServices";
 import type { AuthResult } from "@/shared/contracts/auth";
 import { Permission } from "@/shared/domain/enums/Permission";

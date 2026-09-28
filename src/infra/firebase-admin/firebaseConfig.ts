@@ -15,7 +15,6 @@ function getCredentials() {
 function shouldUseEmulators(): boolean {
   return (
     process.env.FIREBASE_USE_EMULATORS === "true" ||
-    Boolean(process.env.FIRESTORE_EMULATOR_HOST) ||
     Boolean(process.env.FIREBASE_AUTH_EMULATOR_HOST)
   );
 }

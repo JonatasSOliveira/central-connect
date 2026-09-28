@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { canAccessChurch, getChurchIdFromSession } from "@/app/api/_lib/auth";
+import { canAccessChurch, getChurchIdFromSession } from "@/shared/presentation/http/auth";
 import type { CreateMember } from "@/modules/members/application/use-cases/CreateMember";
 import type { ListMembers } from "@/modules/members/application/use-cases/ListMembers";
 import type { AuthResult, SessionPayload } from "@/shared/contracts/auth";

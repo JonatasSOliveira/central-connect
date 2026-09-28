@@ -7,8 +7,8 @@ import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
 import { PermissionSelect } from "@/components/ui/permission-select";
 import { useRoleForm } from "@/features/roles/hooks/useRoleForm";
-import type { CreateRoleInput } from "@/modules/roles/application/dtos/role/CreateRoleDTO";
-import type { UpdateRoleInput } from "@/modules/roles/application/dtos/role/UpdateRoleDTO";
+import type { CreateRoleInput } from "@/modules/roles/presentation/contracts/role/CreateRoleDTO";
+import type { UpdateRoleInput } from "@/modules/roles/presentation/contracts/role/UpdateRoleDTO";
 import type { Permission } from "@/shared/domain/enums/Permission";
 
 interface RoleFormProps {

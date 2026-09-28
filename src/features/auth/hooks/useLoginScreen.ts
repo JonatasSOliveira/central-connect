@@ -7,7 +7,7 @@ import {
   getGoogleRedirectUser,
   signInWithGoogle,
   signInWithGoogleRedirect,
-} from "@/infra/firebase-client/services/googleAuth";
+} from "@/shared/frontend/firebase-auth";
 import { useAuthStore } from "@/stores/authStore";
 
 const GOOGLE_LOGIN_PENDING_KEY = "google-login-pending";

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getChurchIdFromSession, validateSession } from "@/app/api/_lib/auth";
+import { getChurchIdFromSession, validateSession } from "@/shared/presentation/http/auth";
 import { ScaleFormSchema } from "@/modules/scales/application/dtos/ScaleDTO";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
