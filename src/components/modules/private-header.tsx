@@ -53,7 +53,8 @@ export function PrivateHeader({
           <Button
             variant="ghost"
             size="sm"
-            className={`-ml-2 h-9 w-auto min-w-9 px-2 cursor-pointer ${bgColor ? `${textClass} ${hoverClass}` : ""}`}
+            aria-label="Voltar"
+            className={`-ml-2 h-11 w-auto min-w-11 px-2 cursor-pointer ${bgColor ? `${textClass} ${hoverClass}` : ""}`}
             onClick={handleBack}
           >
             <ChevronLeft className="w-5 h-5" />

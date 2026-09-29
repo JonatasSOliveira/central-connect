@@ -1,24 +1,8 @@
 "use client";
 
-import {
-  ArrowRightLeft,
-  BarChart3,
-  BellRing,
-  Building2,
-  CalendarCheck2,
-  CalendarDays,
-  Church,
-  ClipboardCheck,
-  ClipboardList,
-  HandHeart,
-  LogOut,
-  Settings2,
-  UserRoundKey,
-  Users,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { PrivateHeader } from "@/components/modules/private-header";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,362 +13,58 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CardItem } from "@/components/ui/card-item";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { usePermissions } from "@/features/auth/hooks/usePermissions";
-import { GreetingSection } from "@/features/home/components/greeting-section";
-import { NextScaleCard } from "@/features/home/components/next-scale-card";
-import { useHomeScreen } from "@/features/home/hooks/useHomeScreen";
-import { useMyScales } from "@/features/my-scales/hooks/useMyScales";
-import { usePushNotifications } from "@/features/notifications/hooks/usePushNotifications";
-import { APP_VERSION } from "@/shared/constants/app";
+import { ChurchesAccessCard } from "@/features/home/components/ChurchesAccessCard";
+import { HomeHeader } from "@/features/home/components/HomeHeader";
+import { HomeWelcome } from "@/features/home/components/HomeWelcome";
 import { Permission } from "@/shared/domain/enums/Permission";
-import { useChurchStore } from "@/stores/churchStore";
 
 export default function HomePage() {
   const router = useRouter();
-  const { userName, avatarUrl, churchName } = useHomeScreen();
   const { user, logout } = useAuth();
-  const { selectedChurch } = useChurchStore();
-  const { isSupported, permission, isRegistering, enableNotifications } =
-    usePushNotifications({ enableForegroundListener: false });
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const { scales: upcomingScales, isLoading: isLoadingScales } = useMyScales();
-  const nextScale = upcomingScales[0] ?? null;
 
-  const { hasPermission: canManageMembers } = usePermissions({
-    requiredPermissions: [Permission.MEMBER_READ],
-  });
-
-  const { hasPermission: canReadMemberProfiles } = usePermissions({
-    requiredPermissions: [Permission.MEMBER_PROFILE_READ],
-  });
-
-  const { hasPermission: canManageRoles } = usePermissions({
-    requiredPermissions: [Permission.ROLE_READ],
-  });
-
-  const { hasPermission: canManageChurches } = usePermissions({
-    requiredPermissions: [Permission.CHURCH_READ],
-  });
-
-  const { hasPermission: canReadChurchSelf } = usePermissions({
-    requiredPermissions: [Permission.CHURCH_SELF_READ],
-  });
-
-  const { hasPermission: canWriteChurchSelf } = usePermissions({
-    requiredPermissions: [Permission.CHURCH_SELF_WRITE],
-  });
-
-  const { hasPermission: canWriteMemberSelf } = usePermissions({
-    requiredPermissions: [Permission.MEMBER_SELF_WRITE],
-  });
-
-  const { hasPermission: canManageMinistries } = usePermissions({
-    requiredPermissions: [Permission.MINISTRY_READ],
-  });
-
-  const { hasPermission: canManageServices } = usePermissions({
-    requiredPermissions: [Permission.SERVICE_READ],
-  });
-
-  const { hasPermission: canManageServiceTemplates } = usePermissions({
-    requiredPermissions: [Permission.SERVICE_TEMPLATE_READ],
-  });
-
-  const { hasPermission: canManageScales } = usePermissions({
-    requiredPermissions: [Permission.SCALE_READ],
-  });
-
-  const { hasPermission: canReadOwnScales } = usePermissions({
-    requiredPermissions: [Permission.SCALE_SELF_READ],
-  });
-
-  const { hasPermission: canReadScaleAttendance } = usePermissions({
-    requiredPermissions: [Permission.SCALE_ATTENDANCE_READ],
-  });
-
-  const { hasPermission: canReadScaleAttendanceReport } = usePermissions({
-    requiredPermissions: [Permission.SCALE_ATTENDANCE_REPORT_READ],
-  });
-
-  const { hasPermission: canReadMyScales } = usePermissions({
-    requiredPermissions: [Permission.MY_SCALES_READ],
-  });
-
-  const canShowAdminSection =
-    canManageMembers ||
-    canReadMemberProfiles ||
-    canManageRoles ||
-    canManageChurches ||
-    canManageMinistries ||
-    canManageServices ||
-    canManageServiceTemplates ||
-    canManageScales;
-
-  const canShowChurchSelfItem = canReadChurchSelf && !canManageChurches;
-  const canShowQuickActions =
-    canReadMyScales ||
-    canReadOwnScales ||
-    canReadScaleAttendance ||
-    canReadScaleAttendanceReport ||
-    canShowChurchSelfItem;
-
-  const canShowNotificationSection = isSupported && !!user?.memberId;
-  const showEnableNotificationsItem =
-    canShowNotificationSection && permission !== "granted";
-  const isNotificationPermissionDenied = permission === "denied";
-
-  const handleChurchSelfClick = () => {
-    const churchId = selectedChurch?.id || user?.churches?.[0]?.churchId;
-    if (churchId) {
-      const readOnly = !canWriteChurchSelf;
-      router.push(`/churches/${churchId}/edit?readOnly=${readOnly}`);
-    }
-  };
-
-  const canShowMemberSelfItem = canWriteMemberSelf && !!user?.memberId;
-  const handleMemberSelfClick = () => {
-    if (user?.memberId) {
-      router.push(`/members/${user.memberId}/edit?selfEdit=true`);
-    }
-  };
+  const fullName = user?.fullName || "Usuário";
+  const isSuperAdmin = user?.isSuperAdmin ?? false;
+  const hasChurches = (user?.churches.length ?? 0) > 0;
+  const canAccessChurches =
+    isSuperAdmin || user?.permissions.includes(Permission.CHURCH_READ);
 
   return (
-    <div className="app-background py-2">
-      <div className="max-w-2xl mx-auto">
-        <PrivateHeader title="Central Connect" showBackButton={false} />
+    <div className="space-y-8 py-8 sm:space-y-10 sm:py-12">
+      <HomeHeader fullName={fullName} avatarUrl={user?.avatarUrl ?? null} />
 
-        <GreetingSection userName={userName} avatarUrl={avatarUrl} />
+      <HomeWelcome fullName={fullName} />
 
-        <div className="py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                <Church className="h-6 w-6 text-primary" strokeWidth={1.5} />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Igreja selecionada
-                </p>
-                <p className="font-heading text-lg font-semibold text-foreground">
-                  {churchName || "Selecione uma igreja"}
-                </p>
-              </div>
-            </div>
-            {user?.churches && user.churches.length > 1 && (
-              <button
-                type="button"
-                onClick={() => router.push("/select-church")}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
-              >
-                <ArrowRightLeft className="w-4 h-4" />
-                Trocar
-              </button>
-            )}
-          </div>
-        </div>
-
-        {!isLoadingScales && (
-          <div className="mb-7">
-            <NextScaleCard scale={nextScale} />
-          </div>
-        )}
-
-        {canShowAdminSection && (
-          <>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Configurações
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 mb-6">
-              {canManageChurches && (
-                <CardItem
-                  title="Igrejas"
-                  description="Gerencie as igrejas cadastradas"
-                  icon={Church}
-                  onClick={() => router.push("/churches")}
-                />
-              )}
-              {canManageMembers && (
-                <CardItem
-                  title="Membros"
-                  description="Gerencie os membros da igreja"
-                  icon={Users}
-                  onClick={() => router.push("/members")}
-                />
-              )}
-              {canReadMemberProfiles && (
-                <CardItem
-                  title="Perfis dos membros"
-                  description="Veja indicadores e respostas do autocadastro"
-                  icon={BarChart3}
-                  onClick={() => router.push("/member-profiles")}
-                />
-              )}
-              {canManageRoles && (
-                <CardItem
-                  title="Cargos do Sistema"
-                  description="Gerencie as permissões dos cargos do sistema"
-                  icon={UserRoundKey}
-                  onClick={() => router.push("/roles")}
-                />
-              )}
-              {canManageMinistries && (
-                <CardItem
-                  title="Ministérios"
-                  description="Gerencie os ministérios da igreja"
-                  icon={HandHeart}
-                  onClick={() => router.push("/ministries")}
-                />
-              )}
-              {canManageServices && (
-                <CardItem
-                  title="Cultos"
-                  description="Gerencie os cultos da igreja"
-                  icon={CalendarDays}
-                  onClick={() => router.push("/services")}
-                />
-              )}
-              {canManageServiceTemplates && (
-                <CardItem
-                  title="Modelos de Culto"
-                  description="Configure modelos de cultos recorrentes"
-                  icon={Settings2}
-                  onClick={() => router.push("/service-templates")}
-                />
-              )}
-              {canManageScales && (
-                <CardItem
-                  title="Escalas"
-                  description="Gerencie as escalas ministeriais"
-                  icon={ClipboardList}
-                  onClick={() => router.push("/scales")}
-                />
-              )}
-            </div>
-          </>
-        )}
-
-        {canShowQuickActions && (
-          <>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Ações Rápidas
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 mb-6">
-              {canReadMyScales && (
-                <CardItem
-                  title="Minhas Escalas"
-                  description="Veja suas escalas atuais, futuras e já servidas"
-                  icon={CalendarCheck2}
-                  onClick={() => router.push("/my-scales")}
-                />
-              )}
-              {canReadScaleAttendance && (
-                <CardItem
-                  title="Chamadas"
-                  description="Acesse as chamadas por período"
-                  icon={ClipboardCheck}
-                  onClick={() => router.push("/scale-attendances")}
-                />
-              )}
-              {canReadScaleAttendanceReport && (
-                <CardItem
-                  title="Relatório de Escalas"
-                  description="Consulte indicadores por período"
-                  icon={BarChart3}
-                  onClick={() => router.push("/scale-attendance-reports")}
-                />
-              )}
-
-              {canReadOwnScales && !canManageScales && (
-                <CardItem
-                  title="Minhas Escalas"
-                  description="Visualize as escalas em que você está escalado"
-                  icon={ClipboardList}
-                  onClick={() => router.push("/my-scales")}
-                />
-              )}
-
-              {canShowChurchSelfItem && (
-                <CardItem
-                  title="Dados da igreja"
-                  description={
-                    canWriteChurchSelf
-                      ? "Edite os dados da igreja"
-                      : "Visualize os dados da igreja"
-                  }
-                  icon={Building2}
-                  onClick={handleChurchSelfClick}
-                />
-              )}
-
-              {canShowMemberSelfItem && (
-                <CardItem
-                  title="Meu Perfil"
-                  description="Edite seus dados pessoais"
-                  icon={Users}
-                  onClick={handleMemberSelfClick}
-                />
-              )}
-            </div>
-          </>
-        )}
-
-        {canShowNotificationSection && (
-          <>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Notificações
-              </span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 mb-6">
-              {showEnableNotificationsItem ? (
-                <CardItem
-                  title="Ativar notificações"
-                  description={
-                    isRegistering
-                      ? "Ativando notificações..."
-                      : isNotificationPermissionDenied
-                        ? "Notificações bloqueadas no navegador. Ative nas configurações do site."
-                        : "Receba alertas quando for escalado"
-                  }
-                  icon={BellRing}
-                  onClick={
-                    isNotificationPermissionDenied
-                      ? undefined
-                      : () => {
-                          enableNotifications();
-                        }
-                  }
-                />
-              ) : (
-                <CardItem
-                  title="Notificações ativas"
-                  description="Você receberá alertas quando for escalado"
-                  icon={BellRing}
-                />
-              )}
-            </div>
-          </>
-        )}
-
-        <CardItem
-          title="Sair"
-          description="Encerrar sessão atual"
-          icon={LogOut}
-          onClick={() => setShowLogoutDialog(true)}
-          variant="destructive"
+      {canAccessChurches ? (
+        <ChurchesAccessCard
+          isSuperAdmin={isSuperAdmin}
+          hasChurches={hasChurches}
+          onOpen={() => router.push("/churches")}
         />
+      ) : (
+        <section className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8">
+          <h2 className="font-heading text-xl font-semibold text-foreground">
+            Acesso em configuração
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
+            Seu acesso ainda não possui uma área disponível. Fale com o
+            administrador da sua igreja.
+          </p>
+        </section>
+      )}
+
+      <div className="border-t border-border pt-6">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 w-full gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive sm:w-auto"
+          onClick={() => setShowLogoutDialog(true)}
+        >
+          <LogOut className="size-4" aria-hidden="true" />
+          Sair
+        </Button>
       </div>
 
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
@@ -401,10 +81,6 @@ export default function HomePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <p className="text-[10px] text-muted-foreground/60 text-center mt-6 pb-4">
-        v{APP_VERSION}
-      </p>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AppShell } from "@/components/templates/app-shell";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -28,9 +28,13 @@ export default function PrivateLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated, isLoading } = useAuth();
+  const isHome = pathname === "/home";
+  const isChurchManagement =
+    pathname === "/churches" || pathname.startsWith("/churches/");
   const { permission, syncRegisteredToken, autoEnableNotificationsAfterLogin } =
-    usePushNotifications();
+    usePushNotifications({ enableForegroundListener: !isHome });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -39,8 +43,9 @@ export default function PrivateLayout({
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
-    if (!isAuthenticated || permission !== "granted") {
+    if (isHome || !isAuthenticated || permission !== "granted") {
       pushDebug("syncRegisteredToken skipped", {
+        isHome,
         isAuthenticated,
         permission,
       });
@@ -60,11 +65,12 @@ export default function PrivateLayout({
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isAuthenticated, permission, syncRegisteredToken]);
+  }, [isHome, isAuthenticated, permission, syncRegisteredToken]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isHome || !isAuthenticated) {
       pushDebug("autoEnableNotificationsAfterLogin skipped", {
+        isHome,
         isAuthenticated,
       });
       return;
@@ -72,7 +78,7 @@ export default function PrivateLayout({
 
     pushDebug("autoEnableNotificationsAfterLogin triggered");
     autoEnableNotificationsAfterLogin();
-  }, [autoEnableNotificationsAfterLogin, isAuthenticated]);
+  }, [autoEnableNotificationsAfterLogin, isHome, isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -86,5 +92,9 @@ export default function PrivateLayout({
     return null;
   }
 
-  return <AppShell>{children}</AppShell>;
+  return (
+    <AppShell showNavigation={!isHome && !isChurchManagement}>
+      {children}
+    </AppShell>
+  );
 }

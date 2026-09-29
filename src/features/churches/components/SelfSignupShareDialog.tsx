@@ -84,15 +84,15 @@ export function SelfSignupShareDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Auto cadastro da igreja</AlertDialogTitle>
             <AlertDialogDescription>
-              Compartilhe o link ou QR Code para que novos membros facam o
-              cadastro rapidamente.
+              Compartilhe este link ou QR Code para que novos membros preencham
+              seus dados rapidamente.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground">
-                Link publico
+                Link de cadastro
               </p>
               <div className="flex gap-2">
                 <Input value={selfSignupUrl} readOnly className="text-xs" />
@@ -127,7 +127,7 @@ export function SelfSignupShareDialog({
             </AlertDialogAction>
             <AlertDialogAction type="button" onClick={openPublicPage}>
               <ExternalLink className="mr-2 h-4 w-4" />
-              Abrir pagina
+              Abrir página de cadastro
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

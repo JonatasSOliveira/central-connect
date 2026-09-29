@@ -16,39 +16,48 @@ interface UseChurchesReturn {
 }
 
 export function useChurches(): UseChurchesReturn {
-  const { user } = useAuth();
-  const {
-    churches: cachedChurches,
-    fetchIfStale,
-    setChurches,
-  } = useChurchCatalogStore();
+  const { user, isInitialized } = useAuth();
+  const { fetchIfStale, setChurches } = useChurchCatalogStore();
   const [allChurches, setAllChurches] = useState<ChurchListItemDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchChurches = useCallback(async () => {
-    if (!user) return;
-
-    setIsLoading(true);
-    try {
-      if (cachedChurches.length > 0) {
-        setAllChurches(cachedChurches);
-      }
-
-      const churches = await fetchIfStale();
-      if (churches.length > 0) {
-        setAllChurches(churches);
-      }
-    } catch (error) {
-      console.error("Error fetching churches:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cachedChurches, fetchIfStale, user]);
-
   useEffect(() => {
-    fetchChurches();
-  }, [fetchChurches]);
+    if (!isInitialized) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadChurches = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const churches = await fetchIfStale();
+
+        if (!cancelled) {
+          setAllChurches(churches);
+        }
+      } catch (error) {
+        console.error("Error fetching churches:", error);
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadChurches();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchIfStale, isInitialized, user]);
 
   const filteredChurches = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -63,6 +72,23 @@ export function useChurches(): UseChurchesReturn {
   const handleSearch = useCallback((value: string) => {
     setSearchQuery(value);
   }, []);
+
+  const refresh = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const churches = await fetchIfStale(0);
+      setAllChurches(churches);
+    } catch (error) {
+      console.error("Error refreshing churches:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchIfStale, user]);
 
   const deleteChurch = useCallback(
     async (churchId: string): Promise<boolean> => {
@@ -102,6 +128,6 @@ export function useChurches(): UseChurchesReturn {
     searchQuery,
     setSearch: handleSearch,
     deleteChurch,
-    refresh: fetchChurches,
+    refresh,
   };
 }

@@ -9,6 +9,7 @@ export interface RoleSelectItem {
 }
 
 interface RoleSelectProps {
+  id?: string;
   label?: string;
   value: string;
   onChange: (value: string) => void;
@@ -22,6 +23,7 @@ interface RoleSelectProps {
 }
 
 export function RoleSelect({
+  id,
   label,
   value,
   onChange,
@@ -35,7 +37,9 @@ export function RoleSelect({
 }: RoleSelectProps) {
   const options = useMemo(() => {
     const normalized = [...roles]
-      .sort((a, b) => a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" }))
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" }),
+      )
       .map((role) => ({ value: role.id, label: role.name }));
 
     if (!allOptionLabel) {
@@ -47,6 +51,7 @@ export function RoleSelect({
 
   return (
     <SearchableSelect
+      id={id}
       label={label}
       value={value}
       onChange={onChange}

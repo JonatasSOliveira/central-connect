@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface NumberStepperProps {
+  id?: string;
   value: number;
   onChange: (value: number) => void;
   min?: number;
@@ -16,6 +17,7 @@ interface NumberStepperProps {
 }
 
 export function NumberStepper({
+  id,
   value,
   onChange,
   min = 0,
@@ -25,6 +27,8 @@ export function NumberStepper({
   disabled = false,
   className,
 }: NumberStepperProps) {
+  const labelId = id ? `${id}-label` : undefined;
+
   const handleDecrement = () => {
     if (value > min) {
       onChange(value - 1);
@@ -39,42 +43,53 @@ export function NumberStepper({
 
   return (
     <div className={cn("space-y-2", className)}>
-      {label && (
-        <label className="text-sm font-medium text-foreground">{label}</label>
-      )}
-      <div
-        className={cn(
-          "flex items-center justify-center rounded-lg border border-border bg-card",
-          error && "border-destructive",
-          disabled && "opacity-50",
+      <fieldset aria-labelledby={labelId} className="space-y-2">
+        {label && (
+          <legend id={labelId} className="text-sm font-medium text-foreground">
+            {label}
+          </legend>
         )}
-      >
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={handleDecrement}
-          disabled={disabled || value <= min}
-          className="h-12 w-12 rounded-none border-r border-border hover:bg-muted/50"
-          aria-label="Diminuir"
+        <div
+          className={cn(
+            "flex items-center justify-center rounded-lg border border-border bg-card",
+            error && "border-destructive",
+            disabled && "opacity-50",
+          )}
         >
-          <Minus className="h-5 w-5" />
-        </Button>
-        <span className="flex-1 text-center font-semibold text-lg tabular-nums">
-          {value}
-        </span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={handleIncrement}
-          disabled={disabled || value >= max}
-          className="h-12 w-12 rounded-none border-l border-border hover:bg-muted/50"
-          aria-label="Aumentar"
-        >
-          <Plus className="h-5 w-5" />
-        </Button>
-      </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleDecrement}
+            disabled={disabled || value <= min}
+            className="h-12 w-12 rounded-none border-r border-border hover:bg-muted/50"
+            aria-label={`Diminuir ${label?.toLowerCase() ?? "valor"}`}
+          >
+            <Minus className="h-5 w-5" />
+          </Button>
+          <span
+            aria-label={`Valor atual: ${value}`}
+            aria-valuemax={max}
+            aria-valuemin={min}
+            aria-valuenow={value}
+            role="spinbutton"
+            className="flex-1 text-center text-lg font-semibold tabular-nums"
+          >
+            {value}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleIncrement}
+            disabled={disabled || value >= max}
+            className="h-12 w-12 rounded-none border-l border-border hover:bg-muted/50"
+            aria-label={`Aumentar ${label?.toLowerCase() ?? "valor"}`}
+          >
+            <Plus className="h-5 w-5" />
+          </Button>
+        </div>
+      </fieldset>
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );

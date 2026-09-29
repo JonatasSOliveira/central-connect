@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { getAuthenticatedRoute } from "@/features/auth/utils/getAuthenticatedRoute";
 
 export default function RootPage() {
   const router = useRouter();
@@ -12,15 +13,13 @@ export default function RootPage() {
   useEffect(() => {
     if (isLoading) return;
 
-    if (isAuthenticated) {
-      if (user?.isSuperAdmin || user?.churchId) {
-        router.push("/home");
-      } else {
-        router.push("/select-church");
-      }
-    } else {
-      router.push("/login");
-    }
+    router.push(
+      getAuthenticatedRoute({
+        isAuthenticated,
+        isSuperAdmin: user?.isSuperAdmin ?? false,
+        churchId: user?.churchId ?? null,
+      }),
+    );
   }, [isAuthenticated, isLoading, user, router]);
 
   return (

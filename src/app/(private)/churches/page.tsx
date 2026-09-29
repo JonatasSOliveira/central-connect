@@ -31,6 +31,7 @@ export default function ChurchesPage() {
     user?.isSuperAdmin || user?.permissions.includes(Permission.CHURCH_WRITE);
   const canDelete =
     user?.isSuperAdmin || user?.permissions.includes(Permission.CHURCH_DELETE);
+  const hasChurches = allChurchesCount > 0;
 
   const handleCreateChurch = useCallback(() => {
     router.push("/churches/new");
@@ -60,12 +61,14 @@ export default function ChurchesPage() {
       return (
         <ListTemplate.EmptyState
           icon={Inbox}
-          title="Nenhuma igreja cadastrada"
-          description="Clique em Nova Igreja para cadastrar a primeira igreja da plataforma."
+          title="Vamos cadastrar sua primeira igreja?"
+          description="Cadastre os dados básicos da igreja para começar a organizar o Central Connect."
           action={{
-            label: "Cadastrar Igreja",
+            label: "Cadastrar primeira igreja",
             onClick: handleCreateChurch,
+            buttonClassName: "w-full sm:w-auto",
           }}
+          className="mx-auto mt-8 max-w-xl border-primary/20 bg-card"
         />
       );
     }
@@ -75,7 +78,7 @@ export default function ChurchesPage() {
         <ListTemplate.EmptyState
           icon={Search}
           title="Nenhuma igreja encontrada"
-          description={`Não foram encontradas igrejas para "${searchQuery}"`}
+          description={`Não encontramos uma igreja com o nome "${searchQuery}".`}
           action={{
             label: "Limpar busca",
             onClick: () => setSearch(""),
@@ -92,6 +95,7 @@ export default function ChurchesPage() {
             icon={Church}
             title={church.name}
             onClick={canWrite ? () => handleEditChurch(church.id) : undefined}
+            className="border-primary/20"
             actions={
               canWrite || canDelete
                 ? {
@@ -114,22 +118,31 @@ export default function ChurchesPage() {
     <ListTemplate isLoading={isLoading}>
       <ListTemplate.Header
         title="Igrejas"
-        subtitle={`${allChurchesCount} igreja${allChurchesCount !== 1 ? "s" : ""}`}
+        subtitle={
+          hasChurches
+            ? `${allChurchesCount} igreja${allChurchesCount !== 1 ? "s" : ""} cadastrada${allChurchesCount !== 1 ? "s" : ""}`
+            : "Organize as igrejas cadastradas"
+        }
+        bgColor="#16a34a"
       />
 
-      <ListTemplate.SearchBar
-        value={searchQuery}
-        onChange={setSearch}
-        onClear={() => setSearch("")}
-        placeholder="Buscar por nome..."
-        resultsCount={churches.length}
-      />
+      {hasChurches && (
+        <ListTemplate.SearchBar
+          value={searchQuery}
+          onChange={setSearch}
+          onClear={() => setSearch("")}
+          placeholder="Buscar uma igreja"
+          resultsCount={churches.length}
+        />
+      )}
 
-      {canWrite && (
+      {canWrite && hasChurches && (
         <ListTemplate.Action
-          label="Nova Igreja"
+          label="Nova igreja"
           icon={Plus}
           onClick={handleCreateChurch}
+          buttonClassName="w-full sm:w-auto"
+          className="mb-2 sm:mb-0"
         />
       )}
 

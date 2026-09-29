@@ -27,13 +27,18 @@ export function ChurchForm({
   });
 
   const handleCancel = () => {
-    router.push("/home");
+    router.push("/churches");
   };
 
   if (isFetching) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      <div
+        className="flex h-64 flex-col items-center justify-center gap-3 text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <p className="text-sm">Carregando dados da igreja...</p>
       </div>
     );
   }
@@ -41,78 +46,120 @@ export function ChurchForm({
   return (
     <FormTemplate>
       <FormTemplate.Form<ChurchFormData> form={form} onSubmit={onSubmit}>
-        <FormTemplate.Content>
-          <FormField<ChurchFormData>
-            form={form}
-            name="name"
-            label="Nome"
-            placeholder="Nome da igreja"
-            required
-            disabled={readOnly}
-          />
-
-          <div className="space-y-2">
-            <NumberStepper
-              label="Máx. escalas seguidas por membro"
-              value={Number(form.watch("maxConsecutiveScalesPerMember")) || 2}
-              onChange={(value) => {
-                form.setValue("maxConsecutiveScalesPerMember", value, {
-                  shouldValidate: true,
-                });
-              }}
-              min={1}
-              max={10}
-              error={
-                form.formState.errors.maxConsecutiveScalesPerMember
-                  ?.message as string
-              }
-              disabled={readOnly}
-            />
-            <p className="text-xs text-muted-foreground">
-              Limita quantas escalas consecutivas o mesmo membro pode receber.
+        <FormTemplate.Content className="space-y-4 pt-0">
+          <section
+            aria-labelledby="church-data-heading"
+            className="app-surface border-primary/20 p-4 sm:p-6"
+          >
+            <h2 id="church-data-heading" className="text-base font-semibold">
+              Dados da igreja
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Informe o nome que será exibido no Central Connect.
             </p>
+            <div className="mt-5">
+              <FormField<ChurchFormData>
+                form={form}
+                name="name"
+                label="Nome da igreja"
+                placeholder="Digite o nome da igreja"
+                required
+                disabled={readOnly}
+                autoFocus={!readOnly}
+              />
+            </div>
+          </section>
 
-            <RoleSelect
-              label="Cargo padrão para auto cadastro"
-              value={form.watch("selfSignupDefaultRoleId") || ""}
-              onChange={(value) => {
-                form.setValue("selfSignupDefaultRoleId", value, {
-                  shouldValidate: true,
-                });
-              }}
-              roles={roles}
-              allOptionLabel="Selecione um cargo (opcional)"
-              placeholder="Selecione um cargo (opcional)"
-              searchPlaceholder="Pesquisar cargo..."
-              emptyText="Nenhum cargo encontrado"
-              disabled={readOnly}
-            />
-            {form.formState.errors.selfSignupDefaultRoleId?.message && (
-              <p className="text-xs text-destructive">
-                {form.formState.errors.selfSignupDefaultRoleId.message}
+          <section
+            aria-labelledby="scale-settings-heading"
+            className="app-surface border-primary/20 p-4 sm:p-6"
+          >
+            <h2 id="scale-settings-heading" className="text-base font-semibold">
+              Configurações de escala
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Defina regras para distribuir as escalas com equilíbrio.
+            </p>
+            <div className="mt-5">
+              <NumberStepper
+                id="maxConsecutiveScalesPerMember"
+                label="Limite de escalas consecutivas por pessoa"
+                value={Number(form.watch("maxConsecutiveScalesPerMember")) || 2}
+                onChange={(value) => {
+                  form.setValue("maxConsecutiveScalesPerMember", value, {
+                    shouldValidate: true,
+                  });
+                }}
+                min={1}
+                max={10}
+                error={
+                  form.formState.errors.maxConsecutiveScalesPerMember
+                    ?.message as string
+                }
+                disabled={readOnly}
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Evita que a mesma pessoa seja escalada várias vezes seguidas.
               </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Esse cargo será aplicado automaticamente em novos membros que se
-              cadastrarem pelo link ou QR Code da igreja.
-            </p>
+            </div>
+          </section>
 
-            {mode === "edit" && churchId ? (
-              <div className="pt-1">
-                <SelfSignupShareDialog
-                  churchId={churchId}
-                  churchName={form.watch("name")}
-                />
-              </div>
-            ) : null}
-          </div>
+          <section
+            aria-labelledby="member-signup-heading"
+            className="app-surface border-primary/20 p-4 sm:p-6"
+          >
+            <h2 id="member-signup-heading" className="text-base font-semibold">
+              Cadastro de novos membros
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Defina uma opção inicial para os cadastros feitos pelo link ou QR
+              Code.
+            </p>
+            <div className="mt-5 space-y-2">
+              <RoleSelect
+                id="selfSignupDefaultRoleId"
+                label="Cargo inicial — opcional"
+                value={form.watch("selfSignupDefaultRoleId") || ""}
+                onChange={(value) => {
+                  form.setValue("selfSignupDefaultRoleId", value, {
+                    shouldValidate: true,
+                  });
+                }}
+                roles={roles}
+                allOptionLabel="Nenhum cargo definido"
+                placeholder="Selecione um cargo"
+                searchPlaceholder="Pesquisar cargos"
+                emptyText="Nenhum cargo disponível"
+                disabled={readOnly}
+              />
+              {form.formState.errors.selfSignupDefaultRoleId?.message && (
+                <p className="text-xs text-destructive">
+                  {form.formState.errors.selfSignupDefaultRoleId.message}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Você poderá alterar essa configuração depois.
+              </p>
+
+              {mode === "edit" && churchId && !readOnly ? (
+                <div className="pt-1">
+                  <SelfSignupShareDialog
+                    churchId={churchId}
+                    churchName={form.watch("name")}
+                  />
+                </div>
+              ) : null}
+            </div>
+          </section>
         </FormTemplate.Content>
 
         {!readOnly && (
           <FormTemplate.Footer
             onCancel={handleCancel}
             isLoading={isLoading}
-            submitLabel={mode === "edit" ? "Salvar" : "Criar"}
+            submitLabel={
+              mode === "edit" ? "Salvar alterações" : "Cadastrar igreja"
+            }
           />
         )}
       </FormTemplate.Form>

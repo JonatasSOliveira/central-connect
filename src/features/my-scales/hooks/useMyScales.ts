@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export type MyScalePeriod = "upcoming" | "past";
 
@@ -27,12 +28,20 @@ interface UseMyScalesResult {
 }
 
 export function useMyScales(): UseMyScalesResult {
+  const { user } = useAuth();
+  const churchId = user?.churchId ?? null;
   const [period, setPeriod] = useState<MyScalePeriod>("upcoming");
   const [scales, setScales] = useState<MyScaleItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchMyScales = useCallback(async () => {
     setIsLoading(true);
+
+    if (!churchId) {
+      setScales([]);
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch(`/api/my-scales?period=${period}`);
@@ -49,7 +58,7 @@ export function useMyScales(): UseMyScalesResult {
     } finally {
       setIsLoading(false);
     }
-  }, [period]);
+  }, [churchId, period]);
 
   useEffect(() => {
     fetchMyScales();

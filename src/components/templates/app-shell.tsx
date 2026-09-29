@@ -14,16 +14,16 @@ export function AppShell({
   showNavigation = true,
 }: AppShellProps) {
   return (
-    <div className="min-h-dvh bg-background">
-      <main
+    <div className="min-h-dvh overflow-y-auto bg-background">
+      <div
         className={cn(
-          "mx-auto min-h-dvh w-full max-w-3xl px-4 pt-20",
-          showNavigation && "pb-24",
+          "mx-auto min-h-full w-full max-w-3xl px-4 pb-20 pt-20",
+          showNavigation && "pb-28",
           className,
         )}
       >
         {children}
-      </main>
+      </div>
       {showNavigation && <BottomNavigation />}
     </div>
   );

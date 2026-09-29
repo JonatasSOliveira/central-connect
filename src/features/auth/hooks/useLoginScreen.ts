@@ -195,7 +195,7 @@ export function useLoginScreen(): UseLoginScreenReturn {
           }
 
           clearPendingGoogleRedirect();
-          router.replace("/select-church");
+          router.replace("/");
           return;
         }
 
@@ -215,7 +215,7 @@ export function useLoginScreen(): UseLoginScreenReturn {
         }
 
         clearPendingGoogleRedirect();
-        router.replace("/select-church");
+        router.replace("/");
       } catch (err) {
         authDebug("processRedirectLogin error", err);
         const message =
@@ -252,7 +252,7 @@ export function useLoginScreen(): UseLoginScreenReturn {
           return;
         }
 
-        router.replace("/select-church");
+        router.replace("/");
         return;
       }
 

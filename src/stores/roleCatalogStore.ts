@@ -3,6 +3,8 @@ import type { RoleListItem } from "@/modules/roles/presentation/contracts/role/L
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000;
 
+let inFlightRequest: Promise<RoleListItem[]> | null = null;
+
 interface RoleCatalogState {
   roles: RoleListItem[];
   isLoading: boolean;
@@ -23,37 +25,52 @@ export const useRoleCatalogStore = create<RoleCatalogStore>((set, get) => ({
   lastFetchedAt: null,
 
   fetchIfStale: async (ttlMs = DEFAULT_TTL_MS) => {
-    const { roles, isLoading, lastFetchedAt } = get();
+    const { roles, lastFetchedAt } = get();
     const now = Date.now();
-    const isFresh =
-      lastFetchedAt !== null && now - lastFetchedAt < ttlMs && roles.length > 0;
+    const isFresh = lastFetchedAt !== null && now - lastFetchedAt < ttlMs;
 
-    if (isFresh || isLoading) {
+    if (isFresh) {
       return roles;
     }
 
-    set({ isLoading: true });
+    if (inFlightRequest) {
+      return inFlightRequest;
+    }
+
+    const request = (async () => {
+      set({ isLoading: true });
+
+      try {
+        const response = await fetch("/api/roles");
+        const data = await response.json();
+
+        if (!data.ok) {
+          return roles;
+        }
+
+        const sortedRoles = [...data.value.roles].sort((a, b) =>
+          a.name.localeCompare(b.name, "pt-BR"),
+        );
+
+        set({
+          roles: sortedRoles,
+          lastFetchedAt: Date.now(),
+        });
+
+        return sortedRoles;
+      } finally {
+        set({ isLoading: false });
+      }
+    })();
+
+    inFlightRequest = request;
 
     try {
-      const response = await fetch("/api/roles");
-      const data = await response.json();
-
-      if (!data.ok) {
-        return roles;
-      }
-
-      const sortedRoles = [...data.value.roles].sort((a, b) =>
-        a.name.localeCompare(b.name, "pt-BR"),
-      );
-
-      set({
-        roles: sortedRoles,
-        lastFetchedAt: now,
-      });
-
-      return sortedRoles;
+      return await request;
     } finally {
-      set({ isLoading: false });
+      if (inFlightRequest === request) {
+        inFlightRequest = null;
+      }
     }
   },
 

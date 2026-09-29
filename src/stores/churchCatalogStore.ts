@@ -25,10 +25,7 @@ export const useChurchCatalogStore = create<ChurchCatalogStore>((set, get) => ({
   fetchIfStale: async (ttlMs = DEFAULT_TTL_MS) => {
     const { churches, isLoading, lastFetchedAt } = get();
     const now = Date.now();
-    const isFresh =
-      lastFetchedAt !== null &&
-      now - lastFetchedAt < ttlMs &&
-      churches.length > 0;
+    const isFresh = lastFetchedAt !== null && now - lastFetchedAt < ttlMs;
 
     if (isFresh || isLoading) {
       return churches;

@@ -37,6 +37,7 @@ interface FormFieldProps<T extends FieldValues> {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
+  autoFocus?: boolean;
   children?: ReactNode;
 }
 
@@ -47,6 +48,7 @@ function FormField<T extends FieldValues>({
   placeholder,
   required,
   disabled,
+  autoFocus,
   children,
 }: FormFieldProps<T>) {
   const error = extractErrorMessage(form.formState.errors[name]);
@@ -62,11 +64,17 @@ function FormField<T extends FieldValues>({
           id={name}
           placeholder={placeholder}
           disabled={disabled}
+          autoFocus={autoFocus}
           {...form.register(name)}
           aria-invalid={!!error}
+          aria-describedby={error ? `${name}-error` : undefined}
         />
       )}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && (
+        <p id={`${name}-error`} className="text-xs text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

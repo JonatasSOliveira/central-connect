@@ -38,11 +38,7 @@ export function useChurchForm({
   );
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [roles, setRoles] = useState<RoleListItem[]>([]);
-  const {
-    roles: cachedRoles,
-    fetchIfStale,
-    invalidate,
-  } = useRoleCatalogStore();
+  const { fetchIfStale, invalidate } = useRoleCatalogStore();
 
   const form = useForm<ChurchFormData>({
     resolver: zodResolver(ChurchFormSchema),
@@ -51,26 +47,27 @@ export function useChurchForm({
   });
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchRoles = async () => {
       try {
-        if (cachedRoles.length > 0) {
-          setRoles(cachedRoles);
-        }
-
         const loadedRoles = await fetchIfStale();
-        if (loadedRoles.length > 0) {
+        if (!cancelled) {
           setRoles(loadedRoles);
-          return;
         }
-
-        toast.error("Não foi possível carregar os cargos do sistema");
       } catch {
-        toast.error("Não foi possível carregar os cargos do sistema");
+        if (!cancelled) {
+          toast.error("Não foi possível carregar os cargos do sistema");
+        }
       }
     };
 
-    fetchRoles();
-  }, [cachedRoles, fetchIfStale]);
+    void fetchRoles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchIfStale]);
 
   useEffect(() => {
     if (mode === "edit" && !churchId) {

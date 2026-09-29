@@ -56,6 +56,7 @@ interface ListActionProps {
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
+  buttonClassName?: string;
 }
 
 interface ListEmptyStateProps {
@@ -65,6 +66,7 @@ interface ListEmptyStateProps {
   action?: {
     label: string;
     onClick: () => void;
+    buttonClassName?: string;
   };
   className?: string;
 }
@@ -173,7 +175,8 @@ function ListItem({
         <Popover>
           <PopoverTrigger
             onClick={(e) => e.stopPropagation()}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            aria-label={`Ações de ${title}`}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <MoreHorizontal className="h-5 w-5" />
           </PopoverTrigger>
@@ -185,7 +188,7 @@ function ListItem({
                   e.stopPropagation();
                   actions.onEdit?.();
                 }}
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
+                className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
               >
                 <Pencil className="h-4 w-4" />
                 {actions.editLabel || "Editar"}
@@ -195,7 +198,7 @@ function ListItem({
               <button
                 type="button"
                 onClick={handleDeleteClick}
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                className="flex min-h-11 w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
                 {actions.deleteLabel || "Excluir"}
@@ -275,10 +278,11 @@ function Action({
   onClick,
   disabled,
   className,
+  buttonClassName,
 }: ListActionProps) {
   return (
     <div className={cn("flex justify-end", className)}>
-      <Button onClick={onClick} disabled={disabled}>
+      <Button onClick={onClick} disabled={disabled} className={buttonClassName}>
         <Icon className="w-4 h-4 mr-2" />
         {label}
       </Button>
@@ -303,7 +307,13 @@ function EmptyStateComponent({
       >
         <EmptyState icon={icon} title={title} description={description} />
         <div className="mt-4">
-          <Button onClick={action.onClick}>{action.label}</Button>
+          <Button
+            size="lg"
+            onClick={action.onClick}
+            className={action.buttonClassName}
+          >
+            {action.label}
+          </Button>
         </div>
       </div>
     );
@@ -326,7 +336,7 @@ export function ListTemplate({
 }: ListTemplateProps) {
   if (isLoading) {
     return (
-      <div className={cn("p-6 app-background", className)}>
+      <div className={cn("p-4 app-background sm:p-6", className)}>
         <div className="flex items-center justify-center py-12">
           <svg
             role="status"
@@ -355,7 +365,9 @@ export function ListTemplate({
     );
   }
 
-  return <div className={cn("p-6 app-background", className)}>{children}</div>;
+  return (
+    <div className={cn("p-4 app-background sm:p-6", className)}>{children}</div>
+  );
 }
 
 ListTemplate.Header = PrivateHeader;

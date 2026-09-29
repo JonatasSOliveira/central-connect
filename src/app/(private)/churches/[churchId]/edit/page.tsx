@@ -21,10 +21,11 @@ export default function EditChurchPage({ params }: EditChurchPageProps) {
         title={readOnly ? "Dados da igreja" : "Editar Igreja"}
         subtitle={
           readOnly
-            ? "Visualize os dados da igreja"
-            : "Altere os dados da igreja"
+            ? "Visualize as informações cadastradas"
+            : "Atualize os dados e as configurações da igreja"
         }
-        backHref="/home"
+        backHref="/churches"
+        bgColor="#16a34a"
       />
       <div className="px-4 pb-4">
         <ChurchForm mode="edit" churchId={churchId} readOnly={readOnly} />

@@ -8,8 +8,9 @@ export default function NewChurchPage() {
     <>
       <PrivateHeader
         title="Nova Igreja"
-        subtitle="Preencha os dados da igreja"
+        subtitle="Cadastre os dados básicos da igreja"
         backHref="/churches"
+        bgColor="#16a34a"
       />
       <div className="px-4 pb-4">
         <ChurchForm mode="create" />
