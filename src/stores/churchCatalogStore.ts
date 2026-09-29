@@ -3,6 +3,8 @@ import type { ChurchListItemDTO } from "@/modules/churches/presentation/contract
 
 const DEFAULT_TTL_MS = 5 * 60 * 1000;
 
+let inFlightRequest: Promise<ChurchListItemDTO[]> | null = null;
+
 interface ChurchCatalogState {
   churches: ChurchListItemDTO[];
   isLoading: boolean;
@@ -23,36 +25,52 @@ export const useChurchCatalogStore = create<ChurchCatalogStore>((set, get) => ({
   lastFetchedAt: null,
 
   fetchIfStale: async (ttlMs = DEFAULT_TTL_MS) => {
-    const { churches, isLoading, lastFetchedAt } = get();
+    const { churches, lastFetchedAt } = get();
     const now = Date.now();
     const isFresh = lastFetchedAt !== null && now - lastFetchedAt < ttlMs;
 
-    if (isFresh || isLoading) {
+    if (isFresh) {
       return churches;
     }
 
-    set({ isLoading: true });
+    if (inFlightRequest) {
+      return inFlightRequest;
+    }
+
+    const request = (async () => {
+      set({ isLoading: true });
+
+      try {
+        const response = await fetch("/api/churches");
+        const data = await response.json();
+
+        if (!data.ok) {
+          return churches;
+        }
+
+        const sortedChurches = [...data.value.churches].sort((a, b) =>
+          a.name.localeCompare(b.name, "pt-BR"),
+        );
+
+        set({
+          churches: sortedChurches,
+          lastFetchedAt: Date.now(),
+        });
+
+        return sortedChurches;
+      } finally {
+        set({ isLoading: false });
+      }
+    })();
+
+    inFlightRequest = request;
 
     try {
-      const response = await fetch("/api/churches");
-      const data = await response.json();
-
-      if (!data.ok) {
-        return churches;
-      }
-
-      const sortedChurches = [...data.value.churches].sort((a, b) =>
-        a.name.localeCompare(b.name, "pt-BR"),
-      );
-
-      set({
-        churches: sortedChurches,
-        lastFetchedAt: now,
-      });
-
-      return sortedChurches;
+      return await request;
     } finally {
-      set({ isLoading: false });
+      if (inFlightRequest === request) {
+        inFlightRequest = null;
+      }
     }
   },
 

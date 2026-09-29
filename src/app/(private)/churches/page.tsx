@@ -61,8 +61,8 @@ export default function ChurchesPage() {
       return (
         <ListTemplate.EmptyState
           icon={Inbox}
-          title="Vamos cadastrar sua primeira igreja?"
-          description="Cadastre os dados básicos da igreja para começar a organizar o Central Connect."
+          title="Cadastre sua primeira igreja"
+          description="Adicione os dados básicos para começar a organizar suas igrejas no Central Connect."
           action={{
             label: "Cadastrar primeira igreja",
             onClick: handleCreateChurch,
@@ -78,7 +78,7 @@ export default function ChurchesPage() {
         <ListTemplate.EmptyState
           icon={Search}
           title="Nenhuma igreja encontrada"
-          description={`Não encontramos uma igreja com o nome "${searchQuery}".`}
+          description="Tente buscar por outro nome ou limpe o filtro para ver todas as igrejas."
           action={{
             label: "Limpar busca",
             onClick: () => setSearch(""),
@@ -127,23 +127,27 @@ export default function ChurchesPage() {
       />
 
       {hasChurches && (
-        <ListTemplate.SearchBar
-          value={searchQuery}
-          onChange={setSearch}
-          onClear={() => setSearch("")}
-          placeholder="Buscar uma igreja"
-          resultsCount={churches.length}
-        />
-      )}
-
-      {canWrite && hasChurches && (
-        <ListTemplate.Action
-          label="Nova igreja"
-          icon={Plus}
-          onClick={handleCreateChurch}
-          buttonClassName="w-full sm:w-auto"
-          className="mb-2 sm:mb-0"
-        />
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start">
+          <div className="min-w-0 flex-1">
+            <ListTemplate.SearchBar
+              value={searchQuery}
+              onChange={setSearch}
+              onClear={() => setSearch("")}
+              placeholder="Buscar uma igreja"
+              resultsCount={churches.length}
+              className="mb-0"
+            />
+          </div>
+          {canWrite && (
+            <ListTemplate.Action
+              label="Cadastrar igreja"
+              icon={Plus}
+              onClick={handleCreateChurch}
+              buttonClassName="w-full sm:w-auto"
+              className="w-full shrink-0 sm:w-auto"
+            />
+          )}
+        </div>
       )}
 
       {renderContent()}

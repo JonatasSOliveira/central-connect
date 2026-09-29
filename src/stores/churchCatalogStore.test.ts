@@ -42,4 +42,35 @@ describe("church catalog store", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it("shares an in-flight request and returns the loaded churches", async () => {
+    let resolveResponse: ((value: unknown) => void) | undefined;
+    const responsePromise = new Promise((resolve) => {
+      resolveResponse = resolve;
+    });
+    const fetchMock = vi.fn().mockResolvedValue({
+      json: () => responsePromise,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const firstRequest = useChurchCatalogStore.getState().fetchIfStale();
+    const secondRequest = useChurchCatalogStore.getState().fetchIfStale();
+    resolveResponse?.({
+      ok: true,
+      value: {
+        churches: [{ id: "church-1", name: "Igreja Central" }],
+      },
+    });
+
+    const [firstChurches, secondChurches] = await Promise.all([
+      firstRequest,
+      secondRequest,
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(firstChurches).toEqual(secondChurches);
+    expect(firstChurches).toEqual([
+      expect.objectContaining({ id: "church-1", name: "Igreja Central" }),
+    ]);
+  });
 });
