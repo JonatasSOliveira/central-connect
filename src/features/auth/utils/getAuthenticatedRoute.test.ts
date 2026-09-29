@@ -8,18 +8,31 @@ describe("getAuthenticatedRoute", () => {
         isAuthenticated: false,
         isSuperAdmin: false,
         churchId: null,
+        hasChurches: false,
       }),
     ).toBe("/login");
   });
 
-  it("sends a superadmin without a church to home", () => {
+  it("sends a superadmin without churches to home", () => {
     expect(
       getAuthenticatedRoute({
         isAuthenticated: true,
         isSuperAdmin: true,
         churchId: null,
+        hasChurches: false,
       }),
     ).toBe("/home");
+  });
+
+  it("sends a superadmin with churches and no selection to church selection", () => {
+    expect(
+      getAuthenticatedRoute({
+        isAuthenticated: true,
+        isSuperAdmin: true,
+        churchId: null,
+        hasChurches: true,
+      }),
+    ).toBe("/select-church");
   });
 
   it("sends a user with a selected church to home", () => {
@@ -28,6 +41,7 @@ describe("getAuthenticatedRoute", () => {
         isAuthenticated: true,
         isSuperAdmin: false,
         churchId: "church-1",
+        hasChurches: true,
       }),
     ).toBe("/home");
   });
@@ -38,6 +52,7 @@ describe("getAuthenticatedRoute", () => {
         isAuthenticated: true,
         isSuperAdmin: false,
         churchId: null,
+        hasChurches: true,
       }),
     ).toBe("/select-church");
   });

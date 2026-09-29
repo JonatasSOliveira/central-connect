@@ -4,6 +4,7 @@ import { isTrustedOrigin } from "@/shared/presentation/http/csrf";
 import { canSelectChurch } from "@/modules/identity/presentation/http/authorization/canSelectChurch";
 import type { IChurchRepository } from "@/modules/churches/application/ports/IChurchRepository";
 import type { ITokenService } from "@/modules/identity/application/ports/ITokenService";
+import type { RefreshSessionUseCase } from "@/modules/identity/application/use-cases/RefreshSessionUseCase";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IRolePermissionRepository } from "@/modules/roles/application/ports/IRolePermissionRepository";
 import type { AuthResult, SessionPayload } from "@/shared/contracts/auth";
@@ -11,6 +12,7 @@ import { AllPermissions } from "@/shared/domain/enums/Permission";
 import { getRequestId, logEvent } from "@/shared/utils/logger";
 
 interface Dependencies {
+  refreshSessionUseCase: RefreshSessionUseCase;
   tokenService: ITokenService;
   churchRepository: IChurchRepository;
   memberChurchRepository: IMemberChurchRepository;
@@ -33,7 +35,18 @@ export function createIdentityHandlers(
       const auth = await validateSession();
       if (!auth.ok)
         return NextResponse.json({ ok: false, value: null }, { status: 401 });
-      return NextResponse.json({ ok: true, value: auth.user });
+      const refreshed = await dependencies.refreshSessionUseCase.execute(
+        auth.user,
+      );
+      if (!refreshed.ok) {
+        return NextResponse.json({ ok: false, value: null }, { status: 401 });
+      }
+      (await cookies()).set(
+        "session",
+        refreshed.value.sessionToken,
+        cookieOptions,
+      );
+      return NextResponse.json({ ok: true, value: refreshed.value.session });
     },
     logout: async (request: NextRequest) => {
       if (!isTrustedOrigin(request))

@@ -18,6 +18,7 @@ export default function RootPage() {
         isAuthenticated,
         isSuperAdmin: user?.isSuperAdmin ?? false,
         churchId: user?.churchId ?? null,
+        hasChurches: (user?.churches.length ?? 0) > 0,
       }),
     );
   }, [isAuthenticated, isLoading, user, router]);

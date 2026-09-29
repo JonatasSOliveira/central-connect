@@ -30,7 +30,7 @@ export default function SelectChurchPage() {
     goToHome: () => router.push("/home"),
   });
 
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   if (loadingChurches) {
     return (
@@ -52,7 +52,7 @@ export default function SelectChurchPage() {
         />
 
         <h1 className="font-heading text-2xl font-bold text-foreground text-center">
-          Selecione uma igreja
+          {user?.churchId ? "Troque de igreja" : "Selecione uma igreja"}
         </h1>
         <p className="text-muted-foreground text-center mt-2 text-sm">
           Você pertence a {churches.length} igreja
@@ -66,8 +66,17 @@ export default function SelectChurchPage() {
             <CardItem
               key={church.id}
               title={church.name}
-              description="Toque para selecionar"
+              description={
+                church.id === user?.churchId
+                  ? "Igreja atual"
+                  : "Toque para selecionar"
+              }
               icon={Church}
+              className={
+                church.id === user?.churchId
+                  ? "border-primary bg-primary/5"
+                  : undefined
+              }
               onClick={() => handleSelectChurch(church)}
             />
           ))}

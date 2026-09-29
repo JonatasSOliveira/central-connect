@@ -18,6 +18,8 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ChurchesAccessCard } from "@/features/home/components/ChurchesAccessCard";
 import { HomeHeader } from "@/features/home/components/HomeHeader";
 import { HomeWelcome } from "@/features/home/components/HomeWelcome";
+import { MembersAccessCard } from "@/features/home/components/MembersAccessCard";
+import { cn } from "@/lib/utils";
 import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function HomePage() {
@@ -28,21 +30,55 @@ export default function HomePage() {
   const fullName = user?.fullName || "Usuário";
   const isSuperAdmin = user?.isSuperAdmin ?? false;
   const hasChurches = (user?.churches.length ?? 0) > 0;
+  const hasSelectedChurch = Boolean(user?.churchId);
   const canAccessChurches =
     isSuperAdmin || user?.permissions.includes(Permission.CHURCH_READ);
+  const canAccessMembers =
+    isSuperAdmin || user?.permissions.includes(Permission.MEMBER_READ);
+  const hasMembersAccess = canAccessMembers && hasSelectedChurch;
+  const needsChurchSelection = hasChurches && !hasSelectedChurch;
+  const hasAccessCards = canAccessChurches || hasMembersAccess;
+  const hasMultipleAccessCards = canAccessChurches && hasMembersAccess;
 
   return (
     <div className="space-y-8 py-8 sm:space-y-10 sm:py-12">
-      <HomeHeader fullName={fullName} avatarUrl={user?.avatarUrl ?? null} />
+      <HomeHeader
+        fullName={fullName}
+        avatarUrl={user?.avatarUrl ?? null}
+        churchId={user?.churchId ?? null}
+        churchName={user?.churchName ?? null}
+        churchCount={user?.churches.length ?? 0}
+        canCreateChurch={Boolean(
+          user?.isSuperAdmin ||
+            user?.permissions.includes(Permission.CHURCH_WRITE),
+        )}
+      />
 
       <HomeWelcome fullName={fullName} />
 
-      {canAccessChurches ? (
-        <ChurchesAccessCard
-          isSuperAdmin={isSuperAdmin}
-          hasChurches={hasChurches}
-          onOpen={() => router.push("/churches")}
-        />
+      {hasAccessCards ? (
+        <div
+          className={cn(
+            "grid gap-4",
+            hasMultipleAccessCards ? "sm:grid-cols-2" : "grid-cols-1",
+          )}
+        >
+          {canAccessChurches && (
+            <ChurchesAccessCard
+              isSuperAdmin={isSuperAdmin}
+              hasChurches={hasChurches}
+              needsSelection={needsChurchSelection}
+              onOpen={() =>
+                router.push(
+                  needsChurchSelection ? "/select-church" : "/churches",
+                )
+              }
+            />
+          )}
+          {hasMembersAccess && (
+            <MembersAccessCard onOpen={() => router.push("/members")} />
+          )}
+        </div>
       ) : (
         <section className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8">
           <h2 className="font-heading text-xl font-semibold text-foreground">

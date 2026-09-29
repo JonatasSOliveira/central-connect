@@ -101,32 +101,33 @@ export function useSelectChurchScreen({ goToHome }: SelectChurchScreenParams) {
       });
 
       if (token) {
-        if (!shouldSyncPushTokenForChurch(church.id, token)) {
+        const shouldSync = shouldSyncPushTokenForChurch(church.id, token);
+
+        if (!shouldSync) {
           pushDebug("save token after select church skipped: recently synced");
-          return;
-        }
+        } else {
+          const response = await fetch("/api/push-tokens", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token, deviceId, platform: "web" }),
+          });
 
-        const response = await fetch("/api/push-tokens", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token, deviceId, platform: "web" }),
-        });
+          let responseBody: unknown = null;
+          try {
+            responseBody = await response.json();
+          } catch {
+            responseBody = null;
+          }
 
-        let responseBody: unknown = null;
-        try {
-          responseBody = await response.json();
-        } catch {
-          responseBody = null;
-        }
+          pushDebug("save token after select church", {
+            status: response.status,
+            ok: response.ok,
+            responseBody,
+          });
 
-        pushDebug("save token after select church", {
-          status: response.status,
-          ok: response.ok,
-          responseBody,
-        });
-
-        if (response.ok) {
-          markPushTokenSyncedForChurch(church.id, token);
+          if (response.ok) {
+            markPushTokenSyncedForChurch(church.id, token);
+          }
         }
       }
     } catch (error) {

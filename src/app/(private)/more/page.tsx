@@ -16,14 +16,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CardItem } from "@/components/ui/card-item";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useChurchStore } from "@/stores/churchStore";
 
 export default function MorePage() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { selectedChurch } = useChurchStore();
   const [showLogout, setShowLogout] = useState(false);
-  const churchId = selectedChurch?.id ?? user?.churchId;
+  const churchId = user?.churchId;
 
   return (
     <div className="space-y-6 py-2">

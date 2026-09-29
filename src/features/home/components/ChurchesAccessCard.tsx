@@ -4,19 +4,24 @@ import { Button } from "@/components/ui/button";
 interface ChurchesAccessCardProps {
   isSuperAdmin: boolean;
   hasChurches: boolean;
+  needsSelection?: boolean;
   onOpen: () => void;
 }
 
 export function ChurchesAccessCard({
   isSuperAdmin,
   hasChurches,
+  needsSelection = false,
   onOpen,
 }: ChurchesAccessCardProps) {
-  const description = isSuperAdmin
-    ? hasChurches
-      ? "Gerencie as igrejas cadastradas na plataforma."
-      : "Cadastre a primeira igreja da plataforma para começar."
-    : "Veja as igrejas às quais você pertence.";
+  const description = needsSelection
+    ? "Selecione uma igreja para acessar os membros e demais dados dela."
+    : isSuperAdmin
+      ? hasChurches
+        ? "Gerencie as igrejas cadastradas na plataforma."
+        : "Cadastre a primeira igreja da plataforma para começar."
+      : "Veja as igrejas às quais você pertence.";
+  const actionLabel = needsSelection ? "Selecionar igreja" : "Acessar igrejas";
 
   return (
     <section className="rounded-2xl border border-primary/20 bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8">
@@ -37,7 +42,7 @@ export function ChurchesAccessCard({
         className="mt-6 h-12 w-full gap-2 sm:w-auto"
         onClick={onOpen}
       >
-        Acessar igrejas
+        {actionLabel}
         <ArrowRight className="size-4" aria-hidden="true" />
       </Button>
     </section>

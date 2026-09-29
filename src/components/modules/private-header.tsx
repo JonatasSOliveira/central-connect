@@ -4,6 +4,9 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { ChurchContextSwitcher } from "@/features/churches/components/ChurchContextSwitcher";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { Permission } from "@/shared/domain/enums/Permission";
 import { cn, getContrastColor } from "@/lib/utils";
 
 interface PrivateHeaderProps {
@@ -24,6 +27,7 @@ export function PrivateHeader({
   action,
 }: PrivateHeaderProps) {
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleBack = () => {
     router.push(backHref);
@@ -43,7 +47,7 @@ export function PrivateHeader({
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 flex h-16 items-center border-b border-border bg-background/95 px-4 text-foreground shadow-[var(--shadow-soft-sm)] backdrop-blur",
+        "fixed inset-x-0 top-0 z-50 flex min-h-16 items-center border-b border-border bg-background/95 px-4 py-2 text-foreground shadow-[var(--shadow-soft-sm)] backdrop-blur",
         bgColor && "text-current",
       )}
       style={bgStyle}
@@ -73,6 +77,16 @@ export function PrivateHeader({
             </p>
           )}
         </div>
+
+        <ChurchContextSwitcher
+          churchId={user?.churchId ?? null}
+          churchName={user?.churchName ?? null}
+          churchCount={user?.churches.length ?? 0}
+          canCreateChurch={Boolean(
+            user?.isSuperAdmin ||
+              user?.permissions.includes(Permission.CHURCH_WRITE),
+          )}
+        />
 
         {action && <div className="shrink-0">{action}</div>}
       </div>

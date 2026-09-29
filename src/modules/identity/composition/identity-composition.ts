@@ -1,5 +1,6 @@
 import { validateSession } from "@/shared/presentation/http/auth";
 import { AuthLoginUseCase } from "@/modules/identity/application/use-cases/AuthLoginUseCase";
+import { RefreshSessionUseCase } from "@/modules/identity/application/use-cases/RefreshSessionUseCase";
 import type { IGoogleAuthService } from "@/modules/identity/application/ports/IGoogleAuthService";
 import type { ITokenService } from "@/modules/identity/application/ports/ITokenService";
 import type { IUserRepository } from "@/modules/identity/application/ports/IUserRepository";
@@ -28,8 +29,15 @@ export function createIdentityComposition(externalDependencies: {
     externalDependencies.rolePermissionRepository,
     externalDependencies.churchRepository,
   );
+  const refreshSessionUseCase = new RefreshSessionUseCase(
+    externalDependencies.churchRepository,
+    externalDependencies.memberChurchRepository,
+    externalDependencies.rolePermissionRepository,
+    externalDependencies.tokenService,
+  );
   const handlerDependencies = {
     authLoginUseCase,
+    refreshSessionUseCase,
     tokenService: externalDependencies.tokenService,
     churchRepository: externalDependencies.churchRepository,
     memberChurchRepository: externalDependencies.memberChurchRepository,
