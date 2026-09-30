@@ -91,7 +91,7 @@ export function MinistrySelector({
               id: ministry.id,
               name: ministry.name,
             }))}
-            placeholder="Selecione"
+            placeholder="Selecione um ministério"
             required
             disabled={isLoading || disabled}
           />
@@ -102,7 +102,7 @@ export function MinistrySelector({
               variant="outline"
               size="sm"
               onClick={handleCancel}
-              className="flex-1"
+              className="min-h-11 flex-1"
             >
               Cancelar
             </Button>
@@ -111,7 +111,7 @@ export function MinistrySelector({
               size="sm"
               onClick={handleAdd}
               disabled={!selectedMinistryId || disabled}
-              className="flex-1"
+              className="min-h-11 flex-1"
             >
               Adicionar
             </Button>
@@ -129,7 +129,7 @@ export function MinistrySelector({
             availableMinistries.length === 0 ||
             selectedMinistryIds.length >= availableMinistries.length
           }
-          className="w-full h-9"
+          className="min-h-11 w-full"
         >
           <Plus className="w-4 h-4 mr-1" />
           Adicionar Ministério

@@ -8,4 +8,5 @@ export interface IMemberChurchRepository extends BaseRepository<MemberChurch> {
     churchId: string,
   ): Promise<MemberChurch | null>;
   findByChurchId(churchId: string): Promise<MemberChurch[]>;
+  upsert(entity: MemberChurch): Promise<MemberChurch>;
 }

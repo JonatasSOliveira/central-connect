@@ -17,8 +17,8 @@ export function AppShell({
     <div className="min-h-dvh overflow-y-auto bg-background">
       <div
         className={cn(
-          "mx-auto min-h-full w-full max-w-3xl px-4 pb-20 pt-20",
-          showNavigation && "pb-28",
+          "mx-auto min-h-full w-full max-w-3xl px-4 pt-20",
+          showNavigation ? "pb-28" : "pb-6",
           className,
         )}
       >

@@ -27,10 +27,9 @@ export default function RolesPage() {
     redirectTo: "/home",
   });
 
-  const canWrite =
-    user?.isSuperAdmin || user?.permissions.includes(Permission.ROLE_WRITE);
-  const canDelete =
-    user?.isSuperAdmin || user?.permissions.includes(Permission.ROLE_DELETE);
+  const canWrite = user?.isSuperAdmin ?? false;
+  const canDelete = user?.isSuperAdmin ?? false;
+  const showToolbar = allRolesCount > 0 || Boolean(searchQuery.trim());
 
   const handleCreateRole = useCallback(() => {
     router.push("/roles/new");
@@ -47,9 +46,9 @@ export default function RolesPage() {
     async (roleId: string) => {
       const success = await deleteRole(roleId);
       if (success) {
-        toast.success("Cargo do sistema excluído com sucesso");
+        toast.success("Cargo excluído com sucesso");
       } else {
-        toast.error("Erro ao excluir cargo do sistema");
+        toast.error("Erro ao excluir cargo");
       }
     },
     [deleteRole],
@@ -60,12 +59,13 @@ export default function RolesPage() {
       return (
         <ListTemplate.EmptyState
           icon={Inbox}
-          title="Nenhum cargo do sistema cadastrado"
-          description="Clique em Novo cargo do sistema para cadastrar o primeiro cargo do sistema."
-          action={{
-            label: "Cadastrar cargo do sistema",
-            onClick: handleCreateRole,
-          }}
+          title="Nenhum cargo cadastrado"
+          description="Crie um cargo para definir quais áreas do sistema cada pessoa poderá acessar."
+          action={
+            canWrite
+              ? { label: "Cadastrar cargo", onClick: handleCreateRole }
+              : undefined
+          }
         />
       );
     }
@@ -113,23 +113,30 @@ export default function RolesPage() {
   return (
     <ListTemplate isLoading={isLoading}>
       <ListTemplate.Header
-        title="Cargos do sistema"
+        title="Cargos e permissões"
         subtitle={`${allRolesCount} cargo${allRolesCount !== 1 ? "s" : ""}`}
+        bgColor="#16a34a"
       />
 
-      <ListTemplate.SearchBar
-        value={searchQuery}
-        onChange={setSearch}
-        onClear={() => setSearch("")}
-        placeholder="Buscar por nome..."
-        resultsCount={roles.length}
-      />
-
-      {canWrite && (
-        <ListTemplate.Action
-          label="Novo cargo do sistema"
-          icon={Plus}
-          onClick={handleCreateRole}
+      {showToolbar && (
+        <ListTemplate.Toolbar
+          search={{
+            value: searchQuery,
+            onChange: setSearch,
+            onClear: () => setSearch(""),
+            placeholder: "Buscar um cargo",
+            resultLabel: "cargo",
+            resultsCount: roles.length,
+          }}
+          action={
+            canWrite
+              ? {
+                  label: "Cadastrar cargo",
+                  icon: Plus,
+                  onClick: handleCreateRole,
+                }
+              : undefined
+          }
         />
       )}
 

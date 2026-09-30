@@ -14,9 +14,10 @@ export default function EditRolePage({ params }: EditRolePageProps) {
   return (
     <>
       <PrivateHeader
-        title="Editar Cargo do Sistema"
-        subtitle="Altere os dados do cargo"
+        title="Editar cargo"
+        subtitle="Atualize os dados e acessos deste cargo"
         backHref="/roles"
+        bgColor="#16a34a"
       />
       <div className="px-4 pb-4">
         <RoleForm mode="edit" roleId={roleId} />

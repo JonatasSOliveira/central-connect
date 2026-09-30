@@ -1,11 +1,4 @@
-import {
-  CalendarDays,
-  ClipboardCheck,
-  ClipboardList,
-  Home,
-  type LucideIcon,
-  Menu,
-} from "lucide-react";
+import { Building2, Home, type LucideIcon, Users } from "lucide-react";
 import { Permission } from "@/shared/domain/enums/Permission";
 
 export type NavigationItem = {
@@ -17,29 +10,22 @@ export type NavigationItem = {
 export function getNavigationItems(input: {
   isSuperAdmin?: boolean;
   permissions?: string[];
+  churchId?: string | null;
 }): NavigationItem[] {
   const permissions = input.permissions ?? [];
-  const canManageScales =
-    input.isSuperAdmin || permissions.includes(Permission.SCALE_READ);
-  const canReadAttendance =
-    input.isSuperAdmin ||
-    permissions.includes(Permission.SCALE_ATTENDANCE_READ);
+  const canReadChurches =
+    input.isSuperAdmin || permissions.includes(Permission.CHURCH_READ);
+  const canReadMembers =
+    Boolean(input.churchId) &&
+    (input.isSuperAdmin || permissions.includes(Permission.MEMBER_READ));
 
   return [
     { href: "/home", label: "Início", icon: Home },
-    { href: "/my-scales", label: "Minhas escalas", icon: CalendarDays },
-    ...(canManageScales
-      ? [{ href: "/scales", label: "Gestão", icon: ClipboardList }]
+    ...(canReadChurches
+      ? [{ href: "/churches", label: "Igrejas", icon: Building2 }]
       : []),
-    ...(canReadAttendance
-      ? [
-          {
-            href: "/scale-attendances",
-            label: "Chamadas",
-            icon: ClipboardCheck,
-          },
-        ]
+    ...(canReadMembers
+      ? [{ href: "/members", label: "Membros", icon: Users }]
       : []),
-    { href: "/more", label: "Mais", icon: Menu },
   ];
 }

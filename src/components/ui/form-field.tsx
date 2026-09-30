@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import type { FieldPath, FieldValues, UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +35,7 @@ interface FormFieldProps<T extends FieldValues> {
   name: FieldPath<T>;
   label: string;
   placeholder?: string;
+  type?: ComponentProps<"input">["type"];
   required?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
@@ -46,6 +47,7 @@ function FormField<T extends FieldValues>({
   name,
   label,
   placeholder,
+  type = "text",
   required,
   disabled,
   autoFocus,
@@ -62,6 +64,7 @@ function FormField<T extends FieldValues>({
       {children || (
         <Input
           id={name}
+          type={type}
           placeholder={placeholder}
           disabled={disabled}
           autoFocus={autoFocus}

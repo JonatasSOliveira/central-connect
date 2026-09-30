@@ -63,7 +63,7 @@ export function ChurchSection({
 
     return (
       <RoleSelect
-        label="Cargo do sistema"
+        label="Cargo"
         value={form.watch("churches.0.roleId") || ""}
         onChange={(value) =>
           form.setValue("churches.0.roleId", value, {
@@ -71,7 +71,7 @@ export function ChurchSection({
           })
         }
         roles={roles}
-        placeholder="Selecione um cargo do sistema"
+        placeholder="Selecione um cargo"
         required
         disabled={disabled}
       />
@@ -102,14 +102,14 @@ export function ChurchSection({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-muted-foreground">
-          Igrejas
+          Igrejas associadas
         </span>
         {canChangeChurch && (
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-9"
+            className="min-h-11"
             onClick={handleAppend}
             disabled={disabled}
           >

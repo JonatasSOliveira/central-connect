@@ -7,9 +7,10 @@ export default function NewRolePage() {
   return (
     <>
       <PrivateHeader
-        title="Novo Cargo do Sistema"
-        subtitle="Preencha os dados do cargo"
+        title="Novo cargo"
+        subtitle="Defina os acessos deste cargo"
         backHref="/roles"
+        bgColor="#16a34a"
       />
       <div className="px-4 pb-4">
         <RoleForm mode="create" />

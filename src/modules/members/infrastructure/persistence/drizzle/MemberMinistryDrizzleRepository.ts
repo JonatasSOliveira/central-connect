@@ -121,6 +121,31 @@ export class MemberMinistryDrizzleRepository
     return toEntity(row);
   }
 
+  async upsert(entity: MemberMinistry): Promise<MemberMinistry> {
+    const [row] = await this.database
+      .insert(memberMinistries)
+      .values({
+        id: entity.id,
+        memberId: entity.memberId,
+        churchId: entity.churchId,
+        ministryId: entity.ministryId,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
+        deletedAt: entity.deletedAt,
+      })
+      .onConflictDoUpdate({
+        target: [memberMinistries.memberId, memberMinistries.ministryId],
+        set: {
+          churchId: entity.churchId,
+          updatedAt: entity.updatedAt,
+          deletedAt: null,
+        },
+      })
+      .returning();
+
+    return toEntity(row);
+  }
+
   async update(entity: MemberMinistry): Promise<MemberMinistry> {
     const [row] = await this.database
       .update(memberMinistries)

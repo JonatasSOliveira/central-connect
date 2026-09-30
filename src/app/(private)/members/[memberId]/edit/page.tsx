@@ -24,6 +24,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
           readOnly ? "Visualize seus dados" : "Altere os dados do membro"
         }
         backHref="/home"
+        bgColor="#16a34a"
       />
       <div className="px-4 pb-4">
         <MemberForm

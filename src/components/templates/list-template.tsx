@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { SearchInput } from "@/components/ui/search-input";
+import { Action, SearchBar, Toolbar } from "./list-template-toolbar";
 import { cn } from "@/lib/utils";
 
 interface ListTemplateProps {
@@ -39,15 +39,6 @@ interface ListItemProps {
   className?: string;
 }
 
-interface ListActionProps {
-  label: string;
-  icon: LucideIcon;
-  onClick?: () => void;
-  disabled?: boolean;
-  className?: string;
-  buttonClassName?: string;
-}
-
 interface ListEmptyStateProps {
   icon: LucideIcon;
   title: string;
@@ -60,42 +51,8 @@ interface ListEmptyStateProps {
   className?: string;
 }
 
-interface ListSearchBarProps {
-  value: string;
-  onChange: (value: string) => void;
-  onClear?: () => void;
-  placeholder?: string;
-  resultsCount?: number;
-  className?: string;
-}
-
 function List({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-1 gap-3 mt-4">{children}</div>;
-}
-
-function SearchBar({
-  value,
-  onChange,
-  onClear,
-  placeholder = "Buscar...",
-  resultsCount,
-  className,
-}: ListSearchBarProps) {
-  return (
-    <div className={cn("space-y-3 mb-4", className)}>
-      <SearchInput
-        value={value}
-        onChange={onChange}
-        onClear={onClear}
-        placeholder={placeholder}
-      />
-      {value && resultsCount !== undefined && resultsCount > 0 && (
-        <p className="text-xs text-muted-foreground">
-          Encontramos {resultsCount} igreja{resultsCount !== 1 ? "s" : ""}
-        </p>
-      )}
-    </div>
-  );
 }
 
 function ListItem({
@@ -271,24 +228,6 @@ function ListItem({
   );
 }
 
-function Action({
-  label,
-  icon: Icon,
-  onClick,
-  disabled,
-  className,
-  buttonClassName,
-}: ListActionProps) {
-  return (
-    <div className={cn("flex justify-end", className)}>
-      <Button onClick={onClick} disabled={disabled} className={buttonClassName}>
-        <Icon className="w-4 h-4 mr-2" />
-        {label}
-      </Button>
-    </div>
-  );
-}
-
 function EmptyStateComponent({
   icon,
   title,
@@ -374,6 +313,7 @@ ListTemplate.List = List;
 ListTemplate.SearchBar = SearchBar;
 ListTemplate.Item = ListItem;
 ListTemplate.Action = Action;
+ListTemplate.Toolbar = Toolbar;
 ListTemplate.EmptyState = EmptyStateComponent;
 
-export { Action, EmptyStateComponent, List, ListItem };
+export { Action, EmptyStateComponent, List, ListItem, SearchBar, Toolbar };

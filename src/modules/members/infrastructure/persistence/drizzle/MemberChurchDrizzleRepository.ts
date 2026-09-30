@@ -103,6 +103,31 @@ export class MemberChurchDrizzleRepository implements IMemberChurchRepository {
     return toEntity(row);
   }
 
+  async upsert(entity: MemberChurch): Promise<MemberChurch> {
+    const [row] = await this.database
+      .insert(memberChurches)
+      .values({
+        id: entity.id,
+        memberId: entity.memberId,
+        churchId: entity.churchId,
+        roleId: entity.roleId,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
+        deletedAt: entity.deletedAt,
+      })
+      .onConflictDoUpdate({
+        target: [memberChurches.memberId, memberChurches.churchId],
+        set: {
+          roleId: entity.roleId,
+          updatedAt: entity.updatedAt,
+          deletedAt: null,
+        },
+      })
+      .returning();
+
+    return toEntity(row);
+  }
+
   async update(entity: MemberChurch): Promise<MemberChurch> {
     const [row] = await this.database
       .update(memberChurches)

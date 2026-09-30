@@ -69,15 +69,31 @@ export class UpdateMember extends BaseUseCase<
       if (input.churches !== undefined) {
         const existingMemberChurches =
           await this.memberChurchRepository.findByMemberId(memberId);
+        const requestedChurchIds = new Set(
+          input.churches.map((church) => church.churchId),
+        );
 
         for (const existingMc of existingMemberChurches) {
-          await this.memberChurchRepository.delete(existingMc.id);
+          if (!requestedChurchIds.has(existingMc.churchId)) {
+            await this.memberChurchRepository.delete(existingMc.id);
+          }
         }
 
         const existingMemberMinistries =
           await this.memberMinistryRepository.findByMemberId(memberId);
+        const requestedMinistryKeys = new Set(
+          input.churches.flatMap((church) =>
+            church.ministryIds.map(
+              (ministryId) => `${church.churchId}:${ministryId}`,
+            ),
+          ),
+        );
+
         for (const existingMm of existingMemberMinistries) {
-          await this.memberMinistryRepository.delete(existingMm.id);
+          const key = `${existingMm.churchId}:${existingMm.ministryId}`;
+          if (!requestedMinistryKeys.has(key)) {
+            await this.memberMinistryRepository.delete(existingMm.id);
+          }
         }
 
         for (const churchInfo of input.churches) {
@@ -89,7 +105,7 @@ export class UpdateMember extends BaseUseCase<
             updatedAt: new Date(),
           };
           const memberChurch = new MemberChurch(memberChurchParams);
-          await this.memberChurchRepository.create(memberChurch);
+          await this.memberChurchRepository.upsert(memberChurch);
 
           for (const ministryId of churchInfo.ministryIds || []) {
             const memberMinistryParams: MemberMinistryParams = {
@@ -100,7 +116,7 @@ export class UpdateMember extends BaseUseCase<
               updatedAt: new Date(),
             };
             const memberMinistry = new MemberMinistry(memberMinistryParams);
-            await this.memberMinistryRepository.create(memberMinistry);
+            await this.memberMinistryRepository.upsert(memberMinistry);
           }
         }
       }
@@ -129,9 +145,20 @@ export class UpdateMember extends BaseUseCase<
         );
         const existingMemberMinistries =
           await this.memberMinistryRepository.findByMemberId(memberId);
+        const requestedMinistryKeys = new Set(
+          input.ministryAssignments.flatMap((assignment) =>
+            assignment.ministryIds.map(
+              (ministryId) => `${assignment.churchId}:${ministryId}`,
+            ),
+          ),
+        );
 
         for (const existingMm of existingMemberMinistries) {
-          if (assignmentChurchIds.has(existingMm.churchId)) {
+          const key = `${existingMm.churchId}:${existingMm.ministryId}`;
+          if (
+            assignmentChurchIds.has(existingMm.churchId) &&
+            !requestedMinistryKeys.has(key)
+          ) {
             await this.memberMinistryRepository.delete(existingMm.id);
           }
         }
@@ -146,7 +173,7 @@ export class UpdateMember extends BaseUseCase<
               updatedAt: new Date(),
             };
             const memberMinistry = new MemberMinistry(memberMinistryParams);
-            await this.memberMinistryRepository.create(memberMinistry);
+            await this.memberMinistryRepository.upsert(memberMinistry);
           }
         }
       }
@@ -154,7 +181,6 @@ export class UpdateMember extends BaseUseCase<
       if (input.availability) {
         const memberAvailabilityParams: MemberAvailabilityParams = {
           memberId,
-          mode: input.availability.mode,
           daysOfWeek: input.availability.daysOfWeek,
           createdAt: new Date(),
           updatedAt: new Date(),

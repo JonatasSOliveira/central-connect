@@ -43,6 +43,13 @@
       "when": 1790345179247,
       "tag": "0005_powerful_bloodscream",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790773648517,
+      "tag": "0006_classy_infant_terrible",
+      "breakpoints": true
     }
   ]
 }

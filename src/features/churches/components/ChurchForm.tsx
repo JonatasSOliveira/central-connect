@@ -47,75 +47,55 @@ export function ChurchForm({
     <FormTemplate>
       <FormTemplate.Form<ChurchFormData> form={form} onSubmit={onSubmit}>
         <FormTemplate.Content className="space-y-4 pt-0">
-          <section
-            aria-labelledby="church-data-heading"
-            className="app-surface border-primary/20 p-4 sm:p-6"
+          <FormTemplate.Section
+            id="church-data-heading"
+            title="Dados da igreja"
+            description="Informe o nome que será exibido no Central Connect."
           >
-            <h2 id="church-data-heading" className="text-base font-semibold">
-              Dados da igreja
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Informe o nome que será exibido no Central Connect.
-            </p>
-            <div className="mt-5">
-              <FormField<ChurchFormData>
-                form={form}
-                name="name"
-                label="Nome da igreja"
-                placeholder="Digite o nome da igreja"
-                required
-                disabled={readOnly}
-                autoFocus={!readOnly}
-              />
-            </div>
-          </section>
+            <FormField<ChurchFormData>
+              form={form}
+              name="name"
+              label="Nome da igreja"
+              placeholder="Digite o nome da igreja"
+              required
+              disabled={readOnly}
+              autoFocus={!readOnly}
+            />
+          </FormTemplate.Section>
 
-          <section
-            aria-labelledby="scale-settings-heading"
-            className="app-surface border-primary/20 p-4 sm:p-6"
+          <FormTemplate.Section
+            id="scale-settings-heading"
+            title="Configurações de escala"
+            description="Defina regras para distribuir as escalas com equilíbrio."
           >
-            <h2 id="scale-settings-heading" className="text-base font-semibold">
-              Configurações de escala
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Defina regras para distribuir as escalas com equilíbrio.
+            <NumberStepper
+              id="maxConsecutiveScalesPerMember"
+              label="Limite de escalas consecutivas por pessoa"
+              value={Number(form.watch("maxConsecutiveScalesPerMember")) || 2}
+              onChange={(value) => {
+                form.setValue("maxConsecutiveScalesPerMember", value, {
+                  shouldValidate: true,
+                });
+              }}
+              min={1}
+              max={10}
+              error={
+                form.formState.errors.maxConsecutiveScalesPerMember
+                  ?.message as string
+              }
+              disabled={readOnly}
+            />
+            <p className="mt-2 text-xs text-muted-foreground">
+              Evita que a mesma pessoa seja escalada várias vezes seguidas.
             </p>
-            <div className="mt-5">
-              <NumberStepper
-                id="maxConsecutiveScalesPerMember"
-                label="Limite de escalas consecutivas por pessoa"
-                value={Number(form.watch("maxConsecutiveScalesPerMember")) || 2}
-                onChange={(value) => {
-                  form.setValue("maxConsecutiveScalesPerMember", value, {
-                    shouldValidate: true,
-                  });
-                }}
-                min={1}
-                max={10}
-                error={
-                  form.formState.errors.maxConsecutiveScalesPerMember
-                    ?.message as string
-                }
-                disabled={readOnly}
-              />
-              <p className="mt-2 text-xs text-muted-foreground">
-                Evita que a mesma pessoa seja escalada várias vezes seguidas.
-              </p>
-            </div>
-          </section>
+          </FormTemplate.Section>
 
-          <section
-            aria-labelledby="member-signup-heading"
-            className="app-surface border-primary/20 p-4 sm:p-6"
+          <FormTemplate.Section
+            id="member-signup-heading"
+            title="Cadastro de novos membros"
+            description="Defina uma opção inicial para os cadastros feitos pelo link ou QR Code."
           >
-            <h2 id="member-signup-heading" className="text-base font-semibold">
-              Cadastro de novos membros
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Defina uma opção inicial para os cadastros feitos pelo link ou QR
-              Code.
-            </p>
-            <div className="mt-5 space-y-2">
+            <div className="space-y-2">
               <RoleSelect
                 id="selfSignupDefaultRoleId"
                 label="Cargo inicial — opcional"
@@ -150,7 +130,7 @@ export function ChurchForm({
                 </div>
               ) : null}
             </div>
-          </section>
+          </FormTemplate.Section>
         </FormTemplate.Content>
 
         {!readOnly && (

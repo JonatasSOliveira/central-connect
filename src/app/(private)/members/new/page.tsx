@@ -10,6 +10,7 @@ export default function NewMemberPage() {
         title="Novo Membro"
         subtitle="Preencha os dados do membro"
         backHref="/members"
+        bgColor="#16a34a"
       />
       <div className="px-4 pb-4">
         <MemberForm mode="create" />

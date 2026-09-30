@@ -19,6 +19,7 @@ import {
   type MemberMinistryParams,
 } from "@/modules/members/domain/entities/MemberMinistry";
 import type { Result } from "@/shared/types/Result";
+import { ALL_DAYS_OF_WEEK } from "@/shared/constants/daysOfWeek";
 import { BaseUseCase } from "../BaseUseCase";
 import type {
   CreateMemberInput,
@@ -89,11 +90,12 @@ export class CreateMember extends BaseUseCase<
         }
       }
 
-      if (input.availability) {
+      {
         const memberAvailabilityParams: MemberAvailabilityParams = {
           memberId: createdMember.id,
-          mode: input.availability.mode,
-          daysOfWeek: input.availability.daysOfWeek,
+          daysOfWeek: input.availability?.daysOfWeek
+            ? [...input.availability.daysOfWeek]
+            : [...ALL_DAYS_OF_WEEK],
           createdAt: new Date(),
           updatedAt: new Date(),
         };

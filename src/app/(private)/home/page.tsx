@@ -19,6 +19,7 @@ import { ChurchesAccessCard } from "@/features/home/components/ChurchesAccessCar
 import { HomeHeader } from "@/features/home/components/HomeHeader";
 import { HomeWelcome } from "@/features/home/components/HomeWelcome";
 import { MembersAccessCard } from "@/features/home/components/MembersAccessCard";
+import { RolesAccessCard } from "@/features/home/components/RolesAccessCard";
 import { cn } from "@/lib/utils";
 import { Permission } from "@/shared/domain/enums/Permission";
 
@@ -35,10 +36,17 @@ export default function HomePage() {
     isSuperAdmin || user?.permissions.includes(Permission.CHURCH_READ);
   const canAccessMembers =
     isSuperAdmin || user?.permissions.includes(Permission.MEMBER_READ);
+  const canAccessRoles =
+    isSuperAdmin || user?.permissions.includes(Permission.ROLE_READ);
   const hasMembersAccess = canAccessMembers && hasSelectedChurch;
   const needsChurchSelection = hasChurches && !hasSelectedChurch;
-  const hasAccessCards = canAccessChurches || hasMembersAccess;
-  const hasMultipleAccessCards = canAccessChurches && hasMembersAccess;
+  const hasAccessCards =
+    canAccessChurches || hasMembersAccess || canAccessRoles;
+  const accessCardCount = [
+    canAccessChurches,
+    hasMembersAccess,
+    canAccessRoles,
+  ].filter(Boolean).length;
 
   return (
     <div className="space-y-8 py-8 sm:space-y-10 sm:py-12">
@@ -60,7 +68,7 @@ export default function HomePage() {
         <div
           className={cn(
             "grid gap-4",
-            hasMultipleAccessCards ? "sm:grid-cols-2" : "grid-cols-1",
+            accessCardCount > 1 ? "sm:grid-cols-2" : "grid-cols-1",
           )}
         >
           {canAccessChurches && (
@@ -77,6 +85,9 @@ export default function HomePage() {
           )}
           {hasMembersAccess && (
             <MembersAccessCard onOpen={() => router.push("/members")} />
+          )}
+          {canAccessRoles && (
+            <RolesAccessCard onOpen={() => router.push("/roles")} />
           )}
         </div>
       ) : (

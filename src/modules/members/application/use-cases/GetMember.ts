@@ -106,7 +106,6 @@ export class GetMember extends BaseUseCase<GetMemberInput, GetMemberOutput> {
           avatarUrl: member.avatarUrl,
           availability: memberAvailability
             ? {
-                mode: memberAvailability.mode,
                 daysOfWeek: memberAvailability.daysOfWeek,
               }
             : null,

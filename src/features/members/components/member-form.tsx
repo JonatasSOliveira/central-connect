@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormTemplate } from "@/components/templates/form-template";
-import { FormSection } from "@/components/ui/form-section";
 import { useMemberForm } from "@/features/members/hooks/useMemberForm";
 import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
 import type { CreateMemberInput } from "@/modules/members/presentation/contracts/member/CreateMemberDTO";
@@ -95,8 +94,13 @@ export function MemberForm({
 
   if (isFetching) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      <div
+        className="flex h-64 flex-col items-center justify-center gap-3 text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <p className="text-sm">Carregando dados do membro...</p>
       </div>
     );
   }
@@ -104,24 +108,19 @@ export function MemberForm({
   return (
     <FormTemplate>
       <FormTemplate.Form<CreateMemberInput> form={form} onSubmit={onSubmit}>
-        <FormTemplate.Content>
-          <FormSection
+        <FormTemplate.Content className="space-y-4 pt-0">
+          <FormTemplate.Section
+            id="member-personal-data-heading"
             title="Dados pessoais"
-            description="Informações usadas para identificar o membro."
+            description="Campos com * são obrigatórios. Informe como podemos identificar o membro."
           >
             <BasicInfoSection form={form} disabled={readOnly} />
-          </FormSection>
+          </FormTemplate.Section>
 
-          <FormSection
-            title="Disponibilidade"
-            description="Defina os dias em que esta pessoa pode servir."
-          >
-            <AvailabilitySection form={form} disabled={readOnly} />
-          </FormSection>
-
-          <FormSection
-            title="Vínculos e ministérios"
-            description="Defina a igreja, o cargo e as áreas em que o membro atua."
+          <FormTemplate.Section
+            id="member-churches-heading"
+            title="Igrejas e atuação"
+            description="Associe o membro às igrejas, ao cargo e aos ministérios em que atua."
           >
             <ChurchSection
               form={form}
@@ -141,14 +140,22 @@ export function MemberForm({
               editableRemove={editableRemove}
               disabled={readOnly}
             />
-          </FormSection>
+          </FormTemplate.Section>
+
+          <FormTemplate.Section
+            id="member-availability-heading"
+            title="Disponibilidade para as escalas"
+            description="Defina em quais dias essa pessoa pode participar."
+          >
+            <AvailabilitySection form={form} disabled={readOnly} />
+          </FormTemplate.Section>
         </FormTemplate.Content>
 
         {!readOnly && (
           <FormTemplate.Footer
             onCancel={handleCancel}
             isLoading={isLoading}
-            submitLabel={isEdit ? "Salvar" : "Criar"}
+            submitLabel={isEdit ? "Salvar alterações" : "Cadastrar membro"}
           />
         )}
       </FormTemplate.Form>

@@ -16,16 +16,6 @@ export function BasicInfoSection({
 }: BasicInfoSectionProps) {
   return (
     <>
-      <FormField<CreateMemberInput> form={form} name="email" label="Email">
-        <input
-          type="email"
-          placeholder="email@exemplo.com (opcional)"
-          className="flex h-12 w-full rounded-lg border border-border bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-          {...form.register("email")}
-          disabled={disabled}
-        />
-      </FormField>
-
       <FormField<CreateMemberInput>
         form={form}
         name="fullName"
@@ -33,9 +23,23 @@ export function BasicInfoSection({
         placeholder="Nome do membro"
         required
         disabled={disabled}
+        autoFocus={!disabled}
       />
 
-      <FormField<CreateMemberInput> form={form} name="phone" label="Telefone">
+      <FormField<CreateMemberInput>
+        form={form}
+        name="email"
+        label="Email (opcional)"
+        type="email"
+        placeholder="email@exemplo.com (opcional)"
+        disabled={disabled}
+      />
+
+      <FormField<CreateMemberInput>
+        form={form}
+        name="phone"
+        label="Telefone (opcional)"
+      >
         <PhoneInput
           id="phone"
           value={form.watch("phone") ?? ""}

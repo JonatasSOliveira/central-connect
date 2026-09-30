@@ -1,12 +1,10 @@
 "use client";
 
-import { Inbox, Search, User } from "lucide-react";
+import { Inbox, Plus, Search, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { ListTemplate } from "@/components/templates/list-template";
-import { FloatingActionButton } from "@/components/ui/floating-action-button";
-import { SearchInput } from "@/components/ui/search-input";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useMembersListScreen } from "@/features/members/hooks/useMembers";
@@ -32,6 +30,10 @@ export default function MembersPage() {
 
   const canWrite =
     user?.isSuperAdmin || user?.permissions.includes(Permission.MEMBER_WRITE);
+  const canDelete =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.MEMBER_DELETE);
+  const hasMembers = allMembersCount > 0;
+  const showToolbar = hasMembers || Boolean(searchQuery.trim());
 
   const handleCreateMember = useCallback(() => {
     router.push("/members/new");
@@ -62,11 +64,13 @@ export default function MembersPage() {
         <ListTemplate.EmptyState
           icon={Inbox}
           title="Nenhum membro cadastrado"
-          description="Clique em Novo membro para cadastrar o primeiro membro da igreja."
+          description="Cadastre o primeiro membro da igreja para começar a organizar sua comunidade."
           action={{
-            label: "Cadastrar membro",
+            label: "Cadastrar primeiro membro",
             onClick: handleCreateMember,
+            buttonClassName: "w-full sm:w-auto",
           }}
+          className="mx-auto mt-8 max-w-xl border-primary/20 bg-card"
         />
       );
     }
@@ -76,7 +80,7 @@ export default function MembersPage() {
         <ListTemplate.EmptyState
           icon={Search}
           title="Nenhum membro encontrado"
-          description={`Não foram encontrados membros para "${searchQuery}"`}
+          description="Tente buscar por outro nome ou limpe o filtro para ver todos os membros."
           action={{
             label: "Limpar busca",
             onClick: () => setSearch(""),
@@ -92,12 +96,20 @@ export default function MembersPage() {
             key={member.id}
             icon={User}
             title={member.fullName}
-            description={member.churches.map((c) => c.churchName).join(", ")}
+            className="border-primary/20"
             onClick={canWrite ? () => handleEditMember(member.id) : undefined}
-            actions={{
-              onEdit: canWrite ? () => handleEditMember(member.id) : undefined,
-              onDelete: () => handleDeleteMember(member.id),
-            }}
+            actions={
+              canWrite || canDelete
+                ? {
+                    onEdit: canWrite
+                      ? () => handleEditMember(member.id)
+                      : undefined,
+                    onDelete: canDelete
+                      ? () => handleDeleteMember(member.id)
+                      : undefined,
+                  }
+                : undefined
+            }
           />
         ))}
       </ListTemplate.List>
@@ -108,32 +120,37 @@ export default function MembersPage() {
     <ListTemplate isLoading={isLoading}>
       <ListTemplate.Header
         title="Membros"
-        subtitle={`${allMembersCount} membro${allMembersCount !== 1 ? "s" : ""}`}
+        subtitle={
+          hasMembers
+            ? `${allMembersCount} membro${allMembersCount !== 1 ? "s" : ""} cadastrado${allMembersCount !== 1 ? "s" : ""}`
+            : "Organize os membros cadastrados"
+        }
+        bgColor="#16a34a"
       />
 
-      <div className="space-y-3 mb-4">
-        <SearchInput
-          value={searchQuery}
-          onChange={setSearch}
-          onClear={() => setSearch("")}
-          placeholder="Buscar por nome..."
-        />
-        {searchQuery && (
-          <p className="text-xs text-muted-foreground">
-            {members.length} resultado{members.length !== 1 ? "s" : ""} para "
-            {searchQuery}"
-          </p>
-        )}
-      </div>
-
-      {renderContent()}
-
-      {canWrite && (
-        <FloatingActionButton
-          label="Novo membro"
-          onClick={handleCreateMember}
+      {showToolbar && (
+        <ListTemplate.Toolbar
+          search={{
+            value: searchQuery,
+            onChange: setSearch,
+            onClear: () => setSearch(""),
+            placeholder: "Buscar um membro",
+            resultLabel: "membro",
+            resultsCount: members.length,
+          }}
+          action={
+            canWrite
+              ? {
+                  label: "Cadastrar membro",
+                  icon: Plus,
+                  onClick: handleCreateMember,
+                }
+              : undefined
+          }
         />
       )}
+
+      {renderContent()}
     </ListTemplate>
   );
 }

@@ -91,7 +91,7 @@ export function SearchableSelect({
         <PopoverTrigger
           id={id}
           className={cn(
-            "flex min-h-12 w-full items-center justify-between rounded-lg border border-border bg-background px-3 py-2 text-base",
+            "flex min-h-12 w-full items-center justify-between rounded-lg border border-input bg-card px-3 py-2 text-base",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
           )}
@@ -133,7 +133,7 @@ export function SearchableSelect({
               onChange={(event) => setQuery(event.target.value)}
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
-              className="h-10 w-full rounded-md border border-input bg-background py-2 pl-8 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-10 w-full rounded-md border border-input bg-card py-2 pl-8 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 

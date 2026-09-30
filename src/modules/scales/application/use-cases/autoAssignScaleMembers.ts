@@ -43,7 +43,6 @@ function isAvailableForDay(
   dayOfWeek: DayOfWeek,
   availability:
     | {
-        mode: "ALLOW_LIST" | "BLOCK_LIST";
         daysOfWeek: DayOfWeek[];
       }
     | undefined,
@@ -52,13 +51,7 @@ function isAvailableForDay(
     return true;
   }
 
-  const containsDay = availability.daysOfWeek.includes(dayOfWeek);
-
-  if (availability.mode === "ALLOW_LIST") {
-    return containsDay;
-  }
-
-  return !containsDay;
+  return availability.daysOfWeek.includes(dayOfWeek);
 }
 
 export async function autoAssignScaleMembers(

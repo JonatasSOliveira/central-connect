@@ -16,6 +16,7 @@ import type { MinistryListItemDTO } from "@/modules/ministries/presentation/cont
 import type { RoleListItem } from "@/modules/roles/presentation/contracts/role/ListRolesDTO";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { normalizePhone } from "@/shared/utils/phone";
+import { ALL_DAYS_OF_WEEK } from "@/shared/constants/daysOfWeek";
 import { useChurchCatalogStore } from "@/stores/churchCatalogStore";
 import { useRoleCatalogStore } from "@/stores/roleCatalogStore";
 
@@ -125,8 +126,7 @@ export function useMemberForm({
       fullName: "",
       phone: "",
       availability: {
-        mode: "BLOCK_LIST",
-        daysOfWeek: [],
+        daysOfWeek: [...ALL_DAYS_OF_WEEK],
       },
       churches: [
         {
@@ -341,8 +341,7 @@ export function useMemberForm({
                 fullName: memberData.fullName,
                 phone: normalizePhone(memberData.phone),
                 availability: memberData.availability ?? {
-                  mode: "BLOCK_LIST",
-                  daysOfWeek: [],
+                  daysOfWeek: [...ALL_DAYS_OF_WEEK],
                 },
                 churches: editable,
               });
@@ -352,8 +351,7 @@ export function useMemberForm({
                 fullName: memberData.fullName,
                 phone: normalizePhone(memberData.phone),
                 availability: memberData.availability ?? {
-                  mode: "BLOCK_LIST",
-                  daysOfWeek: [],
+                  daysOfWeek: [...ALL_DAYS_OF_WEEK],
                 },
                 churches: [
                   {
@@ -370,8 +368,7 @@ export function useMemberForm({
                 fullName: memberData.fullName,
                 phone: normalizePhone(memberData.phone),
                 availability: memberData.availability ?? {
-                  mode: "BLOCK_LIST",
-                  daysOfWeek: [],
+                  daysOfWeek: [...ALL_DAYS_OF_WEEK],
                 },
                 churches: [{ churchId: "", roleId: "", ministryIds: [] }],
               });

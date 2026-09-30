@@ -65,10 +65,10 @@ export function EditableChurchCard({
   };
 
   return (
-    <div className="bg-card border border-border rounded-lg p-4 space-y-4">
+    <div className="space-y-4 rounded-xl border border-border/80 bg-card/70 p-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground">
-          #{index + 1}
+        <span className="text-sm font-medium text-foreground">
+          Igreja {index + 1}
         </span>
         {canRemove && !disabled && (
           <Button
@@ -76,7 +76,7 @@ export function EditableChurchCard({
             variant="ghost"
             size="sm"
             onClick={onRemove}
-            className="h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="min-h-11 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             Remover
           </Button>
@@ -89,14 +89,14 @@ export function EditableChurchCard({
           value={churchId || ""}
           onChange={handleChurchChange}
           churches={editableChurches}
-          placeholder="Selecione"
+          placeholder="Selecione uma igreja"
           required
           disabled={disabled}
         />
       ) : (
         <div className="space-y-1">
           <span className="text-sm font-medium text-foreground">Igreja</span>
-          <div className="min-h-10 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm">
+          <div className="min-h-11 rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm">
             {churchName}
           </div>
         </div>
@@ -104,11 +104,11 @@ export function EditableChurchCard({
 
       {canEditSystemRole && (
         <RoleSelect
-          label="Cargo do sistema"
+          label="Cargo"
           value={roleId || ""}
           onChange={onRoleChange}
           roles={roles}
-          placeholder="Selecione"
+          placeholder="Selecione um cargo"
           required
           disabled={disabled}
         />

@@ -8,7 +8,6 @@ export type GetMemberChurchOutput = {
 };
 
 export type GetMemberAvailabilityOutput = {
-  mode: "ALLOW_LIST" | "BLOCK_LIST";
   daysOfWeek: (
     | "Sunday"
     | "Monday"

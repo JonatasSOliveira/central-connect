@@ -85,7 +85,6 @@ export class MemberAvailabilityDrizzleRepository
       .onConflictDoUpdate({
         target: memberAvailabilities.memberId,
         set: {
-          mode: entity.mode,
           daysOfWeek: entity.daysOfWeek,
           updatedAt: entity.updatedAt,
           deletedAt: null,

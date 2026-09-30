@@ -3,29 +3,25 @@ import { Permission } from "@/shared/domain/enums/Permission";
 import { getNavigationItems } from "./navigationItems";
 
 describe("getNavigationItems", () => {
-  it("shows only member destinations when the user has no management permissions", () => {
-    expect(getNavigationItems({}).map((item) => item.href)).toEqual([
-      "/home",
-      "/my-scales",
-      "/more",
-    ]);
+  it("shows only the home destination without an authorized scope", () => {
+    expect(getNavigationItems({}).map((item) => item.href)).toEqual(["/home"]);
   });
 
-  it("shows management destinations only for the respective permissions", () => {
+  it("shows churches and members for the current product scope", () => {
     expect(
       getNavigationItems({
-        permissions: [Permission.SCALE_READ, Permission.SCALE_ATTENDANCE_READ],
+        permissions: [Permission.CHURCH_READ, Permission.MEMBER_READ],
+        churchId: "church-1",
       }).map((item) => item.href),
-    ).toEqual([
-      "/home",
-      "/my-scales",
-      "/scales",
-      "/scale-attendances",
-      "/more",
-    ]);
+    ).toEqual(["/home", "/churches", "/members"]);
   });
 
-  it("shows all navigation destinations to a super admin", () => {
-    expect(getNavigationItems({ isSuperAdmin: true })).toHaveLength(5);
+  it("does not show members until a church is selected", () => {
+    expect(
+      getNavigationItems({
+        isSuperAdmin: true,
+        churchId: null,
+      }).map((item) => item.href),
+    ).toEqual(["/home", "/churches"]);
   });
 });

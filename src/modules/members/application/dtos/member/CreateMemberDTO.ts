@@ -10,11 +10,13 @@ const DayOfWeekSchema = z.enum([
   "Saturday",
 ]);
 
-const AvailabilityModeSchema = z.enum(["ALLOW_LIST", "BLOCK_LIST"]);
-
-const MemberAvailabilitySchema = z.object({
-  mode: AvailabilityModeSchema,
-  daysOfWeek: z.array(DayOfWeekSchema),
+export const MemberAvailabilitySchema = z.object({
+  daysOfWeek: z
+    .array(DayOfWeekSchema)
+    .max(7, "Selecione no máximo sete dias")
+    .refine((days) => new Set(days).size === days.length, {
+      message: "Os dias não podem ser repetidos",
+    }),
 });
 
 const MemberChurchInputSchema = z.object({

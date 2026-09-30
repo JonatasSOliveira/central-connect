@@ -37,6 +37,23 @@ export function createRoleHandler(
     }
     return auth;
   };
+  const authorizeSuperAdmin = async () => {
+    const auth = await validateSession();
+    if (!auth.ok) return NextResponse.json(auth, { status: 401 });
+    if (!auth.user.isSuperAdmin) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: "NOT_AUTHORIZED",
+            message: "Apenas superadministradores podem alterar cargos",
+          },
+        },
+        { status: 403 },
+      );
+    }
+    return auth;
+  };
   return {
     GET: async (_request: NextRequest, roleId: string) => {
       const auth = await authorize(Permission.ROLE_READ);
@@ -47,7 +64,7 @@ export function createRoleHandler(
       });
     },
     PUT: async (request: NextRequest, roleId: string) => {
-      const auth = await authorize(Permission.ROLE_WRITE);
+      const auth = await authorizeSuperAdmin();
       if (auth instanceof NextResponse) return auth;
       if (!request.headers.get("content-type")?.includes("application/json")) {
         return NextResponse.json(apiError("INVALID_CONTENT_TYPE"), {
@@ -74,7 +91,7 @@ export function createRoleHandler(
       });
     },
     DELETE: async (_request: NextRequest, roleId: string) => {
-      const auth = await authorize(Permission.ROLE_DELETE);
+      const auth = await authorizeSuperAdmin();
       if (auth instanceof NextResponse) return auth;
       const result = await useCases.deleteRole.execute({ roleId });
       if (!result.ok)

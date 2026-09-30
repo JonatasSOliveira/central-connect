@@ -21,6 +21,14 @@ interface FormContentProps {
   className?: string;
 }
 
+interface FormSectionProps {
+  id: string;
+  title: string;
+  description?: string;
+  children: ReactNode;
+  className?: string;
+}
+
 interface FormFooterProps {
   onCancel?: () => void;
   isLoading?: boolean;
@@ -52,6 +60,29 @@ function FormHeader({ title, description, className }: FormHeaderProps) {
 
 function FormContent({ children, className }: FormContentProps) {
   return <div className={cn("space-y-4 pt-4", className)}>{children}</div>;
+}
+
+function FormSection({
+  id,
+  title,
+  description,
+  children,
+  className,
+}: FormSectionProps) {
+  return (
+    <section
+      aria-labelledby={id}
+      className={cn("app-surface border-primary/20 p-4 sm:p-6", className)}
+    >
+      <h2 id={id} className="text-base font-semibold">
+        {title}
+      </h2>
+      {description && (
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      )}
+      <div className="mt-5 space-y-4">{children}</div>
+    </section>
+  );
 }
 
 function FormFooter({
@@ -129,7 +160,8 @@ export function FormTemplate({
 
 FormTemplate.Header = FormHeader;
 FormTemplate.Content = FormContent;
+FormTemplate.Section = FormSection;
 FormTemplate.Footer = FormFooter;
 FormTemplate.Form = Form;
 
-export { Form, FormContent, FormFooter, FormHeader };
+export { Form, FormContent, FormFooter, FormHeader, FormSection };

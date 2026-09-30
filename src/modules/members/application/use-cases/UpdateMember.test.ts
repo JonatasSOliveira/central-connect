@@ -62,6 +62,7 @@ class MemberChurchRepositoryStub implements IMemberChurchRepository {
     }),
   ];
   deletedIds: string[] = [];
+  upsertedChurchIds: string[] = [];
 
   async findByMemberId(): Promise<MemberChurch[]> {
     return this.churches;
@@ -79,6 +80,31 @@ class MemberChurchRepositoryStub implements IMemberChurchRepository {
     return this.churches;
   }
   async create(entity: MemberChurch): Promise<MemberChurch> {
+    this.churches.push(entity);
+    return entity;
+  }
+  async upsert(entity: MemberChurch): Promise<MemberChurch> {
+    this.upsertedChurchIds.push(entity.churchId);
+    const existing = this.churches.find(
+      (church) =>
+        church.memberId === entity.memberId &&
+        church.churchId === entity.churchId,
+    );
+    if (existing) {
+      const updated = new MemberChurch({
+        id: existing.id,
+        memberId: entity.memberId,
+        churchId: entity.churchId,
+        roleId: entity.roleId,
+        createdAt: existing.createdAt,
+        updatedAt: entity.updatedAt,
+        deletedAt: null,
+      });
+      this.churches = this.churches.map((church) =>
+        church.id === existing.id ? updated : church,
+      );
+      return updated;
+    }
     this.churches.push(entity);
     return entity;
   }
@@ -123,6 +149,11 @@ class MemberMinistryRepositoryStub implements IMemberMinistryRepository {
     return this.ministries;
   }
   async create(entity: MemberMinistry): Promise<MemberMinistry> {
+    this.createdMinistryIds.push(entity.ministryId);
+    this.ministries.push(entity);
+    return entity;
+  }
+  async upsert(entity: MemberMinistry): Promise<MemberMinistry> {
     this.createdMinistryIds.push(entity.ministryId);
     this.ministries.push(entity);
     return entity;
@@ -190,5 +221,29 @@ describe("UpdateMember", () => {
       "ministry-1",
       "ministry-2",
     ]);
+  });
+
+  it("updates church associations without deleting and recreating the same row", async () => {
+    const memberRepository = new MemberRepositoryStub();
+    const memberChurchRepository = new MemberChurchRepositoryStub();
+    const memberMinistryRepository = new MemberMinistryRepositoryStub();
+    const useCase = new UpdateMember(
+      memberRepository,
+      memberChurchRepository,
+      memberMinistryRepository,
+      availabilityRepositoryStub,
+    );
+
+    const result = await useCase.execute({
+      memberId: "member-1",
+      input: {
+        churches: [{ churchId: "church-1", roleId: "role-2", ministryIds: [] }],
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(memberChurchRepository.deletedIds).toEqual([]);
+    expect(memberChurchRepository.upsertedChurchIds).toEqual(["church-1"]);
+    expect(memberChurchRepository.churches[0].roleId).toBe("role-2");
   });
 });

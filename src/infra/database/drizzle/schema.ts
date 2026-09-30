@@ -270,7 +270,6 @@ export const memberAvailabilities = pgTable(
     memberId: uuid("member_id")
       .notNull()
       .references(() => members.id),
-    mode: varchar("mode", { length: 20 }).notNull(),
     daysOfWeek: jsonb("days_of_week").$type<string[]>().notNull(),
     ...timestamps,
   },

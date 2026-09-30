@@ -32,6 +32,7 @@ export default function ChurchesPage() {
   const canDelete =
     user?.isSuperAdmin || user?.permissions.includes(Permission.CHURCH_DELETE);
   const hasChurches = allChurchesCount > 0;
+  const showToolbar = hasChurches || Boolean(searchQuery.trim());
 
   const handleCreateChurch = useCallback(() => {
     router.push("/churches/new");
@@ -126,28 +127,26 @@ export default function ChurchesPage() {
         bgColor="#16a34a"
       />
 
-      {hasChurches && (
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start">
-          <div className="min-w-0 flex-1">
-            <ListTemplate.SearchBar
-              value={searchQuery}
-              onChange={setSearch}
-              onClear={() => setSearch("")}
-              placeholder="Buscar uma igreja"
-              resultsCount={churches.length}
-              className="mb-0"
-            />
-          </div>
-          {canWrite && (
-            <ListTemplate.Action
-              label="Cadastrar igreja"
-              icon={Plus}
-              onClick={handleCreateChurch}
-              buttonClassName="w-full sm:w-auto"
-              className="w-full shrink-0 sm:w-auto"
-            />
-          )}
-        </div>
+      {showToolbar && (
+        <ListTemplate.Toolbar
+          search={{
+            value: searchQuery,
+            onChange: setSearch,
+            onClear: () => setSearch(""),
+            placeholder: "Buscar uma igreja",
+            resultLabel: "igreja",
+            resultsCount: churches.length,
+          }}
+          action={
+            canWrite
+              ? {
+                  label: "Cadastrar igreja",
+                  icon: Plus,
+                  onClick: handleCreateChurch,
+                }
+              : undefined
+          }
+        />
       )}
 
       {renderContent()}

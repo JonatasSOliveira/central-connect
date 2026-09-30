@@ -10,4 +10,5 @@ export interface IMemberMinistryRepository
     memberId: string,
     ministryId: string,
   ): Promise<MemberMinistry | null>;
+  upsert(entity: MemberMinistry): Promise<MemberMinistry>;
 }
