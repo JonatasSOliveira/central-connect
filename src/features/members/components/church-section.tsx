@@ -24,11 +24,19 @@ interface ChurchSectionProps {
   canChangeChurch: boolean;
   canEditSystemRole: boolean;
   canEditMinistries: boolean;
+  canEditMinistryRoles: boolean;
   getMinistriesByChurch: (churchId: string) => MinistryListItemDTO[];
   fetchMinistriesByChurch: (churchId: string) => Promise<void>;
   isLoadingMinistries: boolean;
   editableAppendMinistry: (churchIndex: number, ministryId: string) => void;
   editableRemoveMinistry: (churchIndex: number, ministryIndex: number) => void;
+  getMinistryRoleIds: (churchId: string, ministryId: string) => string[];
+  onToggleMinistryRole: (
+    churchId: string,
+    ministryId: string,
+    roleId: string,
+  ) => void;
+  clearChurchMinistryAssignments: (churchId: string) => void;
   editableAppend: (data: {
     churchId: string;
     roleId: string;
@@ -47,15 +55,21 @@ export function ChurchSection({
   canChangeChurch,
   canEditSystemRole,
   canEditMinistries,
+  canEditMinistryRoles,
   getMinistriesByChurch,
   fetchMinistriesByChurch,
   isLoadingMinistries,
   editableAppendMinistry,
   editableRemoveMinistry,
+  getMinistryRoleIds,
+  onToggleMinistryRole,
+  clearChurchMinistryAssignments,
   editableAppend,
   editableRemove,
   disabled = false,
 }: ChurchSectionProps) {
+  form.watch("ministryRoleAssignments");
+
   if (disabled) {
     if (readonlyChurches.length > 0) {
       return <ReadonlyChurchList churches={readonlyChurches} />;
@@ -104,19 +118,6 @@ export function ChurchSection({
         <span className="text-sm font-medium text-muted-foreground">
           Igrejas associadas
         </span>
-        {canChangeChurch && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            onClick={handleAppend}
-            disabled={disabled}
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Adicionar
-          </Button>
-        )}
       </div>
 
       <div className="space-y-3">
@@ -140,12 +141,14 @@ export function ChurchSection({
               canChangeChurch={canChangeChurch}
               canEditSystemRole={canEditSystemRole}
               canEditMinistries={canEditMinistries}
+              canEditMinistryRoles={canEditMinistryRoles}
               canRemove={canChangeChurch && editableFields.length > 1}
-              onChurchChange={(value) =>
+              onChurchChange={(value) => {
+                clearChurchMinistryAssignments(churchId);
                 form.setValue(`churches.${index}.churchId`, value, {
                   shouldValidate: true,
-                })
-              }
+                });
+              }}
               onRoleChange={(value) =>
                 form.setValue(`churches.${index}.roleId`, value, {
                   shouldValidate: true,
@@ -161,11 +164,27 @@ export function ChurchSection({
               onRemoveMinistry={(ministryIndex) =>
                 editableRemoveMinistry(index, ministryIndex)
               }
+              getMinistryRoleIds={getMinistryRoleIds}
+              onToggleMinistryRole={onToggleMinistryRole}
               onRemove={() => editableRemove(index)}
             />
           );
         })}
       </div>
+
+      {canChangeChurch && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
+          onClick={handleAppend}
+          disabled={disabled}
+        >
+          <Plus className="mr-1 h-4 w-4" />
+          Adicionar outra igreja
+        </Button>
+      )}
 
       {readonlyChurches.length > 0 && (
         <ReadonlyChurchList

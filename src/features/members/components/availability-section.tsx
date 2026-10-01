@@ -51,7 +51,9 @@ export function AvailabilitySection({
   const summary =
     selectedDays.length === 0
       ? "Nenhum dia selecionado. A pessoa não será incluída automaticamente nas escalas."
-      : `A pessoa poderá participar em ${selectedDayLabels.join(", ")}.`;
+      : selectedDays.length === ALL_DAYS_OF_WEEK.length
+        ? "Disponível todos os dias."
+        : `Disponível em ${selectedDays.length} ${selectedDays.length === 1 ? "dia" : "dias"}: ${selectedDayLabels.join(", ")}.`;
 
   return (
     <fieldset className="space-y-2">
@@ -62,7 +64,7 @@ export function AvailabilitySection({
         Marque todos os dias em que ela pode ser incluída nas escalas.
       </p>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
         {DAY_OPTIONS.map((day) => (
           <label
             key={day.value}

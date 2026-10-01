@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@fullcalendar/react/skeleton.css";
+import "@fullcalendar/react/themes/classic/theme.css";
 import { Footer } from "@/components/modules/footer";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 

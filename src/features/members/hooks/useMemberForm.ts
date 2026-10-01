@@ -40,6 +40,10 @@ export interface ReadonlyChurch {
   ministryIds: string[];
 }
 
+type MinistryRoleAssignment = NonNullable<
+  CreateMemberInput["ministryRoleAssignments"]
+>[number];
+
 export interface UseMemberFormReturn {
   form: ReturnType<typeof useForm<CreateMemberInput>>;
   editableFields: ReturnType<
@@ -61,8 +65,16 @@ export interface UseMemberFormReturn {
   canChangeChurch: boolean;
   canEditSystemRole: boolean;
   canEditMinistries: boolean;
+  canEditMinistryRoles: boolean;
   editableAppendMinistry: (churchIndex: number, ministryId: string) => void;
   editableRemoveMinistry: (churchIndex: number, ministryIndex: number) => void;
+  getMinistryRoleIds: (churchId: string, ministryId: string) => string[];
+  onToggleMinistryRole: (
+    churchId: string,
+    ministryId: string,
+    roleId: string,
+  ) => void;
+  clearChurchMinistryAssignments: (churchId: string) => void;
   getMinistriesByChurch: (churchId: string) => MinistryListItemDTO[];
   fetchMinistriesByChurch: (churchId: string) => Promise<void>;
   isLoadingMinistries: boolean;
@@ -105,6 +117,7 @@ export function useMemberForm({
   const canEditOwnMinistries =
     isSelfEdit && memberId === user?.memberId && hasMemberSelfWrite;
   const canEditMinistries = canEditSystemRole || canEditOwnMinistries;
+  const canEditMinistryRoles = canEditSystemRole;
 
   const userChurches = user?.churches ?? [];
   const userWritableChurchIds = useMemo(() => {
@@ -135,6 +148,7 @@ export function useMemberForm({
           ministryIds: [],
         },
       ],
+      ministryRoleAssignments: [],
     },
     mode: "onBlur",
   });
@@ -199,9 +213,74 @@ export function useMemberForm({
     (churchIndex: number, ministryIndex: number) => {
       const currentIds =
         form.getValues(`churches.${churchIndex}.ministryIds`) || [];
+      const ministryId = currentIds[ministryIndex];
       form.setValue(
         `churches.${churchIndex}.ministryIds`,
         currentIds.filter((_, idx) => idx !== ministryIndex),
+      );
+      if (ministryId) {
+        const assignments = form.getValues("ministryRoleAssignments") || [];
+        form.setValue(
+          "ministryRoleAssignments",
+          assignments.filter(
+            (assignment) =>
+              assignment.churchId !==
+                form.getValues(`churches.${churchIndex}.churchId`) ||
+              assignment.ministryId !== ministryId,
+          ),
+          { shouldDirty: true },
+        );
+      }
+    },
+    [form],
+  );
+
+  const getMinistryRoleIds = useCallback(
+    (churchId: string, ministryId: string) =>
+      form
+        .getValues("ministryRoleAssignments")
+        ?.find(
+          (assignment) =>
+            assignment.churchId === churchId &&
+            assignment.ministryId === ministryId,
+        )?.ministryRoleIds ?? [],
+    [form],
+  );
+
+  const onToggleMinistryRole = useCallback(
+    (churchId: string, ministryId: string, roleId: string) => {
+      const assignments = form.getValues("ministryRoleAssignments") || [];
+      const existing = assignments.find(
+        (assignment) =>
+          assignment.churchId === churchId &&
+          assignment.ministryId === ministryId,
+      );
+      const selectedRoleIds = existing?.ministryRoleIds ?? [];
+      const ministryRoleIds = selectedRoleIds.includes(roleId)
+        ? selectedRoleIds.filter((id) => id !== roleId)
+        : [...selectedRoleIds, roleId];
+      const nextAssignments = assignments.filter(
+        (assignment) =>
+          assignment.churchId !== churchId ||
+          assignment.ministryId !== ministryId,
+      );
+      nextAssignments.push({ churchId, ministryId, ministryRoleIds });
+      form.setValue("ministryRoleAssignments", nextAssignments, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+    },
+    [form],
+  );
+
+  const clearChurchMinistryAssignments = useCallback(
+    (churchId: string) => {
+      const assignments = form.getValues("ministryRoleAssignments") || [];
+      form.setValue(
+        "ministryRoleAssignments",
+        assignments.filter((assignment) => assignment.churchId !== churchId),
+        { shouldDirty: true },
       );
     },
     [form],
@@ -297,6 +376,7 @@ export function useMemberForm({
               ministryIds: string[];
             }[] = [];
             const readonly: ReadonlyChurch[] = [];
+            const ministryRoleAssignments: MinistryRoleAssignment[] = [];
 
             for (const church of memberData.churches) {
               if (church.userPermission === "write" || canEditOwnMinistries) {
@@ -305,6 +385,13 @@ export function useMemberForm({
                   roleId: church.roleId,
                   ministryIds: church.ministryIds || [],
                 });
+                for (const item of church.ministryRoleIdsByMinistry ?? []) {
+                  ministryRoleAssignments.push({
+                    churchId: church.churchId,
+                    ministryId: item.ministryId,
+                    ministryRoleIds: item.ministryRoleIds,
+                  });
+                }
                 fetchMinistriesByChurch(church.churchId);
               } else if (church.userPermission === "read") {
                 readonly.push({
@@ -344,6 +431,7 @@ export function useMemberForm({
                   daysOfWeek: [...ALL_DAYS_OF_WEEK],
                 },
                 churches: editable,
+                ministryRoleAssignments,
               });
             } else if (hasSingleWritableChurch) {
               form.reset({
@@ -360,6 +448,7 @@ export function useMemberForm({
                     ministryIds: [],
                   },
                 ],
+                ministryRoleAssignments: [],
               });
               fetchMinistriesByChurch(defaultEditableChurchId);
             } else {
@@ -371,6 +460,7 @@ export function useMemberForm({
                   daysOfWeek: [...ALL_DAYS_OF_WEEK],
                 },
                 churches: [{ churchId: "", roleId: "", ministryIds: [] }],
+                ministryRoleAssignments: [],
               });
             }
           } else {
@@ -449,6 +539,11 @@ export function useMemberForm({
             }));
         }
 
+        if (canEditMinistryRoles) {
+          payload.ministryRoleAssignments =
+            formData.ministryRoleAssignments ?? [];
+        }
+
         const response = await fetch(`/api/members/${memberId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -495,8 +590,12 @@ export function useMemberForm({
     canChangeChurch,
     canEditSystemRole,
     canEditMinistries,
+    canEditMinistryRoles,
     editableAppendMinistry,
     editableRemoveMinistry,
+    getMinistryRoleIds,
+    onToggleMinistryRole,
+    clearChurchMinistryAssignments,
     getMinistriesByChurch,
     fetchMinistriesByChurch,
     isLoadingMinistries,

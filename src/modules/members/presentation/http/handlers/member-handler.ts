@@ -120,6 +120,20 @@ export function createMemberHandler(
           { status: 403 },
         );
       if (
+        parsed.data.ministryRoleAssignments &&
+        !canManageChurches
+      )
+        return NextResponse.json(
+          {
+            ok: false,
+            error: {
+              code: "NOT_AUTHORIZED",
+              message: "Sem permissão para editar funções deste membro",
+            },
+          },
+          { status: 403 },
+        );
+      if (
         !auth.user.isSuperAdmin &&
         parsed.data.churches?.some(
           (church) => church.churchId !== auth.user.churchId,
@@ -131,6 +145,22 @@ export function createMemberHandler(
             error: {
               code: "NOT_AUTHORIZED",
               message: "Sem permissão para adicionar membros a esta igreja",
+            },
+          },
+          { status: 403 },
+        );
+      if (
+        !auth.user.isSuperAdmin &&
+        parsed.data.ministryRoleAssignments?.some(
+          (assignment) => assignment.churchId !== auth.user.churchId,
+        )
+      )
+        return NextResponse.json(
+          {
+            ok: false,
+            error: {
+              code: "NOT_AUTHORIZED",
+              message: "Sem permissão para alterar funções nesta igreja",
             },
           },
           { status: 403 },

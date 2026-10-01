@@ -151,11 +151,23 @@ function Form<T extends Record<string, unknown>>({
 export function FormTemplate({
   children,
   className,
+  size = "default",
 }: {
   children: ReactNode;
   className?: string;
+  size?: "default" | "wide";
 }) {
-  return <div className={cn("max-w-xl mx-auto", className)}>{children}</div>;
+  return (
+    <div
+      className={cn(
+        "mx-auto w-full",
+        size === "wide" ? "max-w-3xl" : "max-w-xl",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 FormTemplate.Header = FormHeader;

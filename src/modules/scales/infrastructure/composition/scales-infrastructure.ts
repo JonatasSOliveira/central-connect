@@ -174,6 +174,7 @@ function createScaleUseCase(
     dependencies.memberRepository,
     dependencies.memberChurchRepository,
     dependencies.memberMinistryRepository,
+    dependencies.memberMinistryRoleRepository,
     dependencies.memberAvailabilityRepository,
   );
 }
@@ -193,5 +194,6 @@ function createUpdateScaleUseCase(
     dependencies.memberRepository,
     dependencies.memberChurchRepository,
     dependencies.memberMinistryRepository,
+    dependencies.memberMinistryRoleRepository,
   );
 }

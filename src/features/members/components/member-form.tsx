@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormTemplate } from "@/components/templates/form-template";
 import { useMemberForm } from "@/features/members/hooks/useMemberForm";
 import { shouldNavigateBack } from "@/features/members/utils/selfEditNavigation";
@@ -39,8 +39,12 @@ export function MemberForm({
     canChangeChurch,
     canEditSystemRole,
     canEditMinistries,
+    canEditMinistryRoles,
     editableAppendMinistry,
     editableRemoveMinistry,
+    getMinistryRoleIds,
+    onToggleMinistryRole,
+    clearChurchMinistryAssignments,
     getMinistriesByChurch,
     fetchMinistriesByChurch,
     isLoadingMinistries,
@@ -49,11 +53,6 @@ export function MemberForm({
     memberId,
     isSelfEdit,
   });
-
-  const [_addingMinistryTo, setAddingMinistryTo] = useState<number | null>(
-    null,
-  );
-  const [selectedMinistryId, setSelectedMinistryId] = useState("");
 
   const hasSingleWritableChurch =
     editableChurches.length === 1 && canChangeChurch;
@@ -72,14 +71,6 @@ export function MemberForm({
     fetchMinistriesByChurch,
   ]);
 
-  const _handleAddMinistry = (churchIndex: number) => {
-    if (selectedMinistryId) {
-      editableAppendMinistry(churchIndex, selectedMinistryId);
-      setSelectedMinistryId("");
-      setAddingMinistryTo(null);
-    }
-  };
-
   const handleCancel = () => {
     if (
       typeof window !== "undefined" &&
@@ -89,7 +80,7 @@ export function MemberForm({
       return;
     }
 
-    router.push("/home");
+    router.push(isSelfEdit ? "/home" : "/members");
   };
 
   if (isFetching) {
@@ -106,21 +97,21 @@ export function MemberForm({
   }
 
   return (
-    <FormTemplate>
+    <FormTemplate size="wide">
       <FormTemplate.Form<CreateMemberInput> form={form} onSubmit={onSubmit}>
         <FormTemplate.Content className="space-y-4 pt-0">
           <FormTemplate.Section
             id="member-personal-data-heading"
             title="Dados pessoais"
-            description="Campos com * são obrigatórios. Informe como podemos identificar o membro."
+            description="Informe os dados básicos para identificar e entrar em contato com esta pessoa."
           >
             <BasicInfoSection form={form} disabled={readOnly} />
           </FormTemplate.Section>
 
           <FormTemplate.Section
             id="member-churches-heading"
-            title="Igrejas e atuação"
-            description="Associe o membro às igrejas, ao cargo e aos ministérios em que atua."
+            title="Participação na igreja"
+            description="Informe em quais igrejas a pessoa participa e quais atividades pode realizar."
           >
             <ChurchSection
               form={form}
@@ -131,11 +122,15 @@ export function MemberForm({
               canChangeChurch={canChangeChurch}
               canEditSystemRole={canEditSystemRole}
               canEditMinistries={canEditMinistries}
+              canEditMinistryRoles={canEditMinistryRoles}
               getMinistriesByChurch={getMinistriesByChurch}
               fetchMinistriesByChurch={fetchMinistriesByChurch}
               isLoadingMinistries={isLoadingMinistries}
               editableAppendMinistry={editableAppendMinistry}
               editableRemoveMinistry={editableRemoveMinistry}
+              getMinistryRoleIds={getMinistryRoleIds}
+              onToggleMinistryRole={onToggleMinistryRole}
+              clearChurchMinistryAssignments={clearChurchMinistryAssignments}
               editableAppend={editableAppend}
               editableRemove={editableRemove}
               disabled={readOnly}
@@ -145,7 +140,7 @@ export function MemberForm({
           <FormTemplate.Section
             id="member-availability-heading"
             title="Disponibilidade para as escalas"
-            description="Defina em quais dias essa pessoa pode participar."
+            description="Informe em quais dias a pessoa pode ser incluída nas escalas."
           >
             <AvailabilitySection form={form} disabled={readOnly} />
           </FormTemplate.Section>

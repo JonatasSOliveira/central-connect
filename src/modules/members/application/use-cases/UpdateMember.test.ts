@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import type { IMemberAvailabilityRepository } from "@/modules/members/application/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { IMemberMinistryRoleRepository } from "@/modules/members/application/ports/IMemberMinistryRoleRepository";
 import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
 import { Member } from "@/modules/members/domain/entities/Member";
 import type { MemberAvailability } from "@/modules/members/domain/entities/MemberAvailability";
 import { MemberChurch } from "@/modules/members/domain/entities/MemberChurch";
 import { MemberMinistry } from "@/modules/members/domain/entities/MemberMinistry";
+import type { MemberMinistryRole } from "@/modules/members/domain/entities/MemberMinistryRole";
+import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
+import type { MinistryRole } from "@/modules/ministries/domain/entities/MinistryRole";
 import { UpdateMember } from "./UpdateMember";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
@@ -166,6 +170,65 @@ class MemberMinistryRepositoryStub implements IMemberMinistryRepository {
   }
 }
 
+class MemberMinistryRoleRepositoryStub
+  implements IMemberMinistryRoleRepository
+{
+  roles: MemberMinistryRole[] = [];
+
+  async findById(): Promise<MemberMinistryRole | null> {
+    return this.roles[0] ?? null;
+  }
+  async findAll(): Promise<MemberMinistryRole[]> {
+    return this.roles;
+  }
+  async findByMemberAndMinistry(): Promise<MemberMinistryRole[]> {
+    return this.roles;
+  }
+  async findByMemberId(): Promise<MemberMinistryRole[]> {
+    return this.roles;
+  }
+  async findByMinistryRoleId(): Promise<MemberMinistryRole[]> {
+    return this.roles;
+  }
+  async findByMinistryId(): Promise<MemberMinistryRole[]> {
+    return this.roles;
+  }
+  async findByChurchMemberAndMinistry(): Promise<MemberMinistryRole[]> {
+    return this.roles;
+  }
+  async create(entity: MemberMinistryRole): Promise<MemberMinistryRole> {
+    this.roles.push(entity);
+    return entity;
+  }
+  async upsert(entity: MemberMinistryRole): Promise<MemberMinistryRole> {
+    this.roles.push(entity);
+    return entity;
+  }
+  async update(entity: MemberMinistryRole): Promise<MemberMinistryRole> {
+    return entity;
+  }
+  async delete(): Promise<void> {}
+}
+
+const ministryRoleRepositoryStub = {
+  async findById(): Promise<MinistryRole | null> {
+    return null;
+  },
+  async findAll(): Promise<MinistryRole[]> {
+    return [];
+  },
+  async findByMinistryId(): Promise<MinistryRole[]> {
+    return [];
+  },
+  async create(entity: MinistryRole): Promise<MinistryRole> {
+    return entity;
+  },
+  async update(entity: MinistryRole): Promise<MinistryRole> {
+    return entity;
+  },
+  async delete(): Promise<void> {},
+} satisfies IMinistryRoleRepository;
+
 const availabilityRepositoryStub = {
   async findById() {
     return null;
@@ -197,10 +260,13 @@ describe("UpdateMember", () => {
     const memberRepository = new MemberRepositoryStub();
     const memberChurchRepository = new MemberChurchRepositoryStub();
     const memberMinistryRepository = new MemberMinistryRepositoryStub();
+    const memberMinistryRoleRepository = new MemberMinistryRoleRepositoryStub();
     const useCase = new UpdateMember(
       memberRepository,
       memberChurchRepository,
       memberMinistryRepository,
+      memberMinistryRoleRepository,
+      ministryRoleRepositoryStub,
       availabilityRepositoryStub,
     );
 
@@ -227,10 +293,13 @@ describe("UpdateMember", () => {
     const memberRepository = new MemberRepositoryStub();
     const memberChurchRepository = new MemberChurchRepositoryStub();
     const memberMinistryRepository = new MemberMinistryRepositoryStub();
+    const memberMinistryRoleRepository = new MemberMinistryRoleRepositoryStub();
     const useCase = new UpdateMember(
       memberRepository,
       memberChurchRepository,
       memberMinistryRepository,
+      memberMinistryRoleRepository,
+      ministryRoleRepositoryStub,
       availabilityRepositoryStub,
     );
 

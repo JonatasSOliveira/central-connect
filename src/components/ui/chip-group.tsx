@@ -1,3 +1,5 @@
+import { Children } from "react";
+
 interface ChipGroupProps {
   children: React.ReactNode;
   emptyMessage?: string;
@@ -9,7 +11,7 @@ export function ChipGroup({
   emptyMessage,
   className = "",
 }: ChipGroupProps) {
-  const hasChildren = Boolean(children);
+  const hasChildren = Children.count(children) > 0;
 
   if (!hasChildren && emptyMessage) {
     return (

@@ -32,41 +32,56 @@ export default function MinistriesPage() {
   const canDelete =
     user?.isSuperAdmin ||
     user?.permissions.includes(Permission.MINISTRY_DELETE);
+  const hasSelectedChurch = Boolean(user?.churchId);
+  const showToolbar = allMinistriesCount > 0 || Boolean(searchQuery.trim());
 
-  const handleCreateMinistry = useCallback(() => {
+  const handleCreate = useCallback(() => {
     router.push("/ministries/new");
   }, [router]);
 
-  const handleEditMinistry = useCallback(
-    (ministryId: string) => {
-      router.push(`/ministries/${ministryId}/edit`);
-    },
+  const handleEdit = useCallback(
+    (ministryId: string) => router.push(`/ministries/${ministryId}/edit`),
     [router],
   );
 
-  const handleDeleteMinistry = useCallback(
+  const handleDelete = useCallback(
     async (ministryId: string) => {
       const success = await deleteMinistry(ministryId);
-      if (success) {
-        toast.success("Ministério excluído com sucesso");
-      } else {
-        toast.error("Erro ao excluir ministério");
-      }
+      toast[success ? "success" : "error"](
+        success
+          ? "Ministério excluído com sucesso"
+          : "Erro ao excluir ministério",
+      );
     },
     [deleteMinistry],
   );
 
   const renderContent = () => {
+    if (!hasSelectedChurch) {
+      return (
+        <ListTemplate.EmptyState
+          icon={HeartHandshake}
+          title="Selecione uma igreja"
+          description="Escolha uma igreja para visualizar e organizar seus ministérios."
+          action={{
+            label: "Selecionar igreja",
+            onClick: () => router.push("/select-church"),
+          }}
+        />
+      );
+    }
+
     if (ministries.length === 0 && allMinistriesCount === 0 && !isLoading) {
       return (
         <ListTemplate.EmptyState
           icon={Inbox}
-          title="Nenhum ministry cadastrado"
-          description="Clique em Novo ministry para cadastrar o primeiro ministry."
-          action={{
-            label: "Cadastrar ministry",
-            onClick: handleCreateMinistry,
-          }}
+          title="Cadastre o primeiro ministério"
+          description="Organize as áreas de atuação da igreja e adicione suas funções quando quiser."
+          action={
+            canWrite
+              ? { label: "Cadastrar ministério", onClick: handleCreate }
+              : undefined
+          }
         />
       );
     }
@@ -75,12 +90,9 @@ export default function MinistriesPage() {
       return (
         <ListTemplate.EmptyState
           icon={Search}
-          title="Nenhum ministry encontrado"
-          description={`Não foram encontrados ministerios para "${searchQuery}"`}
-          action={{
-            label: "Limpar busca",
-            onClick: () => setSearch(""),
-          }}
+          title="Nenhum ministério encontrado"
+          description={`Não encontramos ministérios para "${searchQuery}".`}
+          action={{ label: "Limpar busca", onClick: () => setSearch("") }}
         />
       );
     }
@@ -92,19 +104,18 @@ export default function MinistriesPage() {
             key={ministry.id}
             icon={HeartHandshake}
             title={ministry.name}
-            description={`${ministry.roles.length} função(ões)`}
-            onClick={
-              canWrite ? () => handleEditMinistry(ministry.id) : undefined
-            }
+            description={`${ministry.roles.length} função${ministry.roles.length !== 1 ? "ões" : ""}`}
+            onClick={canWrite ? () => handleEdit(ministry.id) : undefined}
             actions={
               canWrite || canDelete
                 ? {
                     onEdit: canWrite
-                      ? () => handleEditMinistry(ministry.id)
+                      ? () => handleEdit(ministry.id)
                       : undefined,
                     onDelete: canDelete
-                      ? () => handleDeleteMinistry(ministry.id)
+                      ? () => handleDelete(ministry.id)
                       : undefined,
+                    deleteLabel: "Excluir ministério",
                   }
                 : undefined
             }
@@ -115,25 +126,36 @@ export default function MinistriesPage() {
   };
 
   return (
-    <ListTemplate isLoading={isLoading}>
+    <ListTemplate isLoading={isLoading && hasSelectedChurch}>
       <ListTemplate.Header
         title="Ministérios"
-        subtitle={`${allMinistriesCount} ministério${allMinistriesCount !== 1 ? "s" : ""}`}
+        subtitle={
+          hasSelectedChurch
+            ? `${allMinistriesCount} ministério${allMinistriesCount !== 1 ? "s" : ""}`
+            : "Organize as áreas de atuação da igreja"
+        }
+        bgColor="#16a34a"
       />
 
-      <ListTemplate.SearchBar
-        value={searchQuery}
-        onChange={setSearch}
-        onClear={() => setSearch("")}
-        placeholder="Buscar por nome..."
-        resultsCount={ministries.length}
-      />
-
-      {canWrite && (
-        <ListTemplate.Action
-          label="Novo ministry"
-          icon={Plus}
-          onClick={handleCreateMinistry}
+      {showToolbar && hasSelectedChurch && (
+        <ListTemplate.Toolbar
+          search={{
+            value: searchQuery,
+            onChange: setSearch,
+            onClear: () => setSearch(""),
+            placeholder: "Buscar um ministério",
+            resultLabel: "ministério",
+            resultsCount: ministries.length,
+          }}
+          action={
+            canWrite
+              ? {
+                  label: "Cadastrar ministério",
+                  icon: Plus,
+                  onClick: handleCreate,
+                }
+              : undefined
+          }
         />
       )}
 

@@ -1,6 +1,7 @@
 import type { IChurchRepository } from "@/modules/churches/application/ports/IChurchRepository";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { IMemberMinistryRoleRepository } from "@/modules/members/application/ports/IMemberMinistryRoleRepository";
 import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
 import type { IMinistryRepository } from "@/modules/ministries/application/ports/IMinistryRepository";
 import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
@@ -21,6 +22,7 @@ export type ScaleContextDependencies = {
   memberRepository: IMemberRepository;
   memberChurchRepository: IMemberChurchRepository;
   memberMinistryRepository: IMemberMinistryRepository;
+  memberMinistryRoleRepository: IMemberMinistryRoleRepository;
 };
 
 export async function validateScaleContext(
@@ -69,6 +71,20 @@ export async function validateScaleContext(
       memberMinistry.churchId !== input.churchId
     ) {
       return "MEMBER_CONTEXT_INVALID";
+    }
+
+    const eligibleRoles =
+      await deps.memberMinistryRoleRepository.findByChurchMemberAndMinistry(
+        input.churchId,
+        member.memberId,
+        input.ministryId,
+      );
+    if (
+      !eligibleRoles.some(
+        (role) => role.ministryRoleId === member.ministryRoleId,
+      )
+    ) {
+      return "MEMBER_MINISTRY_ROLE_INVALID";
     }
   }
 

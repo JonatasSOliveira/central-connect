@@ -9,9 +9,11 @@ export interface IMemberMinistryRoleRepository
   ): Promise<MemberMinistryRole[]>;
   findByMemberId(memberId: string): Promise<MemberMinistryRole[]>;
   findByMinistryRoleId(ministryRoleId: string): Promise<MemberMinistryRole[]>;
+  findByMinistryId(ministryId: string): Promise<MemberMinistryRole[]>;
   findByChurchMemberAndMinistry(
     churchId: string,
     memberId: string,
     ministryId: string,
   ): Promise<MemberMinistryRole[]>;
+  upsert(entity: MemberMinistryRole): Promise<MemberMinistryRole>;
 }

@@ -31,6 +31,7 @@ export default function PrivateLayout({
   const pathname = usePathname();
   const { isAuthenticated, isLoading } = useAuth();
   const isHome = pathname === "/home";
+  const isCalendar = pathname === "/calendar";
   const isChurchManagement =
     pathname === "/churches" || pathname.startsWith("/churches/");
   const { permission, syncRegisteredToken, autoEnableNotificationsAfterLogin } =
@@ -93,7 +94,10 @@ export default function PrivateLayout({
   }
 
   return (
-    <AppShell showNavigation={!isHome && !isChurchManagement}>
+    <AppShell
+      showNavigation={!isHome && !isChurchManagement}
+      className={isCalendar ? "max-w-none" : undefined}
+    >
       {children}
     </AppShell>
   );

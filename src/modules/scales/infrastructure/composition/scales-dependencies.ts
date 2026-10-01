@@ -4,6 +4,7 @@ import type { IChurchRepository } from "@/modules/churches/application/ports/ICh
 import type { IMemberAvailabilityRepository } from "@/modules/members/application/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { IMemberMinistryRoleRepository } from "@/modules/members/application/ports/IMemberMinistryRoleRepository";
 import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
 import type { IMinistryRepository } from "@/modules/ministries/application/ports/IMinistryRepository";
 import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
@@ -23,6 +24,7 @@ export interface CreateScaleDependencies {
   memberRepository: IMemberRepository;
   memberChurchRepository: IMemberChurchRepository;
   memberMinistryRepository: IMemberMinistryRepository;
+  memberMinistryRoleRepository: IMemberMinistryRoleRepository;
   memberAvailabilityRepository: IMemberAvailabilityRepository;
 }
 
@@ -34,6 +36,7 @@ export interface UpdateScaleDependencies {
   memberRepository: IMemberRepository;
   memberChurchRepository: IMemberChurchRepository;
   memberMinistryRepository: IMemberMinistryRepository;
+  memberMinistryRoleRepository: IMemberMinistryRoleRepository;
 }
 
 export interface ScalesInfrastructureDependencies {
@@ -42,6 +45,7 @@ export interface ScalesInfrastructureDependencies {
   memberRepository: IMemberRepository;
   memberChurchRepository: IMemberChurchRepository;
   memberMinistryRepository: IMemberMinistryRepository;
+  memberMinistryRoleRepository: IMemberMinistryRoleRepository;
   memberAvailabilityRepository: IMemberAvailabilityRepository;
   ministryRepository: IMinistryRepository;
   ministryRoleRepository: IMinistryRoleRepository;

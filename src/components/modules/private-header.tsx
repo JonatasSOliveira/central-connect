@@ -1,21 +1,33 @@
 "use client";
 
+import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import { ChurchContextSwitcher } from "@/features/churches/components/ChurchContextSwitcher";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { Permission } from "@/shared/domain/enums/Permission";
-import { cn, getContrastColor } from "@/lib/utils";
 
 interface PrivateHeaderProps {
   title: string;
   subtitle?: string;
   showBackButton?: boolean;
   backHref?: string;
+  /** Mantido para compatibilidade com páginas legadas; o header usa a cor padrão do tema. */
   bgColor?: string;
   action?: ReactNode;
+}
+
+function getInitials(fullName: string): string {
+  return fullName
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 }
 
 export function PrivateHeader({
@@ -23,7 +35,6 @@ export function PrivateHeader({
   subtitle,
   showBackButton = true,
   backHref = "/home",
-  bgColor,
   action,
 }: PrivateHeaderProps) {
   const router = useRouter();
@@ -33,49 +44,28 @@ export function PrivateHeader({
     router.push(backHref);
   };
 
-  const textColor = bgColor ? getContrastColor(bgColor) : null;
-  const bgStyle = bgColor ? { backgroundColor: bgColor } : undefined;
-  const textClass = textColor === "white" ? "text-white" : "text-foreground";
-  const mutedTextClass =
-    textColor === "white" ? "text-white/80" : "text-muted-foreground";
-  const hoverClass = bgColor
-    ? textColor === "white"
-      ? "hover:bg-white/20"
-      : "hover:bg-muted"
-    : "";
-
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 flex min-h-16 items-center border-b border-border bg-background/95 px-4 py-2 text-foreground shadow-[var(--shadow-soft-sm)] backdrop-blur",
-        bgColor && "text-current",
-      )}
-      style={bgStyle}
-    >
-      <div className="flex items-center gap-3 w-full">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-primary-foreground/10 bg-primary text-primary-foreground shadow-[var(--shadow-soft-sm)]">
+      <div className="mx-auto flex h-16 w-full max-w-3xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
         {showBackButton && (
           <Button
             variant="ghost"
             size="sm"
             aria-label="Voltar"
-            className={`-ml-2 h-11 w-auto min-w-11 px-2 cursor-pointer ${bgColor ? `${textClass} ${hoverClass}` : ""}`}
+            className="-ml-2 h-11 min-w-11 cursor-pointer px-2 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
             onClick={handleBack}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="size-5" />
           </Button>
         )}
 
-        <div className="flex-1 min-w-0">
-          <h1
-            className={`font-heading text-lg font-bold truncate ${bgColor ? textClass : ""}`}
-          >
+        <Logo variant="light" className="size-9 shrink-0" priority />
+
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate font-heading text-base font-bold sm:text-lg">
             {title}
           </h1>
-          {subtitle && (
-            <p className={`text-xs truncate ${bgColor ? mutedTextClass : ""}`}>
-              {subtitle}
-            </p>
-          )}
+          {subtitle && <p className="truncate text-xs text-primary-foreground/75">{subtitle}</p>}
         </div>
 
         <ChurchContextSwitcher
@@ -86,9 +76,26 @@ export function PrivateHeader({
             user?.isSuperAdmin ||
               user?.permissions.includes(Permission.CHURCH_WRITE),
           )}
+          tone="primary"
         />
 
         {action && <div className="shrink-0">{action}</div>}
+
+        <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-foreground/15 text-sm font-semibold ring-1 ring-primary-foreground/20">
+          {user?.avatarUrl ? (
+            <Image
+              loader={({ src }) => src}
+              src={user.avatarUrl}
+              alt={user.fullName || "Usuário"}
+              width={40}
+              height={40}
+              unoptimized
+              className="size-full object-cover"
+            />
+          ) : (
+            getInitials(user?.fullName || "Usuário")
+          )}
+        </div>
       </div>
     </header>
   );

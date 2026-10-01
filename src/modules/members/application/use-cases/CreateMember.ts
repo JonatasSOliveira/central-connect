@@ -1,7 +1,9 @@
 import type { IMemberAvailabilityRepository } from "@/modules/members/application/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { IMemberMinistryRoleRepository } from "@/modules/members/application/ports/IMemberMinistryRoleRepository";
 import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
+import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
 import {
   Member,
   type MemberParams,
@@ -25,6 +27,7 @@ import type {
   CreateMemberInput,
   CreateMemberOutput,
 } from "../dtos/member/CreateMemberDTO";
+import { syncMemberMinistryRoles } from "./helpers/syncMemberMinistryRoles";
 
 export class CreateMember extends BaseUseCase<
   CreateMemberInput,
@@ -34,6 +37,8 @@ export class CreateMember extends BaseUseCase<
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly memberMinistryRepository: IMemberMinistryRepository,
+    private readonly memberMinistryRoleRepository: IMemberMinistryRoleRepository,
+    private readonly ministryRoleRepository: IMinistryRoleRepository,
     private readonly memberAvailabilityRepository: IMemberAvailabilityRepository,
   ) {
     super();
@@ -87,6 +92,24 @@ export class CreateMember extends BaseUseCase<
           };
           const memberMinistry = new MemberMinistry(memberMinistryParams);
           await this.memberMinistryRepository.create(memberMinistry);
+        }
+      }
+
+      for (const assignment of input.ministryRoleAssignments ?? []) {
+        const result = await syncMemberMinistryRoles(
+          {
+            memberMinistryRepository: this.memberMinistryRepository,
+            memberMinistryRoleRepository: this.memberMinistryRoleRepository,
+            ministryRoleRepository: this.ministryRoleRepository,
+          },
+          {
+            ...assignment,
+            memberId: createdMember.id,
+          },
+        );
+
+        if (!result.ok) {
+          return { ok: false, error: result };
         }
       }
 

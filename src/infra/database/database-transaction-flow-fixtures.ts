@@ -9,6 +9,7 @@ import { UserDrizzleRepository } from "@/modules/identity/infrastructure/persist
 import { MemberChurchDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberChurchDrizzleRepository";
 import { MemberDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberDrizzleRepository";
 import { MemberMinistryDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryDrizzleRepository";
+import { MemberMinistryRoleDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryRoleDrizzleRepository";
 import { MinistryDrizzleRepository } from "@/modules/ministries/infrastructure/persistence/drizzle/MinistryDrizzleRepository";
 import { MinistryRoleDrizzleRepository } from "@/modules/ministries/infrastructure/persistence/drizzle/MinistryRoleDrizzleRepository";
 import { RoleDrizzleRepository } from "@/modules/roles/infrastructure/persistence/drizzle/RoleDrizzleRepository";
@@ -31,6 +32,7 @@ export function createUpdateScale(database: DatabaseExecutor) {
     new MemberDrizzleRepository(database),
     new MemberChurchDrizzleRepository(database),
     new MemberMinistryDrizzleRepository(database),
+    new MemberMinistryRoleDrizzleRepository(database),
   );
 }
 

@@ -63,6 +63,10 @@ export const ScaleErrors = {
     code: "MEMBER_CONTEXT_INVALID",
     message: "Membro não pertence à igreja e ao ministério selecionados",
   },
+  MEMBER_MINISTRY_ROLE_INVALID: {
+    code: "MEMBER_MINISTRY_ROLE_INVALID",
+    message: "Membro não está habilitado para esta função",
+  },
   DUPLICATE_SCALE_MEMBER: {
     code: "DUPLICATE_SCALE_MEMBER",
     message: "O mesmo membro não pode ser adicionado duas vezes",

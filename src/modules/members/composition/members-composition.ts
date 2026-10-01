@@ -10,28 +10,33 @@ import { UpdateMember } from "@/modules/members/application/use-cases/UpdateMemb
 import type { IMemberAvailabilityRepository } from "@/modules/members/application/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { IMemberMinistryRoleRepository } from "@/modules/members/application/ports/IMemberMinistryRoleRepository";
 import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
 import { createMemberHandler } from "@/modules/members/presentation/http/handlers/member-handler";
 import { createMembersHandler } from "@/modules/members/presentation/http/handlers/members-handler";
 import type { IRoleRepository } from "@/modules/roles/application/ports/IRoleRepository";
+import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
 
 export function createMembersComposition(dependencies: {
   database: Parameters<typeof createTransactionalUseCase>[0];
   memberRepository: IMemberRepository;
   memberChurchRepository: IMemberChurchRepository;
   memberMinistryRepository: IMemberMinistryRepository;
+  memberMinistryRoleRepository: IMemberMinistryRoleRepository;
   memberAvailabilityRepository: IMemberAvailabilityRepository;
   createTransactionalRepositories: (
     database: DatabaseExecutor,
   ) => ConstructorParameters<typeof CreateMember>;
   churchRepository: IChurchRepository;
   roleRepository: IRoleRepository;
+  ministryRoleRepository: IMinistryRoleRepository;
 }) {
   const createMember = createTransactionalUseCase(
     dependencies.database,
     (transaction) => {
-    const repositories = dependencies.createTransactionalRepositories(transaction);
-    return new CreateMember(...repositories);
+      const repositories =
+        dependencies.createTransactionalRepositories(transaction);
+      return new CreateMember(...repositories);
     },
   );
   const updateMember = createTransactionalUseCase(
@@ -52,9 +57,11 @@ export function createMembersComposition(dependencies: {
       dependencies.memberRepository,
       dependencies.memberChurchRepository,
       dependencies.memberMinistryRepository,
+      dependencies.memberMinistryRoleRepository,
       dependencies.memberAvailabilityRepository,
       dependencies.churchRepository,
       dependencies.roleRepository,
+      dependencies.ministryRoleRepository,
     ),
     updateMember,
     deleteMember: new DeleteMember(

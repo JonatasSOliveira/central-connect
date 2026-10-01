@@ -17,6 +17,7 @@ export default function NewMinistryPage() {
         title="Novo Ministério"
         subtitle="Preencha os dados do ministério"
         backHref="/ministries"
+        bgColor="#16a34a"
       />
       <div className="px-4 pb-4">
         <MinistryForm mode="create" />

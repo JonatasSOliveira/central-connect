@@ -16,9 +16,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ChurchesAccessCard } from "@/features/home/components/ChurchesAccessCard";
+import { CalendarAccessCard } from "@/features/home/components/CalendarAccessCard";
 import { HomeHeader } from "@/features/home/components/HomeHeader";
 import { HomeWelcome } from "@/features/home/components/HomeWelcome";
 import { MembersAccessCard } from "@/features/home/components/MembersAccessCard";
+import { MinistriesAccessCard } from "@/features/home/components/MinistriesAccessCard";
 import { RolesAccessCard } from "@/features/home/components/RolesAccessCard";
 import { cn } from "@/lib/utils";
 import { Permission } from "@/shared/domain/enums/Permission";
@@ -38,13 +40,16 @@ export default function HomePage() {
     isSuperAdmin || user?.permissions.includes(Permission.MEMBER_READ);
   const canAccessRoles =
     isSuperAdmin || user?.permissions.includes(Permission.ROLE_READ);
+  const canAccessMinistries =
+    isSuperAdmin || user?.permissions.includes(Permission.MINISTRY_READ);
   const hasMembersAccess = canAccessMembers && hasSelectedChurch;
+  const hasMinistriesAccess = canAccessMinistries;
   const needsChurchSelection = hasChurches && !hasSelectedChurch;
-  const hasAccessCards =
-    canAccessChurches || hasMembersAccess || canAccessRoles;
   const accessCardCount = [
+    true,
     canAccessChurches,
     hasMembersAccess,
+    hasMinistriesAccess,
     canAccessRoles,
   ].filter(Boolean).length;
 
@@ -64,43 +69,41 @@ export default function HomePage() {
 
       <HomeWelcome fullName={fullName} />
 
-      {hasAccessCards ? (
-        <div
-          className={cn(
-            "grid gap-4",
-            accessCardCount > 1 ? "sm:grid-cols-2" : "grid-cols-1",
-          )}
-        >
-          {canAccessChurches && (
-            <ChurchesAccessCard
-              isSuperAdmin={isSuperAdmin}
-              hasChurches={hasChurches}
-              needsSelection={needsChurchSelection}
-              onOpen={() =>
-                router.push(
-                  needsChurchSelection ? "/select-church" : "/churches",
-                )
-              }
-            />
-          )}
-          {hasMembersAccess && (
-            <MembersAccessCard onOpen={() => router.push("/members")} />
-          )}
-          {canAccessRoles && (
-            <RolesAccessCard onOpen={() => router.push("/roles")} />
-          )}
-        </div>
-      ) : (
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8">
-          <h2 className="font-heading text-xl font-semibold text-foreground">
-            Acesso em configuração
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
-            Seu acesso ainda não possui uma área disponível. Fale com o
-            administrador da sua igreja.
-          </p>
-        </section>
-      )}
+      <div
+        className={cn(
+          "grid gap-4",
+          accessCardCount > 1 ? "sm:grid-cols-2" : "grid-cols-1",
+        )}
+      >
+        <CalendarAccessCard onOpen={() => router.push("/calendar")} />
+        {canAccessChurches && (
+          <ChurchesAccessCard
+            isSuperAdmin={isSuperAdmin}
+            hasChurches={hasChurches}
+            needsSelection={needsChurchSelection}
+            onOpen={() =>
+              router.push(
+                needsChurchSelection ? "/select-church" : "/churches",
+              )
+            }
+          />
+        )}
+        {hasMembersAccess && (
+          <MembersAccessCard onOpen={() => router.push("/members")} />
+        )}
+        {canAccessRoles && (
+          <RolesAccessCard onOpen={() => router.push("/roles")} />
+        )}
+        {hasMinistriesAccess && (
+          <MinistriesAccessCard
+            onOpen={() =>
+              router.push(
+                needsChurchSelection ? "/select-church" : "/ministries",
+              )
+            }
+          />
+        )}
+      </div>
 
       <div className="border-t border-border pt-6">
         <Button

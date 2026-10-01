@@ -39,6 +39,7 @@ interface FormFieldProps<T extends FieldValues> {
   required?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
+  description?: string;
   children?: ReactNode;
 }
 
@@ -51,9 +52,16 @@ function FormField<T extends FieldValues>({
   required,
   disabled,
   autoFocus,
+  description,
   children,
 }: FormFieldProps<T>) {
   const error = extractErrorMessage(form.formState.errors[name]);
+  const describedBy = [
+    description ? `${name}-description` : null,
+    error ? `${name}-error` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className="space-y-1.5">
@@ -61,6 +69,11 @@ function FormField<T extends FieldValues>({
         {label}
         {required && <span className="text-destructive ml-0.5">*</span>}
       </Label>
+      {description && (
+        <p id={`${name}-description`} className="text-xs text-muted-foreground">
+          {description}
+        </p>
+      )}
       {children || (
         <Input
           id={name}
@@ -70,7 +83,7 @@ function FormField<T extends FieldValues>({
           autoFocus={autoFocus}
           {...form.register(name)}
           aria-invalid={!!error}
-          aria-describedby={error ? `${name}-error` : undefined}
+          aria-describedby={describedBy || undefined}
         />
       )}
       {error && (

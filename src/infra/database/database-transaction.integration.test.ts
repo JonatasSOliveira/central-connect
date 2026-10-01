@@ -12,6 +12,8 @@ import { MemberAvailabilityDrizzleRepository } from "@/modules/members/infrastru
 import { MemberChurchDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberChurchDrizzleRepository";
 import { MemberDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberDrizzleRepository";
 import { MemberMinistryDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryDrizzleRepository";
+import { MemberMinistryRoleDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryRoleDrizzleRepository";
+import { MinistryRoleDrizzleRepository } from "@/modules/ministries/infrastructure/persistence/drizzle/MinistryRoleDrizzleRepository";
 import { createMembersComposition } from "@/modules/members/composition/members-composition";
 import { RoleDrizzleRepository } from "@/modules/roles/infrastructure/persistence/drizzle/RoleDrizzleRepository";
 import {
@@ -60,6 +62,9 @@ describe("transactional business flows", () => {
         memberMinistryRepository: new MemberMinistryDrizzleRepository(
           database,
         ),
+        memberMinistryRoleRepository: new MemberMinistryRoleDrizzleRepository(
+          database,
+        ),
         memberAvailabilityRepository: new MemberAvailabilityDrizzleRepository(
           database,
         ),
@@ -67,10 +72,13 @@ describe("transactional business flows", () => {
           new MemberDrizzleRepository(executor),
           new MemberChurchDrizzleRepository(executor),
           new MemberMinistryDrizzleRepository(executor),
+          new MemberMinistryRoleDrizzleRepository(executor),
+          new MinistryRoleDrizzleRepository(executor),
           new MemberAvailabilityDrizzleRepository(executor),
         ],
         churchRepository: new ChurchDrizzleRepository(database),
         roleRepository: new RoleDrizzleRepository(database),
+        ministryRoleRepository: new MinistryRoleDrizzleRepository(database),
       }).useCases.createMember.execute({
         email,
         fullName: "Member",

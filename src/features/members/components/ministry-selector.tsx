@@ -1,8 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { MinistrySelect } from "@/components/ui/ministry-select";
@@ -26,7 +24,6 @@ export function MinistrySelector({
   onRemoveMinistry,
   disabled = false,
 }: MinistrySelectorProps) {
-  const [isAdding, setIsAdding] = useState(false);
   const [selectedMinistryId, setSelectedMinistryId] = useState("");
 
   const selectedMinistryNames = selectedMinistryIds.map((id) => {
@@ -38,42 +35,36 @@ export function MinistrySelector({
     (m) => !selectedMinistryIds.includes(m.id),
   );
 
-  const handleAdd = () => {
-    if (selectedMinistryId) {
-      onAddMinistry(selectedMinistryId);
-      setSelectedMinistryId("");
-      setIsAdding(false);
-    }
-  };
+  const handleMinistryChange = (ministryId: string) => {
+    if (!ministryId) return;
 
-  const handleCancel = () => {
+    onAddMinistry(ministryId);
     setSelectedMinistryId("");
-    setIsAdding(false);
-  };
-
-  const handleStartAdding = () => {
-    setIsAdding(true);
-    if (availableToSelect.length === 1) {
-      setSelectedMinistryId(availableToSelect[0].id);
-    }
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4 rounded-lg border border-primary/20 bg-background/70 p-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-muted-foreground">
-          Ministérios
+        <span className="text-sm font-medium text-foreground">
+          Ministérios em que participa
         </span>
-        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+        <span
+          className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
+        >
           {selectedMinistryIds.length}
         </span>
       </div>
 
-      <ChipGroup emptyMessage="Nenhum ministério selecionado">
+      <p className="text-sm text-muted-foreground">
+        Selecione os ministérios em que esta pessoa atua.
+      </p>
+
+      <ChipGroup emptyMessage="Nenhum ministério selecionado ainda">
         {selectedMinistryIds.map((id, index) => (
           <Chip
             key={id}
             onRemove={disabled ? undefined : () => onRemoveMinistry(index)}
+            aria-label={`Remover ${selectedMinistryNames[index]}`}
             variant="primary"
           >
             {selectedMinistryNames[index]}
@@ -81,12 +72,12 @@ export function MinistrySelector({
         ))}
       </ChipGroup>
 
-      {isAdding ? (
-        <div className="space-y-3 p-3 bg-muted/30 rounded-lg">
+      {availableToSelect.length > 0 ? (
+        <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3">
           <MinistrySelect
-            label="Adicionar ministério"
+            label="Selecione um ministério"
             value={selectedMinistryId}
-            onChange={setSelectedMinistryId}
+            onChange={handleMinistryChange}
             ministries={availableToSelect.map((ministry) => ({
               id: ministry.id,
               name: ministry.name,
@@ -95,45 +86,13 @@ export function MinistrySelector({
             required
             disabled={isLoading || disabled}
           />
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleCancel}
-              className="min-h-11 flex-1"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleAdd}
-              disabled={!selectedMinistryId || disabled}
-              className="min-h-11 flex-1"
-            >
-              Adicionar
-            </Button>
-          </div>
         </div>
       ) : (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleStartAdding}
-          disabled={
-            disabled ||
-            isLoading ||
-            availableMinistries.length === 0 ||
-            selectedMinistryIds.length >= availableMinistries.length
-          }
-          className="min-h-11 w-full"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Adicionar Ministério
-        </Button>
+        <p className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+          {availableMinistries.length === 0
+            ? "Nenhum ministério disponível nesta igreja."
+            : "Todos os ministérios disponíveis já foram adicionados."}
+        </p>
       )}
     </div>
   );

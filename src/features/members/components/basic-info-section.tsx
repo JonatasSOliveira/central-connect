@@ -15,16 +15,18 @@ export function BasicInfoSection({
   disabled = false,
 }: BasicInfoSectionProps) {
   return (
-    <>
-      <FormField<CreateMemberInput>
-        form={form}
-        name="fullName"
-        label="Nome completo"
-        placeholder="Nome do membro"
-        required
-        disabled={disabled}
-        autoFocus={!disabled}
-      />
+    <div className="grid gap-4 md:grid-cols-2">
+      <div className="md:col-span-2">
+        <FormField<CreateMemberInput>
+          form={form}
+          name="fullName"
+          label="Nome completo"
+          placeholder="Nome do membro"
+          required
+          disabled={disabled}
+          autoFocus={!disabled}
+        />
+      </div>
 
       <FormField<CreateMemberInput>
         form={form}
@@ -33,12 +35,14 @@ export function BasicInfoSection({
         type="email"
         placeholder="email@exemplo.com (opcional)"
         disabled={disabled}
+        description="Pode ser usado para comunicações e acesso futuro."
       />
 
       <FormField<CreateMemberInput>
         form={form}
         name="phone"
         label="Telefone (opcional)"
+        description="Usado apenas para contato relacionado às escalas."
       >
         <PhoneInput
           id="phone"
@@ -53,6 +57,6 @@ export function BasicInfoSection({
           disabled={disabled}
         />
       </FormField>
-    </>
+    </div>
   );
 }

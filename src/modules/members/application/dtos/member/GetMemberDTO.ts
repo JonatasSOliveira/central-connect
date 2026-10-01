@@ -5,6 +5,10 @@ export type GetMemberChurchOutput = {
   roleName: string;
   userPermission: "write" | "read" | null;
   ministryIds: string[];
+  ministryRoleIdsByMinistry: {
+    ministryId: string;
+    ministryRoleIds: string[];
+  }[];
 };
 
 export type GetMemberAvailabilityOutput = {

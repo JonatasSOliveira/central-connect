@@ -2,6 +2,7 @@ import type { IChurchRepository } from "@/modules/churches/application/ports/ICh
 import type { IMemberAvailabilityRepository } from "@/modules/members/application/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { IMemberMinistryRoleRepository } from "@/modules/members/application/ports/IMemberMinistryRoleRepository";
 import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
 import type { IMinistryRepository } from "@/modules/ministries/application/ports/IMinistryRepository";
 import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
@@ -56,6 +57,7 @@ export class CreateScale extends BaseUseCase<
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly memberMinistryRepository: IMemberMinistryRepository,
+    private readonly memberMinistryRoleRepository: IMemberMinistryRoleRepository,
     private readonly memberAvailabilityRepository: IMemberAvailabilityRepository,
   ) {
     super();
@@ -72,6 +74,7 @@ export class CreateScale extends BaseUseCase<
           memberRepository: this.memberRepository,
           memberChurchRepository: this.memberChurchRepository,
           memberMinistryRepository: this.memberMinistryRepository,
+          memberMinistryRoleRepository: this.memberMinistryRoleRepository,
         },
         { ...input, members: input.members ?? [] },
       );
@@ -122,6 +125,8 @@ export class CreateScale extends BaseUseCase<
                     this.memberAvailabilityRepository,
                   memberChurchRepository: this.memberChurchRepository,
                   memberMinistryRepository: this.memberMinistryRepository,
+                  memberMinistryRoleRepository:
+                    this.memberMinistryRoleRepository,
                   memberRepository: this.memberRepository,
                   ministryRoleRepository: this.ministryRoleRepository,
                   scaleMemberRepository: this.scaleMemberRepository,

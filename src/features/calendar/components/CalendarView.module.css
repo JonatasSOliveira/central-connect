@@ -1,0 +1,190 @@
+/* biome-ignore-all lint/correctness/noUnknownPseudoClass: CSS Modules require :global selectors for FullCalendar classes. */
+
+.wrapper {
+  --fc-border-color: color-mix(in srgb, var(--border) 58%, var(--card));
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: color-mix(in srgb, var(--muted) 35%, transparent);
+  --fc-neutral-text-color: var(--muted-foreground);
+  --fc-today-bg-color: color-mix(in srgb, var(--primary) 12%, transparent);
+  --fc-button-bg-color: var(--primary);
+  --fc-button-border-color: var(--primary);
+  --fc-button-hover-bg-color: var(--primary-hover);
+  --fc-button-hover-border-color: var(--primary-hover);
+  --fc-button-active-bg-color: var(--primary-selected);
+  --fc-button-active-border-color: var(--primary-selected);
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--border));
+  border-radius: 1.25rem;
+  background: var(--card);
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  box-shadow: var(--shadow-soft);
+  min-height: calc(100dvh - 14rem);
+}
+
+.calendar {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.wrapper :global(.fc) {
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.wrapper :global(.fc table) {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.wrapper :global(.fc th) {
+  background: color-mix(in srgb, var(--primary) 8%, var(--muted));
+  color: var(--foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding-block: 0.8rem;
+  text-transform: uppercase;
+}
+
+.wrapper :global(.fc td) {
+  background: var(--card);
+  min-height: 6rem;
+  transition: background-color 150ms ease;
+}
+
+.dayOther {
+  background: color-mix(in srgb, var(--background) 72%, var(--card));
+}
+
+.wrapper :global(.fc td:hover) {
+  background: color-mix(in srgb, var(--primary) 7%, var(--card));
+}
+
+.dayOther:hover {
+  background: color-mix(in srgb, var(--primary) 10%, var(--card));
+}
+
+.wrapper :global(.fc a) {
+  color: var(--foreground);
+}
+
+.wrapper :global(.fc .fc-daygrid-day-number) {
+  align-items: center;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  justify-content: center;
+  min-height: 2rem;
+  min-width: 2rem;
+  padding: 0.625rem;
+}
+
+.dayToday {
+  background: color-mix(in srgb, var(--primary) 20%, var(--card));
+  box-shadow: inset 0 4px 0 var(--primary);
+}
+
+.dayNumber,
+.dayNumberToday {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  min-width: 2rem;
+  border-radius: 999px;
+}
+
+.dayNumberToday {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 700;
+}
+
+.dayOther .dayNumber {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.wrapper :global(.fc .fc-col-header-cell-cushion) {
+  color: var(--muted-foreground);
+}
+
+.timeHeader,
+.timeHeaderToday {
+  background: color-mix(in srgb, var(--primary) 8%, var(--muted));
+  color: var(--foreground);
+}
+
+.timeHeaderToday {
+  box-shadow: inset 0 -3px 0 var(--primary);
+}
+
+.timeLane,
+.timeLaneToday {
+  background: var(--card);
+}
+
+.timeLaneToday {
+  background: color-mix(in srgb, var(--primary) 8%, var(--card));
+}
+
+.timeSlot {
+  border-color: color-mix(in srgb, var(--border) 48%, var(--card));
+}
+
+.wrapper :global(.fc .fc-timegrid-slot-label) {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.wrapper :global(.fc .fc-timegrid-slot-minor) {
+  border-top-style: dotted;
+  opacity: 0.62;
+}
+
+.wrapper :global(.fc .fc-timegrid-divider) {
+  border-color: color-mix(in srgb, var(--border) 58%, var(--card));
+  padding: 0;
+}
+
+.wrapper .dayOther .dayNumber {
+  color: var(--muted-foreground);
+}
+
+.wrapper .dayNumberToday {
+  color: var(--primary-foreground);
+}
+
+@media (max-width: 640px) {
+  .wrapper {
+    border-radius: 1rem;
+    padding: 0.75rem;
+    min-height: calc(100dvh - 12rem);
+  }
+
+  .calendar {
+    max-width: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
+  .wrapper :global(.fc td) {
+    min-height: 4rem;
+  }
+
+  .wrapper :global(.fc .fc-daygrid-day-number) {
+    font-size: 0.75rem;
+    padding: 0.4rem;
+  }
+
+  .wrapper :global(.fc th) {
+    font-size: 0.65rem;
+    letter-spacing: 0.02em;
+    padding-block: 0.65rem;
+  }
+
+  .wrapper :global(.fc .fc-timegrid-slot-label) {
+    font-size: 0.7rem;
+  }
+}

@@ -25,6 +25,12 @@ const MemberChurchInputSchema = z.object({
   ministryIds: z.array(z.string()),
 });
 
+const MemberMinistryRoleAssignmentSchema = z.object({
+  churchId: z.string().min(1, "Igreja é obrigatória"),
+  ministryId: z.string().min(1, "Ministério é obrigatório"),
+  ministryRoleIds: z.array(z.string()),
+});
+
 const MemberMinistryAssignmentSchema = z.object({
   churchId: z.string().min(1, "Igreja é obrigatória"),
   ministryIds: z.array(z.string()),
@@ -38,6 +44,9 @@ export const CreateMemberInputSchema = z.object({
   churches: z
     .array(MemberChurchInputSchema)
     .min(1, "Pelo menos uma igreja é obrigatória"),
+  ministryRoleAssignments: z
+    .array(MemberMinistryRoleAssignmentSchema)
+    .optional(),
 });
 
 export type CreateMemberInput = z.infer<typeof CreateMemberInputSchema>;
@@ -49,6 +58,9 @@ export const UpdateMemberInputSchema = z.object({
   availability: MemberAvailabilitySchema.optional(),
   churches: z.array(MemberChurchInputSchema).optional(),
   ministryAssignments: z.array(MemberMinistryAssignmentSchema).optional(),
+  ministryRoleAssignments: z
+    .array(MemberMinistryRoleAssignmentSchema)
+    .optional(),
 });
 
 export type UpdateMemberInput = z.infer<typeof UpdateMemberInputSchema>;

@@ -1,15 +1,11 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormTemplate } from "@/components/templates/form-template";
-import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
-import { Input } from "@/components/ui/input";
-import { ListItemCard } from "@/components/ui/list-item-card";
 import { MemberSelect } from "@/components/ui/member-select";
-import { NumberStepper } from "@/components/ui/number-stepper";
 import { useMinistryForm } from "@/features/ministries/hooks/useMinistryForm";
+import { MinistryRolesEditor } from "@/features/ministries/components/MinistryRolesEditor";
 import type { MinistryFormInput } from "@/modules/ministries/presentation/contracts/ministry/MinistryDTO";
 
 interface MinistryFormProps {
@@ -30,18 +26,15 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
     memberOptions,
   } = useMinistryForm({ mode, ministryId });
 
-  const handleCancel = () => {
-    router.push("/ministries");
-  };
-
-  const handleAddRole = () => {
-    editableAppend({ name: "", id: null, requiredCount: 1 });
-  };
-
   if (isFetching) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      <div
+        className="flex h-64 items-center justify-center text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="size-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <span className="sr-only">Carregando ministério...</span>
       </div>
     );
   }
@@ -49,98 +42,64 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
   return (
     <FormTemplate>
       <FormTemplate.Form<MinistryFormInput> form={form} onSubmit={onSubmit}>
-        <FormTemplate.Content>
-          <FormField<MinistryFormInput>
-            form={form}
-            name="name"
-            label="Nome"
-            placeholder="Nome do ministério"
-            required
-          />
+        <FormTemplate.Content className="space-y-4 pt-0">
+          <FormTemplate.Section
+            id="ministry-basic-data-heading"
+            title="Dados do ministério"
+            description="Informe o nome e, se quiser, quem é o líder responsável."
+          >
+            <FormField<MinistryFormInput>
+              form={form}
+              name="name"
+              label="Nome do ministério"
+              placeholder="Ex.: Louvor"
+              required
+              autoFocus={mode === "create"}
+            />
 
-          <MemberSelect
-            label="Líder Responsável"
-            value={form.watch("leaderId") || ""}
-            onChange={(value) => form.setValue("leaderId", value || null)}
-            members={memberOptions}
-            allOptionLabel="Selecione"
-            placeholder="Selecione"
-          />
+            <MemberSelect
+              label="Líder responsável (opcional)"
+              value={form.watch("leaderId") || ""}
+              onChange={(value) =>
+                form.setValue("leaderId", value || null, {
+                  shouldDirty: true,
+                  shouldTouch: true,
+                  shouldValidate: true,
+                })
+              }
+              members={memberOptions}
+              allOptionLabel="Nenhum líder definido"
+              placeholder="Selecione um líder"
+            />
 
-          <FormField<MinistryFormInput>
-            form={form}
-            name="notes"
-            label="Observações"
-            placeholder="Observações opcionais"
-          />
+            <FormField<MinistryFormInput>
+              form={form}
+              name="notes"
+              label="Observações (opcional)"
+              placeholder="Adicione alguma informação importante"
+            />
+          </FormTemplate.Section>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Funções</span>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddRole}
-                className="h-9"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Adicionar
-              </Button>
-            </div>
-
-            {editableFields.length === 0 && (
-              <p className="text-sm text-muted-foreground py-4 text-center bg-muted/30 rounded-lg">
-                Nenhuma função adicionada
-              </p>
-            )}
-
-            {editableFields.map((field, index) => (
-              <ListItemCard
-                key={field.id}
-                index={index}
-                onRemove={() => editableRemove(index)}
-              >
-                <div className="space-y-3">
-                  <Input
-                    placeholder="Nome da função"
-                    {...form.register(`roles.${index}.name`)}
-                  />
-                  <NumberStepper
-                    label="Qtd. obrigatória"
-                    value={
-                      Number(form.watch(`roles.${index}.requiredCount`)) || 1
-                    }
-                    onChange={(value) =>
-                      form.setValue(`roles.${index}.requiredCount`, value, {
-                        shouldValidate: true,
-                      })
-                    }
-                    min={1}
-                    max={20}
-                    error={
-                      form.formState.errors.roles?.[index]?.requiredCount
-                        ?.message as string
-                    }
-                  />
-                </div>
-                {form.formState.errors.roles?.[index]?.name && (
-                  <p className="text-xs text-destructive">
-                    {
-                      form.formState.errors.roles[index]?.name
-                        ?.message as string
-                    }
-                  </p>
-                )}
-              </ListItemCard>
-            ))}
-          </div>
+          <FormTemplate.Section
+            id="ministry-roles-heading"
+            title="Funções do ministério"
+            description="Adicione as funções necessárias para montar as escalas. Essa etapa é opcional."
+          >
+            <MinistryRolesEditor
+              form={form}
+              fields={editableFields}
+              append={editableAppend}
+              remove={editableRemove}
+            />
+          </FormTemplate.Section>
         </FormTemplate.Content>
 
         <FormTemplate.Footer
-          onCancel={handleCancel}
+          onCancel={() => router.push("/ministries")}
           isLoading={isLoading}
-          submitLabel={mode === "edit" ? "Salvar" : "Criar"}
+          submitLabel={
+            mode === "edit" ? "Salvar alterações" : "Cadastrar ministério"
+          }
         />
       </FormTemplate.Form>
     </FormTemplate>

@@ -51,6 +51,7 @@ import { MemberAvailabilityDrizzleRepository } from "@/modules/members/infrastru
 import { MemberDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberDrizzleRepository";
 import { MemberMinistryInterestDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryInterestDrizzleRepository";
 import { MemberMinistryDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryDrizzleRepository";
+import { MemberMinistryRoleDrizzleRepository } from "@/modules/members/infrastructure/persistence/drizzle/MemberMinistryRoleDrizzleRepository";
 import { MemberFinalNotesDrizzleRepository } from "@/modules/member-profiles/infrastructure/persistence/drizzle/MemberFinalNotesDrizzleRepository";
 import { MemberPersonalInfoDrizzleRepository } from "@/modules/member-profiles/infrastructure/persistence/drizzle/MemberPersonalInfoDrizzleRepository";
 import { MemberPracticalSkillDrizzleRepository } from "@/modules/member-profiles/infrastructure/persistence/drizzle/MemberPracticalSkillDrizzleRepository";
@@ -104,6 +105,8 @@ function createApplication(): Application {
   const memberMinistryRepository = new MemberMinistryDrizzleRepository(
     database,
   );
+  const memberMinistryRoleRepository =
+    new MemberMinistryRoleDrizzleRepository(database);
   const memberMinistryInterestRepository =
     new MemberMinistryInterestDrizzleRepository(database);
   const ministryRepository = new MinistryDrizzleRepository(database);
@@ -174,15 +177,19 @@ function createApplication(): Application {
       memberRepository,
       memberChurchRepository,
       memberMinistryRepository,
+      memberMinistryRoleRepository,
       memberAvailabilityRepository,
       createTransactionalRepositories: (executor) => [
         new MemberDrizzleRepository(executor),
         new MemberChurchDrizzleRepository(executor),
         new MemberMinistryDrizzleRepository(executor),
+        new MemberMinistryRoleDrizzleRepository(executor),
+        new MinistryRoleDrizzleRepository(executor),
         new MemberAvailabilityDrizzleRepository(executor),
       ],
       churchRepository,
       roleRepository,
+      ministryRoleRepository,
     }),
     memberProfiles: createMemberProfilesComposition({
       memberRepository,
@@ -253,6 +260,7 @@ function createApplication(): Application {
       memberRepository,
       memberChurchRepository,
       memberMinistryRepository,
+      memberMinistryRoleRepository,
       memberAvailabilityRepository,
       ministryRepository,
       ministryRoleRepository,
@@ -273,6 +281,9 @@ function createApplication(): Application {
         memberMinistryRepository: new MemberMinistryDrizzleRepository(
           executor,
         ),
+        memberMinistryRoleRepository: new MemberMinistryRoleDrizzleRepository(
+          executor,
+        ),
         memberAvailabilityRepository: new MemberAvailabilityDrizzleRepository(
           executor,
         ),
@@ -285,6 +296,9 @@ function createApplication(): Application {
         memberRepository: new MemberDrizzleRepository(executor),
         memberChurchRepository: new MemberChurchDrizzleRepository(executor),
         memberMinistryRepository: new MemberMinistryDrizzleRepository(
+          executor,
+        ),
+        memberMinistryRoleRepository: new MemberMinistryRoleDrizzleRepository(
           executor,
         ),
       }),

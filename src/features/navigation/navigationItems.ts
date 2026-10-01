@@ -1,4 +1,10 @@
-import { Building2, Home, type LucideIcon, Users } from "lucide-react";
+import {
+  Building2,
+  HeartHandshake,
+  Home,
+  type LucideIcon,
+  Users,
+} from "lucide-react";
 import { Permission } from "@/shared/domain/enums/Permission";
 
 export type NavigationItem = {
@@ -18,6 +24,9 @@ export function getNavigationItems(input: {
   const canReadMembers =
     Boolean(input.churchId) &&
     (input.isSuperAdmin || permissions.includes(Permission.MEMBER_READ));
+  const canReadMinistries =
+    Boolean(input.churchId) &&
+    (input.isSuperAdmin || permissions.includes(Permission.MINISTRY_READ));
 
   return [
     { href: "/home", label: "Início", icon: Home },
@@ -26,6 +35,9 @@ export function getNavigationItems(input: {
       : []),
     ...(canReadMembers
       ? [{ href: "/members", label: "Membros", icon: Users }]
+      : []),
+    ...(canReadMinistries
+      ? [{ href: "/ministries", label: "Ministérios", icon: HeartHandshake }]
       : []),
   ];
 }

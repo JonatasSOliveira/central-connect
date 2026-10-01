@@ -24,6 +24,7 @@ export default function EditMinistryPage({ params }: EditMinistryPageProps) {
         title="Editar Ministério"
         subtitle="Altere os dados do ministério"
         backHref="/ministries"
+        bgColor="#16a34a"
       />
       <div className="px-4 pb-4">
         <MinistryForm mode="edit" ministryId={ministryId} />

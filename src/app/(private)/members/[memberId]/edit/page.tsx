@@ -23,7 +23,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
         subtitle={
           readOnly ? "Visualize seus dados" : "Altere os dados do membro"
         }
-        backHref="/home"
+        backHref={isSelfEdit || readOnly ? "/home" : "/members"}
         bgColor="#16a34a"
       />
       <div className="px-4 pb-4">

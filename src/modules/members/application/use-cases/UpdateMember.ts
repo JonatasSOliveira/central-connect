@@ -1,7 +1,9 @@
 import type { IMemberAvailabilityRepository } from "@/modules/members/application/ports/IMemberAvailabilityRepository";
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { IMemberMinistryRoleRepository } from "@/modules/members/application/ports/IMemberMinistryRoleRepository";
 import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
+import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
 import {
   Member,
   type MemberParams,
@@ -10,17 +12,11 @@ import {
   MemberAvailability,
   type MemberAvailabilityParams,
 } from "@/modules/members/domain/entities/MemberAvailability";
-import {
-  MemberChurch,
-  type MemberChurchParams,
-} from "@/modules/members/domain/entities/MemberChurch";
-import {
-  MemberMinistry,
-  type MemberMinistryParams,
-} from "@/modules/members/domain/entities/MemberMinistry";
 import type { Result } from "@/shared/types/Result";
 import { BaseUseCase } from "../BaseUseCase";
 import type { UpdateMemberInput } from "../dtos/member/CreateMemberDTO";
+import { syncMemberRelations } from "./helpers/syncMemberRelations";
+import { syncMemberMinistryRoles } from "./helpers/syncMemberMinistryRoles";
 
 export class UpdateMember extends BaseUseCase<
   { memberId: string; input: UpdateMemberInput },
@@ -30,6 +26,8 @@ export class UpdateMember extends BaseUseCase<
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly memberMinistryRepository: IMemberMinistryRepository,
+    private readonly memberMinistryRoleRepository: IMemberMinistryRoleRepository,
+    private readonly ministryRoleRepository: IMinistryRoleRepository,
     private readonly memberAvailabilityRepository: IMemberAvailabilityRepository,
   ) {
     super();
@@ -66,115 +64,31 @@ export class UpdateMember extends BaseUseCase<
       const updatedMember = new Member({ ...memberParams, id: memberId });
       const result = await this.memberRepository.update(updatedMember);
 
-      if (input.churches !== undefined) {
-        const existingMemberChurches =
-          await this.memberChurchRepository.findByMemberId(memberId);
-        const requestedChurchIds = new Set(
-          input.churches.map((church) => church.churchId),
-        );
-
-        for (const existingMc of existingMemberChurches) {
-          if (!requestedChurchIds.has(existingMc.churchId)) {
-            await this.memberChurchRepository.delete(existingMc.id);
-          }
-        }
-
-        const existingMemberMinistries =
-          await this.memberMinistryRepository.findByMemberId(memberId);
-        const requestedMinistryKeys = new Set(
-          input.churches.flatMap((church) =>
-            church.ministryIds.map(
-              (ministryId) => `${church.churchId}:${ministryId}`,
-            ),
-          ),
-        );
-
-        for (const existingMm of existingMemberMinistries) {
-          const key = `${existingMm.churchId}:${existingMm.ministryId}`;
-          if (!requestedMinistryKeys.has(key)) {
-            await this.memberMinistryRepository.delete(existingMm.id);
-          }
-        }
-
-        for (const churchInfo of input.churches) {
-          const memberChurchParams: MemberChurchParams = {
-            memberId: memberId,
-            churchId: churchInfo.churchId,
-            roleId: churchInfo.roleId,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-          const memberChurch = new MemberChurch(memberChurchParams);
-          await this.memberChurchRepository.upsert(memberChurch);
-
-          for (const ministryId of churchInfo.ministryIds || []) {
-            const memberMinistryParams: MemberMinistryParams = {
-              memberId,
-              churchId: churchInfo.churchId,
-              ministryId,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-            const memberMinistry = new MemberMinistry(memberMinistryParams);
-            await this.memberMinistryRepository.upsert(memberMinistry);
-          }
-        }
+      const relationResult = await syncMemberRelations(
+        {
+          memberChurchRepository: this.memberChurchRepository,
+          memberMinistryRepository: this.memberMinistryRepository,
+          memberMinistryRoleRepository: this.memberMinistryRoleRepository,
+        },
+        memberId,
+        input,
+      );
+      if (!relationResult.ok) {
+        return { ok: false, error: relationResult };
       }
 
-      if (input.ministryAssignments !== undefined) {
-        const existingMemberChurches =
-          await this.memberChurchRepository.findByMemberId(memberId);
-        const existingChurchIds = new Set(
-          existingMemberChurches.map((memberChurch) => memberChurch.churchId),
+      for (const assignment of input.ministryRoleAssignments ?? []) {
+        const result = await syncMemberMinistryRoles(
+          {
+            memberMinistryRepository: this.memberMinistryRepository,
+            memberMinistryRoleRepository: this.memberMinistryRoleRepository,
+            ministryRoleRepository: this.ministryRoleRepository,
+          },
+          { ...assignment, memberId },
         );
 
-        for (const assignment of input.ministryAssignments) {
-          if (!existingChurchIds.has(assignment.churchId)) {
-            return {
-              ok: false,
-              error: {
-                code: "MEMBER_CHURCH_NOT_FOUND",
-                message: "Membro nao pertence a esta igreja",
-              },
-            };
-          }
-        }
-
-        const assignmentChurchIds = new Set(
-          input.ministryAssignments.map((assignment) => assignment.churchId),
-        );
-        const existingMemberMinistries =
-          await this.memberMinistryRepository.findByMemberId(memberId);
-        const requestedMinistryKeys = new Set(
-          input.ministryAssignments.flatMap((assignment) =>
-            assignment.ministryIds.map(
-              (ministryId) => `${assignment.churchId}:${ministryId}`,
-            ),
-          ),
-        );
-
-        for (const existingMm of existingMemberMinistries) {
-          const key = `${existingMm.churchId}:${existingMm.ministryId}`;
-          if (
-            assignmentChurchIds.has(existingMm.churchId) &&
-            !requestedMinistryKeys.has(key)
-          ) {
-            await this.memberMinistryRepository.delete(existingMm.id);
-          }
-        }
-
-        for (const assignment of input.ministryAssignments) {
-          for (const ministryId of assignment.ministryIds) {
-            const memberMinistryParams: MemberMinistryParams = {
-              memberId,
-              churchId: assignment.churchId,
-              ministryId,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
-            const memberMinistry = new MemberMinistry(memberMinistryParams);
-            await this.memberMinistryRepository.upsert(memberMinistry);
-          }
+        if (!result.ok) {
+          return { ok: false, error: result };
         }
       }
 

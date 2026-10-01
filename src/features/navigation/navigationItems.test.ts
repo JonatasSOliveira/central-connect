@@ -10,10 +10,14 @@ describe("getNavigationItems", () => {
   it("shows churches and members for the current product scope", () => {
     expect(
       getNavigationItems({
-        permissions: [Permission.CHURCH_READ, Permission.MEMBER_READ],
+        permissions: [
+          Permission.CHURCH_READ,
+          Permission.MEMBER_READ,
+          Permission.MINISTRY_READ,
+        ],
         churchId: "church-1",
       }).map((item) => item.href),
-    ).toEqual(["/home", "/churches", "/members"]);
+    ).toEqual(["/home", "/churches", "/members", "/ministries"]);
   });
 
   it("does not show members until a church is selected", () => {
