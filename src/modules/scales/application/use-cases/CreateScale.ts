@@ -87,7 +87,6 @@ export class CreateScale extends BaseUseCase<
         };
       }
       const existingScale = await this.scaleRepository.findByServiceAndMinistry(
-        input.churchId,
         input.serviceId,
         input.ministryId,
       );
@@ -100,7 +99,6 @@ export class CreateScale extends BaseUseCase<
       }
 
       const scaleParams: ScaleParams = {
-        churchId: input.churchId,
         serviceId: input.serviceId,
         ministryId: input.ministryId,
         status: input.status ?? "draft",
@@ -164,7 +162,6 @@ export class CreateScale extends BaseUseCase<
         value: {
           scale: {
             id: createdScale.id,
-            churchId: createdScale.churchId,
             serviceId: createdScale.serviceId,
             ministryId: createdScale.ministryId,
             status: createdScale.status,

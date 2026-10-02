@@ -35,9 +35,6 @@ importers:
       firebase-admin:
         specifier: ^13.7.0
         version: 13.7.0
-      html-to-image:
-        specifier: ^1.11.13
-        version: 1.11.13
       jose:
         specifier: ^6.2.1
         version: 6.2.1
@@ -68,6 +65,9 @@ importers:
       shadcn:
         specifier: ^4.0.8
         version: 4.0.8(@types/node@20.19.37)(typescript@5.9.3)
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -117,9 +117,6 @@ importers:
       firebase-tools:
         specifier: ^15.11.0
         version: 15.11.0(@types/node@20.19.37)(typescript@5.9.3)
-      sharp:
-        specifier: ^0.34.5
-        version: 0.34.5
       tailwindcss:
         specifier: ^4
         version: 4.2.1
@@ -3732,9 +3729,6 @@ packages:
 
   html-entities@2.6.0:
     resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
-
-  html-to-image@1.11.13:
-    resolution: {integrity: sha512-cuOPoI7WApyhBElTTb9oqsawRvZ0rHhaHwghRLlTuffoD1B2aDemlCruLeZrUIIdvG7gs9xeELEPm6PhuASqrg==}
 
   http-cache-semantics@4.2.0:
     resolution: {integrity: sha512-dTxcvPXqPvXBQpq5dUr6mEMJX4oIEFv6bwom3FDwKRDsuIjjJGANqhBuoAn9c1RQJIdAKav33ED65E2ys+87QQ==}
@@ -9556,8 +9550,6 @@ snapshots:
 
   html-entities@2.6.0:
     optional: true
-
-  html-to-image@1.11.13: {}
 
   http-cache-semantics@4.2.0:
     optional: true

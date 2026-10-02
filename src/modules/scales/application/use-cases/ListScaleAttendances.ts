@@ -91,7 +91,7 @@ export class ListScaleAttendances extends BaseUseCase<
 
         return {
           scaleId: scale.id,
-          churchId: scale.churchId,
+          churchId: input.churchId,
           serviceId: service.id,
           serviceTitle: service.title,
           serviceDate: service.date,

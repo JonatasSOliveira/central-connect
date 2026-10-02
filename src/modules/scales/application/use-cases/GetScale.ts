@@ -1,5 +1,6 @@
 import type { IScaleMemberRepository } from "@/modules/scales/application/ports/IScaleMemberRepository";
 import type { IScaleRepository } from "@/modules/scales/application/ports/IScaleRepository";
+import type { IServiceRepository } from "@/modules/services/application/ports/IServiceRepository";
 import type { Result } from "@/shared/types/Result";
 import { BaseUseCase } from "../BaseUseCase";
 import type { ScaleDetailDTO } from "../dtos/ScaleDTO";
@@ -7,6 +8,7 @@ import { ScaleErrors } from "../errors/ScaleErrors";
 
 export interface GetScaleInput {
   scaleId: string;
+  churchId: string;
 }
 
 export interface GetScaleOutput {
@@ -17,6 +19,7 @@ export class GetScale extends BaseUseCase<GetScaleInput, GetScaleOutput> {
   constructor(
     private readonly scaleRepository: IScaleRepository,
     private readonly scaleMemberRepository: IScaleMemberRepository,
+    private readonly serviceRepository: IServiceRepository,
   ) {
     super();
   }
@@ -31,6 +34,10 @@ export class GetScale extends BaseUseCase<GetScaleInput, GetScaleOutput> {
           error: ScaleErrors.SCALE_NOT_FOUND,
         };
       }
+      const service = await this.serviceRepository.findById(scale.serviceId);
+      if (!service || service.churchId !== input.churchId) {
+        return { ok: false, error: ScaleErrors.SCALE_NOT_FOUND };
+      }
 
       const members = await this.scaleMemberRepository.findByScaleId(scale.id);
 
@@ -39,7 +46,6 @@ export class GetScale extends BaseUseCase<GetScaleInput, GetScaleOutput> {
         value: {
           scale: {
             id: scale.id,
-            churchId: scale.churchId,
             serviceId: scale.serviceId,
             ministryId: scale.ministryId,
             status: scale.status,

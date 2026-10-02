@@ -119,7 +119,6 @@ export async function createScaleFixture(
   });
   await database.insert(schema.scales).values({
     id: fixture.scaleId,
-    churchId: fixture.churchId,
     serviceId: fixture.serviceId,
     ministryId: fixture.ministryId,
     status: "draft",

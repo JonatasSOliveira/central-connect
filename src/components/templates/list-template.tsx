@@ -120,22 +120,34 @@ function ListItem({
     </>
   );
 
-  const primaryAction = onClick ?? actions?.onEdit;
-  const primaryActionLabel = actions?.onEdit
-    ? actions.editLabel || "Editar"
-    : "Abrir";
-  const PrimaryActionIcon = actions?.onEdit ? Pencil : ChevronRight;
-
   const deleteAction = actions?.onDelete ? (
-    <button
+    <Button
       type="button"
+      variant="destructive"
+      size="sm"
       onClick={handleDeleteClick}
       aria-label={`${actions.deleteLabel || "Excluir"} ${title}`}
-      className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive sm:px-3"
+      className="w-full sm:w-auto"
     >
       <Trash2 className="h-4 w-4" />
       {actions.deleteLabel || "Excluir"}
-    </button>
+    </Button>
+  ) : null;
+
+  const editAction = actions?.onEdit ? (
+    <Button
+      type="button"
+      size="sm"
+      onClick={(e) => {
+        e.stopPropagation();
+        actions.onEdit?.();
+      }}
+      aria-label={`${actions.editLabel || "Editar"} ${title}`}
+      className="w-full sm:w-auto"
+    >
+      <Pencil className="h-4 w-4" />
+      {actions.editLabel || "Editar"}
+    </Button>
   ) : null;
 
   const itemContent = (
@@ -143,25 +155,20 @@ function ListItem({
       <div className="flex min-w-0 flex-1 items-center gap-4">
         {mainContent}
       </div>
-      {deleteAction}
       {!actions && (href || onClick) && (
         <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
       )}
     </>
   );
 
-  const interactiveMainContent = primaryAction ? (
+  const interactiveMainContent = onClick && !actions ? (
     <button
       type="button"
-      onClick={primaryAction}
-      aria-label={`${primaryActionLabel} ${title}`}
+      onClick={onClick}
+      aria-label={`Abrir ${title}`}
       className="flex min-w-0 flex-1 items-center gap-4 rounded-lg px-1 py-1 text-left transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      {mainContent}
-      <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-primary">
-        <PrimaryActionIcon className="h-4 w-4" aria-hidden="true" />
-        {primaryActionLabel}
-      </span>
+      {itemContent}
     </button>
   ) : (
     <div className="flex min-w-0 flex-1 items-center gap-4">{mainContent}</div>
@@ -173,9 +180,12 @@ function ListItem({
   if (actions) {
     return (
       <>
-        <div className={cn(baseClasses, className)}>
+        <div className={cn(baseClasses, "flex-col items-stretch sm:flex-row sm:items-center", className)}>
           {interactiveMainContent}
-          {deleteAction}
+          <div className="flex w-full shrink-0 gap-2 sm:w-auto">
+            {editAction}
+            {deleteAction}
+          </div>
         </div>
         {deleteDialog}
       </>

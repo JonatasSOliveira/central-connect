@@ -51,6 +51,8 @@ export function createMembersComposition(dependencies: {
       dependencies.memberRepository,
       dependencies.memberChurchRepository,
       dependencies.memberMinistryRepository,
+      dependencies.memberMinistryRoleRepository,
+      dependencies.ministryRoleRepository,
     ),
     createMember,
     getMember: new GetMember(

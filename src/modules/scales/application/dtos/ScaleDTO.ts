@@ -38,7 +38,6 @@ export type ScaleMemberDTO = z.infer<typeof ScaleMemberListItemSchema>;
 
 export const ScaleListItemSchema = z.object({
   id: z.string(),
-  churchId: z.string(),
   serviceId: z.string(),
   ministryId: z.string(),
   status: ScaleStatusSchema,
@@ -46,6 +45,13 @@ export const ScaleListItemSchema = z.object({
 });
 
 export type ScaleListItemDTO = z.infer<typeof ScaleListItemSchema>;
+
+export const ScaleSummarySchema = ScaleListItemSchema.extend({
+  ministryName: z.string(),
+  memberCount: z.number().int().nonnegative(),
+});
+
+export type ScaleSummaryDTO = z.infer<typeof ScaleSummarySchema>;
 
 export const ScaleDetailSchema = ScaleListItemSchema.extend({
   members: z.array(ScaleMemberListItemSchema),

@@ -1,6 +1,7 @@
 import {
   CalendarClock,
   CalendarDays,
+  CalendarPlus,
   CalendarRange,
   ChevronLeft,
   ChevronRight,
@@ -40,7 +41,7 @@ export function CalendarToolbar({
   return (
     <div
       className={cn(
-        "mb-5 grid min-w-0 gap-3 px-4 pt-4 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-5 lg:px-6 lg:pt-6",
+        "mb-5 grid min-w-0 gap-3 border-b border-border bg-card px-4 pb-4 pt-4 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-5 lg:px-6 lg:pb-6 lg:pt-6",
         className,
       )}
     >
@@ -79,9 +80,10 @@ export function CalendarToolbar({
         {title}
       </h2>
 
-      <div className="flex min-w-0 flex-wrap gap-2 lg:justify-self-end">
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center lg:justify-self-end">
         {onCreateService && (
-          <Button type="button" onClick={onCreateService}>
+          <Button type="button" className="w-full sm:w-auto" onClick={onCreateService}>
+            <CalendarPlus className="size-4" aria-hidden="true" />
             Novo culto
           </Button>
         )}

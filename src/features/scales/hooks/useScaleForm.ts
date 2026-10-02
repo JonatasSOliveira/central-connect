@@ -21,6 +21,8 @@ import type {
 interface UseScaleFormProps {
   mode: "create" | "edit";
   scaleId?: string;
+  initialServiceId?: string;
+  onSuccess?: (scaleId?: string) => void;
 }
 
 export interface UseScaleFormReturn {
@@ -48,6 +50,8 @@ export interface UseScaleFormReturn {
 export function useScaleForm({
   mode,
   scaleId,
+  initialServiceId,
+  onSuccess,
 }: UseScaleFormProps): UseScaleFormReturn {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -64,7 +68,7 @@ export function useScaleForm({
   const form = useForm<ScaleFormInput>({
     resolver: zodResolver(ScaleFormSchema),
     defaultValues: {
-      serviceId: "",
+      serviceId: initialServiceId ?? "",
       ministryId: "",
       status: "draft",
       notes: "",
@@ -80,6 +84,12 @@ export function useScaleForm({
     control: form.control,
     name: "members",
   });
+
+  useEffect(() => {
+    if (mode === "create" && initialServiceId) {
+      form.setValue("serviceId", initialServiceId, { shouldValidate: true });
+    }
+  }, [form, initialServiceId, mode]);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -160,9 +170,17 @@ export function useScaleForm({
         const membersData = await membersResponse.json();
         if (membersData.ok) {
           const membersDataList = membersData.value.members.map(
-            (m: { id: string; fullName: string }) => ({
+            (m: {
+              id: string;
+              fullName: string;
+              ministryRoles?: Array<{
+                ministryRoleId: string;
+                roleName: string;
+              }>;
+            }) => ({
               id: m.id,
               fullName: m.fullName,
+              ministryRoles: m.ministryRoles ?? [],
             }),
           );
           setMembers(membersDataList);
@@ -171,9 +189,10 @@ export function useScaleForm({
         const ministryData = await ministryResponse.json();
         if (ministryData.ok) {
           const rolesData = ministryData.value.ministry.roles.map(
-            (r: { id: string; name: string }) => ({
+            (r: { id: string; name: string; requiredCount: number }) => ({
               id: r.id,
               name: r.name,
+              requiredCount: r.requiredCount,
             }),
           );
           setRoles(rolesData);
@@ -202,7 +221,9 @@ export function useScaleForm({
       const fetchScale = async () => {
         setIsFetching(true);
         try {
-          const response = await fetch(`/api/scales/${scaleId}`);
+          const response = await fetch(
+            `/api/scales/${scaleId}?churchId=${user?.churchId ?? ""}`,
+          );
           const data = await response.json();
 
           if (data.ok && data.value) {
@@ -232,7 +253,7 @@ export function useScaleForm({
 
       fetchScale();
     }
-  }, [mode, scaleId, form, router]);
+  }, [mode, scaleId, form, router, user?.churchId]);
 
   const onSubmit = useCallback(
     async (formData: ScaleFormInput) => {
@@ -251,7 +272,8 @@ export function useScaleForm({
 
           if (data.ok) {
             toast.success("Escala criada com sucesso!");
-            router.push("/scales");
+            if (onSuccess) onSuccess(data.value?.scale?.id);
+            else router.push("/scales");
           } else {
             toast.error(data.error?.message || "Erro ao criar escala");
           }
@@ -268,7 +290,8 @@ export function useScaleForm({
 
           if (data.ok) {
             toast.success("Escala atualizada com sucesso!");
-            router.push("/scales");
+            if (onSuccess) onSuccess(scaleId);
+            else router.push("/scales");
           } else {
             toast.error(data.error?.message || "Erro ao atualizar escala");
           }
@@ -279,7 +302,7 @@ export function useScaleForm({
         setIsLoading(false);
       }
     },
-    [mode, scaleId, router, user?.churchId],
+    [mode, onSuccess, scaleId, router, user?.churchId],
   );
 
   return {

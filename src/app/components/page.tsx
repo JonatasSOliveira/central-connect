@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Form, FormTemplate } from "@/components/templates/form-template";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,16 @@ import {
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/sonner";
 import type { ChurchFormData } from "@/modules/churches/presentation/contracts/church/ChurchDTO";
 import {
@@ -28,6 +39,27 @@ interface ComponentConfig {
   name: string;
   description?: string;
   render: () => React.ReactNode;
+}
+
+function DialogDemo() {
+  const [open, setOpen] = useState(false);
+
+  return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger render={<Button type="button" />}>Abrir diálogo</DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Exemplo de diálogo</DialogTitle>
+            <DialogDescription>
+              Use este padrão para conteúdos com ações, não para confirmações destrutivas.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose className="w-full sm:w-auto">Fechar</DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+  );
 }
 
 const buttonVariants = [
@@ -291,6 +323,11 @@ const components: ComponentConfig[] = [
         </div>
       </div>
     ),
+  },
+  {
+    name: "Dialog",
+    description: "Janela para apresentar informações e ações relacionadas.",
+    render: () => <DialogDemo />,
   },
   {
     name: "Toaster",

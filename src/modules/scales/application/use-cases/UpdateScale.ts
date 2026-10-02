@@ -74,6 +74,16 @@ export class UpdateScale extends BaseUseCase<
         };
       }
 
+      const existingService = await this.serviceRepository.findById(
+        existingScale.serviceId,
+      );
+      if (!existingService || existingService.churchId !== input.churchId) {
+        return {
+          ok: false,
+          error: ScaleErrors.SCALE_NOT_FOUND,
+        };
+      }
+
       const contextError = await validateScaleContext(
         {
           churchRepository: this.churchRepository,
@@ -98,7 +108,6 @@ export class UpdateScale extends BaseUseCase<
 
       const duplicateScale =
         await this.scaleRepository.findByServiceAndMinistry(
-          input.churchId,
           input.serviceId,
           input.ministryId,
           existingScale.id,
@@ -113,7 +122,6 @@ export class UpdateScale extends BaseUseCase<
 
       const scaleParams: ScaleParams = {
         id: existingScale.id,
-        churchId: existingScale.churchId,
         serviceId: input.serviceId,
         ministryId: input.ministryId,
         status: input.status,
@@ -192,7 +200,6 @@ export class UpdateScale extends BaseUseCase<
         value: {
           scale: {
             id: updatedScale.id,
-            churchId: updatedScale.churchId,
             serviceId: updatedScale.serviceId,
             ministryId: updatedScale.ministryId,
             status: updatedScale.status,

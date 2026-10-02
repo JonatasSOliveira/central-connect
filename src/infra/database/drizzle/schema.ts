@@ -12,6 +12,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 const id = () => uuid("id").primaryKey().defaultRandom();
 const timestamps = {
@@ -457,9 +458,6 @@ export const scales = pgTable(
   "scales",
   {
     id: id(),
-    churchId: uuid("church_id")
-      .notNull()
-      .references(() => churches.id),
     serviceId: uuid("service_id")
       .notNull()
       .references(() => services.id),
@@ -471,9 +469,10 @@ export const scales = pgTable(
     ...timestamps,
   },
   (table) => [
-    index("scales_church_status_idx").on(table.churchId, table.status),
-    index("scales_church_service_idx").on(table.churchId, table.serviceId),
-    index("scales_church_ministry_idx").on(table.churchId, table.ministryId),
+    uniqueIndex("scales_service_ministry_idx")
+      .on(table.serviceId, table.ministryId)
+      .where(sql`${table.deletedAt} is null`),
+    index("scales_ministry_idx").on(table.ministryId),
   ],
 );
 

@@ -10,6 +10,10 @@ export interface IMemberMinistryRoleRepository
   findByMemberId(memberId: string): Promise<MemberMinistryRole[]>;
   findByMinistryRoleId(ministryRoleId: string): Promise<MemberMinistryRole[]>;
   findByMinistryId(ministryId: string): Promise<MemberMinistryRole[]>;
+  findByChurchIdAndMinistryId(
+    churchId: string,
+    ministryId: string,
+  ): Promise<MemberMinistryRole[]>;
   findByChurchMemberAndMinistry(
     churchId: string,
     memberId: string,

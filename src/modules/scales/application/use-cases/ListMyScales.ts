@@ -52,18 +52,20 @@ export class ListMyScales extends BaseUseCase<
           scaleIds.map((scaleId) => this.scaleRepository.findById(scaleId)),
         )
       ).filter((scale): scale is NonNullable<typeof scale> => scale !== null);
+      const services = await this.serviceRepository.findByChurchId(
+        input.churchId,
+      );
+      const serviceMap = new Map(
+        services.map((service) => [service.id, service]),
+      );
       const publishedScales = scales.filter(
-        (scale) =>
-          scale.churchId === input.churchId && scale.status === "published",
+        (scale) => serviceMap.has(scale.serviceId) && scale.status === "published",
       );
 
       if (publishedScales.length === 0) {
         return { ok: true, value: { scales: [] } };
       }
 
-      const services = await this.serviceRepository.findByChurchId(
-        input.churchId,
-      );
       const ministries = await this.ministryRepository.findByChurchId(
         input.churchId,
       );
@@ -73,9 +75,6 @@ export class ListMyScales extends BaseUseCase<
         ),
       );
 
-      const serviceMap = new Map(
-        services.map((service) => [service.id, service]),
-      );
       const ministryMap = new Map(
         ministries.map((ministry) => [ministry.id, ministry]),
       );

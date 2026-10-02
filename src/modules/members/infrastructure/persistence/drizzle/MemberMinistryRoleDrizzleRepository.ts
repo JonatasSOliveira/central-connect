@@ -101,6 +101,23 @@ export class MemberMinistryRoleDrizzleRepository
 
     return rows.map(toEntity);
   }
+  async findByChurchIdAndMinistryId(
+    churchId: string,
+    ministryId: string,
+  ): Promise<MemberMinistryRole[]> {
+    const rows = await this.database
+      .select()
+      .from(memberMinistryRoles)
+      .where(
+        and(
+          eq(memberMinistryRoles.churchId, churchId),
+          eq(memberMinistryRoles.ministryId, ministryId),
+          isNull(memberMinistryRoles.deletedAt),
+        ),
+      );
+
+    return rows.map(toEntity);
+  }
   async findByChurchMemberAndMinistry(
     churchId: string,
     memberId: string,

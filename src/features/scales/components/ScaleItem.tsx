@@ -151,7 +151,7 @@ export function ScaleItem({
                   e.stopPropagation();
                   actions.onEdit?.();
                 }}
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-primary transition-colors hover:bg-primary/10"
               >
                 <Pencil className="h-4 w-4" />
                 Editar
@@ -174,7 +174,7 @@ export function ScaleItem({
                   e.stopPropagation();
                   actions.onShareImage?.();
                 }}
-                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-primary transition-colors hover:bg-primary/10"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

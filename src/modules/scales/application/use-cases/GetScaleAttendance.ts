@@ -49,6 +49,9 @@ export class GetScaleAttendance extends BaseUseCase<
           .catch(() => null),
         this.serviceRepository.findById(scale.serviceId).catch(() => null),
       ]);
+      if (!service) {
+        return { ok: false, error: ScaleAttendanceErrors.SCALE_NOT_FOUND };
+      }
 
       const memberResults = await Promise.allSettled(
         scaleMembers
@@ -89,8 +92,8 @@ export class GetScaleAttendance extends BaseUseCase<
           attendance: {
             id: attendance?.id ?? null,
             scaleId: scale.id,
-            churchId: scale.churchId,
-            serviceDate: service?.date ?? new Date(),
+            churchId: service.churchId,
+            serviceDate: service.date,
             status: attendance?.status ?? "draft",
             publishedAt: attendance?.publishedAt ?? null,
             publishedByUserId: attendance?.publishedByUserId ?? null,

@@ -9,7 +9,7 @@ interface ServiceFormProps {
   mode: "create" | "edit";
   serviceId?: string;
   goBack: () => void;
-  onSuccess?: (message: string) => void;
+  onSuccess?: (message: string, serviceId?: string) => void;
   onError?: (message: string) => void;
   initialDate?: string;
   layout?: "page" | "sheet";

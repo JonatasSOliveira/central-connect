@@ -193,6 +193,9 @@ class MemberMinistryRoleRepositoryStub
   async findByMinistryId(): Promise<MemberMinistryRole[]> {
     return this.roles;
   }
+  async findByChurchIdAndMinistryId(): Promise<MemberMinistryRole[]> {
+    return this.roles;
+  }
   async findByChurchMemberAndMinistry(): Promise<MemberMinistryRole[]> {
     return this.roles;
   }

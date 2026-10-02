@@ -56,6 +56,9 @@ export class SaveScaleAttendance extends BaseUseCase<
       }
 
       const service = await this.serviceRepository.findById(scale.serviceId);
+      if (!service) {
+        return { ok: false, error: ScaleAttendanceErrors.SCALE_NOT_FOUND };
+      }
 
       let attendance = await this.scaleAttendanceRepository.findByScaleId(
         scale.id,
@@ -63,7 +66,7 @@ export class SaveScaleAttendance extends BaseUseCase<
 
       if (!attendance) {
         const attendanceParams: ScaleAttendanceParams = {
-          churchId: scale.churchId,
+          churchId: service.churchId,
           scaleId: scale.id,
           status: "draft",
           publishedAt: null,
@@ -182,8 +185,8 @@ export class SaveScaleAttendance extends BaseUseCase<
           attendance: {
             id: attendance.id,
             scaleId: scale.id,
-            churchId: scale.churchId,
-            serviceDate: service?.date ?? new Date(),
+            churchId: service.churchId,
+            serviceDate: service.date,
             status: attendance.status,
             publishedAt: attendance.publishedAt,
             publishedByUserId: attendance.publishedByUserId,

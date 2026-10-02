@@ -1,11 +1,7 @@
 "use client";
 
 import FullCalendar from "@fullcalendar/react";
-import type {
-  CalendarRef,
-  DatesSetInfo,
-  DayCellInfo,
-} from "@fullcalendar/react";
+import type { CalendarRef, DatesSetInfo, DayCellInfo } from "@fullcalendar/react";
 import classicThemePlugin from "@fullcalendar/react/themes/classic";
 import dayGridPlugin from "@fullcalendar/react/daygrid";
 import interactionPlugin from "@fullcalendar/react/interaction";
@@ -15,11 +11,10 @@ import { useRef, useState } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { CalendarEmptyState } from "@/features/calendar/components/CalendarEmptyState";
 import { CalendarEventContent } from "@/features/calendar/components/CalendarEventContent";
-import { CalendarDaySummary, servicesForDate } from "@/features/calendar/components/CalendarDaySummary";
+import { CalendarPanel, type PanelState } from "@/features/calendar/components/CalendarPanel";
 import { CalendarToolbar } from "@/features/calendar/components/CalendarToolbar";
 import { toCalendarEvents } from "@/features/calendar/utils/calendar-events";
 import { formatCalendarPeriodLabel } from "@/features/calendar/utils/calendar-period-label";
-import { ServiceFormSheet } from "@/features/services/components/ServiceFormSheet";
 import { useServices } from "@/features/services/hooks/useServices";
 import { formatServiceDate } from "@/features/services/utils/service-date";
 import { Permission } from "@/shared/domain/enums/Permission";
@@ -29,17 +24,39 @@ export function CalendarView() {
   const calendarRef = useRef<CalendarRef>(null);
   const [title, setTitle] = useState("Calendário");
   const [currentView, setCurrentView] = useState("dayGridMonth");
-  const [selectedDate, setSelectedDate] = useState<string>();
-  const [selectedServiceId, setSelectedServiceId] = useState<string>();
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [panel, setPanel] = useState<PanelState>({ mode: "closed" });
   const { user } = useAuth();
   const { services, applyFilters, refresh, deleteService } = useServices();
-  const canCreateService =
-    user?.isSuperAdmin || user?.permissions.includes(Permission.SERVICE_WRITE);
+  const canCreateService = Boolean(
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SERVICE_WRITE),
+  );
+  const canViewScales = Boolean(
+    user?.isSuperAdmin ||
+      user?.permissions.includes(Permission.SCALE_READ) ||
+      user?.permissions.includes(Permission.SCALE_SELF_READ),
+  );
+  const canReadScales = Boolean(
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_READ),
+  );
+  const canDeleteService = Boolean(
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SERVICE_DELETE),
+  );
+  const canWriteScales = Boolean(
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_WRITE),
+  );
+  const canDeleteScales = Boolean(
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_DELETE),
+  );
 
-  const events = toCalendarEvents(services);
+  const openCreateService = (date?: string) => {
+    const nextDate = date ?? formatServiceDate(new Date());
+    setPanel({ mode: "create-service", date: nextDate });
+  };
 
-  const getCalendarApi = () => calendarRef.current?.getApi();
+  const openDetails = (serviceId: string) => {
+    setPanel({ mode: "service-details", serviceId });
+  };
+
   const handleDatesSet = (info: DatesSetInfo) => {
     setTitle(
       formatCalendarPeriodLabel(
@@ -54,26 +71,6 @@ export function CalendarView() {
     applyFilters(info.start, endDate);
   };
 
-  const openCreateForm = (date?: string) => {
-    setSelectedServiceId(undefined);
-    setSelectedDate(date ?? formatServiceDate(new Date()));
-    setIsFormOpen(true);
-  };
-
-  const openEditForm = (serviceId: string, date?: string) => {
-    setSelectedServiceId(serviceId);
-    if (date) setSelectedDate(date);
-    setIsFormOpen(true);
-  };
-
-  const closeForm = (open: boolean) => {
-    setIsFormOpen(open);
-    if (!open) setSelectedServiceId(undefined);
-  };
-
-  const selectedServices = selectedDate
-    ? servicesForDate(services, selectedDate)
-    : [];
   const eventVariant =
     currentView === "dayGridMonth"
       ? "month"
@@ -82,7 +79,7 @@ export function CalendarView() {
         : currentView === "dayGridDay"
           ? "day"
           : "list";
-
+  const getCalendarApi = () => calendarRef.current?.getApi();
   const getDayCellClass = (info: DayCellInfo) =>
     [
       info.isToday ? styles.dayToday : info.isOther ? styles.dayOther : "",
@@ -91,14 +88,8 @@ export function CalendarView() {
       .filter(Boolean)
       .join(" ");
 
-  const getDayNumberClass = (info: DayCellInfo) =>
-    info.isToday ? styles.dayNumberToday : styles.dayNumber;
-
   return (
-    <section
-      className={styles.wrapper}
-      aria-label="Calendário de cultos e escalas"
-    >
+    <section className={styles.wrapper} aria-label="Calendário de cultos e escalas">
       <CalendarToolbar
         title={title}
         currentView={currentView}
@@ -106,22 +97,17 @@ export function CalendarView() {
         onNext={() => getCalendarApi()?.next()}
         onToday={() => getCalendarApi()?.today()}
         onChangeView={(view) => getCalendarApi()?.changeView(view)}
-        onCreateService={canCreateService ? () => openCreateForm() : undefined}
+        onCreateService={canCreateService ? () => openCreateService() : undefined}
       />
       <FullCalendar
         ref={calendarRef}
         className={styles.calendar}
-        plugins={[
-          classicThemePlugin,
-          dayGridPlugin,
-          interactionPlugin,
-          listPlugin,
-        ]}
+        plugins={[classicThemePlugin, dayGridPlugin, interactionPlugin, listPlugin]}
         locales={[ptBrLocale]}
         locale="pt-br"
         initialView="dayGridMonth"
         headerToolbar={false}
-        events={events}
+        events={toCalendarEvents(services)}
         eventContent={(info) => (
           <CalendarEventContent
             title={info.event.title}
@@ -130,35 +116,23 @@ export function CalendarView() {
             variant={eventVariant}
           />
         )}
-        eventClass={(info) =>
-          [
-            styles.serviceEvent,
-            canCreateService ? styles.serviceEventInteractive : "",
-            selectedServiceId === info.event.id ? styles.serviceEventSelected : "",
-          ]
+        eventClass={(_info) =>
+          [styles.serviceEvent, canCreateService ? styles.serviceEventInteractive : ""]
             .filter(Boolean)
             .join(" ")
         }
-        eventClick={
-          (info) => {
-            const date = info.event.startStr.slice(0, 10);
-            if (canCreateService) openEditForm(info.event.id, date);
-            else setSelectedDate(date);
-          }
-        }
-        dateClick={(info) => setSelectedDate(info.dateStr.slice(0, 10))}
+        eventClick={(info) => openDetails(info.event.id)}
+        dateClick={(info) => openCreateService(info.dateStr.slice(0, 10))}
         height="100%"
         fixedWeekCount={false}
         dayMaxEvents={currentView === "dayGridMonth" ? 3 : false}
         datesSet={handleDatesSet}
         dayCellClass={getDayCellClass}
-        dayCellTopInnerClass={getDayNumberClass}
-        dayHeaderClass={(info) =>
-          info.isToday ? styles.timeHeaderToday : styles.timeHeader
+        dayCellTopInnerClass={(info) =>
+          info.isToday ? styles.dayNumberToday : styles.dayNumber
         }
-        dayLaneClass={(info) =>
-          info.isToday ? styles.timeLaneToday : styles.timeLane
-        }
+        dayHeaderClass={(info) => (info.isToday ? styles.timeHeaderToday : styles.timeHeader)}
+        dayLaneClass={(info) => (info.isToday ? styles.timeLaneToday : styles.timeLane)}
         slotLaneClass={styles.timeSlot}
         noEventsContent={() => <CalendarEmptyState viewType={currentView} />}
         editable={false}
@@ -166,26 +140,18 @@ export function CalendarView() {
         eventStartEditable={false}
         eventDurationEditable={false}
       />
-      {selectedDate && (
-        <CalendarDaySummary
-          date={selectedDate}
-          services={selectedServices}
-          canCreateService={Boolean(canCreateService)}
-          onCreate={() => openCreateForm(selectedDate)}
-          onEdit={(serviceId) => openEditForm(serviceId, selectedDate)}
-        />
-      )}
-      <ServiceFormSheet
-        open={isFormOpen}
-        mode={selectedServiceId ? "edit" : "create"}
-        serviceId={selectedServiceId}
-        initialDate={selectedDate}
-        onOpenChange={closeForm}
-        onSuccess={() => {
-          closeForm(false);
-          void refresh();
-        }}
-        onDelete={deleteService}
+      <CalendarPanel
+        panel={panel}
+        setPanel={setPanel}
+        services={services}
+        canCreateService={canCreateService}
+        canDeleteService={canDeleteService}
+        canViewScales={canViewScales}
+        canReadScales={canReadScales}
+        canWriteScales={canWriteScales}
+        canDeleteScales={canDeleteScales}
+        refreshServices={refresh}
+        deleteService={deleteService}
       />
     </section>
   );

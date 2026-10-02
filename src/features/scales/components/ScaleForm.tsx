@@ -10,18 +10,31 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { ServiceSelect } from "@/components/ui/service-select";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { ScaleFormInput } from "@/modules/scales/presentation/contracts/ScaleDTO";
+import { Permission } from "@/shared/domain/enums/Permission";
 import { useScaleForm } from "../hooks/useScaleForm";
-import { ScaleMemberList } from "./ScaleMemberList";
+import { ScaleRoleList } from "./ScaleRoleList";
 import { ShareScaleImageDialog } from "./ShareScaleImageDialog";
 
 interface ScaleFormProps {
   mode: "create" | "edit";
   scaleId?: string;
+  initialServiceId?: string;
+  onSuccess?: (scaleId?: string) => void;
+  onCancel?: () => void;
 }
 
-export function ScaleForm({ mode, scaleId }: ScaleFormProps) {
+export function ScaleForm({
+  mode,
+  scaleId,
+  initialServiceId,
+  onSuccess,
+  onCancel,
+}: ScaleFormProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const canSharePublishedScale = Boolean(
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_READ),
+  );
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const {
     form,
@@ -37,15 +50,28 @@ export function ScaleForm({ mode, scaleId }: ScaleFormProps) {
     availableRoles,
     isLoadingMembers,
     isLoadingRoles,
-  } = useScaleForm({ mode, scaleId });
+  } = useScaleForm({ mode, scaleId, initialServiceId, onSuccess });
+
+  const handleMinistryChange = useCallback(
+    (value: string) => {
+      form.setValue("ministryId", value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      editableFields
+        .map((_, index) => index)
+        .reverse()
+        .forEach((index) => {
+          editableRemove(index);
+        });
+    },
+    [editableFields, editableRemove, form],
+  );
 
   const handleCancel = useCallback(() => {
-    router.push("/scales");
-  }, [router]);
-
-  const handleAddMember = useCallback(() => {
-    editableAppend({ memberId: "", ministryRoleId: "", notes: "", id: null });
-  }, [editableAppend]);
+    if (onCancel) onCancel();
+    else router.push("/scales");
+  }, [onCancel, router]);
 
   if (isFetching) {
     return (
@@ -77,6 +103,7 @@ export function ScaleForm({ mode, scaleId }: ScaleFormProps) {
               services={services}
               placeholder="Selecione um culto"
               required
+              disabled={Boolean(initialServiceId)}
             />
             {form.formState.errors.serviceId && (
               <p className="text-xs text-destructive">
@@ -89,12 +116,7 @@ export function ScaleForm({ mode, scaleId }: ScaleFormProps) {
             <MinistrySelect
               label="Ministério"
               value={form.watch("ministryId") || ""}
-              onChange={(value) =>
-                form.setValue("ministryId", value, {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                })
-              }
+              onChange={handleMinistryChange}
               ministries={ministries}
               placeholder="Selecione um ministério"
               required
@@ -137,11 +159,12 @@ export function ScaleForm({ mode, scaleId }: ScaleFormProps) {
             />
           </div>
 
-          <ScaleMemberList
+          <ScaleRoleList
             form={form}
+            ministryId={form.watch("ministryId") || ""}
             editableFields={editableFields}
+            editableAppend={editableAppend}
             editableRemove={editableRemove}
-            onAddMember={handleAddMember}
             availableMembers={availableMembers}
             availableRoles={availableRoles}
             isLoadingMembers={isLoadingMembers}
@@ -176,13 +199,11 @@ export function ScaleForm({ mode, scaleId }: ScaleFormProps) {
         />
       </FormTemplate.Form>
 
-      {mode === "edit" && scaleId && user?.churchId ? (
+      {mode === "edit" && scaleId && canSharePublishedScale ? (
         <ShareScaleImageDialog
           open={shareDialogOpen}
           onOpenChange={setShareDialogOpen}
           scaleId={scaleId}
-          churchId={user.churchId}
-          churchName={user.churchName ?? "Igreja"}
         />
       ) : null}
     </FormTemplate>

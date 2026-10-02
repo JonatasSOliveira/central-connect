@@ -4,6 +4,7 @@ import { AddMemberToScale } from "@/modules/scales/application/use-cases/AddMemb
 import { CreateScale } from "@/modules/scales/application/use-cases/CreateScale";
 import { DeleteScale } from "@/modules/scales/application/use-cases/DeleteScale";
 import { GetScale } from "@/modules/scales/application/use-cases/GetScale";
+import { GenerateScaleShareImage } from "@/modules/scales/application/use-cases/GenerateScaleShareImage";
 import { GetScaleAttendance } from "@/modules/scales/application/use-cases/GetScaleAttendance";
 import { GetScaleAttendanceReport } from "@/modules/scales/application/use-cases/GetScaleAttendanceReport";
 import { ListMyScales } from "@/modules/scales/application/use-cases/ListMyScales";
@@ -14,6 +15,9 @@ import { RemoveMemberFromScale } from "@/modules/scales/application/use-cases/Re
 import { RunScheduledScaleGeneration } from "@/modules/scales/application/use-cases/RunScheduledScaleGeneration";
 import { SaveScaleAttendance } from "@/modules/scales/application/use-cases/SaveScaleAttendance";
 import { UpdateScale } from "@/modules/scales/application/use-cases/UpdateScale";
+import { ScaleDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleDrizzleRepository";
+import { ScaleMemberDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleMemberDrizzleRepository";
+import { ScaleShareImageGenerator } from "@/modules/scales/infrastructure/services/ScaleShareImageGenerator";
 import type {
   CreateScaleDependencies,
   ScalesInfrastructureDependencies,
@@ -36,8 +40,8 @@ export function createScalesInfrastructure(
     (transaction) =>
       createScaleUseCase(
         dependencies.createCreateScaleDependencies(transaction),
-        scaleRepository,
-        scaleMemberRepository,
+        new ScaleDrizzleRepository(transaction),
+        new ScaleMemberDrizzleRepository(transaction),
       ),
   );
 
@@ -45,6 +49,14 @@ export function createScalesInfrastructure(
     addMemberToScale: new AddMemberToScale(
       scaleRepository,
       scaleMemberRepository,
+      dependencies.churchRepository,
+      dependencies.serviceRepository,
+      dependencies.ministryRepository,
+      dependencies.ministryRoleRepository,
+      dependencies.memberRepository,
+      dependencies.memberChurchRepository,
+      dependencies.memberMinistryRepository,
+      dependencies.memberMinistryRoleRepository,
     ),
     createScale,
     deleteScale: new DeleteScale(
@@ -53,15 +65,33 @@ export function createScalesInfrastructure(
       scaleAttendanceRepository,
       scaleAttendanceMemberRepository,
     ),
-    getScale: new GetScale(scaleRepository, scaleMemberRepository),
-    listScales: new ListScales(scaleRepository),
+    getScale: new GetScale(
+      scaleRepository,
+      scaleMemberRepository,
+      dependencies.serviceRepository,
+    ),
+    generateScaleShareImage: new GenerateScaleShareImage(
+      scaleRepository,
+      scaleMemberRepository,
+      dependencies.churchRepository,
+      dependencies.serviceRepository,
+      dependencies.ministryRepository,
+      dependencies.ministryRoleRepository,
+      dependencies.memberRepository,
+      new ScaleShareImageGenerator(),
+    ),
+    listScales: new ListScales(
+      scaleRepository,
+      dependencies.ministryRepository,
+      scaleMemberRepository,
+    ),
     updateScale: createTransactionalUseCase(
       dependencies.database,
       (transaction) =>
         createUpdateScaleUseCase(
           dependencies.createUpdateScaleDependencies(transaction),
-          scaleRepository,
-          scaleMemberRepository,
+          new ScaleDrizzleRepository(transaction),
+          new ScaleMemberDrizzleRepository(transaction),
         ),
     ),
     getScaleAttendance: new GetScaleAttendance(

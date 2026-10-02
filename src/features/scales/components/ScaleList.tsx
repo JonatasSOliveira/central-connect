@@ -40,6 +40,8 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
     user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_WRITE);
   const canDeleteScales =
     user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_DELETE);
+  const canReadScales =
+    user?.isSuperAdmin || user?.permissions.includes(Permission.SCALE_READ);
 
   const {
     scales,
@@ -242,7 +244,7 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
               canWriteScales ? () => handleEditScale(scale.id) : undefined
             }
             actions={
-              canWriteScales || canDeleteScales
+              canWriteScales || canDeleteScales || canReadScales
                 ? {
                     onEdit: canWriteScales
                       ? () => handleEditScale(scale.id)
@@ -251,7 +253,7 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
                       ? () => handleDeleteScale(scale.id)
                       : undefined,
                     onShareImage:
-                      canWriteScales && scale.status === "published"
+                      canReadScales && scale.status === "published"
                         ? () => handleOpenShareDialog(scale.id)
                         : undefined,
                   }
@@ -306,7 +308,7 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
 
       {renderContent()}
 
-      {shareScaleId && churchId ? (
+      {shareScaleId ? (
         <ShareScaleImageDialog
           open={!!shareScaleId}
           onOpenChange={(open) => {
@@ -315,8 +317,6 @@ export function ScaleList({ viewMode = "all" }: ScaleListProps) {
             }
           }}
           scaleId={shareScaleId}
-          churchId={churchId}
-          churchName={user?.churchName ?? "Igreja"}
         />
       ) : null}
     </ListTemplate>

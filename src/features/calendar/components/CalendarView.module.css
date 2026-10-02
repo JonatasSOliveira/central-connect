@@ -65,6 +65,10 @@
   background: color-mix(in srgb, var(--primary) 7%, var(--card));
 }
 
+.wrapper :global(.fc .fc-daygrid-day-frame) {
+  min-height: 6rem;
+}
+
 .dayOther:hover {
   background: color-mix(in srgb, var(--primary) 10%, var(--card));
 }
@@ -124,6 +128,10 @@
   min-height: 2rem;
   min-width: 2rem;
   padding: 0.625rem;
+}
+
+.wrapper :global(.fc .fc-daygrid-event) {
+  line-height: 1.25;
 }
 
 .dayToday {
@@ -215,7 +223,11 @@
   }
 
   .calendar :global(.fc-scrollgrid) {
-    min-width: 42rem;
+    min-width: 34rem;
+  }
+
+  .calendar :global(.fc-dayGridMonth-view .fc-scrollgrid) {
+    min-width: 0;
   }
 
   .wrapper :global(.fc td) {
@@ -235,6 +247,7 @@
 
   .wrapper :global(.fc .fc-daygrid-event) {
     margin-inline: 0.125rem;
+    padding: 0.2rem 0.25rem;
   }
 
   .wrapper :global(.fc .fc-timegrid-slot-label) {

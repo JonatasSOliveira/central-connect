@@ -10,18 +10,24 @@ interface ScaleResult {
   value?: {
     scale?: {
       id: string;
-      churchId: string;
       serviceId: string;
       status: string;
       members: Array<{ memberId: string }>;
     };
     scales?: Array<{
       id: string;
-      churchId: string;
+      ministryName: string;
+      memberCount: number;
       status: string;
     }>;
   };
   error?: { code?: string };
+}
+
+interface ShareImageResult {
+  ok: boolean;
+  value?: { file: Uint8Array; fileName: string };
+  error?: { code?: string; message?: string };
 }
 
 interface DeleteResult {
@@ -37,6 +43,9 @@ export interface ScaleHandlerDependencies {
     createScale: { execute(input: unknown): Promise<ScaleResult> };
     getScale: { execute(input: unknown): Promise<ScaleResult> };
     updateScale: { execute(input: unknown): Promise<ScaleResult> };
+    generateScaleShareImage: {
+      execute(input: unknown): Promise<ShareImageResult>;
+    };
     deleteScale: { execute(input: unknown): Promise<DeleteResult> };
     scaleMemberRepository: {
       findByScaleId(scaleId: string): Promise<Array<{ memberId: string }>>;
@@ -95,7 +104,50 @@ export function createScaleHandlers(dependencies: ScaleHandlerDependencies) {
         return updateScale(request, scaleId, dependencies);
       return deleteScale(request, scaleId, dependencies);
     },
+    shareImage: (request: NextRequest, scaleId: string) =>
+      shareScaleImage(request, scaleId, dependencies),
   };
+}
+
+async function shareScaleImage(
+  request: NextRequest,
+  scaleId: string,
+  dependencies: ScaleHandlerDependencies,
+) {
+  const auth = await validateSession();
+  if (!auth.ok)
+    return NextResponse.json({ ok: false, error: auth.error }, { status: 401 });
+
+  const { user } = auth;
+  if (!user.isSuperAdmin && !user.permissions.includes(Permission.SCALE_READ))
+    return unauthorized("Sem permissão para compartilhar escalas");
+
+  const churchId = getChurchIdFromSession(
+    user,
+    new URL(request.url).searchParams.get("churchId"),
+  );
+  if (!churchId) return invalidChurch("Nenhuma igreja selecionada");
+
+  const result = await dependencies.scale.generateScaleShareImage.execute({
+    scaleId,
+    churchId,
+  });
+  if (!result.ok || !result.value) {
+    return NextResponse.json(result, {
+      status: resultStatus(result as ScaleResult, 404),
+    });
+  }
+
+  const imageBuffer = new ArrayBuffer(result.value.file.byteLength);
+  new Uint8Array(imageBuffer).set(result.value.file);
+  return new Response(new Blob([imageBuffer], { type: "image/png" }), {
+    status: 200,
+    headers: {
+      "Content-Type": "image/png",
+      "Content-Disposition": `inline; filename="${result.value.fileName}"`,
+      "Cache-Control": "private, no-store",
+    },
+  });
 }
 
 async function listScales(
@@ -221,7 +273,7 @@ async function createScale(
 }
 
 async function getScale(
-  _request: NextRequest,
+  request: NextRequest,
   scaleId: string,
   dependencies: ScaleHandlerDependencies,
 ) {
@@ -235,7 +287,12 @@ async function getScale(
     user.isSuperAdmin || user.permissions.includes(Permission.SCALE_SELF_READ);
   if (!hasReadAccess && !hasSelfReadAccess)
     return unauthorized("Sem permissão para visualizar escalas");
-  const result = await dependencies.scale.getScale.execute({ scaleId });
+  const churchId = getChurchIdFromSession(
+    user,
+    new URL(request.url).searchParams.get("churchId"),
+  );
+  if (!churchId) return invalidChurch("Nenhuma igreja selecionada");
+  const result = await dependencies.scale.getScale.execute({ scaleId, churchId });
   if (!result.ok)
     return NextResponse.json(result, { status: resultStatus(result, 200) });
   const scale = result.value?.scale;
@@ -248,12 +305,22 @@ async function getScale(
       scale.status !== "published"
     )
       return unauthorized("Sem permissão para visualizar esta escala");
+
+    return NextResponse.json(
+      {
+        ok: true,
+        value: {
+          scale: {
+            ...scale,
+            members: scale.members.filter(
+              (member) => member.memberId === user.memberId,
+            ),
+          },
+        },
+      },
+      { status: 200 },
+    );
   }
-  if (
-    !user.isSuperAdmin &&
-    !user.churches.some((church) => church.churchId === scale.churchId)
-  )
-    return unauthorized("Sem permissão para visualizar esta escala");
   return NextResponse.json(result, { status: 200 });
 }
 
@@ -268,15 +335,15 @@ async function updateScale(
   const { user } = auth;
   if (!user.isSuperAdmin && !user.permissions.includes(Permission.SCALE_WRITE))
     return unauthorized("Sem permissão para atualizar escalas");
-  const current = await dependencies.scale.getScale.execute({ scaleId });
+  const churchId = getChurchIdFromSession(
+    user,
+    new URL(request.url).searchParams.get("churchId"),
+  );
+  if (!churchId) return invalidChurch("Nenhuma igreja selecionada");
+  const current = await dependencies.scale.getScale.execute({ scaleId, churchId });
   if (!current.ok) return NextResponse.json(current, { status: 404 });
   const existing = current.value?.scale;
   if (!existing) return NextResponse.json(current, { status: 404 });
-  if (
-    !user.isSuperAdmin &&
-    !user.churches.some((church) => church.churchId === existing.churchId)
-  )
-    return unauthorized("Sem permissão para atualizar esta escala");
   const body = await readJson(request);
   if (body instanceof NextResponse) return body;
   const parsed = ScaleFormSchema.safeParse(body);
@@ -286,7 +353,7 @@ async function updateScale(
     });
   const result = await dependencies.scale.updateScale.execute({
     scaleId,
-    churchId: existing.churchId,
+    churchId,
     serviceId: parsed.data.serviceId,
     ministryId: parsed.data.ministryId,
     status: parsed.data.status,
@@ -307,7 +374,7 @@ async function updateScale(
   )
     await notifyPublishedScale(
       updatedScale,
-      existing.churchId,
+      churchId,
       dependencies,
       getRequestId(request),
       user.userId,
@@ -326,15 +393,15 @@ async function deleteScale(
   const { user } = auth;
   if (!user.isSuperAdmin && !user.permissions.includes(Permission.SCALE_DELETE))
     return unauthorized("Sem permissão para excluir escalas");
-  const current = await dependencies.scale.getScale.execute({ scaleId });
+  const churchId = getChurchIdFromSession(
+    user,
+    new URL(_request.url).searchParams.get("churchId"),
+  );
+  if (!churchId) return invalidChurch("Nenhuma igreja selecionada");
+  const current = await dependencies.scale.getScale.execute({ scaleId, churchId });
   if (!current.ok) return NextResponse.json(current, { status: 404 });
   const scale = current.value?.scale;
   if (!scale) return NextResponse.json(current, { status: 404 });
-  if (
-    !user.isSuperAdmin &&
-    !user.churches.some((church) => church.churchId === scale.churchId)
-  )
-    return unauthorized("Sem permissão para excluir esta escala");
   const result = await dependencies.scale.deleteScale.execute({ scaleId });
   return NextResponse.json(result, { status: resultStatus(result, 204) });
 }

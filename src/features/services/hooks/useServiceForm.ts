@@ -24,7 +24,7 @@ interface UseServiceFormProps {
   mode: "create" | "edit";
   serviceId?: string;
   goBack: () => void;
-  onSuccess?: (message: string) => void;
+  onSuccess?: (message: string, serviceId?: string) => void;
   onError?: (message: string) => void;
   initialDate?: string;
 }
@@ -117,8 +117,8 @@ export function useServiceForm({
 
         if (data.ok) {
           const message = "Culto criado com sucesso!";
-          onSuccess?.(message);
-          goBack();
+          onSuccess?.(message, data.value?.service?.id);
+          if (!onSuccess) goBack();
         } else {
           const errorMessage = data.error?.message || "Erro ao criar culto";
           onError?.(errorMessage);
@@ -145,8 +145,8 @@ export function useServiceForm({
 
         if (data.ok) {
           const message = "Culto atualizado com sucesso!";
-          onSuccess?.(message);
-          goBack();
+          onSuccess?.(message, serviceId);
+          if (!onSuccess) goBack();
         } else {
           const errorMessage = data.error?.message || "Erro ao atualizar culto";
           onError?.(errorMessage);

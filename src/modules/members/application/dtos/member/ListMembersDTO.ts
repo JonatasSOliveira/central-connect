@@ -3,10 +3,16 @@ export type MemberChurchInfo = {
   churchName: string;
 };
 
+export type MemberMinistryRoleInfo = {
+  ministryRoleId: string;
+  roleName: string;
+};
+
 export type MemberListItem = {
   id: string;
   fullName: string;
   churches: MemberChurchInfo[];
+  ministryRoles?: MemberMinistryRoleInfo[];
 };
 
 export type ListMembersOutput = {

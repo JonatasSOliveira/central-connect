@@ -13,9 +13,14 @@ export interface MinistryOption {
 export interface MemberOption {
   id: string;
   fullName: string;
+  ministryRoles: Array<{
+    ministryRoleId: string;
+    roleName: string;
+  }>;
 }
 
 export interface MinistryRoleOption {
   id: string;
   name: string;
+  requiredCount: number;
 }

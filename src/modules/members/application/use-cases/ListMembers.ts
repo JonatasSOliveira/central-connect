@@ -1,6 +1,8 @@
 import type { IMemberChurchRepository } from "@/modules/members/application/ports/IMemberChurchRepository";
 import type { IMemberMinistryRepository } from "@/modules/members/application/ports/IMemberMinistryRepository";
+import type { IMemberMinistryRoleRepository } from "@/modules/members/application/ports/IMemberMinistryRoleRepository";
 import type { IMemberRepository } from "@/modules/members/application/ports/IMemberRepository";
+import type { IMinistryRoleRepository } from "@/modules/ministries/application/ports/IMinistryRoleRepository";
 import type { Result } from "@/shared/types/Result";
 import type {
   ListMembersInput,
@@ -19,6 +21,8 @@ export class ListMembers extends BaseUseCase<
     private readonly memberRepository: IMemberRepository,
     private readonly memberChurchRepository: IMemberChurchRepository,
     private readonly memberMinistryRepository: IMemberMinistryRepository,
+    private readonly memberMinistryRoleRepository: IMemberMinistryRoleRepository,
+    private readonly ministryRoleRepository: IMinistryRoleRepository,
   ) {
     super();
   }
@@ -56,6 +60,25 @@ export class ListMembers extends BaseUseCase<
         a.fullName.localeCompare(b.fullName, "pt-BR", { sensitivity: "base" }),
       );
 
+      const roleInfoByMember = new Map<string, { ministryRoleId: string; roleName: string }[]>();
+      if (input.ministryId) {
+        const [assignments, roles] = await Promise.all([
+          this.memberMinistryRoleRepository.findByChurchIdAndMinistryId(
+            input.churchId,
+            input.ministryId,
+          ),
+          this.ministryRoleRepository.findByMinistryId(input.ministryId),
+        ]);
+        const roleNames = new Map(roles.map((role) => [role.id, role.name]));
+        for (const assignment of assignments) {
+          const roleName = roleNames.get(assignment.ministryRoleId);
+          if (!roleName) continue;
+          const current = roleInfoByMember.get(assignment.memberId) ?? [];
+          current.push({ ministryRoleId: assignment.ministryRoleId, roleName });
+          roleInfoByMember.set(assignment.memberId, current);
+        }
+      }
+
       const memberListItems = sortedMembers.map((member) => ({
         id: member.id,
         fullName: member.fullName,
@@ -65,6 +88,9 @@ export class ListMembers extends BaseUseCase<
             churchName: input.churchName ?? "Igreja",
           },
         ],
+        ...(input.ministryId
+          ? { ministryRoles: roleInfoByMember.get(member.id) ?? [] }
+          : {}),
       }));
 
       return {
