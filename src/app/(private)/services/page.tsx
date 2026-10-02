@@ -18,6 +18,7 @@ import { SearchInput } from "@/components/ui/search-input";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { usePermissions } from "@/features/auth/hooks/usePermissions";
 import { useServices } from "@/features/services/hooks/useServices";
+import { formatServiceTime } from "@/features/services/utils/service-date";
 import { Permission } from "@/shared/domain/enums/Permission";
 
 export default function ServicesPage() {
@@ -146,7 +147,7 @@ export default function ServicesPage() {
             key={service.id}
             icon={Cross}
             title={service.title}
-            description={`${formatDate(service.date)} às ${service.time}${service.location ? ` • ${service.location}` : ""}`}
+            description={`${formatDate(service.date)} às ${formatServiceTime(service.time)}${service.location ? ` • ${service.location}` : ""}`}
             onClick={canWrite ? () => handleEditService(service.id) : undefined}
             actions={{
               onEdit: canWrite

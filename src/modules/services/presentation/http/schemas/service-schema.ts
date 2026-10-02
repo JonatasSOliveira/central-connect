@@ -6,3 +6,7 @@ export {
   type UpdateServiceInput,
   UpdateServiceInputSchema,
 } from "@/modules/services/application/dtos/service/UpdateServiceDTO";
+export {
+  ListServicesQuerySchema,
+  type ListServicesQuery,
+} from "@/modules/services/application/dtos/service/ListServicesDTO";

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { formatServiceTime } from "../utils/service-date";
 
 const ServiceFormSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
@@ -25,6 +26,7 @@ interface UseServiceFormProps {
   goBack: () => void;
   onSuccess?: (message: string) => void;
   onError?: (message: string) => void;
+  initialDate?: string;
 }
 
 export function useServiceForm({
@@ -33,6 +35,7 @@ export function useServiceForm({
   goBack,
   onSuccess,
   onError,
+  initialDate,
 }: UseServiceFormProps) {
   const { user } = useAuth();
   const churchId = user?.churchId ?? null;
@@ -44,13 +47,19 @@ export function useServiceForm({
     resolver: zodResolver(ServiceFormSchema),
     defaultValues: {
       title: "",
-      date: "",
+      date: initialDate ?? "",
       time: "19:00",
       location: "",
       description: "",
     },
     mode: "onBlur",
   });
+
+  useEffect(() => {
+    if (mode === "create" && initialDate) {
+      form.setValue("date", initialDate, { shouldValidate: true });
+    }
+  }, [form, initialDate, mode]);
 
   useEffect(() => {
     if (mode === "edit" && serviceId) {
@@ -68,7 +77,7 @@ export function useServiceForm({
             form.reset({
               title: serviceData.title,
               date: dateStr,
-              time: serviceData.time,
+              time: formatServiceTime(serviceData.time),
               location: serviceData.location ?? "",
               description: serviceData.description ?? "",
             });

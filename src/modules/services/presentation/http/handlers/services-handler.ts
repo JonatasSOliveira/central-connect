@@ -5,7 +5,10 @@ import type { ListServices } from "@/modules/services/application/use-cases/List
 import type { AuthResult } from "@/shared/contracts/auth";
 import { Permission } from "@/shared/domain/enums/Permission";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
-import { CreateServiceInputSchema } from "../schemas/service-schema";
+import {
+  CreateServiceInputSchema,
+  ListServicesQuerySchema,
+} from "../schemas/service-schema";
 
 interface UseCases {
   listServices: ListServices;
@@ -44,12 +47,17 @@ export function createServicesHandler(
           },
           { status: 403 },
         );
-      const startDate = query.get("startDate");
-      const endDate = query.get("endDate");
-      const result = await useCases.listServices.execute({
+      const parsedQuery = ListServicesQuerySchema.safeParse({
         churchId,
-        startDate: startDate ? new Date(startDate) : undefined,
-        endDate: endDate ? new Date(endDate) : undefined,
+        startDate: query.get("startDate") ?? undefined,
+        endDate: query.get("endDate") ?? undefined,
+      });
+      if (!parsedQuery.success)
+        return NextResponse.json(apiError("VALIDATION_ERROR", parsedQuery.error), {
+          status: 400,
+        });
+      const result = await useCases.listServices.execute({
+        ...parsedQuery.data,
       });
       return NextResponse.json(result, {
         status: result.ok ? 200 : getHttpStatus(result.error?.code),

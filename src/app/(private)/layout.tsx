@@ -96,7 +96,8 @@ export default function PrivateLayout({
   return (
     <AppShell
       showNavigation={!isHome && !isChurchManagement}
-      className={isCalendar ? "max-w-none" : undefined}
+      scrollMode={isCalendar ? "contained" : "page"}
+      className={isCalendar ? "max-w-none !px-0 !pb-0" : undefined}
     >
       {children}
     </AppShell>

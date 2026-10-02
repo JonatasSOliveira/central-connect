@@ -4,6 +4,7 @@ import {
   type ServiceParams,
 } from "@/modules/services/domain/entities/Service";
 import type { DayOfWeek } from "@/shared/domain/entities/DayOfWeek";
+import { getServiceDayIndex } from "@/modules/services/domain/value-objects/ServiceDate";
 import type { Result } from "@/shared/types/Result";
 import { BaseUseCase } from "../BaseUseCase";
 import type {
@@ -51,7 +52,7 @@ export class CreateService extends BaseUseCase<
         };
       }
 
-      const dayOfWeek = DAY_OF_WEEK_MAP[input.date.getDay()];
+      const dayOfWeek = DAY_OF_WEEK_MAP[getServiceDayIndex(input.date)];
 
       const serviceParams: ServiceParams = {
         churchId: input.churchId,

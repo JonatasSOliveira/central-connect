@@ -1,4 +1,4 @@
-import { and, eq, gte, isNull, lte } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, lte } from "drizzle-orm";
 import type { DatabaseExecutor } from "@/infra/database/contracts/database-executor";
 import { services } from "@/infra/database/drizzle/schema";
 import type { IServiceRepository } from "@/modules/services/application/ports/IServiceRepository";
@@ -46,7 +46,8 @@ export class ServiceDrizzleRepository implements IServiceRepository {
     const rows = await this.database
       .select()
       .from(services)
-      .where(and(eq(services.churchId, churchId), isNull(services.deletedAt)));
+      .where(and(eq(services.churchId, churchId), isNull(services.deletedAt)))
+      .orderBy(asc(services.date), asc(services.time));
     return rows.map(toEntity);
   }
 
@@ -65,7 +66,8 @@ export class ServiceDrizzleRepository implements IServiceRepository {
           lte(services.date, endDate),
           isNull(services.deletedAt),
         ),
-      );
+      )
+      .orderBy(asc(services.date), asc(services.time));
     return rows.map(toEntity);
   }
 

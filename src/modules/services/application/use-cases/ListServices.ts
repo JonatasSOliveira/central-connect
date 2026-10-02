@@ -40,6 +40,7 @@ export class ListServices extends BaseUseCase<
           time: service.time,
           location: service.location,
           description: service.description,
+          createdAt: service.createdAt,
         }),
       );
 

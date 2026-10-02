@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { serviceDateSchema } from "./service-date-schema";
 
 export const CreateServiceInputSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
-  date: z.string().transform((val) => new Date(val)),
+  date: serviceDateSchema,
   time: z
     .string()
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"),

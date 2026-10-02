@@ -4,6 +4,7 @@ import {
   type ServiceParams,
 } from "@/modules/services/domain/entities/Service";
 import type { DayOfWeek } from "@/shared/domain/entities/DayOfWeek";
+import { getServiceDayIndex } from "@/modules/services/domain/value-objects/ServiceDate";
 import type { Result } from "@/shared/types/Result";
 import { BaseUseCase } from "../BaseUseCase";
 import type { CreateServiceOutput } from "../dtos/service/CreateServiceDTO";
@@ -82,7 +83,7 @@ export class UpdateService extends BaseUseCase<
       }
 
       const dayOfWeek = input.date
-        ? DAY_OF_WEEK_MAP[input.date.getDay()]
+        ? DAY_OF_WEEK_MAP[getServiceDayIndex(input.date)]
         : existingService.dayOfWeek;
 
       const serviceParams: ServiceParams = {

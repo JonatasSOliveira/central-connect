@@ -16,12 +16,14 @@ interface CalendarToolbarProps {
   onNext: () => void;
   onToday: () => void;
   onChangeView: (view: string) => void;
+  onCreateService?: () => void;
+  className?: string;
 }
 
 const views = [
   { value: "dayGridMonth", label: "Mês", icon: CalendarDays },
-  { value: "timeGridWeek", label: "Semana", icon: CalendarRange },
-  { value: "timeGridDay", label: "Dia", icon: CalendarClock },
+  { value: "dayGridWeek", label: "Semana", icon: CalendarRange },
+  { value: "dayGridDay", label: "Dia", icon: CalendarClock },
   { value: "listWeek", label: "Lista", icon: List },
 ];
 
@@ -32,9 +34,16 @@ export function CalendarToolbar({
   onNext,
   onToday,
   onChangeView,
+  onCreateService,
+  className,
 }: CalendarToolbarProps) {
   return (
-    <div className="mb-5 grid min-w-0 gap-3 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-5">
+    <div
+      className={cn(
+        "mb-5 grid min-w-0 gap-3 px-4 pt-4 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-5 lg:px-6 lg:pt-6",
+        className,
+      )}
+    >
       <div className="flex min-w-0 items-center gap-1">
           <Button
             type="button"
@@ -66,39 +75,44 @@ export function CalendarToolbar({
           </Button>
       </div>
 
-      <h2 className="min-w-0 break-words font-heading text-lg font-bold capitalize text-foreground lg:text-center lg:text-2xl">
+      <h2 className="min-w-0 break-words font-heading text-lg font-bold text-foreground lg:text-center lg:text-2xl">
         {title}
       </h2>
 
-      <fieldset
-        className="flex w-full min-w-0 max-w-full overflow-x-auto rounded-xl border border-border bg-background/60 p-1 [scrollbar-width:none] lg:w-auto [&::-webkit-scrollbar]:hidden"
-      >
-        <legend className="sr-only">Visualização da agenda</legend>
-        {views.map((view) => {
-          const Icon = view.icon;
+      <div className="flex min-w-0 flex-wrap gap-2 lg:justify-self-end">
+        {onCreateService && (
+          <Button type="button" onClick={onCreateService}>
+            Novo culto
+          </Button>
+        )}
 
-          return (
-            <button
-              key={view.value}
-              type="button"
-              aria-pressed={currentView === view.value}
-              className={cn(
-                "inline-flex min-h-10 min-w-20 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-1",
-                currentView === view.value
-                  ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft-sm)]"
-                  : "text-muted-foreground hover:bg-primary/10 hover:text-foreground",
-              )}
-              onClick={() => onChangeView(view.value)}
-            >
-              <Icon
-                className="size-4 shrink-0"
-                aria-hidden="true"
-              />
-              {view.label}
-            </button>
-          );
-        })}
-      </fieldset>
+        <fieldset
+          className="flex w-full min-w-0 max-w-full overflow-x-auto rounded-xl border border-border bg-background/60 p-1 [scrollbar-width:none] lg:w-auto [&::-webkit-scrollbar]:hidden"
+        >
+          <legend className="sr-only">Visualização da agenda</legend>
+          {views.map((view) => {
+            const Icon = view.icon;
+
+            return (
+              <button
+                key={view.value}
+                type="button"
+                aria-pressed={currentView === view.value}
+                className={cn(
+                  "inline-flex min-h-10 min-w-20 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-1",
+                  currentView === view.value
+                    ? "bg-primary text-primary-foreground shadow-[var(--shadow-soft-sm)]"
+                    : "text-muted-foreground hover:bg-primary/10 hover:text-foreground",
+                )}
+                onClick={() => onChangeView(view.value)}
+              >
+                <Icon className="size-4 shrink-0" aria-hidden="true" />
+                {view.label}
+              </button>
+            );
+          })}
+        </fieldset>
+      </div>
     </div>
   );
 }

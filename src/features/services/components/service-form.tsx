@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { FormTemplate } from "@/components/templates/form-template";
 import { FormField } from "@/components/ui/form-field";
 import { useServiceForm } from "../hooks/useServiceForm";
@@ -10,6 +11,8 @@ interface ServiceFormProps {
   goBack: () => void;
   onSuccess?: (message: string) => void;
   onError?: (message: string) => void;
+  initialDate?: string;
+  layout?: "page" | "sheet";
 }
 
 export function ServiceForm({
@@ -18,6 +21,8 @@ export function ServiceForm({
   goBack,
   onSuccess,
   onError,
+  initialDate,
+  layout = "page",
 }: ServiceFormProps) {
   const { form, isLoading, isFetching, onSubmit, isEdit } = useServiceForm({
     mode,
@@ -25,7 +30,14 @@ export function ServiceForm({
     goBack,
     onSuccess,
     onError,
+    initialDate,
   });
+
+  useEffect(() => {
+    if (layout === "sheet" && !isFetching) {
+      form.setFocus("time");
+    }
+  }, [form, isFetching, layout]);
 
   if (isFetching) {
     return (
@@ -56,14 +68,6 @@ export function ServiceForm({
         <FormTemplate.Content>
           <FormField
             form={form}
-            name="title"
-            label="Título"
-            placeholder="Ex: Culto de Domingo"
-            required
-          />
-
-          <FormField
-            form={form}
             name="date"
             label="Data"
             placeholder="Selecione a data"
@@ -92,6 +96,14 @@ export function ServiceForm({
 
           <FormField
             form={form}
+            name="title"
+            label="Título"
+            placeholder="Ex: Culto de Domingo"
+            required
+          />
+
+          <FormField
+            form={form}
             name="location"
             label="Local"
             placeholder="Ex: Templo Central"
@@ -110,6 +122,7 @@ export function ServiceForm({
           isLoading={isLoading}
           submitLabel={isEdit ? "Atualizar" : "Criar"}
           cancelLabel="Cancelar"
+          fixed={layout === "page"}
         />
       </FormTemplate.Form>
     </FormTemplate>

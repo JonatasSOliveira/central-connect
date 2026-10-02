@@ -35,6 +35,7 @@ interface FormFooterProps {
   submitLabel?: string;
   cancelLabel?: string;
   className?: string;
+  fixed?: boolean;
 }
 
 interface FormProps<T extends Record<string, unknown>> {
@@ -91,11 +92,14 @@ function FormFooter({
   submitLabel = "Salvar",
   cancelLabel = "Cancelar",
   className,
+  fixed = true,
 }: FormFooterProps) {
   return (
     <div
       className={cn(
-        "fixed inset-x-0 bottom-16 z-40 border-t border-border/80 bg-background/95 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur sm:static sm:mt-8 sm:border-t-0 sm:bg-transparent sm:p-0 sm:pb-0 sm:backdrop-blur-none",
+        fixed
+          ? "fixed inset-x-0 bottom-16 z-40 border-t border-border/80 bg-background/95 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur sm:static sm:mt-8 sm:border-t-0 sm:bg-transparent sm:p-0 sm:pb-0 sm:backdrop-blur-none"
+          : "mt-8 border-t border-border/80 pt-4",
         className,
       )}
     >

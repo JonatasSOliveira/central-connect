@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { formatServiceDate } from "../utils/service-date";
 
 export interface ServiceListItem {
   id: string;
@@ -12,6 +13,7 @@ export interface ServiceListItem {
   time: string;
   location: string | null;
   description: string | null;
+  createdAt: string;
 }
 
 export function useServices() {
@@ -38,10 +40,10 @@ export function useServices() {
       const params = new URLSearchParams();
 
       if (filters.startDate) {
-        params.append("startDate", filters.startDate.toISOString());
+        params.append("startDate", formatServiceDate(filters.startDate));
       }
       if (filters.endDate) {
-        params.append("endDate", filters.endDate.toISOString());
+        params.append("endDate", formatServiceDate(filters.endDate));
       }
 
       const response = await fetch(`/api/services?${params.toString()}`);
@@ -69,7 +71,22 @@ export function useServices() {
 
   const applyFilters = useCallback(
     (startDate: Date | undefined, endDate: Date | undefined) => {
-      setFilters({ startDate, endDate });
+      setFilters((currentFilters) => {
+        const currentStart = currentFilters.startDate
+          ? formatServiceDate(currentFilters.startDate)
+          : undefined;
+        const currentEnd = currentFilters.endDate
+          ? formatServiceDate(currentFilters.endDate)
+          : undefined;
+        const nextStart = startDate ? formatServiceDate(startDate) : undefined;
+        const nextEnd = endDate ? formatServiceDate(endDate) : undefined;
+
+        if (currentStart === nextStart && currentEnd === nextEnd) {
+          return currentFilters;
+        }
+
+        return { startDate, endDate };
+      });
     },
     [],
   );
@@ -86,10 +103,9 @@ export function useServices() {
       );
     }
 
-    return result.sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      return dateA - dateB;
+    return [...result].sort((a, b) => {
+      const dateComparison = a.date.localeCompare(b.date);
+      return dateComparison || a.time.localeCompare(b.time);
     });
   }, [services, searchQuery]);
 
