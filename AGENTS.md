@@ -23,6 +23,10 @@ O escopo atual inclui:
 - autocadastro público de membros;
 - consentimentos legais.
 
+## Decisões funcionais vigentes
+
+As regras aprovadas para a geração automática de escalas estão documentadas em [docs/product/automatic-scale-generation.md](docs/product/automatic-scale-generation.md) e registradas tecnicamente no [ADR-001](docs/decisions/ADR-001-automatic-scale-generation.md). Consulte esses documentos antes de alterar geração, disponibilidade, conflitos, distribuição, rascunhos ou publicação de escalas. Mudanças nessas regras devem registrar uma nova decisão, em vez de alterar silenciosamente o comportamento documentado.
+
 Novos recursos devem ser introduzidos como módulos independentes quando fizerem sentido. Não transforme conceitos específicos de um módulo em abstrações compartilhadas sem necessidade real.
 
 ## Identidade visual
