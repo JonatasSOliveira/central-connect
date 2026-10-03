@@ -12,6 +12,10 @@ import type { ListScales } from "@/modules/scales/application/use-cases/ListScal
 import type { PublishScaleAttendance } from "@/modules/scales/application/use-cases/PublishScaleAttendance";
 import type { RemoveMemberFromScale } from "@/modules/scales/application/use-cases/RemoveMemberFromScale";
 import type { RunScheduledScaleGeneration } from "@/modules/scales/application/use-cases/RunScheduledScaleGeneration";
+import type { GenerateScalePreview } from "@/modules/scales/application/use-cases/GenerateScalePreview";
+import type { SaveGeneratedScale } from "@/modules/scales/application/use-cases/SaveGeneratedScale";
+import type { PublishGeneratedScales } from "@/modules/scales/application/use-cases/PublishGeneratedScales";
+import type { UnpublishGeneratedScales } from "@/modules/scales/application/use-cases/UnpublishGeneratedScales";
 import type { SaveScaleAttendance } from "@/modules/scales/application/use-cases/SaveScaleAttendance";
 import type { UpdateScale } from "@/modules/scales/application/use-cases/UpdateScale";
 import type { ScaleNotificationResult } from "@/modules/scales/application/ports/IScaleNotificationService";
@@ -34,6 +38,10 @@ export interface ScalesHandlerDependencies {
     publishScaleAttendance: Executable<PublishScaleAttendance>;
     removeMemberFromScale: Executable<RemoveMemberFromScale>;
     runScheduledScaleGeneration: Executable<RunScheduledScaleGeneration>;
+    generateScalePreview: Executable<GenerateScalePreview>;
+    saveGeneratedScale: Executable<SaveGeneratedScale>;
+    publishGeneratedScales: Executable<PublishGeneratedScales>;
+    unpublishGeneratedScales: Executable<UnpublishGeneratedScales>;
     saveScaleAttendance: Executable<SaveScaleAttendance>;
     updateScale: Executable<UpdateScale>;
     scaleMemberRepository: Pick<

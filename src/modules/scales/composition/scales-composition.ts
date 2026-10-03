@@ -4,6 +4,7 @@ import { createScaleAttendanceHandlers } from "@/modules/scales/presentation/htt
 import { createScaleGenerationHandlers } from "@/modules/scales/presentation/http/handlers/scale-generation-handlers";
 import { createScaleHandlers } from "@/modules/scales/presentation/http/handlers/scale-handlers";
 import { createScaleReportHandlers } from "@/modules/scales/presentation/http/handlers/scale-report-handlers";
+import { createScalePublicationHandlers } from "@/modules/scales/presentation/http/handlers/scale-publication-handlers";
 
 export function createScalesComposition(
   dependencies: ScalesInfrastructure,
@@ -15,6 +16,7 @@ export function createScalesComposition(
       attendance: createScaleAttendanceHandlers(dependencies),
       reports: createScaleReportHandlers(dependencies),
       generation: createScaleGenerationHandlers(dependencies),
+      publication: createScalePublicationHandlers(dependencies),
       myScales: {
         list: (request: Parameters<typeof listMyScales>[0]) =>
           listMyScales(request, dependencies),

@@ -103,6 +103,9 @@ export class CreateScale extends BaseUseCase<
         ministryId: input.ministryId,
         status: input.status ?? "draft",
         notes: input.notes ?? null,
+        publishedAt: input.status === "published" ? new Date() : null,
+        publishedByUserId:
+          input.status === "published" ? input.createdByUserId : null,
         createdByUserId: input.createdByUserId,
         createdAt: new Date(),
         updatedAt: new Date(),

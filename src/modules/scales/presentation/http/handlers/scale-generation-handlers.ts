@@ -6,6 +6,7 @@ import type { ScalesHandlerDependencies } from "@/modules/scales/presentation/co
 import { Permission } from "@/shared/domain/enums/Permission";
 import { apiError, getHttpStatus } from "@/shared/utils/apiResponse";
 import { getRequestId, logEvent } from "@/shared/utils/logger";
+import { createScaleGenerationPreviewHandlers } from "./scale-generation-preview-handlers";
 
 const GenerateScaleInputSchema = z.object({
   serviceId: z.string().min(1, "Culto é obrigatório"),
@@ -181,8 +182,11 @@ async function notifyByDate(
 export function createScaleGenerationHandlers(
   dependencies: ScalesHandlerDependencies,
 ) {
+  const previewHandlers = createScaleGenerationPreviewHandlers(dependencies);
   return {
     generate: (request: NextRequest) => generateScale(request, dependencies),
+    preview: previewHandlers.preview,
+    save: previewHandlers.save,
     scheduledRun: (request: NextRequest) =>
       runScheduledGeneration(request, dependencies),
     notifyByDate: (request: NextRequest) => notifyByDate(request, dependencies),

@@ -471,6 +471,8 @@ export const scales = pgTable(
       .references(() => ministries.id),
     status: varchar("status", { length: 20 }).default("draft").notNull(),
     notes: text("notes"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    publishedByUserId: uuid("published_by_user_id").references(() => users.id),
     ...timestamps,
   },
   (table) => [

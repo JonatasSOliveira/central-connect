@@ -1,5 +1,9 @@
 import { createTransactionalUseCase } from "@/infra/database/create-transactional-use-case";
 import { ListMinistries } from "@/modules/ministries/application/use-cases/ListMinistries";
+import { GenerateScalePreview } from "@/modules/scales/application/use-cases/GenerateScalePreview";
+import { SaveGeneratedScale } from "@/modules/scales/application/use-cases/SaveGeneratedScale";
+import { PublishGeneratedScales } from "@/modules/scales/application/use-cases/PublishGeneratedScales";
+import { UnpublishGeneratedScales } from "@/modules/scales/application/use-cases/UnpublishGeneratedScales";
 import { AddMemberToScale } from "@/modules/scales/application/use-cases/AddMemberToScale";
 import { CreateScale } from "@/modules/scales/application/use-cases/CreateScale";
 import { DeleteScale } from "@/modules/scales/application/use-cases/DeleteScale";
@@ -16,6 +20,10 @@ import { RunScheduledScaleGeneration } from "@/modules/scales/application/use-ca
 import { SaveScaleAttendance } from "@/modules/scales/application/use-cases/SaveScaleAttendance";
 import { UpdateScale } from "@/modules/scales/application/use-cases/UpdateScale";
 import { ScaleDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleDrizzleRepository";
+import { ScaleGenerationContextDrizzleReader } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleGenerationContextDrizzleReader";
+import { ScaleGenerationCandidateDrizzleReader } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleGenerationCandidateDrizzleReader";
+import { ScaleGenerationHistoryDrizzleReader } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleGenerationHistoryDrizzleReader";
+import { ScaleGenerationWriter } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleGenerationWriter";
 import { ScaleMemberDrizzleRepository } from "@/modules/scales/infrastructure/persistence/drizzle/ScaleMemberDrizzleRepository";
 import { ScaleShareImageGenerator } from "@/modules/scales/infrastructure/services/ScaleShareImageGenerator";
 import type {
@@ -34,6 +42,16 @@ export function createScalesInfrastructure(
     scaleAttendanceMemberRepository,
     scaleGenerationJobRepository,
   } = dependencies;
+
+  const generationContextReader = new ScaleGenerationContextDrizzleReader(
+    dependencies.database,
+  );
+  const generationCandidateReader = new ScaleGenerationCandidateDrizzleReader(
+    dependencies.database,
+  );
+  const generationHistoryReader = new ScaleGenerationHistoryDrizzleReader(
+    dependencies.database,
+  );
 
   const createScale = createTransactionalUseCase(
     dependencies.database,
@@ -59,6 +77,54 @@ export function createScalesInfrastructure(
       dependencies.memberMinistryRoleRepository,
     ),
     createScale,
+    generateScalePreview: new GenerateScalePreview(
+      generationContextReader,
+      generationCandidateReader,
+      generationHistoryReader,
+    ),
+    saveGeneratedScale: createTransactionalUseCase(
+      dependencies.database,
+      (transaction) =>
+        new SaveGeneratedScale(
+          new ScaleGenerationWriter(
+            new ScaleDrizzleRepository(transaction),
+            new ScaleMemberDrizzleRepository(transaction),
+          ),
+          new ScaleGenerationContextDrizzleReader(transaction),
+          new ScaleGenerationCandidateDrizzleReader(transaction),
+          new ScaleGenerationHistoryDrizzleReader(transaction),
+        ),
+    ),
+    publishGeneratedScales: createTransactionalUseCase(
+      dependencies.database,
+      (transaction) => {
+        const transactionScaleRepository = new ScaleDrizzleRepository(transaction);
+        const transactionMemberRepository = new ScaleMemberDrizzleRepository(transaction);
+        const contextReader = new ScaleGenerationContextDrizzleReader(transaction);
+        return new PublishGeneratedScales(
+          transactionScaleRepository,
+          transactionMemberRepository,
+          contextReader,
+          new SaveGeneratedScale(
+            new ScaleGenerationWriter(
+              transactionScaleRepository,
+              transactionMemberRepository,
+            ),
+            contextReader,
+            new ScaleGenerationCandidateDrizzleReader(transaction),
+            new ScaleGenerationHistoryDrizzleReader(transaction),
+          ),
+        );
+      },
+    ),
+    unpublishGeneratedScales: createTransactionalUseCase(
+      dependencies.database,
+      (transaction) =>
+        new UnpublishGeneratedScales(
+          new ScaleDrizzleRepository(transaction),
+          new ScaleGenerationContextDrizzleReader(transaction),
+        ),
+    ),
     deleteScale: new DeleteScale(
       scaleRepository,
       scaleMemberRepository,

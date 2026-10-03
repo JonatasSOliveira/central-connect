@@ -10,6 +10,8 @@ export class Scale extends AuditableEntity {
   protected readonly _ministryId: string;
   protected readonly _status: ScaleStatus;
   protected readonly _notes: string | null;
+  protected readonly _publishedAt: Date | null;
+  protected readonly _publishedByUserId: string | null;
 
   constructor(params: ScaleParams) {
     super(params);
@@ -17,6 +19,8 @@ export class Scale extends AuditableEntity {
     this._ministryId = params.ministryId;
     this._status = params.status ?? "draft";
     this._notes = params.notes ?? null;
+    this._publishedAt = params.publishedAt ?? null;
+    this._publishedByUserId = params.publishedByUserId ?? null;
   }
 
   get serviceId(): string {
@@ -34,6 +38,14 @@ export class Scale extends AuditableEntity {
   get notes(): string | null {
     return this._notes;
   }
+
+  get publishedAt(): Date | null {
+    return this._publishedAt;
+  }
+
+  get publishedByUserId(): string | null {
+    return this._publishedByUserId;
+  }
 }
 
 export interface ScaleParams extends AuditableEntityParams {
@@ -41,4 +53,6 @@ export interface ScaleParams extends AuditableEntityParams {
   ministryId: string;
   status?: ScaleStatus;
   notes?: string | null;
+  publishedAt?: Date | null;
+  publishedByUserId?: string | null;
 }

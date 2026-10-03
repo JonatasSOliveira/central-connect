@@ -126,6 +126,10 @@ export class UpdateScale extends BaseUseCase<
         ministryId: input.ministryId,
         status: input.status,
         notes: input.notes ?? null,
+        publishedAt:
+          input.status === "published" ? new Date() : null,
+        publishedByUserId:
+          input.status === "published" ? input.updatedByUserId : null,
         createdByUserId: existingScale.createdByUserId ?? null,
         createdAt: existingScale.createdAt,
         updatedAt: new Date(),

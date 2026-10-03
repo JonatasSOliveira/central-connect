@@ -11,6 +11,8 @@ function toEntity(row: typeof scales.$inferSelect): Scale {
     ministryId: row.ministryId,
     status: row.status as "draft" | "published",
     notes: row.notes,
+    publishedAt: row.publishedAt,
+    publishedByUserId: row.publishedByUserId,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
@@ -101,6 +103,8 @@ export class ScaleDrizzleRepository implements IScaleRepository {
         ministryId: entity.ministryId,
         status: entity.status,
         notes: entity.notes,
+        publishedAt: entity.publishedAt,
+        publishedByUserId: entity.publishedByUserId,
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
         deletedAt: entity.deletedAt,
@@ -117,6 +121,8 @@ export class ScaleDrizzleRepository implements IScaleRepository {
         ministryId: entity.ministryId,
         status: entity.status,
         notes: entity.notes,
+        publishedAt: entity.publishedAt,
+        publishedByUserId: entity.publishedByUserId,
         updatedAt: entity.updatedAt,
       })
       .where(and(eq(scales.id, entity.id), isNull(scales.deletedAt)))
