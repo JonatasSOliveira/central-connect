@@ -18,10 +18,9 @@ export function ScaleRolePicker({
 }: ScaleRolePickerProps) {
   const options = roles
     .filter((role) => !selectedRoleIds.includes(role.id))
-    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
     .map((role) => ({
       value: role.id,
-      label: `${role.name} · ideal: ${role.requiredCount}`,
+      label: `${role.displayOrder}. ${role.name} · ideal: ${role.requiredCount}`,
     }));
 
   return (

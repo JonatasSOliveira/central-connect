@@ -14,6 +14,7 @@
   --fc-button-active-bg-color: var(--primary-selected);
   --fc-button-active-border-color: var(--primary-selected);
   display: flex;
+  flex: 1 1 auto;
   min-height: 0;
   height: 100%;
   flex-direction: column;
@@ -21,14 +22,22 @@
   background: var(--card);
 }
 
-.calendar {
+.calendarViewport {
   flex: 1;
   min-width: 0;
   min-height: 0;
   width: calc(100% - var(--calendar-inline-gap) - var(--calendar-inline-gap));
   max-width: calc(100% - var(--calendar-inline-gap) - var(--calendar-inline-gap));
   margin-inline: var(--calendar-inline-gap);
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.calendar {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  overflow: visible;
 }
 
 .wrapper :global(.fc) {
@@ -105,6 +114,19 @@
 
 .serviceEventInteractive {
   cursor: pointer;
+}
+
+.serviceEvent :global(.fc-event-main) {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.serviceEvent span {
+  min-width: 0;
+}
+
+.serviceEvent span:first-child {
+  white-space: nowrap;
 }
 
 .serviceEventInteractive:hover,
@@ -216,18 +238,45 @@
     border-radius: 0;
   }
 
-  .calendar {
+  .calendarViewport {
     max-width: none;
     overflow-x: auto;
-    overscroll-behavior-x: contain;
+    overflow-y: hidden;
   }
 
-  .calendar :global(.fc-scrollgrid) {
-    min-width: 34rem;
+  .calendar {
+    max-width: none;
   }
 
-  .calendar :global(.fc-dayGridMonth-view .fc-scrollgrid) {
+  .calendarViewport[data-calendar-view="dayGridMonth"] .calendar {
+    min-width: 38rem;
+    width: 38rem;
+  }
+
+  .calendarViewport[data-calendar-view="dayGridWeek"] .calendar {
+    min-width: 42rem;
+    width: 42rem;
+  }
+
+  .calendarViewport[data-calendar-view="listWeek"] .calendar,
+  .calendarViewport[data-calendar-view="listDay"] .calendar {
     min-width: 0;
+    width: 100%;
+  }
+
+  .calendar :global(.fc-list-table) {
+    min-width: 0;
+  }
+
+  .calendar :global(.fc-list-event) {
+    min-height: 3.5rem;
+  }
+
+  .calendar :global(.fc-list-day-cushion),
+  .calendar :global(.fc-list-event-graphic),
+  .calendar :global(.fc-list-event-time),
+  .calendar :global(.fc-list-event-title) {
+    padding-block: 0.75rem;
   }
 
   .wrapper :global(.fc td) {

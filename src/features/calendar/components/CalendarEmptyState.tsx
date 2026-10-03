@@ -8,9 +8,9 @@ export function CalendarEmptyState({
   viewType = "dayGridMonth",
 }: CalendarEmptyStateProps) {
   const periodLabel =
-    viewType === "dayGridDay"
+    viewType === "dayGridDay" || viewType === "listDay"
       ? "neste dia"
-      : viewType === "dayGridWeek"
+      : viewType === "dayGridWeek" || viewType === "listWeek"
         ? "nesta semana"
         : "neste período";
 

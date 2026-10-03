@@ -37,7 +37,7 @@ export function formatCalendarPeriodLabel(
   const formattedStart = formatCalendarDate(startDate);
   const formattedEnd = formatCalendarDate(endDate);
 
-  if (viewType === "dayGridDay") {
+  if (viewType === "dayGridDay" || viewType === "listDay") {
     return capitalize(formattedStart);
   }
 

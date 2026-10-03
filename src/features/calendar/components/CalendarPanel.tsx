@@ -9,7 +9,11 @@ import type { ServiceListItem } from "@/features/services/hooks/useServices";
 
 export type PanelState =
   | { mode: "closed" }
-  | { mode: "create-service"; date: string }
+  | {
+      mode: "create-service";
+      date: string;
+      autoFocusField: "date" | "time";
+    }
   | { mode: "service-details"; serviceId: string }
   | { mode: "edit-service"; serviceId: string }
   | { mode: "create-scale"; serviceId: string }
@@ -68,6 +72,7 @@ export function CalendarPanel({
         mode={getServicePanelMode(panel)}
         serviceId={activeServiceId}
         initialDate={panel.mode === "create-service" ? panel.date : undefined}
+        autoFocusField={panel.mode === "create-service" ? panel.autoFocusField : undefined}
         service={selectedService}
         onOpenChange={(open) => !open && setPanel({ mode: "closed" })}
         onSuccess={handleServiceSuccess}

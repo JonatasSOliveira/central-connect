@@ -180,6 +180,7 @@ export const ministryRoles = pgTable(
       .references(() => ministries.id),
     name: varchar("name", { length: 160 }).notNull(),
     requiredCount: integer("required_count").default(1).notNull(),
+    displayOrder: integer("display_order").default(1).notNull(),
     createdByUserId: uuid("created_by_user_id").references(() => users.id),
     updatedByUserId: uuid("updated_by_user_id").references(() => users.id),
     ...timestamps,
@@ -188,6 +189,10 @@ export const ministryRoles = pgTable(
     uniqueIndex("ministry_roles_ministry_name_idx").on(
       table.ministryId,
       table.name,
+    ),
+    index("ministry_roles_ministry_order_idx").on(
+      table.ministryId,
+      table.displayOrder,
     ),
   ],
 );

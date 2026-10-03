@@ -57,6 +57,13 @@
       "when": 1790945289740,
       "tag": "0007_simple_madame_masque",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790983896621,
+      "tag": "0008_black_slapstick",
+      "breakpoints": true
     }
   ]
 }

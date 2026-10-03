@@ -7,6 +7,7 @@ export class MinistryRole extends BaseEntity {
   protected readonly _ministryId: string;
   protected readonly _name: string;
   protected readonly _requiredCount: number;
+  protected readonly _displayOrder: number;
   protected readonly _createdByUserId: string | null;
   protected readonly _updatedByUserId: string | null;
 
@@ -15,6 +16,7 @@ export class MinistryRole extends BaseEntity {
     this._ministryId = params.ministryId;
     this._name = params.name;
     this._requiredCount = params.requiredCount ?? 1;
+    this._displayOrder = params.displayOrder;
     this._createdByUserId = params.createdByUserId ?? null;
     this._updatedByUserId = params.updatedByUserId ?? null;
   }
@@ -31,6 +33,10 @@ export class MinistryRole extends BaseEntity {
     return this._requiredCount;
   }
 
+  get displayOrder(): number {
+    return this._displayOrder;
+  }
+
   get createdByUserId(): string | null {
     return this._createdByUserId;
   }
@@ -44,6 +50,7 @@ export interface MinistryRoleParams extends BaseEntityParams {
   ministryId: string;
   name: string;
   requiredCount?: number;
+  displayOrder: number;
   createdByUserId?: string | null;
   updatedByUserId?: string | null;
 }

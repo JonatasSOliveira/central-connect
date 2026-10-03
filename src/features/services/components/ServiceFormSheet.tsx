@@ -25,6 +25,7 @@ interface ServiceFormSheetProps {
   mode: "create" | "edit" | "details";
   serviceId?: string;
   initialDate?: string;
+  autoFocusField?: "date" | "time";
   service?: ServiceListItem;
   onOpenChange: (open: boolean) => void;
   onSuccess: (message: string, serviceId?: string) => void;
@@ -38,6 +39,7 @@ export function ServiceFormSheet({
   mode,
   serviceId,
   initialDate,
+  autoFocusField,
   service,
   onOpenChange,
   onSuccess,
@@ -100,7 +102,7 @@ export function ServiceFormSheet({
               : "Novo culto"
         }
         aria-modal="true"
-        className="relative flex h-full w-full max-w-xl flex-col overflow-hidden border-l border-border bg-background shadow-2xl"
+        className="relative z-[60] flex h-full w-full max-w-xl flex-col overflow-hidden border-l border-border bg-background shadow-2xl"
         role="dialog"
       >
         <div className="flex shrink-0 items-center justify-end border-b border-border bg-background px-4 py-2 sm:px-6">
@@ -114,7 +116,7 @@ export function ServiceFormSheet({
             <X aria-hidden="true" />
           </Button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:p-6">
           {mode === "details" ? (
             service ? (
               <ServiceDetails service={service} canEdit={Boolean(onEdit)} onEdit={onEdit ?? (() => undefined)}>
@@ -128,6 +130,7 @@ export function ServiceFormSheet({
               mode={mode}
               serviceId={serviceId}
               initialDate={initialDate}
+              autoFocusField={autoFocusField}
               layout="sheet"
               goBack={() => onOpenChange(false)}
               onSuccess={onSuccess}
@@ -147,6 +150,19 @@ export function ServiceFormSheet({
               >
                 <Trash2 aria-hidden="true" />
                 Excluir culto
+              </Button>
+            </div>
+          )}
+          {mode === "details" && (
+            <div className="mt-6 border-t border-border pt-5 sm:hidden">
+              <Button
+                type="button"
+                variant="outline"
+                className="min-h-12 w-full"
+                onClick={() => onOpenChange(false)}
+              >
+                <X aria-hidden="true" />
+                Fechar detalhes
               </Button>
             </div>
           )}

@@ -26,6 +26,7 @@ export const MinistryRoleListItemSchema = z.object({
   id: z.string(),
   name: z.string(),
   requiredCount: z.number().int().min(1),
+  displayOrder: z.number().int().min(1),
 });
 
 export type MinistryRoleListItemDTO = z.infer<

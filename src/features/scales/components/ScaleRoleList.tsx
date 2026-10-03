@@ -58,6 +58,15 @@ export function ScaleRoleList({
     () => new Map(availableRoles.map((role) => [role.id, role])),
     [availableRoles],
   );
+  const orderedActiveRoleIds = useMemo(() => {
+    const availableIds = new Set(availableRoles.map((role) => role.id));
+    return [
+      ...availableRoles
+        .filter((role) => activeRoleIds.includes(role.id))
+        .map((role) => role.id),
+      ...activeRoleIds.filter((roleId) => !availableIds.has(roleId)),
+    ];
+  }, [activeRoleIds, availableRoles]);
 
   const handleAddRole = (roleId: string) => {
     setActiveRoleIds((current) => (current.includes(roleId) ? current : [...current, roleId]));
@@ -89,7 +98,7 @@ export function ScaleRoleList({
       )}
 
       <div className="space-y-3">
-        {activeRoleIds.map((roleId) => {
+        {orderedActiveRoleIds.map((roleId) => {
           const role = roleById.get(roleId);
           if (!role) return null;
           const selectedMembers = editableFields.flatMap((field, index) =>

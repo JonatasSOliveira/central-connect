@@ -22,10 +22,10 @@ interface CalendarToolbarProps {
 }
 
 const views = [
-  { value: "dayGridMonth", label: "Mês", icon: CalendarDays },
-  { value: "dayGridWeek", label: "Semana", icon: CalendarRange },
-  { value: "dayGridDay", label: "Dia", icon: CalendarClock },
-  { value: "listWeek", label: "Lista", icon: List },
+  { value: "month", label: "Mês", icon: CalendarDays },
+  { value: "week", label: "Semana", icon: CalendarRange },
+  { value: "day", label: "Dia", icon: CalendarClock },
+  { value: "list", label: "Lista", icon: List },
 ];
 
 export function CalendarToolbar({

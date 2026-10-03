@@ -115,7 +115,6 @@ export default function MinistriesPage() {
                     onDelete: canDelete
                       ? () => handleDelete(ministry.id)
                       : undefined,
-                    deleteLabel: "Excluir ministério",
                   }
                 : undefined
             }

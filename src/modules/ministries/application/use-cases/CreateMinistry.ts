@@ -66,11 +66,12 @@ export class CreateMinistry extends BaseUseCase<
 
       const createdRoles: MinistryRole[] = [];
 
-      for (const role of input.roles) {
+      for (const [index, role] of input.roles.entries()) {
         const roleParams: MinistryRoleParams = {
           ministryId: createdMinistry.id,
           name: role.name,
           requiredCount: role.requiredCount,
+          displayOrder: index + 1,
           createdByUserId: input.createdByUserId,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -96,6 +97,7 @@ export class CreateMinistry extends BaseUseCase<
               id: r.id,
               name: r.name,
               requiredCount: r.requiredCount,
+              displayOrder: r.displayOrder,
             })),
           },
         },

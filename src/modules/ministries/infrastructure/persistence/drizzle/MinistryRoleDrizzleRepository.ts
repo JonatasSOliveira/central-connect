@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 
 import type { DatabaseExecutor } from "@/infra/database/contracts/database-executor";
 import { ministryRoles } from "@/infra/database/drizzle/schema";
@@ -11,6 +11,7 @@ function toEntity(row: typeof ministryRoles.$inferSelect): MinistryRole {
     ministryId: row.ministryId,
     name: row.name,
     requiredCount: row.requiredCount,
+    displayOrder: row.displayOrder,
     createdByUserId: row.createdByUserId,
     updatedByUserId: row.updatedByUserId,
     createdAt: row.createdAt,
@@ -36,7 +37,8 @@ export class MinistryRoleDrizzleRepository implements IMinistryRoleRepository {
     const rows = await this.database
       .select()
       .from(ministryRoles)
-      .where(isNull(ministryRoles.deletedAt));
+      .where(isNull(ministryRoles.deletedAt))
+      .orderBy(asc(ministryRoles.ministryId), asc(ministryRoles.displayOrder));
 
     return rows.map(toEntity);
   }
@@ -50,7 +52,8 @@ export class MinistryRoleDrizzleRepository implements IMinistryRoleRepository {
           eq(ministryRoles.ministryId, ministryId),
           isNull(ministryRoles.deletedAt),
         ),
-      );
+      )
+      .orderBy(asc(ministryRoles.displayOrder), asc(ministryRoles.name));
 
     return rows.map(toEntity);
   }
@@ -63,6 +66,7 @@ export class MinistryRoleDrizzleRepository implements IMinistryRoleRepository {
         ministryId: entity.ministryId,
         name: entity.name,
         requiredCount: entity.requiredCount,
+        displayOrder: entity.displayOrder,
         createdByUserId: entity.createdByUserId,
         updatedByUserId: entity.updatedByUserId,
         createdAt: entity.createdAt,
@@ -81,6 +85,7 @@ export class MinistryRoleDrizzleRepository implements IMinistryRoleRepository {
         ministryId: entity.ministryId,
         name: entity.name,
         requiredCount: entity.requiredCount,
+        displayOrder: entity.displayOrder,
         updatedByUserId: entity.updatedByUserId,
         updatedAt: entity.updatedAt,
       })

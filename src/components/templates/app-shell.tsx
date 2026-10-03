@@ -26,7 +26,8 @@ export function AppShell({
         className={cn(
           "mx-auto min-h-full w-full max-w-3xl px-4 pt-20",
           showNavigation ? "pb-28" : "pb-6",
-          scrollMode === "contained" && "flex h-dvh min-h-0 flex-col overflow-hidden",
+          scrollMode === "contained" &&
+            "flex h-dvh min-h-0 flex-col overflow-hidden",
           className,
         )}
       >

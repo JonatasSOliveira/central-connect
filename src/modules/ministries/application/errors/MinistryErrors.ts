@@ -11,6 +11,10 @@ export const MinistryErrors = {
     code: "MINISTRY_ROLE_NOT_FOUND",
     message: "Função não encontrada",
   },
+  MINISTRY_ROLE_NOT_BELONG_TO_MINISTRY: {
+    code: "MINISTRY_ROLE_NOT_BELONG_TO_MINISTRY",
+    message: "A função informada não pertence a este ministério",
+  },
   MINISTRY_CREATION_FAILED: {
     code: "MINISTRY_CREATION_FAILED",
     message: "Falha ao criar ministério",

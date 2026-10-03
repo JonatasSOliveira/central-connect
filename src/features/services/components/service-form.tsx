@@ -12,6 +12,7 @@ interface ServiceFormProps {
   onSuccess?: (message: string, serviceId?: string) => void;
   onError?: (message: string) => void;
   initialDate?: string;
+  autoFocusField?: "date" | "time";
   layout?: "page" | "sheet";
 }
 
@@ -22,6 +23,7 @@ export function ServiceForm({
   onSuccess,
   onError,
   initialDate,
+  autoFocusField,
   layout = "page",
 }: ServiceFormProps) {
   const { form, isLoading, isFetching, onSubmit, isEdit } = useServiceForm({
@@ -35,9 +37,9 @@ export function ServiceForm({
 
   useEffect(() => {
     if (layout === "sheet" && !isFetching) {
-      form.setFocus("time");
+      form.setFocus(autoFocusField ?? "time");
     }
-  }, [form, isFetching, layout]);
+  }, [autoFocusField, form, isFetching, layout]);
 
   if (isFetching) {
     return (

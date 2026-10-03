@@ -20,6 +20,7 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
     editableFields,
     editableAppend,
     editableRemove,
+    editableMove,
     isLoading,
     isFetching,
     onSubmit,
@@ -90,6 +91,7 @@ export function MinistryForm({ mode, ministryId }: MinistryFormProps) {
               fields={editableFields}
               append={editableAppend}
               remove={editableRemove}
+              move={editableMove}
             />
           </FormTemplate.Section>
         </FormTemplate.Content>

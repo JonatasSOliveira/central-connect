@@ -30,6 +30,9 @@ export interface UseMinistryFormReturn {
   editableAppend: ReturnType<
     typeof useFieldArray<MinistryFormInput, "roles">
   >["append"];
+  editableMove: ReturnType<
+    typeof useFieldArray<MinistryFormInput, "roles">
+  >["move"];
   editableRemove: ReturnType<
     typeof useFieldArray<MinistryFormInput, "roles">
   >["remove"];
@@ -64,7 +67,7 @@ export function useMinistryForm({
     mode: "onBlur",
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control: form.control,
     name: "roles",
   });
@@ -120,11 +123,13 @@ export function useMinistryForm({
               name: ministryData.name,
               leaderId: ministryData.leaderId,
               notes: ministryData.notes ?? "",
-              roles: ministryData.roles.map((r) => ({
-                id: r.id,
-                name: r.name,
-                requiredCount: r.requiredCount,
-              })),
+              roles: [...ministryData.roles]
+                .sort((a, b) => a.displayOrder - b.displayOrder)
+                .map((r) => ({
+                  id: r.id,
+                  name: r.name,
+                  requiredCount: r.requiredCount,
+                })),
             });
           } else {
             toast.error("Ministério não encontrado");
@@ -192,6 +197,7 @@ export function useMinistryForm({
     form,
     editableFields: fields,
     editableAppend: append,
+    editableMove: move,
     editableRemove: remove,
     isLoading,
     isFetching,

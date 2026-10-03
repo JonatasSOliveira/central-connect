@@ -45,7 +45,7 @@ export function ScaleFormSheet({
       <aside
         aria-label={mode === "create" ? "Nova escala" : "Editar escala"}
         aria-modal="true"
-        className="relative flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-border bg-background shadow-2xl"
+        className="relative z-[60] flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-border bg-background shadow-2xl"
         role="dialog"
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3 sm:px-6">
@@ -68,7 +68,7 @@ export function ScaleFormSheet({
             Selecione o ministério e as pessoas que participarão deste culto.
           </p>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 sm:px-6 sm:pb-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-6">
           <ScaleForm
             key={`${mode}-${scaleId ?? "new"}-${serviceId}`}
             mode={mode}

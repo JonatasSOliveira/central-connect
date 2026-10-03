@@ -100,6 +100,13 @@ export class UpdateMinistry extends BaseUseCase<
         input.roles.filter((r) => r.id).map((r) => r.id),
       );
 
+      if (existingRoleIds.size !== input.roles.filter((r) => r.id).length) {
+        return {
+          ok: false,
+          error: MinistryErrors.MINISTRY_ROLE_UPDATE_FAILED,
+        };
+      }
+
       const rolesToDelete = existingRoles.filter(
         (r) => !existingRoleIds.has(r.id),
       );
@@ -109,19 +116,29 @@ export class UpdateMinistry extends BaseUseCase<
 
       const finalRoles: MinistryRoleListItemDTO[] = [];
 
-      for (const roleInput of input.roles) {
+      for (const [index, roleInput] of input.roles.entries()) {
+        const displayOrder = index + 1;
         if (roleInput.id) {
           const existingRole = existingRoles.find((r) => r.id === roleInput.id);
+          if (!existingRole) {
+            return {
+              ok: false,
+              error: MinistryErrors.MINISTRY_ROLE_NOT_BELONG_TO_MINISTRY,
+            };
+          }
+
           if (existingRole) {
             if (
               existingRole.name !== roleInput.name ||
-              existingRole.requiredCount !== roleInput.requiredCount
+              existingRole.requiredCount !== roleInput.requiredCount ||
+              existingRole.displayOrder !== displayOrder
             ) {
               const roleParams: MinistryRoleParams = {
                 id: existingRole.id,
                 ministryId: existingRole.ministryId,
                 name: roleInput.name,
                 requiredCount: roleInput.requiredCount,
+                displayOrder,
                 createdByUserId: existingRole.createdByUserId ?? null,
                 createdAt: existingRole.createdAt,
                 updatedAt: new Date(),
@@ -134,12 +151,14 @@ export class UpdateMinistry extends BaseUseCase<
                 id: updatedRole.id,
                 name: updatedRole.name,
                 requiredCount: updatedRole.requiredCount,
+                displayOrder: updatedRole.displayOrder,
               });
             } else {
               finalRoles.push({
                 id: existingRole.id,
                 name: existingRole.name,
                 requiredCount: existingRole.requiredCount,
+                displayOrder: existingRole.displayOrder,
               });
             }
           }
@@ -148,6 +167,7 @@ export class UpdateMinistry extends BaseUseCase<
             ministryId: updatedMinistry.id,
             name: roleInput.name,
             requiredCount: roleInput.requiredCount,
+            displayOrder,
             createdByUserId: input.updatedByUserId,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -158,6 +178,7 @@ export class UpdateMinistry extends BaseUseCase<
             id: createdRole.id,
             name: createdRole.name,
             requiredCount: createdRole.requiredCount,
+            displayOrder: createdRole.displayOrder,
           });
         }
       }

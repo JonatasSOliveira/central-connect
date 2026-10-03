@@ -23,4 +23,5 @@ export interface MinistryRoleOption {
   id: string;
   name: string;
   requiredCount: number;
+  displayOrder: number;
 }

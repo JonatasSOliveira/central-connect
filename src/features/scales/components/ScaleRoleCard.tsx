@@ -42,7 +42,12 @@ export function ScaleRoleCard({
     <article className="rounded-xl border border-primary/20 bg-card p-4 shadow-[var(--shadow-soft-sm)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-semibold text-foreground">{role.name}</h3>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+              {role.displayOrder}
+            </span>
+            <h3 className="font-semibold text-foreground">{role.name}</h3>
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             Ideal: {role.requiredCount} pessoa{role.requiredCount === 1 ? "" : "s"} · Escalados: {countLabel}
           </p>

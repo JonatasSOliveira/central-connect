@@ -1,7 +1,7 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { ArrowDown, ArrowUp, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ListItemCard } from "@/components/ui/list-item-card";
@@ -13,6 +13,7 @@ interface MinistryRolesEditorProps {
   fields: UseMinistryFormReturn["editableFields"];
   append: UseMinistryFormReturn["editableAppend"];
   remove: UseMinistryFormReturn["editableRemove"];
+  move: UseMinistryFormReturn["editableMove"];
 }
 
 export function MinistryRolesEditor({
@@ -20,8 +21,10 @@ export function MinistryRolesEditor({
   fields,
   append,
   remove,
+  move,
 }: MinistryRolesEditorProps) {
   const pendingFocusIndex = useRef<number | null>(null);
+  const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
     if (pendingFocusIndex.current === null) return;
@@ -41,10 +44,25 @@ export function MinistryRolesEditor({
     append({ name: "", id: null, requiredCount: 1 });
   };
 
+  const handleMove = (index: number, direction: -1 | 1) => {
+    const nextIndex = index + direction;
+    const field = fields[index];
+    if (!field || nextIndex < 0 || nextIndex >= fields.length) return;
+
+    pendingFocusIndex.current = nextIndex;
+    move(index, nextIndex);
+    setAnnouncement(
+      `${form.getValues(`roles.${index}.name`) || "Função"} movida para a posição ${nextIndex + 1}.`,
+    );
+  };
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Você também pode cadastrar as funções depois.
+      </p>
+      <p className="sr-only" role="status" aria-live="polite">
+        {announcement}
       </p>
 
       {fields.length === 0 ? (
@@ -59,6 +77,34 @@ export function MinistryRolesEditor({
               key={field.id}
               index={index}
               onRemove={() => remove(index)}
+              actions={
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-10 w-10 p-0 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    onClick={() => handleMove(index, -1)}
+                    disabled={index === 0}
+                    aria-label={`Mover ${form.watch(`roles.${index}.name`) || "função"} para cima`}
+                    title="Mover para cima"
+                  >
+                    <ArrowUp className="size-4" aria-hidden="true" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-10 w-10 p-0 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    onClick={() => handleMove(index, 1)}
+                    disabled={index === fields.length - 1}
+                    aria-label={`Mover ${form.watch(`roles.${index}.name`) || "função"} para baixo`}
+                    title="Mover para baixo"
+                  >
+                    <ArrowDown className="size-4" aria-hidden="true" />
+                  </Button>
+                </>
+              }
             >
               <div className="space-y-4">
                 <div className="space-y-1.5">

@@ -157,9 +157,14 @@ function createApplication(): Application {
 
   return {
     ministries: createMinistriesComposition({
+      database,
       ministryRepository,
       ministryRoleRepository,
       scaleRepository,
+      createTransactionalRepositories: (executor) => [
+        new MinistryDrizzleRepository(executor),
+        new MinistryRoleDrizzleRepository(executor),
+      ],
     }),
     roles: createRolesComposition({ roleRepository, rolePermissionRepository }),
     services: createServicesComposition({ repository: serviceRepository }),

@@ -67,6 +67,7 @@ export class ListMinistries extends BaseUseCase<
               id: r.id,
               name: r.name,
               requiredCount: r.requiredCount,
+              displayOrder: r.displayOrder,
             })),
           };
         }),

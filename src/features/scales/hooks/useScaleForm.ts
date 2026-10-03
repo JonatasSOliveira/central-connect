@@ -189,10 +189,16 @@ export function useScaleForm({
         const ministryData = await ministryResponse.json();
         if (ministryData.ok) {
           const rolesData = ministryData.value.ministry.roles.map(
-            (r: { id: string; name: string; requiredCount: number }) => ({
+            (r: {
+              id: string;
+              name: string;
+              requiredCount: number;
+              displayOrder: number;
+            }, index: number) => ({
               id: r.id,
               name: r.name,
               requiredCount: r.requiredCount,
+              displayOrder: r.displayOrder ?? index + 1,
             }),
           );
           setRoles(rolesData);
